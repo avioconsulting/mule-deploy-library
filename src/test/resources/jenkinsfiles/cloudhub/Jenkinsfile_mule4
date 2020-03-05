@@ -1,0 +1,43 @@
+package jenkinsfiles.cloudhub
+
+pipeline {
+    agent any
+
+    environment {
+        anypoint_credentials_usr = 'bwied_avio2'
+        anypoint_autodiscclientidsecret_usr = '48cd877e25b94c36a51609eb2d1b0e6f'
+        // set this environment variable unit test run to keep out of source control
+        //anypoint_password = 'foobar'
+        anypoint_org_id = 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee'
+        cloudhub_app_prefix = 'AVI'
+        version = "1.0.${env.BUILD_NUMBER}"
+        fileName = getMuleFileName appName: 'mule4testapp',
+                                   appVersion: version,
+                                   muleVersion: '4.1.4'
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                sh "mvn org.codehaus.mojo:versions-maven-plugin:2.7:set -DnewVersion=${env.version} -DgenerateBackupPoms=false -DprocessAllModules=true -f MULE4_PROJECT_PATH/pom.xml"
+                sh "mvn -f MULE4_PROJECT_PATH/pom.xml clean package"
+            }
+        }
+
+        stage('Deploy') {
+            environment {
+                anypoint_environment = 'DEV'
+            }
+
+            steps {
+                muleDeployCloudHub zipFilePath: "MULE4_PROJECT_PATH/${env.fileName}",
+                                   appName: 'the-app-2',
+                                   muleVersion: '4.1.4',
+                                   awsRegion: 'us-east-1',
+                                   cryptoKey: 'theKey',
+                                   otherPropertyOverrides: 'our.prop=newvalue',
+                                   overrideByChangingFileInZip: 'api.dev.properties'
+            }
+        }
+    }
+}

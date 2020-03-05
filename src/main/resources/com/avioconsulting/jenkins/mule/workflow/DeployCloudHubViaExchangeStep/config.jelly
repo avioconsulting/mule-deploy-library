@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?jelly escape-by-default='true'?>
+<j:jelly xmlns:j="jelly:core" xmlns:f="/lib/form">
+    <f:entry field="cryptoKey" title="Crypto key">
+        <f:textbox/>
+    </f:entry>
+    <f:entry field="appName" title="App name to use">
+        <f:textbox/>
+    </f:entry>
+    <f:entry field="muleVersion" title="Mule version">
+        <f:textbox default="${descriptor.defaultMuleVersion}"/>
+    </f:entry>
+    <f:entry field="awsRegion" title="AWS Region">
+        <f:textbox/>
+    </f:entry>
+    <f:entry field="usePersistentQueues" title="Use Persistent Queue?">
+        <f:checkbox default="${descriptor.persistentQueueEnabled}"/>
+    </f:entry>
+    <f:entry field="workerType" title="Worker Type">
+        <f:textbox default="${descriptor.defaultWorkerType}"/>
+    </f:entry>
+    <f:entry field="workerCount" title="Worker Count">
+        <f:textbox default="${descriptor.defaultWorkerCount}"/>
+    </f:entry>
+    <f:entry field="otherCloudHubPropertiesJson" title="Other properties">
+        <f:textbox default="${descriptor.defaultOtherPropertiesJson}"/>
+    </f:entry>
+    <f:entry field="version" title="Version to deploy from Exchange">
+        <f:textbox/>
+    </f:entry>
+    <f:entry field="otherAppPropertyOverrides" title="Other app property overrides">
+        <f:textbox/>
+    </f:entry>
+</j:jelly>

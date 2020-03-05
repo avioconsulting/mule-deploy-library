@@ -1,0 +1,38 @@
+package jenkinsfiles.cloudhub
+
+pipeline {
+    agent any
+
+    environment {
+        anypoint_credentials_usr = 'bwied_avio2'
+        // set this environment variable unit test run to keep out of source control
+        //anypoint_password = 'foobar'
+        anypoint_org_id = 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee'
+        version = "1.0.${env.BUILD_NUMBER}"
+                fileName = getMuleFileName appName: 'tester',
+                                           appVersion: version,
+                                           muleVersion: '3.9.1'
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                sh "mvn -DtheVersion=${env.version} -f MULE_PROJECT_PATH/pom.xml clean package"
+            }
+        }
+
+        stage('Deploy') {
+            environment {
+                anypoint_environment = 'DEV'
+                version = '1.0.1'
+            }
+
+            steps {
+                muleDeployOnPrem zipFilePath: "MULE_PROJECT_PATH/${env.fileName}",
+                                 appName: 'the-app-2',
+                                 targetServerOrClusterName: 'bradytest2',
+                                 version: env.version
+            }
+        }
+    }
+}

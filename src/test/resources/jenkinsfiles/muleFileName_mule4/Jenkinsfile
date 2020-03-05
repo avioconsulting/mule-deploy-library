@@ -1,0 +1,19 @@
+package jenkinsfiles.cloudhub
+
+pipeline {
+    agent any
+
+    environment {
+        filename = getMuleFileName appName: 'theapp',
+                                   appVersion: '1.0.2',
+                                   muleVersion: '4.1.5'
+    }
+
+    stages {
+        stage('Deploy') {
+            steps {
+                echo "the filename is ${env.filename}"
+            }
+        }
+    }
+}
