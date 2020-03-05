@@ -9,6 +9,13 @@ import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
 
 class OnPremDeployer extends BaseDeployer {
+    /***
+     * Instantiate using default anypoint.mulesoft.com URL
+     * @param anypointOrganizationId
+     * @param username
+     * @param password
+     * @param logger - will be used for all your log messages
+     */
     OnPremDeployer(String anypointOrganizationId,
                    String username,
                    String password,
@@ -38,13 +45,23 @@ class OnPremDeployer extends BaseDeployer {
               logger)
     }
 
+    /***
+     * Do an on-prem deployment
+     * @param environment - environment name (e.g. DEV, not GUID)
+     * @param appName
+     * @param zipFile
+     * @param fileName - The filename to display in the Runtime Manager app GUI. Often used as a version for a label
+     * @param targetServerOrClusterName
+     * @param appProperties - Mule app property overrides (the stuff in the properties tab)
+     * @param overrideByChangingFileInZip - VERY rare. If you have a weird situation where you need to be able to say that you "froze" an app ZIP/JAR for config management purposes and you want to change the properties inside a ZIP file, set this to the filename you want to drop new properties in inside the ZIP (e.g. api.dev.properties)
+     */
     def deploy(String environment,
                String appName,
                InputStream zipFile,
                String fileName,
                String targetServerOrClusterName,
-               String propertyOverrides,
-               String overrideByChangingFileInZip) {
+               Map<String, String> appProperties = [:],
+               String overrideByChangingFileInZip = null) {
         if (appName.contains(' ')) {
             throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
         }
@@ -52,21 +69,20 @@ class OnPremDeployer extends BaseDeployer {
         def environmentId = locateEnvironment(environment)
         def existingApp = locateApplication(environmentId,
                                             appName)
-        Map propertyMap = propertyOverrides ? parseProperties(propertyOverrides) : [:]
         def appId = existingApp ?
                 updateDeployment(environmentId,
                                  appName,
                                  existingApp,
                                  zipFile,
                                  fileName,
-                                 propertyMap,
+                                 appProperties,
                                  overrideByChangingFileInZip) :
                 newDeployment(environmentId,
                               appName,
                               zipFile,
                               fileName,
                               targetServerOrClusterName,
-                              propertyMap,
+                              appProperties,
                               overrideByChangingFileInZip)
         logger.println 'Now will wait for application to start...'
         def tries = 0
@@ -117,7 +133,7 @@ class OnPremDeployer extends BaseDeployer {
                                  InputStream zipFile,
                                  String fileName,
                                  String targetServerOrClusterName,
-                                 Map propertyMap,
+                                 Map<String, String> propertyMap,
                                  String overrideByChangingFileInZip) {
         def serverId = locateServer(environmentId,
                                     targetServerOrClusterName)
@@ -167,7 +183,7 @@ class OnPremDeployer extends BaseDeployer {
                                     String appId,
                                     InputStream zipFile,
                                     String fileName,
-                                    Map propertyMap,
+                                    Map<String, String> propertyMap,
                                     String overrideByChangingFileInZip) {
         logger.println "Deploying '${appName}', ${fileName} as an UPDATED application to existing app id ${appId} with additional properties ${propertyMap}"
         def request = new HttpPatch("${baseUrl}/hybrid/api/v1/applications/${appId}").with {

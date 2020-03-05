@@ -141,15 +141,6 @@ abstract class BaseDeployer implements HttpRequestInterceptor {
         }
     }
 
-    Map parseProperties(String input) {
-        if (input == null) {
-            return [:]
-        }
-        def props = new Properties()
-        props.load(new StringReader(input))
-        props
-    }
-
     InputStream modifyZipFileWithNewProperties(InputStream inputZipFile,
                                                String zipFileName,
                                                String propertiesFileToAddTo,

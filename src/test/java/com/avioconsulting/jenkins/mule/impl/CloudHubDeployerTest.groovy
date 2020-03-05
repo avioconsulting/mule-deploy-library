@@ -7,13 +7,12 @@ import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerRequest
 import org.junit.After
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
+import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
-import static org.junit.Assert.assertThat
 
 class CloudHubDeployerTest implements HttpServerUtils {
     HttpServer httpServer
@@ -81,9 +80,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
         deployer.authenticate()
 
         // act
-        def status = deployer.getDeploymentStatus('def456',
-                                                  'theapp'
-        )
+        deployer.getDeploymentStatus('def456',
+                                     'theapp')
 
         // assert
         assertThat url,
@@ -133,8 +131,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // act
         def status = deployer.getDeploymentStatus('def456',
-                                                  'the-app'
-        )
+                                                  'the-app')
 
         // assert
         assertThat status.toList(),
@@ -227,8 +224,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                    is(equalTo([DeploymentStatus.STARTING]))
     }
 
-    def getDeploymentStatusJson(String worker1Status,
-                                String worker2Status) {
+    static def getDeploymentStatusJson(String worker1Status,
+                                       String worker2Status) {
         [
                 data: [
                         [
@@ -329,11 +326,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         false,
                         WorkerTypes.Micro,
                         1,
-                        '{}',
+                        [:],
                         'theClientId',
-                        'theSecret',
-                        null,
-                        null)
+                        'theSecret')
 
         // assert
         assertThat url,
@@ -452,10 +447,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         false,
                         WorkerTypes.Micro,
                         1,
-                        '{}',
+                        [:],
                         'theClientId',
-                        'theSecret',
-                        null)
+                        'theSecret')
 
         // assert
         assertThat url,
@@ -581,11 +575,10 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         false,
                         WorkerTypes.Micro,
                         1,
-                        '{}',
+                        [:],
                         'theClientId',
                         'theSecret',
-                        'prop1=foo\nprop2=bar\n',
-                        null)
+                        [prop1: 'foo', prop2: 'bar'])
 
         // assert
         assertThat url,
@@ -718,10 +711,10 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         false,
                         WorkerTypes.Micro,
                         1,
-                        '{}',
+                        [:],
                         'theClientId',
                         'theSecret',
-                        'existing = changed',
+                        [existing: 'changed'],
                         'api.dev.properties')
 
         // assert
@@ -854,11 +847,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         true,
                         WorkerTypes.Micro,
                         1,
-                        '{}',
+                        [:],
                         'theClientId',
-                        'theSecret',
-                        null,
-                        null)
+                        'theSecret')
 
         // assert
         assertThat url,
@@ -971,7 +962,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 properties      : [
                         env: 'TST'
                 ]
-        ]
+        ] as Map<String, String>
 
         // act
         deployer.deploy('DEV',
@@ -985,11 +976,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         false,
                         WorkerTypes.Micro,
                         1,
-                        JsonOutput.toJson(otherProperties),
+                        otherProperties,
                         'theClientId',
-                        'theSecret',
-                        null,
-                        null)
+                        'theSecret')
 
         // assert
         assertThat url,
@@ -1099,7 +1088,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         def stream = new FileInputStream(file)
         def otherProperties = [
                 persistentQueues: true
-        ]
+        ] as Map<String, String>
 
         // act
         deployer.deploy('DEV',
@@ -1113,11 +1102,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         false,
                         WorkerTypes.Micro,
                         1,
-                        JsonOutput.toJson(otherProperties),
+                        otherProperties,
                         'theClientId',
-                        'theSecret',
-                        null,
-                        null)
+                        'theSecret')
 
         // assert
         assertThat url,
@@ -1231,7 +1218,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         env  : 'TST',
                         prop1: 'should not see this'
                 ]
-        ]
+        ] as Map<String, String>
 
         // act
         deployer.deploy('DEV',
@@ -1245,11 +1232,10 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         false,
                         WorkerTypes.Micro,
                         1,
-                        JsonOutput.toJson(otherProperties),
+                        otherProperties,
                         'theClientId',
                         'theSecret',
-                        'prop1=foo\nprop2=bar\n',
-                        null)
+                        [prop1: 'foo', prop2: 'bar'])
 
         // assert
         assertThat url,
@@ -1372,11 +1358,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         false,
                         WorkerTypes.Micro,
                         1,
-                        '{}',
+                        [:],
                         'theClientId',
-                        'theSecret',
-                        null,
-                        null)
+                        'theSecret')
 
         // assert
         assertThat url,
@@ -1438,11 +1422,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                             false,
                             WorkerTypes.Micro,
                             1,
-                            '{}',
+                            [:],
                             'theClientId',
-                            'theSecret',
-                            null,
-                            null)
+                            'theSecret')
         }
 
         // assert
@@ -1505,11 +1487,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                             false,
                             WorkerTypes.Micro,
                             1,
-                            '{}',
+                            [:],
                             'theClientId',
-                            'theSecret',
-                            null,
-                            null)
+                            'theSecret')
         }
 
         // assert
@@ -1601,11 +1581,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         false,
                         WorkerTypes.Micro,
                         1,
-                        '{}',
+                        [:],
                         'theClientId',
-                        'theSecret',
-                        null,
-                        null)
+                        'theSecret')
 
         // assert
         assertThat url,
@@ -1772,11 +1750,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         false,
                         WorkerTypes.Micro,
                         1,
-                        '{}',
+                        [:],
                         'theClientId',
-                        'theSecret',
-                        null,
-                        null)
+                        'theSecret')
 
         // assert
         assertThat url,
@@ -1875,7 +1851,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         ]
                     }
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
-                    assert deployed : 'We should not be calling this until we have done our POST'
+                    assert deployed: 'We should not be calling this until we have done our POST'
                     statusCode = 200
                     // we test most of this in other methods
                     result = getDeploymentStatusJson('STARTED',
@@ -1923,11 +1899,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         false,
                         WorkerTypes.Micro,
                         1,
-                        '{}',
+                        [:],
                         'theClientId',
-                        'theSecret',
-                        null,
-                        null)
+                        'theSecret')
 
         // assert
         // our mock assertions should do the work here
@@ -1988,7 +1962,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         ]
                     }
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
-                    assert deployed : 'We should not be calling this until we have done our POST'
+                    assert deployed: 'We should not be calling this until we have done our POST'
                     statusCode = 200
                     // we test most of this in other methods
                     result = getDeploymentStatusJson('STARTED',
@@ -2036,11 +2010,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         false,
                         WorkerTypes.Micro,
                         1,
-                        '{}',
+                        [:],
                         'theClientId',
-                        'theSecret',
-                        null,
-                        null)
+                        'theSecret')
 
         // assert
         // our mock assertions should do the work here
@@ -2135,11 +2107,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         false,
                         WorkerTypes.Micro,
                         1,
-                        '{}',
+                        [:],
                         'theClientId',
-                        'theSecret',
-                        null,
-                        null)
+                        'theSecret')
 
         // assert
         assertThat 'We should check status twice. The initial one for the app (app) and then to see if app started',
@@ -2205,11 +2175,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         false,
                         WorkerTypes.Micro,
                         1,
-                        '{}',
+                        [:],
                         'theClientId',
-                        'theSecret',
-                        null,
-                        null)
+                        'theSecret')
 
         // assert
         assertThat 'We should check status 3 times. The initial one for the app and then 2 to see if app started',
@@ -2270,11 +2238,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                             false,
                             WorkerTypes.Micro,
                             1,
-                            '{}',
+                            [:],
                             'theClientId',
-                            'theSecret',
-                            null,
-                            null)
+                            'theSecret')
         }
 
         // assert
@@ -2334,11 +2300,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                             false,
                             WorkerTypes.Micro,
                             1,
-                            '{}',
+                            [:],
                             'theClientId',
-                            'theSecret',
-                            null,
-                            null)
+                            'theSecret')
         }
 
         // assert

@@ -1,7 +1,6 @@
 package com.avioconsulting.jenkins.mule.impl
 
 import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
 import org.apache.http.client.methods.*
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
@@ -59,10 +58,10 @@ class CloudHubDeployer extends BaseDeployer {
      * @param usePersistentQueues
      * @param workerType
      * @param workerCount
-     * @param otherCloudHubPropertiesJson - CloudHub level property overrides (e.g. region type stuff)
+     * @param otherCloudHubProperties - CloudHub level property overrides (e.g. region type stuff)
      * @param anypointClientId - will be set in the anypoint.platform.client_id CloudHub property
      * @param anypointClientSecret - will be set in the anypoint.platform.client_secret CloudHub property
-     * @param otherAppPropertyOverrides - Mule app property overrides (the stuff in the properties tab)
+     * @param appProperties - Mule app property overrides (the stuff in the properties tab)
      */
     def deploy(String environment,
                String appName,
@@ -75,18 +74,16 @@ class CloudHubDeployer extends BaseDeployer {
                boolean usePersistentQueues,
                WorkerTypes workerType,
                int workerCount,
-               String otherCloudHubPropertiesJson,
+               Map<String, String> otherCloudHubProperties,
                String anypointClientId,
                String anypointClientSecret,
-               String otherAppPropertyOverrides) {
+               Map<String, String> appProperties = [:]) {
         def artifactId = appName
         appName = normalizeAppName(appName,
                                    cloudHubAppPrefix,
                                    environment)
-        Map appProperties = parseProperties(otherAppPropertyOverrides)
         authenticate()
         def environmentId = locateEnvironment(environment)
-        def cloudHubProperties = new JsonSlurper().parseText(otherCloudHubPropertiesJson) as Map
         def existingAppStatus = getAppStatus(environmentId,
                                              appName)
         def fileName = MuleUtil.getFileName(artifactId,
@@ -110,7 +107,7 @@ class CloudHubDeployer extends BaseDeployer {
                                 usePersistentQueues,
                                 workerType,
                                 workerCount,
-                                cloudHubProperties,
+                                otherCloudHubProperties,
                                 anypointClientId,
                                 anypointClientSecret,
                                 appProperties)
@@ -123,19 +120,19 @@ class CloudHubDeployer extends BaseDeployer {
      * @param environment - environment name (e.g. DEV, not GUID)
      * @param appName
      * @param cloudHubAppPrefix - Your "DNS prefix" for Cloudhub app uniqueness, usually a 3 letter customer ID
-     * @param zipFile
-     * @param fileName
-     * @param cryptoKey
+     * @param zipFile - stream of the app ZIP contents
+     * @param fileName - The filename to display in the Runtime Manager app GUI. Often used as a version for a label
+     * @param cryptoKey - Will be set in the 'crypto.key' CloudHub property
      * @param muleVersion
      * @param awsRegion
      * @param usePersistentQueues
      * @param workerType
      * @param workerCount
-     * @param otherCloudHubPropertiesJson - CloudHub level property overrides (e.g. region type stuff)
+     * @param otherCloudHubProperties - CloudHub level property overrides (e.g. region type stuff)
      * @param anypointClientId - will be set in the anypoint.platform.client_id CloudHub property
      * @param anypointClientSecret - will be set in the anypoint.platform.client_secret CloudHub property
-     * @param otherAppPropertyOverrides - Mule app property overrides (the stuff in the properties tab)
-     * @param overrideByChangingFileInZip
+     * @param appProperties - Mule app property overrides (the stuff in the properties tab)
+     * @param overrideByChangingFileInZip - VERY rare. If you have a weird situation where you need to be able to say that you "froze" an app ZIP/JAR for config management purposes and you want to change the properties inside a ZIP file, set this to the filename you want to drop new properties in inside the ZIP (e.g. api.dev.properties)
      * @return
      */
     def deploy(String environment,
@@ -149,18 +146,16 @@ class CloudHubDeployer extends BaseDeployer {
                boolean usePersistentQueues,
                WorkerTypes workerType,
                int workerCount,
-               String otherCloudHubPropertiesJson,
+               Map<String, String> otherCloudHubProperties,
                String anypointClientId,
                String anypointClientSecret,
-               String otherAppPropertyOverrides,
-               String overrideByChangingFileInZip) {
+               Map<String, String> appProperties = [:],
+               String overrideByChangingFileInZip = null) {
         appName = normalizeAppName(appName,
                                    cloudHubAppPrefix,
                                    environment)
-        Map appProperties = parseProperties(otherAppPropertyOverrides)
         authenticate()
         def environmentId = locateEnvironment(environment)
-        def cloudHubProperties = new JsonSlurper().parseText(otherCloudHubPropertiesJson) as Map
         def existingAppStatus = getAppStatus(environmentId,
                                              appName)
         def request = getDeploymentHttpRequest(existingAppStatus,
@@ -179,7 +174,7 @@ class CloudHubDeployer extends BaseDeployer {
                      usePersistentQueues,
                      workerType,
                      workerCount,
-                     cloudHubProperties,
+                     otherCloudHubProperties,
                      anypointClientId,
                      anypointClientSecret,
                      appProperties,
@@ -243,7 +238,7 @@ class CloudHubDeployer extends BaseDeployer {
                              Map otherProperties,
                              String anypointClientId,
                              String anypoingClientSecret,
-                             Map propertyOverrideMap,
+                             Map<String, String> propertyOverrideMap,
                              String overrideByChangingFileInZip) {
         def props = [
                 // env in on-prem environment is lower cased

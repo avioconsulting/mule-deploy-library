@@ -11,8 +11,8 @@ import org.junit.Before
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
+import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
-import static org.junit.Assert.assertThat
 
 class OnPremDeployerTest implements HttpServerUtils {
     HttpServer httpServer
@@ -607,9 +607,7 @@ class OnPremDeployerTest implements HttpServerUtils {
                         'new-app',
                         stream,
                         file.name,
-                        'clustera',
-                        null,
-                        null)
+                        'clustera')
 
         // assert
         assertThat url,
@@ -747,8 +745,7 @@ class OnPremDeployerTest implements HttpServerUtils {
                         stream,
                         file.name,
                         'clustera',
-                        'prop1=foo\nprop2=bar\n',
-                        null)
+                        [prop1: 'foo', prop2: 'bar'])
 
         // assert
         assertThat url,
@@ -899,7 +896,7 @@ class OnPremDeployerTest implements HttpServerUtils {
                         stream,
                         zipFile.name,
                         'clustera',
-                        'existing = changed',
+                        [existing: 'changed'],
                         'api.dev.properties')
 
         // assert
@@ -1070,9 +1067,7 @@ class OnPremDeployerTest implements HttpServerUtils {
                         'the-app',
                         stream,
                         file.name,
-                        'clustera',
-                        null,
-                        null)
+                        'clustera')
 
         // assert
         assertThat url,
@@ -1206,8 +1201,7 @@ class OnPremDeployerTest implements HttpServerUtils {
                         stream,
                         file.name,
                         'clustera',
-                        'prop1=foo\nprop2 = bar',
-                        null)
+                        [prop1: 'foo', prop2: 'bar'])
 
         // assert
         assertThat url,
@@ -1354,7 +1348,7 @@ class OnPremDeployerTest implements HttpServerUtils {
                         stream,
                         zipFile.name,
                         'clustera',
-                        'existing = changed',
+                        [existing: 'changed'],
                         'api.dev.properties')
 
         // assert
@@ -1939,60 +1933,6 @@ class OnPremDeployerTest implements HttpServerUtils {
         // assert
         assertThat exception.message,
                    is(equalTo('Deployment failed on 1 or more nodes. Please see logs and messages as to why app did not start'))
-    }
-
-    @Test
-    void parseProperties_valid() {
-        // arrange
-        def input = 'prop1=foo\nprop2 = bar'
-
-        // act
-        def map = deployer.parseProperties(input)
-
-        // assert
-        assertThat map,
-                   is(equalTo([
-                           prop1: 'foo',
-                           prop2: 'bar'
-                   ]))
-    }
-
-    @Test
-    void parseProperties_null() {
-        // arrange
-
-        // act
-        def map = deployer.parseProperties(null)
-
-        // assert
-        assertThat map,
-                   is(equalTo([:]))
-    }
-
-    @Test
-    void parseProperties_empty_string() {
-        // arrange
-        def input = ''
-
-        // act
-        def map = deployer.parseProperties(input)
-
-        // assert
-        assertThat map,
-                   is(equalTo([:]))
-    }
-
-    @Test
-    void parseProperties_space() {
-        // arrange
-        def input = ' '
-
-        // act
-        def map = deployer.parseProperties(input)
-
-        // assert
-        assertThat map,
-                   is(equalTo([:]))
     }
 
     @Test
