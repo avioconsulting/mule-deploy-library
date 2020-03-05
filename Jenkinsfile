@@ -27,6 +27,9 @@ pipeline {
                     // -B = batch mode, less noise
                     // -e shows detailed stack traces if errors happen
                     sh "mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -e -B ${env.BRANCH_NAME == 'master' ? 'clean deploy' : 'clean package'}"
+                    if (env.BRANCH_NAME == 'master') {
+                        keepBuild()
+                    }
                 }
             }
         }
