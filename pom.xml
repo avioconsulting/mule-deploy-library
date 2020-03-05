@@ -97,4 +97,16 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>groovy</id>
+            <name>Groovy</name>
+            <layout>default</layout>
+            <url>https://dl.bintray.com/groovy/maven/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
 </project>
