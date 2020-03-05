@@ -40,9 +40,16 @@ pipeline {
                 withMaven(jdk: env.jdk,
                           maven: env.mvn,
                           mavenSettingsConfig: env.standard_avio_mvn_settings) {
-                    quietMaven 'clean deploy -DskipTests'
+                    quietMaven 'clean deploy groovydoc:generate site -DskipTests'
                     // keeps buildDiscarder from getting rid of stuff we've published
                     keepBuild()
+                    publishHTML([allowMissing: false,
+                                 alwaysLinkToLastBuild: false,
+                                 keepAll: false,
+                                 reportDir: 'target/site',
+                                 reportFiles: 'index.html',
+                                 reportName: 'Maven site',
+                                 reportTitles: ''])
                 }
             }
 
