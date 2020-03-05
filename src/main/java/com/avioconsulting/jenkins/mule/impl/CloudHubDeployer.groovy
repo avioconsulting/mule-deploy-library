@@ -9,6 +9,13 @@ import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
 
 class CloudHubDeployer extends BaseDeployer {
+    /***
+     * Instantiate using default anypoint.mulesoft.com URL
+     * @param anypointOrganizationId
+     * @param username
+     * @param password
+     * @param logger - will be used for all your log messages
+     */
     CloudHubDeployer(String anypointOrganizationId,
                      String username,
                      String password,
@@ -41,7 +48,7 @@ class CloudHubDeployer extends BaseDeployer {
 
     /**
      *
-     * @param environment
+     * @param environment - environment name (e.g. DEV, not GUID)
      * @param appName - Used for deployment AND for the artifact ID from Exchange
      * @param cloudHubAppPrefix
      * @param groupId - Used to retrieve ZIP/JAR from Exchange
