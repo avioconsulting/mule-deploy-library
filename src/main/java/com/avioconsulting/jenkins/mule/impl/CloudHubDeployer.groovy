@@ -47,21 +47,21 @@ class CloudHubDeployer extends BaseDeployer {
     }
 
     /**
-     *
+     * Perform a "GAV style" deployment where the app JAR has been previously pushed to Anypoint Exchange
      * @param environment - environment name (e.g. DEV, not GUID)
      * @param appName - Used for deployment AND for the artifact ID from Exchange
-     * @param cloudHubAppPrefix
+     * @param cloudHubAppPrefix - Your "DNS prefix" for Cloudhub app uniqueness, usually a 3 letter customer ID
      * @param groupId - Used to retrieve ZIP/JAR from Exchange
      * @param version - Used to retrieve ZIP/JAR from Exchange
-     * @param cryptoKey
+     * @param cryptoKey - Will be set in the 'crypto.key' CloudHub property
      * @param muleVersion
      * @param awsRegion
      * @param usePersistentQueues
      * @param workerType
      * @param workerCount
      * @param otherCloudHubPropertiesJson - CloudHub level property overrides (e.g. region type stuff)
-     * @param anypointClientId
-     * @param anypointClientSecret
+     * @param anypointClientId - will be set in the anypoint.platform.client_id CloudHub property
+     * @param anypointClientSecret - will be set in the anypoint.platform.client_secret CloudHub property
      * @param otherAppPropertyOverrides - Mule app property overrides (the stuff in the properties tab)
      */
     def deploy(String environment,
@@ -73,7 +73,7 @@ class CloudHubDeployer extends BaseDeployer {
                String muleVersion,
                String awsRegion,
                boolean usePersistentQueues,
-               String workerType,
+               WorkerTypes workerType,
                int workerCount,
                String otherCloudHubPropertiesJson,
                String anypointClientId,
@@ -119,10 +119,10 @@ class CloudHubDeployer extends BaseDeployer {
     }
 
     /**
-     *
-     * @param environment
+     * Deploy via a supplied file
+     * @param environment - environment name (e.g. DEV, not GUID)
      * @param appName
-     * @param cloudHubAppPrefix
+     * @param cloudHubAppPrefix - Your "DNS prefix" for Cloudhub app uniqueness, usually a 3 letter customer ID
      * @param zipFile
      * @param fileName
      * @param cryptoKey
@@ -132,8 +132,8 @@ class CloudHubDeployer extends BaseDeployer {
      * @param workerType
      * @param workerCount
      * @param otherCloudHubPropertiesJson - CloudHub level property overrides (e.g. region type stuff)
-     * @param anypointClientId
-     * @param anypointClientSecret
+     * @param anypointClientId - will be set in the anypoint.platform.client_id CloudHub property
+     * @param anypointClientSecret - will be set in the anypoint.platform.client_secret CloudHub property
      * @param otherAppPropertyOverrides - Mule app property overrides (the stuff in the properties tab)
      * @param overrideByChangingFileInZip
      * @return
@@ -147,7 +147,7 @@ class CloudHubDeployer extends BaseDeployer {
                String muleVersion,
                String awsRegion,
                boolean usePersistentQueues,
-               String workerType,
+               WorkerTypes workerType,
                int workerCount,
                String otherCloudHubPropertiesJson,
                String anypointClientId,
@@ -238,7 +238,7 @@ class CloudHubDeployer extends BaseDeployer {
                              String muleVersion,
                              String awsRegion,
                              boolean usePersistentQueues,
-                             String workerType,
+                             WorkerTypes workerType,
                              int workerCount,
                              Map otherProperties,
                              String anypointClientId,
@@ -265,7 +265,7 @@ class CloudHubDeployer extends BaseDeployer {
                 monitoringAutoRestart: true,
                 workers              : [
                         type  : [
-                                name: workerType
+                                name: workerType.toString()
                         ],
                         amount: workerCount
                 ],
@@ -324,7 +324,7 @@ class CloudHubDeployer extends BaseDeployer {
                                         String muleVersion,
                                         String awsRegion,
                                         boolean usePersistentQueues,
-                                        String workerType,
+                                        WorkerTypes workerType,
                                         int workerCount,
                                         Map otherProperties,
                                         String anypointClientId,
@@ -350,7 +350,7 @@ class CloudHubDeployer extends BaseDeployer {
                 monitoringAutoRestart: true,
                 workers              : [
                         type  : [
-                                name: workerType
+                                name: workerType.toString()
                         ],
                         amount: workerCount
                 ],
