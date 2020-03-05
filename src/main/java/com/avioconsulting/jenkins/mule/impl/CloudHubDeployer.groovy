@@ -54,13 +54,13 @@ class CloudHubDeployer extends BaseDeployer {
      * @param version - Used to retrieve ZIP/JAR from Exchange
      * @param cryptoKey - Will be set in the 'crypto.key' CloudHub property
      * @param muleVersion
-     * @param awsRegion
      * @param usePersistentQueues
      * @param workerType
      * @param workerCount
-     * @param otherCloudHubProperties - CloudHub level property overrides (e.g. region type stuff)
      * @param anypointClientId - will be set in the anypoint.platform.client_id CloudHub property
      * @param anypointClientSecret - will be set in the anypoint.platform.client_secret CloudHub property
+     * @param awsRegion - by default will use what's configured in Runtime Manager if you don't supply one
+     * @param otherCloudHubProperties - CloudHub level property overrides (e.g. region type stuff)
      * @param appProperties - Mule app property overrides (the stuff in the properties tab)
      */
     def deploy(String environment,
@@ -70,13 +70,13 @@ class CloudHubDeployer extends BaseDeployer {
                String version,
                String cryptoKey,
                String muleVersion,
-               String awsRegion,
                boolean usePersistentQueues,
                WorkerTypes workerType,
                int workerCount,
-               Map<String, String> otherCloudHubProperties,
                String anypointClientId,
                String anypointClientSecret,
+               AwsRegions awsRegion = null,
+               Map<String, String> otherCloudHubProperties = [:],
                Map<String, String> appProperties = [:]) {
         def artifactId = appName
         appName = normalizeAppName(appName,
@@ -128,10 +128,11 @@ class CloudHubDeployer extends BaseDeployer {
      * @param usePersistentQueues
      * @param workerType
      * @param workerCount
-     * @param otherCloudHubProperties - CloudHub level property overrides (e.g. region type stuff)
      * @param anypointClientId - will be set in the anypoint.platform.client_id CloudHub property
      * @param anypointClientSecret - will be set in the anypoint.platform.client_secret CloudHub property
+     * @param awsRegion - by default will use what's configured in Runtime Manager if you don't supply one
      * @param appProperties - Mule app property overrides (the stuff in the properties tab)
+     * @param otherCloudHubProperties - CloudHub level property overrides (e.g. region type stuff)
      * @param overrideByChangingFileInZip - VERY rare. If you have a weird situation where you need to be able to say that you "froze" an app ZIP/JAR for config management purposes and you want to change the properties inside a ZIP file, set this to the filename you want to drop new properties in inside the ZIP (e.g. api.dev.properties)
      * @return
      */
@@ -142,14 +143,14 @@ class CloudHubDeployer extends BaseDeployer {
                String fileName,
                String cryptoKey,
                String muleVersion,
-               String awsRegion,
                boolean usePersistentQueues,
                WorkerTypes workerType,
                int workerCount,
-               Map<String, String> otherCloudHubProperties,
                String anypointClientId,
                String anypointClientSecret,
+               AwsRegions awsRegion = null,
                Map<String, String> appProperties = [:],
+               Map<String, String> otherCloudHubProperties = [:],
                String overrideByChangingFileInZip = null) {
         appName = normalizeAppName(appName,
                                    cloudHubAppPrefix,
@@ -223,6 +224,38 @@ class CloudHubDeployer extends BaseDeployer {
         appName
     }
 
+    private static Map<String, String> getCoreProperties(String appName,
+                                                         String muleVersion,
+                                                         AwsRegions awsRegion,
+                                                         WorkerTypes workerType,
+                                                         int workerCount,
+                                                         boolean usePersistentQueues,
+                                                         Map<String, String> props) {
+        def result = [
+                // CloudHub's API calls the Mule application the 'domain'
+                domain               : appName,
+                muleVersion          : [
+                        version: muleVersion
+                ],
+                region               : awsRegion?.awsCode,
+                monitoringAutoRestart: true,
+                workers              : [
+                        type  : [
+                                name: workerType.toString()
+                        ],
+                        amount: workerCount
+                ],
+                persistentQueues     : usePersistentQueues,
+                // these are the actual properties in the 'Settings' tab
+                properties           : props
+        ] as Map<String, String>
+        if (!result.region) {
+            // use default/runtime manager region
+            result.remove('region')
+        }
+        result
+    }
+
     private def doDeployment(HttpEntityEnclosingRequestBase request,
                              String environment,
                              String environmentId,
@@ -231,7 +264,7 @@ class CloudHubDeployer extends BaseDeployer {
                              String fileName,
                              String cryptoKey,
                              String muleVersion,
-                             String awsRegion,
+                             AwsRegions awsRegion,
                              boolean usePersistentQueues,
                              WorkerTypes workerType,
                              int workerCount,
@@ -250,24 +283,13 @@ class CloudHubDeployer extends BaseDeployer {
         if (otherProperties.containsKey('properties')) {
             otherProperties.properties = props + otherProperties.properties
         }
-        def appInfo = [
-                // CloudHub's API calls the Mule application the 'domain'
-                domain               : appName,
-                muleVersion          : [
-                        version: muleVersion
-                ],
-                region               : awsRegion,
-                monitoringAutoRestart: true,
-                workers              : [
-                        type  : [
-                                name: workerType.toString()
-                        ],
-                        amount: workerCount
-                ],
-                persistentQueues     : usePersistentQueues,
-                // these are the actual properties in the 'Settings' tab
-                properties           : props
-        ] + otherProperties
+        def appInfo = getCoreProperties(appName,
+                                        muleVersion,
+                                        awsRegion,
+                                        workerType,
+                                        workerCount,
+                                        usePersistentQueues,
+                                        props) + otherProperties
         if (!overrideByChangingFileInZip) {
             appInfo.properties = appInfo.properties + propertyOverrideMap
         } else {
@@ -317,7 +339,7 @@ class CloudHubDeployer extends BaseDeployer {
                                         String filename,
                                         String cryptoKey,
                                         String muleVersion,
-                                        String awsRegion,
+                                        AwsRegions awsRegion,
                                         boolean usePersistentQueues,
                                         WorkerTypes workerType,
                                         int workerCount,
@@ -335,25 +357,15 @@ class CloudHubDeployer extends BaseDeployer {
         if (otherProperties.containsKey('properties')) {
             otherProperties.properties = props + otherProperties.properties
         }
-        def appInfo = [
-                // CloudHub's API calls the Mule application the 'domain'
-                domain               : appName,
-                muleVersion          : [
-                        version: muleVersion
-                ],
-                region               : awsRegion,
-                monitoringAutoRestart: true,
-                workers              : [
-                        type  : [
-                                name: workerType.toString()
-                        ],
-                        amount: workerCount
-                ],
-                persistentQueues     : usePersistentQueues,
-                // these are the actual properties in the 'Settings' tab
-                properties           : props,
+        def appInfo = getCoreProperties(appName,
+                                        muleVersion,
+                                        awsRegion,
+                                        workerType,
+                                        workerCount,
+                                        usePersistentQueues,
+                                        props) + [
                 // this way the version of the app shows up in Runtime Manager
-                fileName             : filename
+                fileName: filename
         ] + otherProperties
         appInfo.properties = appInfo.properties + propertyOverrideMap
         def appSource = [

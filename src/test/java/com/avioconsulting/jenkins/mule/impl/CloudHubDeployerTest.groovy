@@ -322,11 +322,131 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         file.name,
                         'theKey',
                         '3.9.1',
-                        'us-east-1',
                         false,
                         WorkerTypes.Micro,
                         1,
-                        [:],
+                        'theClientId',
+                        'theSecret',
+                        AwsRegions.UsEast1)
+
+        // assert
+        assertThat url,
+                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+        assertThat method,
+                   is(equalTo('POST'))
+        assertThat authToken,
+                   is(equalTo('Bearer the token'))
+        assertThat envId,
+                   is(equalTo('def456'))
+        assertThat orgId,
+                   is(equalTo('the-org-id'))
+        assertThat sentFormAttributes.names().toList().sort(),
+                   is(equalTo(['appInfoJson', 'autoStart']))
+        assertThat sentFormAttributes.get('autoStart'),
+                   is(equalTo('true'))
+        def map = new JsonSlurper().parseText(sentFormAttributes.get('appInfoJson'))
+        assertThat map,
+                   is(equalTo([
+                           domain               : 'client-new-app-dev',
+                           muleVersion          : [
+                                   version: '3.9.1'
+                           ],
+                           region               : 'us-east-1',
+                           monitoringAutoRestart: true,
+                           workers              : [
+                                   type  : [
+                                           name: 'Micro'
+                                   ],
+                                   amount: 1
+                           ],
+                           persistentQueues     : false,
+                           properties           : [
+                                   env                              : 'dev',
+                                   'crypto.key'                     : 'theKey',
+                                   'anypoint.platform.client_id'    : 'theClientId',
+                                   'anypoint.platform.client_secret': 'theSecret'
+                           ]
+                   ]))
+        assertThat rawBody,
+                   is(containsString('Content-Disposition: form-data; name="file"; filename="some_file.txt"'))
+    }
+
+    @Test
+    void perform_deployment_correct_request_new_app_no_region() {
+        // arrange
+        def authenticated = false
+        String url = null
+        String method = null
+        String authToken = null
+        String envId = null
+        String orgId = null
+        MultiMap sentFormAttributes = null
+        String rawBody = null
+        withHttpServer { HttpServerRequest request ->
+            def uri = request.absoluteURI()
+            if (uri == 'http://localhost:8080/accounts/login') {
+                assert !authenticated: 'Expect only 1 auth!'
+                authenticated = true
+                return mockAuthenticationOk(request)
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def result = null
+                if (uri.endsWith('environments')) {
+                    result = [
+                            data: [
+                                    [
+                                            id  : 'abc123',
+                                            name: 'Design'
+                                    ],
+                                    [
+                                            id  : 'def456',
+                                            name: 'DEV'
+                                    ]
+                            ]
+                    ]
+                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                    statusCode = 404
+                } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
+                    statusCode = 200
+                    // we test most of this in other methods
+                    result = getDeploymentStatusJson('STARTED',
+                                                     'STARTED')
+                } else {
+                    // deployment service returns this
+                    statusCode = 200
+                    result = [
+                            domain: 'new-app'
+                    ]
+                    url = uri
+                    method = request.method()
+                    (authToken, orgId, envId) = capturedStandardHeaders(request)
+                    request.expectMultipart = true
+                    sentFormAttributes = request.formAttributes()
+                    request.bodyHandler { buffer ->
+                        rawBody = buffer.toString()
+                    }
+                }
+                end(JsonOutput.toJson(result))
+            }
+        }
+        deployer.authenticate()
+        def file = new File('src/test/resources/some_file.txt')
+        def stream = new FileInputStream(file)
+
+        // act
+        deployer.deploy('DEV',
+                        'new-app',
+                        'CLIENT',
+                        stream,
+                        file.name,
+                        'theKey',
+                        '3.9.1',
+                        false,
+                        WorkerTypes.Micro,
+                        1,
                         'theClientId',
                         'theSecret')
 
@@ -352,7 +472,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                            muleVersion          : [
                                    version: '3.9.1'
                            ],
-                           region               : 'us-east-1',
                            monitoringAutoRestart: true,
                            workers              : [
                                    type  : [
@@ -443,13 +562,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         '1.0.0',
                         'theKey',
                         '3.9.1',
-                        'us-east-1',
                         false,
                         WorkerTypes.Micro,
                         1,
-                        [:],
                         'theClientId',
-                        'theSecret')
+                        'theSecret',
+                        AwsRegions.UsEast1)
 
         // assert
         assertThat url,
@@ -571,13 +689,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         file.name,
                         'theKey',
                         '3.9.1',
-                        'us-east-1',
                         false,
                         WorkerTypes.Micro,
                         1,
-                        [:],
                         'theClientId',
                         'theSecret',
+                        AwsRegions.UsEast1,
                         [prop1: 'foo', prop2: 'bar'])
 
         // assert
@@ -707,14 +824,14 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         zipFile.name,
                         'theKey',
                         '3.9.1',
-                        'us-east-1',
                         false,
                         WorkerTypes.Micro,
                         1,
-                        [:],
                         'theClientId',
                         'theSecret',
+                        AwsRegions.UsEast1,
                         [existing: 'changed'],
+                        [:],
                         'api.dev.properties')
 
         // assert
@@ -843,13 +960,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         file.name,
                         'theKey',
                         '3.9.1',
-                        'us-east-1',
                         true,
                         WorkerTypes.Micro,
                         1,
-                        [:],
                         'theClientId',
-                        'theSecret')
+                        'theSecret',
+                        AwsRegions.UsEast1)
 
         // assert
         assertThat url,
@@ -972,13 +1088,14 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         file.name,
                         'theKey',
                         '3.9.1',
-                        'us-east-1',
                         false,
                         WorkerTypes.Micro,
                         1,
-                        otherProperties,
                         'theClientId',
-                        'theSecret')
+                        'theSecret',
+                        AwsRegions.UsEast1,
+                        [:],
+                        otherProperties)
 
         // assert
         assertThat url,
@@ -1098,13 +1215,14 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         file.name,
                         'theKey',
                         '3.9.1',
-                        'us-east-1',
                         false,
                         WorkerTypes.Micro,
                         1,
-                        otherProperties,
                         'theClientId',
-                        'theSecret')
+                        'theSecret',
+                        AwsRegions.UsEast1,
+                        [:],
+                        otherProperties)
 
         // assert
         assertThat url,
@@ -1228,14 +1346,14 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         file.name,
                         'theKey',
                         '3.9.1',
-                        'us-east-1',
                         false,
                         WorkerTypes.Micro,
                         1,
-                        otherProperties,
                         'theClientId',
                         'theSecret',
-                        [prop1: 'foo', prop2: 'bar'])
+                        AwsRegions.UsEast1,
+                        [prop1: 'foo', prop2: 'bar'],
+                        otherProperties)
 
         // assert
         assertThat url,
@@ -1354,13 +1472,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         file.name,
                         'theKey',
                         '3.9.1',
-                        'us-east-1',
                         false,
                         WorkerTypes.Micro,
                         1,
-                        [:],
                         'theClientId',
-                        'theSecret')
+                        'theSecret',
+                        AwsRegions.UsEast1)
 
         // assert
         assertThat url,
@@ -1418,13 +1535,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
                             file.name,
                             'theKey',
                             '3.9.1',
-                            'us-east-1',
                             false,
                             WorkerTypes.Micro,
                             1,
-                            [:],
                             'theClientId',
-                            'theSecret')
+                            'theSecret',
+                            AwsRegions.UsEast1)
         }
 
         // assert
@@ -1483,13 +1599,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
                             file.name,
                             'theKey',
                             '3.9.1',
-                            'us-east-1',
                             false,
                             WorkerTypes.Micro,
                             1,
-                            [:],
                             'theClientId',
-                            'theSecret')
+                            'theSecret',
+                            AwsRegions.UsEast1)
         }
 
         // assert
@@ -1577,13 +1692,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         file.name,
                         'theKey',
                         '3.9.1',
-                        'us-east-1',
                         false,
                         WorkerTypes.Micro,
                         1,
-                        [:],
                         'theClientId',
-                        'theSecret')
+                        'theSecret',
+                        AwsRegions.UsEast1)
 
         // assert
         assertThat url,
@@ -1746,13 +1860,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         file.name,
                         'theKey',
                         '3.9.1',
-                        'us-east-1',
                         false,
                         WorkerTypes.Micro,
                         1,
-                        [:],
                         'theClientId',
-                        'theSecret')
+                        'theSecret',
+                        AwsRegions.UsEast1)
 
         // assert
         assertThat url,
@@ -1895,13 +2008,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         file.name,
                         'theKey',
                         '3.9.1',
-                        'us-east-1',
                         false,
                         WorkerTypes.Micro,
                         1,
-                        [:],
                         'theClientId',
-                        'theSecret')
+                        'theSecret',
+                        AwsRegions.UsEast1)
 
         // assert
         // our mock assertions should do the work here
@@ -2006,13 +2118,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         file.name,
                         'theKey',
                         '3.9.1',
-                        'us-east-1',
                         false,
                         WorkerTypes.Micro,
                         1,
-                        [:],
                         'theClientId',
-                        'theSecret')
+                        'theSecret',
+                        AwsRegions.UsEast1)
 
         // assert
         // our mock assertions should do the work here
@@ -2103,13 +2214,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         file.name,
                         'theKey',
                         '3.9.1',
-                        'us-east-1',
                         false,
                         WorkerTypes.Micro,
                         1,
-                        [:],
                         'theClientId',
-                        'theSecret')
+                        'theSecret',
+                        AwsRegions.UsEast1)
 
         // assert
         assertThat 'We should check status twice. The initial one for the app (app) and then to see if app started',
@@ -2171,13 +2281,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         file.name,
                         'theKey',
                         '3.9.1',
-                        'us-east-1',
                         false,
                         WorkerTypes.Micro,
                         1,
-                        [:],
                         'theClientId',
-                        'theSecret')
+                        'theSecret',
+                        AwsRegions.UsEast1)
 
         // assert
         assertThat 'We should check status 3 times. The initial one for the app and then 2 to see if app started',
@@ -2234,13 +2343,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
                             file.name,
                             'theKey',
                             '3.9.1',
-                            'us-east-1',
                             false,
                             WorkerTypes.Micro,
                             1,
-                            [:],
                             'theClientId',
-                            'theSecret')
+                            'theSecret',
+                            AwsRegions.UsEast1)
         }
 
         // assert
@@ -2296,13 +2404,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
                             file.name,
                             'theKey',
                             '3.9.1',
-                            'us-east-1',
                             false,
                             WorkerTypes.Micro,
                             1,
-                            [:],
                             'theClientId',
-                            'theSecret')
+                            'theSecret',
+                            AwsRegions.UsEast1)
         }
 
         // assert
