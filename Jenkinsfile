@@ -44,12 +44,11 @@ pipeline {
                     // keeps buildDiscarder from getting rid of stuff we've published
                     keepBuild()
                     publishHTML([allowMissing: false,
-                                 alwaysLinkToLastBuild: false,
-                                 keepAll: false,
+                                 alwaysLinkToLastBuild: true,
+                                 keepAll: true,
                                  reportDir: 'target/site',
                                  reportFiles: 'index.html',
-                                 reportName: 'Maven site',
-                                 reportTitles: ''])
+                                 reportName: 'Maven site'])
                 }
             }
 
