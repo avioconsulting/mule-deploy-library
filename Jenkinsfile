@@ -10,7 +10,6 @@ pipeline {
     stages {
         stage('Fetch dependencies') {
             steps {
-                currentBuild.description = env.version
                 withMaven(jdk: env.jdk,
                           maven: env.mvn) {
                     // Used to clarify Maven phases a bit more than pure dependency as you go mode.
@@ -31,5 +30,10 @@ pipeline {
                 }
             }
         }
+    }
+
+    options {
+        buildDiscarder logRotator(numToKeepStr: '3')
+        timestamps()
     }
 }
