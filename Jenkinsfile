@@ -19,18 +19,31 @@ pipeline {
             }
         }
 
-        stage('Build/test/deploy') {
+        stage('Build/test') {
             steps {
                 withMaven(jdk: env.jdk,
                           maven: env.mvn) {
                     sh "mvn org.codehaus.mojo:versions-maven-plugin:2.7:set -DnewVersion=${env.version} -DgenerateBackupPoms=false -DprocessAllModules=true"
                     // -B = batch mode, less noise
                     // -e shows detailed stack traces if errors happen
-                    sh "mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -e -B ${env.BRANCH_NAME == 'master' ? 'clean deploy' : 'clean package'}"
-                    if (env.BRANCH_NAME == 'master') {
-                        keepBuild()
-                    }
+                    sh "mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -e -B clean package"
                 }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                withMaven(jdk: env.jdk,
+                          maven: env.mvn) {
+                    // -B = batch mode, less noise
+                    // -e shows detailed stack traces if errors happen
+                    sh "mvn -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -e -B clean deploy -DskipTests"
+                    keepBuild()
+                }
+            }
+
+            when {
+                branch 'master'
             }
         }
     }
