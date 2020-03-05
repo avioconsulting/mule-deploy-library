@@ -42,7 +42,7 @@ pipeline {
                           mavenSettingsConfig: env.standard_avio_mvn_settings,
                           // only want to capture artifact if we're deploying (see below)
                           options: [artifactsPublisher(disabled: true)]) {
-                    quietMaven 'clean surefire:test@integration-test'
+                    quietMaven 'clean test-compile surefire:test@integration-test'
                 }
             }
         }
