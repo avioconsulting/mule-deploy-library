@@ -47,4 +47,16 @@ pipeline {
         buildDiscarder logRotator(numToKeepStr: '3')
         timestamps()
     }
+
+    post {
+        always {
+            cleanWs()
+        }
+        failure {
+            handleError([message: 'Build failed'])
+        }
+        unstable {
+            handleError([message: 'Build failed'])
+        }
+    }
 }
