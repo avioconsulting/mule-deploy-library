@@ -4,22 +4,27 @@ import org.apache.maven.shared.invoker.DefaultInvocationRequest
 import org.apache.maven.shared.invoker.DefaultInvoker
 import org.junit.Before
 import org.junit.BeforeClass
+import org.junit.Ignore
 import org.junit.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
+import static org.junit.Assume.assumeTrue
 
 class IntegrationTest {
     private static final String AVIO_ORG_ID = 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee'
     private static final String ANYPOINT_USERNAME = System.getProperty('anypoint.username')
     private static final String ANYPOINT_PASSWORD = System.getProperty('anypoint.password')
+    private static final String ON_PREM_SERVER_NAME = System.getProperty('mule4.onprem.server.name')
     private static final String CLOUDHUB_APP_PREFIX = 'avio'
     private static final String CLOUDHUB_APP_NAME = 'mule-deploy-lib-v4-test-app-ch'
+    private static final String ONPREM_APP_NAME = 'mule-deploy-lib-v4-test-app-onprem'
     private static File projectDirectory
     private static File builtFile
     public static final String AVIO_ENVIRONMENT_DEV = 'DEV'
     private CloudHubDeployer cloudHubDeployer
+    private OnPremDeployer onPremDeployer
 
     private static File getProjectDir(String proj) {
         def pomFileUrl = IntegrationTest.getResource("/${proj}/pom.xml")
@@ -75,6 +80,17 @@ class IntegrationTest {
                                             appName)
     }
 
+    def deleteOnPremApp(String appName,
+                        String environment) {
+        def environmentId = onPremDeployer.locateEnvironment(environment)
+        def existingAppId = onPremDeployer.locateApplication(environmentId,
+                                                             appName)
+        if (existingAppId) {
+            onPremDeployer.deleteApp(environmentId,
+                                     existingAppId)
+        }
+    }
+
     @Before
     void cleanup() {
         cloudHubDeployer = new CloudHubDeployer(AVIO_ORG_ID,
@@ -93,6 +109,11 @@ class IntegrationTest {
                 throw e
             }
         }
+        onPremDeployer = new OnPremDeployer(AVIO_ORG_ID,
+                                            ANYPOINT_USERNAME,
+                                            ANYPOINT_PASSWORD,
+                                            System.out)
+        onPremDeployer.authenticate()
     }
 
     @Test
@@ -133,6 +154,43 @@ class IntegrationTest {
             deleteCloudHubApp(CLOUDHUB_APP_NAME,
                               CLOUDHUB_APP_PREFIX,
                               AVIO_ENVIRONMENT_DEV)
+        }
+    }
+
+    @Test
+    void on_prem() {
+        // arrange
+        assumeTrue('Need a configured AND RUNNING -Dmule4.onprem.server.name to run this test',
+                   ON_PREM_SERVER_NAME != '' && ON_PREM_SERVER_NAME != null)
+        println 'Cleaning up existing app'
+        def deleteResult = deleteOnPremApp(ONPREM_APP_NAME,
+                                           AVIO_ENVIRONMENT_DEV)
+        if (deleteResult == 404) {
+            println 'Existing app does not exist, no problem'
+        }
+        def zipFile = builtFile.newInputStream()
+
+        // act
+        onPremDeployer.deploy(AVIO_ENVIRONMENT_DEV,
+                              ONPREM_APP_NAME,
+                              zipFile,
+                              builtFile.name,
+                              ON_PREM_SERVER_NAME,
+                              [env: AVIO_ENVIRONMENT_DEV])
+        println 'test: app deployed OK, now trying to hit its HTTP listener'
+
+        // assert
+        try {
+            def url = "http://localhost:8081/".toURL()
+            println "Hitting app @ ${url}"
+            assertThat url.text,
+                       is(equalTo('hello there'))
+            println 'test passed'
+        }
+        finally {
+            println 'test has finished one way or the other, now cleaning up our mess'
+            deleteOnPremApp(ONPREM_APP_NAME,
+                            AVIO_ENVIRONMENT_DEV)
         }
     }
 }
