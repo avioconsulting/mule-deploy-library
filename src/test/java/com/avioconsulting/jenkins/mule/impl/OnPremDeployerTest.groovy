@@ -211,6 +211,32 @@ class OnPremDeployerTest implements HttpServerUtils {
     }
 
     @Test
+    void locate_environment_401() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
+                return mockAuthenticationOk(request)
+            }
+            request.response().with {
+                statusCode = 401
+                putHeader('Content-Type',
+                          'application/json')
+                end()
+            }
+        }
+        deployer.authenticate()
+
+        // act
+        def exception = shouldFail {
+            deployer.locateEnvironment('FOO')
+        }
+
+        // assert
+        assertThat exception.message,
+                   is(containsString("Unable to Retrieve environments (check to ensure your org ID, the-org-id, is correct and the credentials you are using have the right permissions.)"))
+    }
+
+    @Test
     void locate_server_request_is_correct() {
         // arrange
         String url = null

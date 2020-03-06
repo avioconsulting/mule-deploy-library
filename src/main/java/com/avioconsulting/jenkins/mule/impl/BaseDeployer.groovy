@@ -59,7 +59,7 @@ abstract class BaseDeployer implements HttpRequestInterceptor {
         def response = httpClient.execute(request)
         try {
             def result = assertSuccessfulResponseAndReturnJson(response,
-                                                               'Retrieve environments')
+                                                               "Retrieve environments (check to ensure your org ID, ${anypointOrganizationId}, is correct and the credentials you are using have the right permissions.)")
             def listing = result.data
             def environment = listing.find { env ->
                 env.name == environmentName
