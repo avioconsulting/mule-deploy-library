@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
-	  xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+      xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
-	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="0be2e7b7-947d-4292-aaa0-251bb57e59f3" >
-		<http:listener-connection host="0.0.0.0" port="${http.port}" />
-	</http:listener-config>
-	<configuration-properties doc:name="Configuration properties"
-							  doc:id="64f5c5fe-01d9-4d77-9464-37f609e5974b"
-							  file="api.${env}.properties" />
+    <http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config"
+                          doc:id="0be2e7b7-947d-4292-aaa0-251bb57e59f3">
+        <http:listener-connection host="0.0.0.0" port="${http.port}"/>
+    </http:listener-config>
+    <configuration-properties doc:name="Configuration properties"
+                              doc:id="64f5c5fe-01d9-4d77-9464-37f609e5974b"
+                              file="api.${env}.properties"/>
 
-	<flow name="mule4testappFlow" doc:id="732be13e-cc87-455f-b750-62ad130a1e86" >
-		<http:listener doc:name="Listener" doc:id="f9a496a2-43b8-4951-979e-e15f4163feab" config-ref="HTTP_Listener_config" path="/"/>
-		<logger level="INFO" doc:name="Logger" doc:id="557be44f-3e70-4794-a9cc-c988dd133315" message="hello we have ${our.prop}"/>
-	</flow>
+    <flow name="mule4testappFlow" doc:id="732be13e-cc87-455f-b750-62ad130a1e86">
+        <http:listener doc:name="Listener" doc:id="f9a496a2-43b8-4951-979e-e15f4163feab"
+                       config-ref="HTTP_Listener_config" path="/"/>
+        <set-payload value="hello there"/>
+    </flow>
 </mule>

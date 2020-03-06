@@ -1,6 +1,7 @@
 package com.avioconsulting.jenkins.mule.impl
 
 import groovy.json.JsonOutput
+import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPatch
 import org.apache.http.client.methods.HttpPost
@@ -336,5 +337,16 @@ class OnPremDeployer extends BaseDeployer {
         finally {
             response.close()
         }
+    }
+
+    def deleteApp(String environmentId,
+                  String appId) {
+        def request = new HttpDelete("${baseUrl}/hybrid/api/v1/applications/${appId}").with {
+            addStandardStuff(it,
+                             environmentId)
+            it
+        }
+        def response = httpClient.execute(request)
+        response.statusLine.statusCode
     }
 }

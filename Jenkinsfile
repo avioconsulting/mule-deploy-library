@@ -22,7 +22,7 @@ pipeline {
             }
         }
 
-        stage('Build/test') {
+        stage('Build and unit test') {
             steps {
                 withMaven(jdk: env.jdk,
                           maven: env.mvn,
@@ -35,6 +35,22 @@ pipeline {
             }
         }
 
+        stage('Integration test') {
+            environment {
+                ANYPOINT_CREDS = credentials('anypoint-jenkins')
+            }
+
+            steps {
+                withMaven(jdk: env.jdk,
+                          maven: env.mvn,
+                          mavenSettingsConfig: env.standard_avio_mvn_settings,
+                          // only want to capture artifact if we're deploying (see below)
+                          options: [artifactsPublisher(disabled: true)]) {
+                    quietMaven "clean test-compile surefire:test@integration-test -Danypoint.username=${env.ANYPOINT_CREDS_USR} -Danypoint.password=${env.ANYPOINT_CREDS_PSW}"
+                }
+            }
+        }
+
         stage('Deploy') {
             steps {
                 withMaven(jdk: env.jdk,
@@ -43,12 +59,12 @@ pipeline {
                     quietMaven 'clean deploy groovydoc:generate site -DskipTests'
                     // keeps buildDiscarder from getting rid of stuff we've published
                     keepBuild()
-                    publishHTML([allowMissing: false,
+                    publishHTML([allowMissing         : false,
                                  alwaysLinkToLastBuild: true,
-                                 keepAll: true,
-                                 reportDir: 'target/site',
-                                 reportFiles: 'index.html',
-                                 reportName: 'Maven site'])
+                                 keepAll              : true,
+                                 reportDir            : 'target/site',
+                                 reportFiles          : 'index.html',
+                                 reportName           : 'Maven site'])
                 }
             }
 
