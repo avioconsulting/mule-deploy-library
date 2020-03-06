@@ -125,8 +125,10 @@ class IntegrationTest {
             println "Hitting app @ ${url}"
             assertThat url.text,
                        is(equalTo('hello there'))
+            println 'test passed'
         }
         finally {
+            println 'test has finished one way or the other, now cleaning up our mess'
             // don't be dirty!
             deleteCloudHubApp(CLOUDHUB_APP_NAME,
                               CLOUDHUB_APP_PREFIX,
