@@ -56,6 +56,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
             }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
+            }
             url = request.absoluteURI()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -85,7 +88,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
 
         // act
-        deployer.getDeploymentStatus('def456',
+        deployer.getDeploymentStatus('DEV',
                                      'theapp')
 
         // assert
@@ -107,6 +110,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
+            }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
             }
             request.response().with {
                 statusCode = 200
@@ -134,7 +140,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
 
         // act
-        def status = deployer.getDeploymentStatus('def456',
+        def status = deployer.getDeploymentStatus('DEV',
                                                   'the-app')
 
         // assert
@@ -148,6 +154,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
+            }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
             }
             request.response().with {
                 statusCode = 200
@@ -175,7 +184,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
 
         // act
-        def status = deployer.getDeploymentStatus('def456',
+        def status = deployer.getDeploymentStatus('DEV',
                                                   'appid'
         )
 
@@ -190,6 +199,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
+            }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
             }
             request.response().with {
                 statusCode = 200
@@ -217,7 +229,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
 
         // act
-        def status = deployer.getDeploymentStatus('def456',
+        def status = deployer.getDeploymentStatus('DEV',
                                                   'appid'
         )
 
@@ -2376,6 +2388,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
             }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
+            }
             url = request.absoluteURI()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -2390,7 +2405,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
 
         // act
-        deployer.getAppStatus('def456',
+        deployer.getAppStatus('DEV',
                               'theapp')
 
         // assert
@@ -2413,6 +2428,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
             }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -2424,7 +2442,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
 
         // act
-        def status = deployer.getAppStatus('def456',
+        def status = deployer.getAppStatus('DEV',
                                            'the-app')
 
         // assert
@@ -2439,6 +2457,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
             }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -2450,7 +2471,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
 
         // act
-        def status = deployer.getAppStatus('def456',
+        def status = deployer.getAppStatus('DEV',
                                            'the-app')
 
         // assert
@@ -2465,6 +2486,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
             }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -2476,7 +2500,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
 
         // act
-        def status = deployer.getAppStatus('def456',
+        def status = deployer.getAppStatus('DEV',
                                            'the-app')
 
         // assert
@@ -2491,6 +2515,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
             }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
+            }
             request.response().with {
                 statusCode = 404
                 end()
@@ -2498,7 +2525,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
 
         // act
-        def status = deployer.getAppStatus('def456',
+        def status = deployer.getAppStatus('DEV',
                                            'the-app')
 
         // assert
@@ -2513,6 +2540,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
             }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -2524,7 +2554,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
 
         // act
-        def status = deployer.getAppStatus('def456',
+        def status = deployer.getAppStatus('DEV',
                                            'the-app')
 
         // assert

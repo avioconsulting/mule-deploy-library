@@ -75,9 +75,7 @@ class CloudHubDeployer extends BaseDeployer {
         appName = normalizeAppName(appName,
                                    cloudHubAppPrefix,
                                    environment)
-        authenticate()
-        def environmentId = locateEnvironment(environment)
-        def existingAppStatus = getAppStatus(environmentId,
+        def existingAppStatus = getAppStatus(environment,
                                              appName)
         def fileName = MuleUtil.getFileName(artifactId,
                                             version,
@@ -85,10 +83,9 @@ class CloudHubDeployer extends BaseDeployer {
         def request = getDeploymentHttpRequest(existingAppStatus,
                                                appName,
                                                fileName,
-                                               environmentId)
+                                               environment)
         doDeploymentViaExchange(request,
                                 environment,
-                                environmentId,
                                 appName,
                                 artifactId,
                                 groupId,
@@ -104,7 +101,7 @@ class CloudHubDeployer extends BaseDeployer {
                                 anypointClientId,
                                 anypointClientSecret,
                                 appProperties)
-        waitForAppToStart(environmentId,
+        waitForAppToStart(environment,
                           appName)
     }
 
@@ -148,17 +145,14 @@ class CloudHubDeployer extends BaseDeployer {
         appName = normalizeAppName(appName,
                                    cloudHubAppPrefix,
                                    environment)
-        authenticate()
-        def environmentId = locateEnvironment(environment)
-        def existingAppStatus = getAppStatus(environmentId,
+        def existingAppStatus = getAppStatus(environment,
                                              appName)
         def request = getDeploymentHttpRequest(existingAppStatus,
                                                appName,
                                                fileName,
-                                               environmentId)
+                                               environment)
         doDeployment(request,
                      environment,
-                     environmentId,
                      appName,
                      zipFile,
                      fileName,
@@ -173,31 +167,31 @@ class CloudHubDeployer extends BaseDeployer {
                      anypointClientSecret,
                      appProperties,
                      overrideByChangingFileInZip)
-        waitForAppToStart(environmentId,
+        waitForAppToStart(environment,
                           appName)
     }
 
     private HttpEntityEnclosingRequestBase getDeploymentHttpRequest(AppStatus existingAppStatus,
                                                                     String appName,
                                                                     String fileName,
-                                                                    String environmentId) {
+                                                                    String environment) {
         HttpEntityEnclosingRequestBase request
         if (existingAppStatus == AppStatus.NotFound) {
             logger.println "Deploying '${appName}', ${fileName} as a NEW application"
-            request = new HttpPost("${baseUrl}/cloudhub/api/v2/applications")
+            request = new HttpPost("${clientWrapper.baseUrl}/cloudhub/api/v2/applications")
         } else if ([AppStatus.Undeployed, AppStatus.Failed].contains(existingAppStatus)) {
             // If you try and PUT a new version of an app over an existing failed deployment, CloudHub will reject it
             // so we delete first to clear out the failed deployment
             logger.println "Existing deployment of '${appName}' is in status '${existingAppStatus}' and is not currently running. Will remove first and then deploy a new copy"
-            deleteApp(environmentId,
+            deleteApp(environment,
                       appName)
-            waitForAppDeletion(environmentId,
+            waitForAppDeletion(environment,
                                appName)
             logger.println "App deleted, now deploying '${appName}', ${fileName} as a NEW application"
-            request = new HttpPost("${baseUrl}/cloudhub/api/v2/applications")
+            request = new HttpPost("${clientWrapper.baseUrl}/cloudhub/api/v2/applications")
         } else {
             logger.println "Deploying '${appName}', ${fileName} as an UPDATED application"
-            request = new HttpPut("${baseUrl}/cloudhub/api/v2/applications/${appName}")
+            request = new HttpPut("${clientWrapper.baseUrl}/cloudhub/api/v2/applications/${appName}")
         }
         request
     }
@@ -251,7 +245,6 @@ class CloudHubDeployer extends BaseDeployer {
 
     private def doDeployment(HttpEntityEnclosingRequestBase request,
                              String environment,
-                             String environmentId,
                              String appName,
                              InputStream zipFile,
                              String fileName,
@@ -295,7 +288,7 @@ class CloudHubDeployer extends BaseDeployer {
         logger.println "Deploying using settings: ${JsonOutput.prettyPrint(appInfoJson)}"
         request = request.with {
             addStandardStuff(it,
-                             environmentId)
+                             environment)
             def entity = MultipartEntityBuilder.create()
                     .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
             // without autoStart, the app won't actually start after we push this request out
@@ -311,10 +304,10 @@ class CloudHubDeployer extends BaseDeployer {
             setEntity(entity)
             it
         }
-        def response = httpClient.execute(request)
+        def response = clientWrapper.execute(request)
         try {
-            def result = assertSuccessfulResponseAndReturnJson(response,
-                                                               'deploy application')
+            def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
+                                                                             'deploy application')
             logger.println("Application '${appName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
         }
         finally {
@@ -324,7 +317,6 @@ class CloudHubDeployer extends BaseDeployer {
 
     private def doDeploymentViaExchange(HttpEntityEnclosingRequestBase request,
                                         String environment,
-                                        String environmentId,
                                         String appName,
                                         String artifactId,
                                         String groupId,
@@ -376,16 +368,16 @@ class CloudHubDeployer extends BaseDeployer {
         logger.println "Deploying using settings: ${JsonOutput.prettyPrint(payloadJson)}"
         request = request.with {
             addStandardStuff(it,
-                             environmentId)
+                             environment)
             def entity = new StringEntity(payloadJson,
                                           ContentType.APPLICATION_JSON)
             setEntity(entity)
             it
         }
-        def response = httpClient.execute(request)
+        def response = clientWrapper.execute(request)
         try {
-            def result = assertSuccessfulResponseAndReturnJson(response,
-                                                               'deploy application')
+            def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
+                                                                             'deploy application')
             logger.println("Application '${appName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
         }
         finally {
@@ -393,24 +385,24 @@ class CloudHubDeployer extends BaseDeployer {
         }
     }
 
-    def deleteApp(String environmentId,
+    def deleteApp(String environment,
                   String appName) {
-        def request = new HttpDelete("${baseUrl}/cloudhub/api/v2/applications/${appName}").with {
+        def request = new HttpDelete("${clientWrapper.baseUrl}/cloudhub/api/v2/applications/${appName}").with {
             addStandardStuff(it,
-                             environmentId)
+                             environment)
             it
         } as HttpDelete
-        def response = httpClient.execute(request)
+        def response = clientWrapper.execute(request)
         try {
-            assertSuccessfulResponse(response,
-                                     'Removing failed app deployment')
+            clientWrapper.assertSuccessfulResponse(response,
+                                                   'Removing failed app deployment')
         }
         finally {
             response.close()
         }
     }
 
-    def waitForAppDeletion(String environmentId,
+    def waitForAppDeletion(String environment,
                            String appName) {
         def tries = 0
         def deleted = false
@@ -419,7 +411,7 @@ class CloudHubDeployer extends BaseDeployer {
         while (!deleted && tries < this.maxTries) {
             tries++
             logger.println "*** Try ${tries} ***"
-            AppStatus status = getAppStatus(environmentId,
+            AppStatus status = getAppStatus(environment,
                                             appName)
             logger.println "Received status of ${status}"
             if (status == AppStatus.NotFound) {
@@ -438,7 +430,7 @@ class CloudHubDeployer extends BaseDeployer {
         }
     }
 
-    def waitForAppToStart(String environmentId,
+    def waitForAppToStart(String environment,
                           String appName) {
         logger.println 'Now will wait for application to start...'
         def tries = 0
@@ -447,7 +439,7 @@ class CloudHubDeployer extends BaseDeployer {
         while (!deployed && tries < this.maxTries) {
             tries++
             logger.println "*** Try ${tries} ***"
-            Set<DeploymentStatus> status = getDeploymentStatus(environmentId,
+            Set<DeploymentStatus> status = getDeploymentStatus(environment,
                                                                appName)
             logger.println "Received statuses of ${status}"
             if (status.toList() == [DeploymentStatus.STARTED]) {
@@ -471,20 +463,20 @@ class CloudHubDeployer extends BaseDeployer {
         }
     }
 
-    AppStatus getAppStatus(String environmentId,
+    AppStatus getAppStatus(String environmentName,
                            String appName) {
-        def request = new HttpGet("${baseUrl}/cloudhub/api/v2/applications/${appName}").with {
+        def request = new HttpGet("${clientWrapper.baseUrl}/cloudhub/api/v2/applications/${appName}").with {
             addStandardStuff(it,
-                             environmentId)
+                             environmentName)
             it
         } as HttpGet
-        def response = httpClient.execute(request)
+        def response = clientWrapper.execute(request)
         try {
             if (response.statusLine.statusCode == 404) {
                 return AppStatus.NotFound
             }
-            def result = assertSuccessfulResponseAndReturnJson(response,
-                                                               'app status')
+            def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
+                                                                             'app status')
             def mapStatus = { String input ->
                 switch (input) {
                     case 'STARTED':
@@ -504,17 +496,17 @@ class CloudHubDeployer extends BaseDeployer {
         }
     }
 
-    Set<DeploymentStatus> getDeploymentStatus(String environmentId,
+    Set<DeploymentStatus> getDeploymentStatus(String environment,
                                               String appName) {
-        def request = new HttpGet("${baseUrl}/cloudhub/api/v2/applications/${appName}/deployments?orderByDate=DESC").with {
+        def request = new HttpGet("${clientWrapper.baseUrl}/cloudhub/api/v2/applications/${appName}/deployments?orderByDate=DESC").with {
             addStandardStuff(it,
-                             environmentId)
+                             environment)
             it
         } as HttpGet
-        def response = httpClient.execute(request)
+        def response = clientWrapper.execute(request)
         try {
-            def result = assertSuccessfulResponseAndReturnJson(response,
-                                                               'deployment status')
+            def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
+                                                                             'deployment status')
             def data = result.data
             // we used order by desc date
             def lastChronologicalDeployment = data[0]
