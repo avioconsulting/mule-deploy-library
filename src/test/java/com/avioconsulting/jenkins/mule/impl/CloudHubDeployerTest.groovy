@@ -329,21 +329,22 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'CLIENT',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deployFromFile(request)
 
         // assert
         assertThat url,
@@ -447,20 +448,20 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'CLIENT',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret')
+        deployer.deployFromFile(request)
 
         // assert
         assertThat url,
@@ -684,22 +685,23 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client',
+                                                        [prop1: 'foo', prop2: 'bar'])
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'CLIENT',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1,
-                                [prop1: 'foo', prop2: 'bar'])
+        deployer.deployFromFile(request)
 
         // assert
         assertThat url,
@@ -815,24 +817,24 @@ class CloudHubDeployerTest implements HttpServerUtils {
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
         def stream = new FileInputStream(zipFile)
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        zipFile.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client',
+                                                        [existing: 'changed'],
+                                                        'api.dev.properties')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'CLIENT',
-                                stream,
-                                zipFile.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1,
-                                [existing: 'changed'],
-                                [:],
-                                'api.dev.properties')
+        deployer.deployFromFile(request)
 
         // assert
         assertThat url,
@@ -1072,23 +1074,24 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         env: 'TST'
                 ]
         ] as Map<String, String>
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client',
+                                                        [:],
+                                                        otherProperties)
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1,
-                                [:],
-                                otherProperties)
+        deployer.deployFromFile(request)
 
         // assert
         assertThat url,
@@ -1195,23 +1198,23 @@ class CloudHubDeployerTest implements HttpServerUtils {
         def otherProperties = [
                 persistentQueues: true
         ] as Map<String, String>
-
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client',
+                                                        [:],
+                                                        otherProperties)
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1,
-                                [:],
-                                otherProperties)
+        deployer.deployFromFile(request)
 
         // assert
         assertThat url,
@@ -1322,23 +1325,24 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         prop1: 'should not see this'
                 ]
         ] as Map<String, String>
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client',
+                                                        [prop1: 'foo', prop2: 'bar'],
+                                                        otherProperties)
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1,
-                                [prop1: 'foo', prop2: 'bar'],
-                                otherProperties)
+        deployer.deployFromFile(request)
 
         // assert
         assertThat url,
@@ -1444,21 +1448,22 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'NEW-APP',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'NEW-APP',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deployFromFile(request)
 
         // assert
         assertThat url,
@@ -1509,19 +1514,19 @@ class CloudHubDeployerTest implements HttpServerUtils {
         def stream = new FileInputStream(file)
         // act
         def exception = shouldFail {
-            deployer.deployFromFile('DEV',
-                                    'some app name',
-                                    'client',
-                                    stream,
-                                    file.name,
-                                    'theKey',
-                                    '3.9.1',
-                                    false,
-                                    WorkerTypes.Micro,
-                                    1,
-                                    'theClientId',
-                                    'theSecret',
-                                    AwsRegions.UsEast1)
+            new CloudhubFileDeploymentRequest(stream,
+                                              'DEV',
+                                              'some app name',
+                                              new CloudhubWorkerSpecRequest('3.9.1',
+                                                                            false,
+                                                                            1,
+                                                                            WorkerTypes.Micro,
+                                                                            AwsRegions.UsEast1),
+                                              file.name,
+                                              'theKey',
+                                              'theClientId',
+                                              'theSecret',
+                                              'client')
         }
 
         // assert
@@ -1569,22 +1574,23 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client')
 
         // act
         def exception = shouldFail {
-            deployer.deployFromFile('DEV',
-                                    'new-app',
-                                    'client',
-                                    stream,
-                                    file.name,
-                                    'theKey',
-                                    '3.9.1',
-                                    false,
-                                    WorkerTypes.Micro,
-                                    1,
-                                    'theClientId',
-                                    'theSecret',
-                                    AwsRegions.UsEast1)
+            deployer.deployFromFile(request)
         }
 
         // assert
@@ -1659,21 +1665,22 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deployFromFile(request)
 
         // assert
         assertThat url,
@@ -1823,21 +1830,22 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deployFromFile(request)
 
         // assert
         assertThat url,
@@ -1970,21 +1978,22 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deployFromFile(request)
 
         // assert
         // our mock assertions should do the work here
@@ -2079,21 +2088,22 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deployFromFile(request)
 
         // assert
         // our mock assertions should do the work here
@@ -2174,21 +2184,22 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deployFromFile(request)
 
         // assert
         assertThat 'We should check status twice. The initial one for the app (app) and then to see if app started',
@@ -2240,21 +2251,22 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deployFromFile(request)
 
         // assert
         assertThat 'We should check status 3 times. The initial one for the app and then 2 to see if app started',
@@ -2300,22 +2312,23 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client')
 
         // act
         def exception = shouldFail {
-            deployer.deployFromFile('DEV',
-                                    'new-app',
-                                    'client',
-                                    stream,
-                                    file.name,
-                                    'theKey',
-                                    '3.9.1',
-                                    false,
-                                    WorkerTypes.Micro,
-                                    1,
-                                    'theClientId',
-                                    'theSecret',
-                                    AwsRegions.UsEast1)
+            deployer.deployFromFile(request)
         }
 
         // assert
@@ -2360,22 +2373,23 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      false,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client')
 
         // act
         def exception = shouldFail {
-            deployer.deployFromFile('DEV',
-                                    'new-app',
-                                    'client',
-                                    stream,
-                                    file.name,
-                                    'theKey',
-                                    '3.9.1',
-                                    false,
-                                    WorkerTypes.Micro,
-                                    1,
-                                    'theClientId',
-                                    'theSecret',
-                                    AwsRegions.UsEast1)
+            deployer.deployFromFile(request)
         }
 
         // assert
