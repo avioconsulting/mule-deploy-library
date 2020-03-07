@@ -18,15 +18,21 @@ class CloudHubDeployerTest implements HttpServerUtils {
     HttpServer httpServer
     private CloudHubDeployer deployer
     int port
+    private HttpClientWrapper clientWrapper
 
     @Before
     void startServer() {
         httpServer = Vertx.vertx().createHttpServer()
         port = 8080
-        deployer = new CloudHubDeployer("http://localhost:${port}",
-                                        'the-org-id',
-                                        'the user',
-                                        'the password',
+        clientWrapper = new HttpClientWrapper("http://localhost:${port}",
+                                              'the user',
+                                              'the password',
+                                              'the-org-id',
+                                              System.out)
+        def envLocator = new EnvironmentLocator(clientWrapper,
+                                                System.out)
+        deployer = new CloudHubDeployer(this.clientWrapper,
+                                        envLocator,
                                         500,
                                         10,
                                         System.out)
@@ -34,7 +40,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
     @After
     void stopServer() {
-        deployer.close()
+        clientWrapper.close()
         httpServer.close()
     }
 

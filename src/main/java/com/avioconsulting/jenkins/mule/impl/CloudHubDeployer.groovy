@@ -15,34 +15,27 @@ class CloudHubDeployer extends BaseDeployer {
      * @param password
      * @param logger - will be used for all your log messages
      */
-    CloudHubDeployer(String anypointOrganizationId,
-                     String username,
-                     String password,
+    CloudHubDeployer(HttpClientWrapper clientWrapper,
+                     EnvironmentLocator environmentLocator,
                      PrintStream logger) {
-        this('https://anypoint.mulesoft.com/',
-             anypointOrganizationId,
-             username,
-             password,
+        this(clientWrapper,
+             environmentLocator,
              60000,
              // for CloudHub, the deploy cycle is longer so we wait longer
              30,
              logger)
     }
 
-    CloudHubDeployer(String baseUrl,
-                     String anypointOrganizationId,
-                     String username,
-                     String password,
+    CloudHubDeployer(HttpClientWrapper clientWrapper,
+                     EnvironmentLocator environmentLocator,
                      int retryIntervalInMs,
                      int maxTries,
                      PrintStream logger) {
-        super(baseUrl,
-              anypointOrganizationId,
-              username,
-              password,
-              retryIntervalInMs,
+        super(retryIntervalInMs,
               maxTries,
-              logger)
+              logger,
+              clientWrapper,
+              environmentLocator)
     }
 
     /**
