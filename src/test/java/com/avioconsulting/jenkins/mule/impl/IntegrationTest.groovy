@@ -1,10 +1,10 @@
 package com.avioconsulting.jenkins.mule.impl
 
+import com.avioconsulting.jenkins.mule.impl.models.OnPremDeploymentRequest
 import org.apache.maven.shared.invoker.DefaultInvocationRequest
 import org.apache.maven.shared.invoker.DefaultInvoker
 import org.junit.Before
 import org.junit.BeforeClass
-import org.junit.Ignore
 import org.junit.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
@@ -169,14 +169,15 @@ class IntegrationTest {
             println 'Existing app does not exist, no problem'
         }
         def zipFile = builtFile.newInputStream()
+        def request = new OnPremDeploymentRequest(AVIO_ENVIRONMENT_DEV,
+                                                  ONPREM_APP_NAME,
+                                                  ON_PREM_SERVER_NAME,
+                                                  builtFile.name,
+                                                  zipFile,
+                                                  [env: AVIO_ENVIRONMENT_DEV])
 
         // act
-        onPremDeployer.deploy(AVIO_ENVIRONMENT_DEV,
-                              ONPREM_APP_NAME,
-                              zipFile,
-                              builtFile.name,
-                              ON_PREM_SERVER_NAME,
-                              [env: AVIO_ENVIRONMENT_DEV])
+        onPremDeployer.deploy(request)
         println 'test: app deployed OK, now trying to hit its HTTP listener'
 
         // assert

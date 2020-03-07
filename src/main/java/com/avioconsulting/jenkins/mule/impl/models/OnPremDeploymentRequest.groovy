@@ -18,29 +18,38 @@ class OnPremDeploymentRequest {
      * Mule app property overrides (the stuff in the properties tab)
      */
     final Map<String, String> appProperties
+    /**
+     * Stream of the ZIP/JAR containing the application to deploy
+     */
+    final InputStream app
+
 
     OnPremDeploymentRequest(String environment,
                             String appName,
                             String targetServerOrClusterName,
                             String fileName,
+                            InputStream app,
                             Map<String, String> appProperties = [:]) {
         this.environment = environment
         this.appName = appName
         this.targetServerOrClusterName = targetServerOrClusterName
         this.fileName = fileName
         this.appProperties = appProperties
+        this.app = app
     }
 
     OnPremDeploymentRequest(String environment,
                             String appName,
                             String targetServerOrClusterName,
                             String fileName,
+                            InputStream app,
                             Map<String, String> appProperties,
                             String overrideByChangingFileInZip) {
         this(environment,
              appName,
              targetServerOrClusterName,
              fileName,
+             app,
              appProperties)
         this.overrideByChangingFileInZip = overrideByChangingFileInZip
     }

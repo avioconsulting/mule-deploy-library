@@ -631,11 +631,11 @@ class OnPremDeployerTest implements HttpServerUtils {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
                                                   'clustera',
-                                                  file.name)
+                                                  file.name,
+                                                  stream)
 
         // act
-        deployer.deploy(request,
-                        stream)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -766,14 +766,15 @@ class OnPremDeployerTest implements HttpServerUtils {
         deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'new-app',
+                                                  'clustera',
+                                                  file.name,
+                                                  stream,
+                                                  [prop1: 'foo', prop2: 'bar'])
 
         // act
-        deployer.deploy('DEV',
-                        'new-app',
-                        stream,
-                        file.name,
-                        'clustera',
-                        [prop1: 'foo', prop2: 'bar'])
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -917,15 +918,16 @@ class OnPremDeployerTest implements HttpServerUtils {
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
         def stream = new FileInputStream(zipFile)
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'testapp',
+                                                  'clustera',
+                                                  zipFile.name,
+                                                  stream,
+                                                  [existing: 'changed'],
+                                                  'api.dev.properties')
 
         // act
-        deployer.deploy('DEV',
-                        'testapp',
-                        stream,
-                        zipFile.name,
-                        'clustera',
-                        [existing: 'changed'],
-                        'api.dev.properties')
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -972,16 +974,15 @@ class OnPremDeployerTest implements HttpServerUtils {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'some app name',
+                                                  'clustera',
+                                                  file.name,
+                                                  stream)
 
         // act
         def exception = shouldFail {
-            deployer.deploy('DEV',
-                            'some app name',
-                            stream,
-                            file.name,
-                            'clustera',
-                            null,
-                            null)
+            deployer.deploy(request)
         }
 
         // assert
@@ -1089,13 +1090,14 @@ class OnPremDeployerTest implements HttpServerUtils {
         deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'the-app',
+                                                  'clustera',
+                                                  file.name,
+                                                  stream)
 
         // act
-        deployer.deploy('DEV',
-                        'the-app',
-                        stream,
-                        file.name,
-                        'clustera')
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -1222,14 +1224,15 @@ class OnPremDeployerTest implements HttpServerUtils {
         deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'the-app',
+                                                  'clustera',
+                                                  file.name,
+                                                  stream,
+                                                  [prop1: 'foo', prop2: 'bar'])
 
         // act
-        deployer.deploy('DEV',
-                        'the-app',
-                        stream,
-                        file.name,
-                        'clustera',
-                        [prop1: 'foo', prop2: 'bar'])
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -1369,15 +1372,16 @@ class OnPremDeployerTest implements HttpServerUtils {
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
         def stream = new FileInputStream(zipFile)
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'the-app',
+                                                  'clustera',
+                                                  zipFile.name,
+                                                  stream,
+                                                  [existing: 'changed'],
+                                                  'api.dev.properties')
 
         // act
-        deployer.deploy('DEV',
-                        'the-app',
-                        stream,
-                        zipFile.name,
-                        'clustera',
-                        [existing: 'changed'],
-                        'api.dev.properties')
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -1810,15 +1814,14 @@ class OnPremDeployerTest implements HttpServerUtils {
         deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'new-app',
+                                                  'clustera',
+                                                  file.name,
+                                                  stream)
 
         // act
-        deployer.deploy('DEV',
-                        'new-app',
-                        stream,
-                        file.name,
-                        'clustera',
-                        null,
-                        null)
+        deployer.deploy(request)
 
         // assert
     }
@@ -1860,15 +1863,14 @@ class OnPremDeployerTest implements HttpServerUtils {
         deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'new-app',
+                                                  'clustera',
+                                                  file.name,
+                                                  stream)
 
         // act
-        deployer.deploy('DEV',
-                        'new-app',
-                        stream,
-                        file.name,
-                        'clustera',
-                        null,
-                        null)
+        deployer.deploy(request)
     }
 
     @Test
@@ -1900,16 +1902,15 @@ class OnPremDeployerTest implements HttpServerUtils {
         deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'new-app',
+                                                  'clustera',
+                                                  file.name,
+                                                  stream)
 
         // act
         def exception = shouldFail {
-            deployer.deploy('DEV',
-                            'new-app',
-                            stream,
-                            file.name,
-                            'clustera',
-                            null,
-                            null)
+            deployer.deploy(request)
         }
 
         // assert
@@ -1946,16 +1947,15 @@ class OnPremDeployerTest implements HttpServerUtils {
         deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'new-app',
+                                                  'clustera',
+                                                  file.name,
+                                                  stream)
 
         // act
         def exception = shouldFail {
-            deployer.deploy('DEV',
-                            'new-app',
-                            stream,
-                            file.name,
-                            'clustera',
-                            null,
-                            null)
+            deployer.deploy(request)
         }
 
         // assert

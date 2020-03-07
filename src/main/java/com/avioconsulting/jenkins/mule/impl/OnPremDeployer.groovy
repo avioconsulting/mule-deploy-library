@@ -49,10 +49,9 @@ class OnPremDeployer extends BaseDeployer {
 
     /***
      * Do an on-prem deployment
-     * @param zipFile
+     * @param request - deployment request
      */
-    def deploy(OnPremDeploymentRequest request,
-               InputStream zipFile) {
+    def deploy(OnPremDeploymentRequest request) {
         def appName = request.appName
         if (appName.contains(' ')) {
             throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
@@ -65,13 +64,13 @@ class OnPremDeployer extends BaseDeployer {
                 updateDeployment(environmentId,
                                  appName,
                                  existingApp,
-                                 zipFile,
+                                 request.app,
                                  request.fileName,
                                  request.appProperties,
                                  request.overrideByChangingFileInZip) :
                 newDeployment(environmentId,
                               appName,
-                              zipFile,
+                              request.app,
                               request.fileName,
                               request.targetServerOrClusterName,
                               request.appProperties,
