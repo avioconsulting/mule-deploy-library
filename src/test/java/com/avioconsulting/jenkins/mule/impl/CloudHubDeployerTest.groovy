@@ -2,10 +2,7 @@ package com.avioconsulting.jenkins.mule.impl
 
 import com.avioconsulting.jenkins.mule.impl.httpapi.EnvironmentLocator
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
-import com.avioconsulting.jenkins.mule.impl.models.AwsRegions
-import com.avioconsulting.jenkins.mule.impl.models.CloudhubFileDeploymentRequest
-import com.avioconsulting.jenkins.mule.impl.models.CloudhubWorkerSpecRequest
-import com.avioconsulting.jenkins.mule.impl.models.WorkerTypes
+import com.avioconsulting.jenkins.mule.impl.models.*
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
@@ -344,7 +341,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                                         'client')
 
         // act
-        deployer.deployFromFile(request)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -461,7 +458,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                                         'client')
 
         // act
-        deployer.deployFromFile(request)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -562,21 +559,22 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
+        def request = new CloudhubGavDeploymentRequest('com.group',
+                                                       '1.0.0',
+                                                       'DEV',
+                                                       'new-app',
+                                                       new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                     false,
+                                                                                     1,
+                                                                                     WorkerTypes.Micro,
+                                                                                     AwsRegions.UsEast1),
+                                                       'theKey',
+                                                       'theClientId',
+                                                       'theSecret',
+                                                       'client')
 
         // act
-        deployer.deployFromExchange('DEV',
-                                    'new-app',
-                                    'CLIENT',
-                                    'com.group',
-                                    '1.0.0',
-                                    'theKey',
-                                    '3.9.1',
-                                    false,
-                                    WorkerTypes.Micro,
-                                    1,
-                                    'theClientId',
-                                    'theSecret',
-                                    AwsRegions.UsEast1)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -593,33 +591,33 @@ class CloudHubDeployerTest implements HttpServerUtils {
                    is(equalTo('application/json; charset=UTF-8'))
         assertThat sentBody,
                    is(equalTo([
+                           applicationInfo  : [
+                                   domain               : 'client-new-app-dev',
+                                   monitoringAutoRestart: true,
+                                   muleVersion          : [
+                                           version: '3.9.1'
+                                   ],
+                                   persistentQueues     : false,
+                                   properties           : [
+                                           'crypto.key'                     : 'theKey',
+                                           'anypoint.platform.client_id'    : 'theClientId',
+                                           'anypoint.platform.client_secret': 'theSecret',
+                                           env                              : 'dev'
+                                   ],
+                                   region               : 'us-east-1',
+                                   workers              : [
+                                           amount: 1,
+                                           type  : [
+                                                   name: 'Micro'
+                                           ]
+                                   ],
+                                   fileName             : 'new-app-1.0.0.zip'
+                           ],
                            applicationSource: [
                                    groupId   : 'com.group',
                                    artifactId: 'new-app',
                                    version   : '1.0.0',
                                    source    : 'EXCHANGE'
-                           ],
-                           applicationInfo  : [
-                                   domain               : 'client-new-app-dev',
-                                   muleVersion          : [
-                                           version: '3.9.1'
-                                   ],
-                                   region               : 'us-east-1',
-                                   monitoringAutoRestart: true,
-                                   workers              : [
-                                           type  : [
-                                                   name: 'Micro'
-                                           ],
-                                           amount: 1
-                                   ],
-                                   persistentQueues     : false,
-                                   properties           : [
-                                           env                              : 'dev',
-                                           'crypto.key'                     : 'theKey',
-                                           'anypoint.platform.client_id'    : 'theClientId',
-                                           'anypoint.platform.client_secret': 'theSecret'
-                                   ],
-                                   fileName             : 'new-app-1.0.0.zip'
                            ],
                            autoStart        : true
                    ]))
@@ -701,7 +699,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                                         [prop1: 'foo', prop2: 'bar'])
 
         // act
-        deployer.deployFromFile(request)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -834,7 +832,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                                         'api.dev.properties')
 
         // act
-        deployer.deployFromFile(request)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -964,7 +962,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                                         'client')
 
         // act
-        deployer.deployFromFile(request)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -1091,7 +1089,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                                         otherProperties)
 
         // act
-        deployer.deployFromFile(request)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -1214,7 +1212,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                                         [:],
                                                         otherProperties)
         // act
-        deployer.deployFromFile(request)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -1342,7 +1340,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                                         otherProperties)
 
         // act
-        deployer.deployFromFile(request)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -1463,7 +1461,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                                         'client')
 
         // act
-        deployer.deployFromFile(request)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -1590,7 +1588,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // act
         def exception = shouldFail {
-            deployer.deployFromFile(request)
+            deployer.deploy(request)
         }
 
         // assert
@@ -1680,7 +1678,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                                         'client')
 
         // act
-        deployer.deployFromFile(request)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -1845,7 +1843,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                                         'client')
 
         // act
-        deployer.deployFromFile(request)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
@@ -1993,7 +1991,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                                         'client')
 
         // act
-        deployer.deployFromFile(request)
+        deployer.deploy(request)
 
         // assert
         // our mock assertions should do the work here
@@ -2103,7 +2101,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                                         'client')
 
         // act
-        deployer.deployFromFile(request)
+        deployer.deploy(request)
 
         // assert
         // our mock assertions should do the work here
@@ -2199,7 +2197,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                                         'client')
 
         // act
-        deployer.deployFromFile(request)
+        deployer.deploy(request)
 
         // assert
         assertThat 'We should check status twice. The initial one for the app (app) and then to see if app started',
@@ -2266,7 +2264,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                                         'client')
 
         // act
-        deployer.deployFromFile(request)
+        deployer.deploy(request)
 
         // assert
         assertThat 'We should check status 3 times. The initial one for the app and then 2 to see if app started',
@@ -2328,7 +2326,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // act
         def exception = shouldFail {
-            deployer.deployFromFile(request)
+            deployer.deploy(request)
         }
 
         // assert
@@ -2389,7 +2387,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // act
         def exception = shouldFail {
-            deployer.deployFromFile(request)
+            deployer.deploy(request)
         }
 
         // assert

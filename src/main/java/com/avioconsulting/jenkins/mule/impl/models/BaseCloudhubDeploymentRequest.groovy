@@ -1,5 +1,8 @@
 package com.avioconsulting.jenkins.mule.impl.models
 
+import groovy.json.JsonOutput
+import org.apache.http.HttpEntity
+
 abstract class BaseCloudhubDeploymentRequest {
     /**
      * environment name (e.g. DEV, not GUID)
@@ -137,6 +140,16 @@ abstract class BaseCloudhubDeploymentRequest {
         if (otherCloudHubProperties.containsKey('properties')) {
             otherCloudHubProperties.properties = props + otherCloudHubProperties.properties
         }
-        result + otherCloudHubProperties
+        def appInfo = result + otherCloudHubProperties
+        if (!overrideByChangingFileInZip) {
+            appInfo.properties = appInfo.properties + appProperties
+        }
+        appInfo
     }
+
+    String getCloudhubAppInfoAsJson() {
+        JsonOutput.toJson(cloudhubAppInfo)
+    }
+
+    abstract HttpEntity getHttpPayload()
 }

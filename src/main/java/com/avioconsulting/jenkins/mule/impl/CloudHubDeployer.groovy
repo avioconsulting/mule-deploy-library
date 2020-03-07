@@ -2,15 +2,10 @@ package com.avioconsulting.jenkins.mule.impl
 
 import com.avioconsulting.jenkins.mule.impl.httpapi.EnvironmentLocator
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
-import com.avioconsulting.jenkins.mule.impl.models.AwsRegions
+import com.avioconsulting.jenkins.mule.impl.models.BaseCloudhubDeploymentRequest
 import com.avioconsulting.jenkins.mule.impl.models.CloudhubFileDeploymentRequest
-import com.avioconsulting.jenkins.mule.impl.models.WorkerTypes
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.*
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.StringEntity
-import org.apache.http.entity.mime.HttpMultipartMode
-import org.apache.http.entity.mime.MultipartEntityBuilder
 
 class CloudHubDeployer extends BaseDeployer {
     /***
@@ -44,77 +39,10 @@ class CloudHubDeployer extends BaseDeployer {
     }
 
     /**
-     * Perform a "GAV style" deployment where the app JAR has been previously pushed to Anypoint Exchange
-     * @param environment - environment name (e.g. DEV, not GUID)
-     * @param appName - Used for deployment AND for the artifact ID from Exchange
-     * @param cloudHubAppPrefix - Your "DNS prefix" for Cloudhub app uniqueness, usually a 3 letter customer ID
-     * @param groupId - Used to retrieve ZIP/JAR from Exchange
-     * @param version - Used to retrieve ZIP/JAR from Exchange
-     * @param cryptoKey - Will be set in the 'crypto.key' CloudHub property
-     * @param muleVersion
-     * @param usePersistentQueues
-     * @param workerType
-     * @param workerCount
-     * @param anypointClientId - will be set in the anypoint.platform.client_id CloudHub property
-     * @param anypointClientSecret - will be set in the anypoint.platform.client_secret CloudHub property
-     * @param awsRegion - by default will use what's configured in Runtime Manager if you don't supply one
-     * @param otherCloudHubProperties - CloudHub level property overrides (e.g. region type stuff)
-     * @param appProperties - Mule app property overrides (the stuff in the properties tab)
-     */
-    def deployFromExchange(String environment,
-                           String appName,
-                           String cloudHubAppPrefix,
-                           String groupId,
-                           String version,
-                           String cryptoKey,
-                           String muleVersion,
-                           boolean usePersistentQueues,
-                           WorkerTypes workerType,
-                           int workerCount,
-                           String anypointClientId,
-                           String anypointClientSecret,
-                           AwsRegions awsRegion = null,
-                           Map<String, String> otherCloudHubProperties = [:],
-                           Map<String, String> appProperties = [:]) {
-        def artifactId = appName
-        appName = normalizeAppName(appName,
-                                   cloudHubAppPrefix,
-                                   environment)
-        def existingAppStatus = getAppStatus(environment,
-                                             appName)
-        def fileName = MuleUtil.getFileName(artifactId,
-                                            version,
-                                            muleVersion)
-        def request = getDeploymentHttpRequest(existingAppStatus,
-                                               appName,
-                                               fileName,
-                                               environment)
-        doDeploymentViaExchange(request,
-                                environment,
-                                appName,
-                                artifactId,
-                                groupId,
-                                version,
-                                fileName,
-                                cryptoKey,
-                                muleVersion,
-                                awsRegion,
-                                usePersistentQueues,
-                                workerType,
-                                workerCount,
-                                otherCloudHubProperties,
-                                anypointClientId,
-                                anypointClientSecret,
-                                appProperties)
-        waitForAppToStart(environment,
-                          appName)
-    }
-
-    /**
      * Deploy via a supplied file
      * @return
      */
-    def deployFromFile(CloudhubFileDeploymentRequest deploymentRequest) {
+    def deploy(BaseCloudhubDeploymentRequest deploymentRequest) {
         def existingAppStatus = getAppStatus(deploymentRequest.environment,
                                              deploymentRequest.normalizedAppName)
         def request = getDeploymentHttpRequest(existingAppStatus,
@@ -153,34 +81,19 @@ class CloudHubDeployer extends BaseDeployer {
     }
 
     private def doDeployment(HttpEntityEnclosingRequestBase request,
-                             CloudhubFileDeploymentRequest deploymentRequest) {
-        def appInfo = deploymentRequest.cloudhubAppInfo
-        def zipFile = deploymentRequest.app
-        if (!deploymentRequest.overrideByChangingFileInZip) {
-            appInfo.properties = appInfo.properties + deploymentRequest.appProperties
-        } else {
-            zipFile = modifyZipFileWithNewProperties(zipFile,
-                                                     deploymentRequest.fileName,
-                                                     deploymentRequest.overrideByChangingFileInZip,
-                                                     deploymentRequest.appProperties)
+                             BaseCloudhubDeploymentRequest deploymentRequest) {
+        if (deploymentRequest instanceof CloudhubFileDeploymentRequest && deploymentRequest.overrideByChangingFileInZip) {
+            // TODO: Refactoring, does modifyZipFileWithNewProperties belong somewhere else?
+            deploymentRequest.app = modifyZipFileWithNewProperties(deploymentRequest.app,
+                                                                   deploymentRequest.fileName,
+                                                                   deploymentRequest.overrideByChangingFileInZip,
+                                                                   deploymentRequest.appProperties)
         }
-        def appInfoJson = JsonOutput.toJson(appInfo)
-        logger.println "Deploying using settings: ${JsonOutput.prettyPrint(appInfoJson)}"
+        logger.println "Deploying using settings: ${JsonOutput.prettyPrint(deploymentRequest.cloudhubAppInfoAsJson)}"
         request = request.with {
             addStandardStuff(it,
                              deploymentRequest.environment)
-            def entity = MultipartEntityBuilder.create()
-                    .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
-            // without autoStart, the app won't actually start after we push this request out
-                    .addTextBody('autoStart',
-                                 'true')
-                    .addTextBody('appInfoJson',
-                                 appInfoJson)
-                    .addBinaryBody('file',
-                                   zipFile,
-                                   ContentType.APPLICATION_OCTET_STREAM,
-                                   deploymentRequest.fileName)
-                    .build()
+            def entity = deploymentRequest.getHttpPayload()
             setEntity(entity)
             it
         }
@@ -189,76 +102,6 @@ class CloudHubDeployer extends BaseDeployer {
             def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
                                                                              'deploy application')
             logger.println("Application '${deploymentRequest.normalizedAppName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
-        }
-        finally {
-            response.close()
-        }
-    }
-
-    private def doDeploymentViaExchange(HttpEntityEnclosingRequestBase request,
-                                        String environment,
-                                        String appName,
-                                        String artifactId,
-                                        String groupId,
-                                        String version,
-                                        String filename,
-                                        String cryptoKey,
-                                        String muleVersion,
-                                        AwsRegions awsRegion,
-                                        boolean usePersistentQueues,
-                                        WorkerTypes workerType,
-                                        int workerCount,
-                                        Map otherProperties,
-                                        String anypointClientId,
-                                        String anypoingClientSecret,
-                                        Map propertyOverrideMap) {
-        def props = [
-                // env in on-prem environment is lower cased
-                env                              : environment.toLowerCase(),
-                'crypto.key'                     : cryptoKey,
-                'anypoint.platform.client_id'    : anypointClientId,
-                'anypoint.platform.client_secret': anypoingClientSecret
-        ]
-        if (otherProperties.containsKey('properties')) {
-            otherProperties.properties = props + otherProperties.properties
-        }
-        def appInfo = getCoreProperties(appName,
-                                        muleVersion,
-                                        awsRegion,
-                                        workerType,
-                                        workerCount,
-                                        usePersistentQueues,
-                                        props) + [
-                // this way the version of the app shows up in Runtime Manager
-                fileName: filename
-        ] + otherProperties
-        appInfo.properties = appInfo.properties + propertyOverrideMap
-        def appSource = [
-                groupId   : groupId,
-                artifactId: artifactId,
-                version   : version,
-                source    : 'EXCHANGE'
-        ]
-        def payload = [
-                applicationSource: appSource,
-                applicationInfo  : appInfo,
-                autoStart        : true
-        ]
-        def payloadJson = JsonOutput.toJson(payload)
-        logger.println "Deploying using settings: ${JsonOutput.prettyPrint(payloadJson)}"
-        request = request.with {
-            addStandardStuff(it,
-                             environment)
-            def entity = new StringEntity(payloadJson,
-                                          ContentType.APPLICATION_JSON)
-            setEntity(entity)
-            it
-        }
-        def response = clientWrapper.execute(request)
-        try {
-            def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
-                                                                             'deploy application')
-            logger.println("Application '${appName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
         }
         finally {
             response.close()
