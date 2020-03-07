@@ -3,6 +3,8 @@ package com.avioconsulting.jenkins.mule.impl
 import com.avioconsulting.jenkins.mule.impl.httpapi.EnvironmentLocator
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.models.AwsRegions
+import com.avioconsulting.jenkins.mule.impl.models.CloudhubFileDeploymentRequest
+import com.avioconsulting.jenkins.mule.impl.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.jenkins.mule.impl.models.WorkerTypes
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -945,21 +947,22 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new CloudhubFileDeploymentRequest(stream,
+                                                        'DEV',
+                                                        'new-app',
+                                                        new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                      true,
+                                                                                      1,
+                                                                                      WorkerTypes.Micro,
+                                                                                      AwsRegions.UsEast1),
+                                                        file.name,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                true,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deployFromFile(request)
 
         // assert
         assertThat url,

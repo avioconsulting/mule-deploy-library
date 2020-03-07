@@ -40,6 +40,11 @@ abstract class BaseCloudhubDeploymentRequest {
      */
     final String overrideByChangingFileInZip
 
+    /**
+     * Derived from app, environment, and prefix, the real name we'll use in CH
+     */
+    final String normalizedAppName
+
     BaseCloudhubDeploymentRequest(String environment,
                                   String appName,
                                   CloudhubWorkerSpecRequest workerSpecRequest,
@@ -60,6 +65,15 @@ abstract class BaseCloudhubDeploymentRequest {
         this.cloudHubAppPrefix = cloudHubAppPrefix
         this.appProperties = appProperties
         this.otherCloudHubProperties = otherCloudHubProperties
+        if (appName.contains(' ')) {
+            throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
+        }
+        def newAppName = "${cloudHubAppPrefix}-${appName}-${environment}"
+        def appNameLowerCase = newAppName.toLowerCase()
+        if (appNameLowerCase != newAppName) {
+            newAppName = appNameLowerCase
+        }
+        normalizedAppName = newAppName
     }
 
     BaseCloudhubDeploymentRequest(String environment,
@@ -84,5 +98,45 @@ abstract class BaseCloudhubDeploymentRequest {
              appProperties,
              otherCloudHubProperties)
         this.overrideByChangingFileInZip = overrideByChangingFileInZip
+    }
+
+    private Map<String, String> getCloudhubProperties() {
+        [
+                // env in on-prem environment is lower cased
+                env                              : environment.toLowerCase(),
+                'crypto.key'                     : cryptoKey,
+                'anypoint.platform.client_id'    : anypointClientId,
+                'anypoint.platform.client_secret': anypointClientSecret
+        ]
+    }
+
+    Map<String, String> getCloudhubAppInfo() {
+        def props = getCloudhubProperties()
+        def result = [
+                // CloudHub's API calls the Mule application the 'domain'
+                domain               : normalizedAppName,
+                muleVersion          : [
+                        version: workerSpecRequest.muleVersion
+                ],
+                region               : workerSpecRequest.awsRegion?.awsCode,
+                monitoringAutoRestart: true,
+                workers              : [
+                        type  : [
+                                name: workerSpecRequest.workerType.toString()
+                        ],
+                        amount: workerSpecRequest.workerCount
+                ],
+                persistentQueues     : workerSpecRequest.usePersistentQueues,
+                // these are the actual properties in the 'Settings' tab
+                properties           : props
+        ] as Map<String, String>
+        if (!result.region) {
+            // use default/runtime manager region
+            result.remove('region')
+        }
+        if (otherCloudHubProperties.containsKey('properties')) {
+            otherCloudHubProperties.properties = props + otherCloudHubProperties.properties
+        }
+        result + otherCloudHubProperties
     }
 }

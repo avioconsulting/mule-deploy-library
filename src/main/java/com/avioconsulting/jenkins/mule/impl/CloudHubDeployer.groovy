@@ -115,33 +115,16 @@ class CloudHubDeployer extends BaseDeployer {
      * @return
      */
     def deployFromFile(CloudhubFileDeploymentRequest deploymentRequest) {
-        appName = normalizeAppName(appName,
-                                   cloudHubAppPrefix,
-                                   environment)
-        def existingAppStatus = getAppStatus(environment,
-                                             appName)
+        def existingAppStatus = getAppStatus(deploymentRequest.environment,
+                                             deploymentRequest.normalizedAppName)
         def request = getDeploymentHttpRequest(existingAppStatus,
-                                               appName,
-                                               fileName,
-                                               environment)
+                                               deploymentRequest.normalizedAppName,
+                                               deploymentRequest.fileName,
+                                               deploymentRequest.environment)
         doDeployment(request,
-                     environment,
-                     appName,
-                     zipFile,
-                     fileName,
-                     cryptoKey,
-                     muleVersion,
-                     awsRegion,
-                     usePersistentQueues,
-                     workerType,
-                     workerCount,
-                     otherCloudHubProperties,
-                     anypointClientId,
-                     anypointClientSecret,
-                     appProperties,
-                     overrideByChangingFileInZip)
-        waitForAppToStart(environment,
-                          appName)
+                     deploymentRequest)
+        waitForAppToStart(deploymentRequest.environment,
+                          deploymentRequest.normalizedAppName)
     }
 
     private HttpEntityEnclosingRequestBase getDeploymentHttpRequest(AppStatus existingAppStatus,
@@ -169,99 +152,23 @@ class CloudHubDeployer extends BaseDeployer {
         request
     }
 
-    private String normalizeAppName(String appName,
-                                    String cloudHubAppPrefix,
-                                    String environment) {
-        if (appName.contains(' ')) {
-            throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
-        }
-        appName = "${cloudHubAppPrefix}-${appName}-${environment}"
-        def appNameLowerCase = appName.toLowerCase()
-        if (appNameLowerCase != appName) {
-            logger.println "NOTE: Automatically lower casing app name of '${appName}' to avoid CloudHub mismatch problems"
-            appName = appNameLowerCase
-        }
-        appName
-    }
-
-    private static Map<String, String> getCoreProperties(String appName,
-                                                         String muleVersion,
-                                                         AwsRegions awsRegion,
-                                                         WorkerTypes workerType,
-                                                         int workerCount,
-                                                         boolean usePersistentQueues,
-                                                         Map<String, String> props) {
-        def result = [
-                // CloudHub's API calls the Mule application the 'domain'
-                domain               : appName,
-                muleVersion          : [
-                        version: muleVersion
-                ],
-                region               : awsRegion?.awsCode,
-                monitoringAutoRestart: true,
-                workers              : [
-                        type  : [
-                                name: workerType.toString()
-                        ],
-                        amount: workerCount
-                ],
-                persistentQueues     : usePersistentQueues,
-                // these are the actual properties in the 'Settings' tab
-                properties           : props
-        ] as Map<String, String>
-        if (!result.region) {
-            // use default/runtime manager region
-            result.remove('region')
-        }
-        result
-    }
-
     private def doDeployment(HttpEntityEnclosingRequestBase request,
-                             String environment,
-                             String appName,
-                             InputStream zipFile,
-                             String fileName,
-                             String cryptoKey,
-                             String muleVersion,
-                             AwsRegions awsRegion,
-                             boolean usePersistentQueues,
-                             WorkerTypes workerType,
-                             int workerCount,
-                             Map otherProperties,
-                             String anypointClientId,
-                             String anypoingClientSecret,
-                             Map<String, String> propertyOverrideMap,
-                             String overrideByChangingFileInZip) {
-        def props = [
-                // env in on-prem environment is lower cased
-                env                              : environment.toLowerCase(),
-                'crypto.key'                     : cryptoKey,
-                'anypoint.platform.client_id'    : anypointClientId,
-                'anypoint.platform.client_secret': anypoingClientSecret
-        ]
-        if (otherProperties.containsKey('properties')) {
-            otherProperties.properties = props + otherProperties.properties
-        }
-        def appInfo = getCoreProperties(appName,
-                                        muleVersion,
-                                        awsRegion,
-                                        workerType,
-                                        workerCount,
-                                        usePersistentQueues,
-                                        props) + otherProperties
-        if (!overrideByChangingFileInZip) {
-            appInfo.properties = appInfo.properties + propertyOverrideMap
+                             CloudhubFileDeploymentRequest deploymentRequest) {
+        def appInfo = deploymentRequest.cloudhubAppInfo
+        def zipFile = deploymentRequest.app
+        if (!deploymentRequest.overrideByChangingFileInZip) {
+            appInfo.properties = appInfo.properties + deploymentRequest.appProperties
         } else {
             zipFile = modifyZipFileWithNewProperties(zipFile,
-                                                     fileName,
-                                                     overrideByChangingFileInZip,
-                                                     propertyOverrideMap)
+                                                     deploymentRequest.fileName,
+                                                     deploymentRequest.overrideByChangingFileInZip,
+                                                     deploymentRequest.appProperties)
         }
         def appInfoJson = JsonOutput.toJson(appInfo)
         logger.println "Deploying using settings: ${JsonOutput.prettyPrint(appInfoJson)}"
         request = request.with {
             addStandardStuff(it,
-                             environment)
+                             deploymentRequest.environment)
             def entity = MultipartEntityBuilder.create()
                     .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
             // without autoStart, the app won't actually start after we push this request out
@@ -272,7 +179,7 @@ class CloudHubDeployer extends BaseDeployer {
                     .addBinaryBody('file',
                                    zipFile,
                                    ContentType.APPLICATION_OCTET_STREAM,
-                                   fileName)
+                                   deploymentRequest.fileName)
                     .build()
             setEntity(entity)
             it
@@ -281,7 +188,7 @@ class CloudHubDeployer extends BaseDeployer {
         try {
             def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
                                                                              'deploy application')
-            logger.println("Application '${appName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
+            logger.println("Application '${deploymentRequest.normalizedAppName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
         }
         finally {
             response.close()
