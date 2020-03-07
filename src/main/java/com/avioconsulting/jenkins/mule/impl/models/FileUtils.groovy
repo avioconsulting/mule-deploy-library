@@ -32,23 +32,27 @@ trait FileUtils {
                 while ((inputEntry = archiveIn.nextEntry as ZipArchiveEntry) != null) {
                     assert archiveIn.canReadEntryData(inputEntry)
                     archiveOut.putArchiveEntry(inputEntry)
-                    if (!inputEntry.isDirectory()) {
-                        if (inputEntry.name.endsWith('.properties')) {
-                            propertiesFilesFound << inputEntry.name
-                        }
-                        if (inputEntry.name == propertiesFileToAddTo) {
-                            found = true
-                            def modifiedStream = modifyProperties(archiveIn,
-                                                                  propertiesFileToAddTo,
-                                                                  propertiesToAdd)
-                            IOUtils.copy(modifiedStream,
-                                         archiveOut)
-                        } else {
-                            IOUtils.copy(archiveIn,
-                                         archiveOut)
+                    try {
+                        if (!inputEntry.isDirectory()) {
+                            if (inputEntry.name.endsWith('.properties')) {
+                                propertiesFilesFound << inputEntry.name
+                            }
+                            if (inputEntry.name == propertiesFileToAddTo) {
+                                found = true
+                                def modifiedStream = modifyProperties(archiveIn,
+                                                                      propertiesFileToAddTo,
+                                                                      propertiesToAdd)
+                                IOUtils.copy(modifiedStream,
+                                             archiveOut)
+                            } else {
+                                IOUtils.copy(archiveIn,
+                                             archiveOut)
+                            }
                         }
                     }
-                    archiveOut.closeArchiveEntry()
+                    finally {
+                        archiveOut.closeArchiveEntry()
+                    }
                 }
             }
             finally {
