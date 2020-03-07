@@ -22,6 +22,7 @@ class EnvironmentLocator {
             def valids = environments.keySet()
             throw new Exception("Unable to find environment '${environmentName}'. Valid environments are ${valids}")
         }
+        return environment
     }
 
     private Map<String, String> getEnvironments() {
