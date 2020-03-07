@@ -2,6 +2,7 @@ package com.avioconsulting.jenkins.mule.impl
 
 import com.avioconsulting.jenkins.mule.impl.httpapi.EnvironmentLocator
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
+import com.avioconsulting.jenkins.mule.impl.models.FileUtils
 import com.avioconsulting.jenkins.mule.impl.models.OnPremDeploymentRequest
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpDelete
@@ -12,7 +13,7 @@ import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
 
-class OnPremDeployer extends BaseDeployer {
+class OnPremDeployer extends BaseDeployer implements FileUtils {
     /***
      * Instantiate using default anypoint.mulesoft.com URL
      * @param anypointOrganizationId

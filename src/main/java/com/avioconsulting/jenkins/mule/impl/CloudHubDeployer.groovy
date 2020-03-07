@@ -3,7 +3,6 @@ package com.avioconsulting.jenkins.mule.impl
 import com.avioconsulting.jenkins.mule.impl.httpapi.EnvironmentLocator
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.models.BaseCloudhubDeploymentRequest
-import com.avioconsulting.jenkins.mule.impl.models.CloudhubFileDeploymentRequest
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.*
 
@@ -82,13 +81,6 @@ class CloudHubDeployer extends BaseDeployer {
 
     private def doDeployment(HttpEntityEnclosingRequestBase request,
                              BaseCloudhubDeploymentRequest deploymentRequest) {
-        if (deploymentRequest instanceof CloudhubFileDeploymentRequest && deploymentRequest.overrideByChangingFileInZip) {
-            // TODO: Refactoring, does modifyZipFileWithNewProperties belong somewhere else?
-            deploymentRequest.app = modifyZipFileWithNewProperties(deploymentRequest.app,
-                                                                   deploymentRequest.fileName,
-                                                                   deploymentRequest.overrideByChangingFileInZip,
-                                                                   deploymentRequest.appProperties)
-        }
         logger.println "Deploying using settings: ${JsonOutput.prettyPrint(deploymentRequest.cloudhubAppInfoAsJson)}"
         request = request.with {
             addStandardStuff(it,

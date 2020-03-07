@@ -6,11 +6,11 @@ import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
 
-class CloudhubFileDeploymentRequest extends BaseCloudhubDeploymentRequest {
+class CloudhubFileDeploymentRequest extends BaseCloudhubDeploymentRequest implements FileUtils {
     /**
      * Stream of the ZIP/JAR containing the application to deploy
      */
-    InputStream app
+    final InputStream app
 
     CloudhubFileDeploymentRequest(InputStream app,
                                   String environment,
@@ -64,6 +64,13 @@ class CloudhubFileDeploymentRequest extends BaseCloudhubDeploymentRequest {
 
     @Override
     HttpEntity getHttpPayload() {
+        def zipFile = app
+        if (overrideByChangingFileInZip) {
+            zipFile = modifyZipFileWithNewProperties(zipFile,
+                                                     fileName,
+                                                     overrideByChangingFileInZip,
+                                                     appProperties)
+        }
         MultipartEntityBuilder.create()
                 .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
         // without autoStart, the app won't actually start after we push this request out
@@ -72,7 +79,7 @@ class CloudhubFileDeploymentRequest extends BaseCloudhubDeploymentRequest {
                 .addTextBody('appInfoJson',
                              cloudhubAppInfoAsJson)
                 .addBinaryBody('file',
-                               app,
+                               zipFile,
                                ContentType.APPLICATION_OCTET_STREAM,
                                fileName)
                 .build()
