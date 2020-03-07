@@ -1,6 +1,8 @@
 package com.avioconsulting.jenkins.mule.impl
 
+import com.avioconsulting.jenkins.mule.impl.models.AwsRegions
 import com.avioconsulting.jenkins.mule.impl.models.OnPremDeploymentRequest
+import com.avioconsulting.jenkins.mule.impl.models.WorkerTypes
 import org.apache.maven.shared.invoker.DefaultInvocationRequest
 import org.apache.maven.shared.invoker.DefaultInvoker
 import org.junit.Before

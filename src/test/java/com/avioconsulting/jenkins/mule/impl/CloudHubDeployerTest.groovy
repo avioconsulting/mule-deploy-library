@@ -1,5 +1,7 @@
 package com.avioconsulting.jenkins.mule.impl
 
+import com.avioconsulting.jenkins.mule.impl.models.AwsRegions
+import com.avioconsulting.jenkins.mule.impl.models.WorkerTypes
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap

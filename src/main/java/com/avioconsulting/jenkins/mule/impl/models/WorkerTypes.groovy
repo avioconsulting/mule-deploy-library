@@ -1,4 +1,4 @@
-package com.avioconsulting.jenkins.mule.impl
+package com.avioconsulting.jenkins.mule.impl.models
 
 enum WorkerTypes {
     /**
