@@ -3,6 +3,7 @@ package com.avioconsulting.jenkins.mule.impl
 import com.avioconsulting.jenkins.mule.impl.httpapi.EnvironmentLocator
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.models.AwsRegions
+import com.avioconsulting.jenkins.mule.impl.models.CloudhubFileDeploymentRequest
 import com.avioconsulting.jenkins.mule.impl.models.WorkerTypes
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.*
@@ -111,41 +112,9 @@ class CloudHubDeployer extends BaseDeployer {
 
     /**
      * Deploy via a supplied file
-     * @param environment - environment name (e.g. DEV, not GUID)
-     * @param appName
-     * @param cloudHubAppPrefix - Your "DNS prefix" for Cloudhub app uniqueness, usually a 3 letter customer ID
-     * @param zipFile - stream of the app ZIP contents
-     * @param fileName - The filename to display in the Runtime Manager app GUI. Often used as a version for a label
-     * @param cryptoKey - Will be set in the 'crypto.key' CloudHub property
-     * @param muleVersion
-     * @param awsRegion
-     * @param usePersistentQueues
-     * @param workerType
-     * @param workerCount
-     * @param anypointClientId - will be set in the anypoint.platform.client_id CloudHub property
-     * @param anypointClientSecret - will be set in the anypoint.platform.client_secret CloudHub property
-     * @param awsRegion - by default will use what's configured in Runtime Manager if you don't supply one
-     * @param appProperties - Mule app property overrides (the stuff in the properties tab)
-     * @param otherCloudHubProperties - CloudHub level property overrides (e.g. region type stuff)
-     * @param overrideByChangingFileInZip - VERY rare. If you have a weird situation where you need to be able to say that you "froze" an app ZIP/JAR for config management purposes and you want to change the properties inside a ZIP file, set this to the filename you want to drop new properties in inside the ZIP (e.g. api.dev.properties)
      * @return
      */
-    def deployFromFile(String environment,
-                       String appName,
-                       String cloudHubAppPrefix,
-                       InputStream zipFile,
-                       String fileName,
-                       String cryptoKey,
-                       String muleVersion,
-                       boolean usePersistentQueues,
-                       WorkerTypes workerType,
-                       int workerCount,
-                       String anypointClientId,
-                       String anypointClientSecret,
-                       AwsRegions awsRegion = null,
-                       Map<String, String> appProperties = [:],
-                       Map<String, String> otherCloudHubProperties = [:],
-                       String overrideByChangingFileInZip = null) {
+    def deployFromFile(CloudhubFileDeploymentRequest deploymentRequest) {
         appName = normalizeAppName(appName,
                                    cloudHubAppPrefix,
                                    environment)
