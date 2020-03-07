@@ -1,5 +1,7 @@
 package com.avioconsulting.jenkins.mule.impl
 
+import com.avioconsulting.jenkins.mule.impl.httpapi.EnvironmentLocator
+import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.io.IOUtils

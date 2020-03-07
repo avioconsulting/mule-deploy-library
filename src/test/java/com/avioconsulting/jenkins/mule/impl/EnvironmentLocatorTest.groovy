@@ -1,5 +1,7 @@
 package com.avioconsulting.jenkins.mule.impl
 
+import com.avioconsulting.jenkins.mule.impl.httpapi.EnvironmentLocator
+import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import groovy.json.JsonOutput
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServer

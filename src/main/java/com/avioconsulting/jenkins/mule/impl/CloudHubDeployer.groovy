@@ -1,5 +1,7 @@
 package com.avioconsulting.jenkins.mule.impl
 
+import com.avioconsulting.jenkins.mule.impl.httpapi.EnvironmentLocator
+import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.models.AwsRegions
 import com.avioconsulting.jenkins.mule.impl.models.WorkerTypes
 import groovy.json.JsonOutput

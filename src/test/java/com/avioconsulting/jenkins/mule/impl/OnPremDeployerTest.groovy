@@ -1,5 +1,7 @@
 package com.avioconsulting.jenkins.mule.impl
 
+import com.avioconsulting.jenkins.mule.impl.httpapi.EnvironmentLocator
+import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.models.OnPremDeploymentRequest
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
