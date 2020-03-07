@@ -18,33 +18,26 @@ class OnPremDeployer extends BaseDeployer {
      * @param password
      * @param logger - will be used for all your log messages
      */
-    OnPremDeployer(String anypointOrganizationId,
-                   String username,
-                   String password,
+    OnPremDeployer(HttpClientWrapper clientWrapper,
+                   EnvironmentLocator environmentLocator,
                    PrintStream logger) {
-        this('https://anypoint.mulesoft.com/',
-             anypointOrganizationId,
-             username,
-             password,
+        this(clientWrapper,
+             environmentLocator,
              10000,
              30,
              logger)
     }
 
-    OnPremDeployer(String baseUrl,
-                   String anypointOrganizationId,
-                   String username,
-                   String password,
+    OnPremDeployer(HttpClientWrapper clientWrapper,
+                   EnvironmentLocator environmentLocator,
                    int retryIntervalInMs,
                    int maxTries,
                    PrintStream logger) {
-        super(baseUrl,
-              anypointOrganizationId,
-              username,
-              password,
-              retryIntervalInMs,
+        super(retryIntervalInMs,
               maxTries,
-              logger)
+              logger,
+              clientWrapper,
+              environmentLocator)
     }
 
     /***
@@ -52,29 +45,11 @@ class OnPremDeployer extends BaseDeployer {
      * @param request - deployment request
      */
     def deploy(OnPremDeploymentRequest request) {
-        def appName = request.appName
-        if (appName.contains(' ')) {
-            throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
-        }
-        authenticate()
-        def environmentId = locateEnvironment(request.environment)
-        def existingApp = locateApplication(environmentId,
-                                            appName)
+        def existingApp = locateApplication(request)
         def appId = existingApp ?
-                updateDeployment(environmentId,
-                                 appName,
-                                 existingApp,
-                                 request.app,
-                                 request.fileName,
-                                 request.appProperties,
-                                 request.overrideByChangingFileInZip) :
-                newDeployment(environmentId,
-                              appName,
-                              request.app,
-                              request.fileName,
-                              request.targetServerOrClusterName,
-                              request.appProperties,
-                              request.overrideByChangingFileInZip)
+                updateDeployment(existingApp,
+                                 request) :
+                newDeployment(request)
         logger.println 'Now will wait for application to start...'
         def tries = 0
         def deployed = false
@@ -82,7 +57,7 @@ class OnPremDeployer extends BaseDeployer {
         while (!deployed && tries < this.maxTries) {
             tries++
             logger.println "*** Try ${tries} ***"
-            Set<OnPremDeploymentStatus> status = getAppStatus(environmentId,
+            Set<OnPremDeploymentStatus> status = getAppStatus(request.environment,
                                                               appId,
                                                               request.fileName)
             logger.println "Received statuses of ${status}"
@@ -119,19 +94,17 @@ class OnPremDeployer extends BaseDeployer {
      * @param targetServerOrClusterName
      * @return - the app ID
      */
-    private String newDeployment(String environmentId,
-                                 String appName,
-                                 InputStream zipFile,
-                                 String fileName,
-                                 String targetServerOrClusterName,
-                                 Map<String, String> propertyMap,
-                                 String overrideByChangingFileInZip) {
-        def serverId = locateServer(environmentId,
-                                    targetServerOrClusterName)
+    private String newDeployment(OnPremDeploymentRequest deploymentRequest) {
+        def serverId = locateServer(deploymentRequest)
+        def appName = deploymentRequest.appName
+        def fileName = deploymentRequest.fileName
+        def propertyMap = deploymentRequest.appProperties
+        def overrideByChangingFileInZip = deploymentRequest.overrideByChangingFileInZip
+        def zipFile = deploymentRequest.app
         logger.println "Deploying '${appName}', ${fileName} as a new application with additional properties ${propertyMap}"
         def request = new HttpPost("${baseUrl}/hybrid/api/v1/applications").with {
             addStandardStuff(it,
-                             environmentId)
+                             deploymentRequest.environment)
             def configJson = getConfigJson(appName,
                                            overrideByChangingFileInZip ? [:] : propertyMap)
             if (overrideByChangingFileInZip) {
@@ -169,17 +142,17 @@ class OnPremDeployer extends BaseDeployer {
         }
     }
 
-    private String updateDeployment(String environmentId,
-                                    String appName,
-                                    String appId,
-                                    InputStream zipFile,
-                                    String fileName,
-                                    Map<String, String> propertyMap,
-                                    String overrideByChangingFileInZip) {
+    private String updateDeployment(String appId,
+                                    OnPremDeploymentRequest deploymentRequest) {
+        def appName = deploymentRequest.appName
+        def fileName = deploymentRequest.fileName
+        def propertyMap = deploymentRequest.appProperties
+        def overrideByChangingFileInZip = deploymentRequest.overrideByChangingFileInZip
+        def zipFile = deploymentRequest.app
         logger.println "Deploying '${appName}', ${fileName} as an UPDATED application to existing app id ${appId} with additional properties ${propertyMap}"
         def request = new HttpPatch("${baseUrl}/hybrid/api/v1/applications/${appId}").with {
             addStandardStuff(it,
-                             environmentId)
+                             deploymentRequest.environment)
             def configJson = getConfigJson(appName,
                                            overrideByChangingFileInZip ? [:] : propertyMap)
             if (overrideByChangingFileInZip) {
@@ -223,18 +196,18 @@ class OnPremDeployer extends BaseDeployer {
         JsonOutput.toJson(map)
     }
 
-    Set<OnPremDeploymentStatus> getAppStatus(String environmentId,
+    Set<OnPremDeploymentStatus> getAppStatus(String environmentName,
                                              String appId,
                                              String fileName) {
-        def request = new HttpGet("${baseUrl}/hybrid/api/v1/applications/${appId}").with {
+        def request = new HttpGet("${clientWrapper.baseUrl}/hybrid/api/v1/applications/${appId}").with {
             addStandardStuff(it,
-                             environmentId)
+                             environmentName)
             it
         } as HttpGet
-        def response = httpClient.execute(request)
+        def response = clientWrapper.execute(request)
         try {
-            def result = assertSuccessfulResponseAndReturnJson(response,
-                                                               'app status')
+            def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
+                                                                             'app status')
             // matching the fileName (which SHOULD contain a version) is the only easy way to know what
             // serverArtifact matches the deployment we should just did
             // we can't use server artifact IDs because they don't exist in the new app POST response
@@ -270,17 +243,17 @@ class OnPremDeployer extends BaseDeployer {
         }
     }
 
-    String locateServer(String environmentId,
+    String locateServer(String environmentName,
                         String serverOrClusterName) {
-        def request = new HttpGet("${baseUrl}/hybrid/api/v1/servers").with {
+        def request = new HttpGet("${clientWrapper.baseUrl}/hybrid/api/v1/servers").with {
             addStandardStuff(it,
-                             environmentId)
+                             environmentName)
             it
         }
-        def response = httpClient.execute(request)
+        def response = clientWrapper.execute(request)
         try {
-            def result = assertSuccessfulResponseAndReturnJson(response,
-                                                               'Retrieve servers')
+            def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
+                                                                             'Retrieve servers')
             def listing = result.data
             def server = listing.find { server ->
                 server.name == serverOrClusterName
@@ -307,20 +280,19 @@ class OnPremDeployer extends BaseDeployer {
         }
     }
 
-    String locateApplication(String environmentId,
-                             String applicationName) {
-        def request = new HttpGet("${baseUrl}/hybrid/api/v1/applications").with {
+    String locateApplication(OnPremDeploymentRequest deploymentRequest) {
+        def request = new HttpGet("${clientWrapper.baseUrl}/hybrid/api/v1/applications").with {
             addStandardStuff(it,
-                             environmentId)
+                             deploymentRequest.environment)
             it
         }
-        def response = httpClient.execute(request)
+        def response = clientWrapper.execute(request)
         try {
-            def result = assertSuccessfulResponseAndReturnJson(response,
-                                                               'Retrieve applications')
+            def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
+                                                                             'Retrieve applications')
             def listing = result.data
             def app = listing.find { app ->
-                app.name == applicationName
+                app.name == deploymentRequest.appName
             }
             app?.id
         }

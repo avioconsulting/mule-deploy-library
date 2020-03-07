@@ -1,144 +1,36 @@
 package com.avioconsulting.jenkins.mule.impl
 
-import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
 import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.io.IOUtils
-import org.apache.http.HttpException
-import org.apache.http.HttpRequest
-import org.apache.http.HttpRequestInterceptor
-import org.apache.http.client.methods.CloseableHttpResponse
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.client.methods.HttpPost
-import org.apache.http.entity.StringEntity
-import org.apache.http.impl.client.CloseableHttpClient
-import org.apache.http.impl.client.HttpClients
-import org.apache.http.protocol.HttpContext
+import org.apache.http.client.methods.HttpUriRequest
 
-abstract class BaseDeployer implements HttpRequestInterceptor {
-    protected final String baseUrl
-    protected final CloseableHttpClient httpClient
+abstract class BaseDeployer {
+    protected final EnvironmentLocator environmentLocator
     protected final PrintStream logger
-    private final String anypointOrganizationId
-    private final String username
-    private final String password
-    private String accessToken
     protected final int retryIntervalInMs
     protected final int maxTries
+    protected final HttpClientWrapper clientWrapper
 
-    BaseDeployer(String baseUrl,
-                 String anypointOrganizationId,
-                 String username,
-                 String password,
-                 int retryIntervalInMs,
+    BaseDeployer(int retryIntervalInMs,
                  int maxTries,
-                 PrintStream logger) {
+                 PrintStream logger,
+                 HttpClientWrapper clientWrapper,
+                 EnvironmentLocator environmentLocator) {
+        this.clientWrapper = clientWrapper
+        this.logger = logger
         this.maxTries = maxTries
         this.retryIntervalInMs = retryIntervalInMs
-        this.password = password
-        this.username = username
-        this.anypointOrganizationId = anypointOrganizationId
-        this.logger = logger
-        this.baseUrl = baseUrl
-        this.httpClient = HttpClients.custom()
-                .addInterceptorFirst(this)
-                .build()
+        this.environmentLocator = environmentLocator
     }
 
-    protected def addStandardStuff(request,
-                                   String environmentId) {
+    def addStandardStuff(HttpUriRequest request,
+                         String environmentName) {
+        def environmentId = environmentLocator.getEnvironmentId(environmentName)
         request.addHeader('X-ANYPNT-ENV-ID',
                           environmentId)
         request.addHeader('X-ANYPNT-ORG-ID',
-                          anypointOrganizationId)
-    }
-
-    String locateEnvironment(String environmentName) {
-        def request = new HttpGet("${baseUrl}/accounts/api/organizations/${anypointOrganizationId}/environments")
-        def response = httpClient.execute(request)
-        try {
-            def result = assertSuccessfulResponseAndReturnJson(response,
-                                                               "Retrieve environments (check to ensure your org ID, ${anypointOrganizationId}, is correct and the credentials you are using have the right permissions.)")
-            def listing = result.data
-            def environment = listing.find { env ->
-                env.name == environmentName
-            }
-            if (!environment) {
-                def valids = listing.collect { env ->
-                    env.name
-                }
-                throw new Exception("Unable to find environment '${environmentName}'. Valid environments are ${valids}")
-            }
-            logger.println "Resolved environment '${environmentName}' to ID '${environment.id}'"
-            environment.id
-        }
-        finally {
-            response.close()
-        }
-    }
-
-    /**
-     *
-     * @param username
-     * @param password
-     * @return - an auth token
-     */
-    String authenticate() {
-        if (this.accessToken) {
-            return this.accessToken
-        }
-        logger.println "Authenticating to Anypoint as user '${username}'"
-        def payload = [
-                username: username,
-                password: password
-        ]
-        def request = new HttpPost("${baseUrl}/accounts/login").with {
-            setEntity(new StringEntity(JsonOutput.toJson(payload)))
-            addHeader('Content-Type',
-                      'application/json')
-            it
-        }
-        def response = httpClient.execute(request)
-        try {
-            def result = assertSuccessfulResponseAndReturnJson(response,
-                                                               "authenticate to Anypoint as '${username}'")
-            logger.println 'Successfully authenticated'
-            accessToken = result.access_token
-        }
-        finally {
-            response.close()
-        }
-    }
-
-    static protected def assertSuccessfulResponse(CloseableHttpResponse response,
-                                                  String failureContext) {
-        def status = response.statusLine.statusCode
-        if (status < 200 || status > 299) {
-            throw new Exception("Unable to ${failureContext}, got an HTTP ${status} with a response of '${response.entity.content.text}'")
-        }
-    }
-
-    static protected def assertSuccessfulResponseAndReturnJson(CloseableHttpResponse response,
-                                                               String failureContext) {
-        assertSuccessfulResponse(response,
-                                 failureContext)
-        def contentType = response.getFirstHeader('Content-Type')
-        assert contentType?.value?.contains('application/json'): "Expected a JSON response but got ${contentType}!"
-        new JsonSlurper().parse(response.entity.content)
-    }
-
-    def close() {
-        httpClient.close()
-    }
-
-    @Override
-    void process(HttpRequest httpRequest,
-                 HttpContext httpContext) throws HttpException, IOException {
-        if (accessToken) {
-            httpRequest.setHeader('Authorization',
-                                  "Bearer ${accessToken}")
-        }
+                          clientWrapper.anypointOrganizationId)
     }
 
     InputStream modifyZipFileWithNewProperties(InputStream inputZipFile,

@@ -19,15 +19,21 @@ class OnPremDeployerTest implements HttpServerUtils {
     HttpServer httpServer
     private OnPremDeployer deployer
     int port
+    private HttpClientWrapper clientWrapper
 
     @Before
     void startServer() {
         httpServer = Vertx.vertx().createHttpServer()
         port = 8080
-        deployer = new OnPremDeployer("http://localhost:${port}",
-                                      'the-org-id',
-                                      'the user',
-                                      'the password',
+        clientWrapper = new HttpClientWrapper("http://localhost:${port}",
+                                              'the user',
+                                              'the password',
+                                              'the-org-id',
+                                              System.out)
+        def envLocator = new EnvironmentLocator(clientWrapper,
+                                                System.out)
+        deployer = new OnPremDeployer(this.clientWrapper,
+                                      envLocator,
                                       500,
                                       10,
                                       System.out)
@@ -35,7 +41,7 @@ class OnPremDeployerTest implements HttpServerUtils {
 
     @After
     void stopServer() {
-        deployer.close()
+        clientWrapper.close()
         httpServer.close()
     }
 
@@ -390,7 +396,6 @@ class OnPremDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
         def exception = shouldFail {
@@ -1461,7 +1466,6 @@ class OnPremDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
         def status = deployer.getAppStatus('def456',

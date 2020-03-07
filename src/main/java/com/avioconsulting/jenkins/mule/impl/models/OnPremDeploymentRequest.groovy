@@ -30,6 +30,9 @@ class OnPremDeploymentRequest {
                             String fileName,
                             InputStream app,
                             Map<String, String> appProperties = [:]) {
+        if (appName.contains(' ')) {
+            throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
+        }
         this.environment = environment
         this.appName = appName
         this.targetServerOrClusterName = targetServerOrClusterName
