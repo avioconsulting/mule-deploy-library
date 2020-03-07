@@ -70,16 +70,16 @@ class HttpClientWrapper implements HttpRequestInterceptor {
         }
     }
 
-    static protected def assertSuccessfulResponse(CloseableHttpResponse response,
-                                                  String failureContext) {
+    static def assertSuccessfulResponse(CloseableHttpResponse response,
+                                        String failureContext) {
         def status = response.statusLine.statusCode
         if (status < 200 || status > 299) {
             throw new Exception("Unable to ${failureContext}, got an HTTP ${status} with a response of '${response.entity.content.text}'")
         }
     }
 
-    static protected def assertSuccessfulResponseAndReturnJson(CloseableHttpResponse response,
-                                                               String failureContext) {
+    static def assertSuccessfulResponseAndReturnJson(CloseableHttpResponse response,
+                                                     String failureContext) {
         assertSuccessfulResponse(response,
                                  failureContext)
         def contentType = response.getFirstHeader('Content-Type')
