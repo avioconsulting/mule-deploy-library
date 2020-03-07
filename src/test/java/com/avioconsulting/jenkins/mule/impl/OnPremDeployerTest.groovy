@@ -1,5 +1,6 @@
 package com.avioconsulting.jenkins.mule.impl
 
+import com.avioconsulting.jenkins.mule.impl.models.OnPremDeploymentRequest
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
@@ -627,13 +628,14 @@ class OnPremDeployerTest implements HttpServerUtils {
         deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'new-app',
+                                                  'clustera',
+                                                  file.name)
 
         // act
-        deployer.deploy('DEV',
-                        'new-app',
-                        stream,
-                        file.name,
-                        'clustera')
+        deployer.deploy(request,
+                        stream)
 
         // assert
         assertThat url,

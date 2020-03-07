@@ -1,5 +1,6 @@
 package com.avioconsulting.jenkins.mule.impl
 
+import com.avioconsulting.jenkins.mule.impl.models.OnPremDeploymentRequest
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
@@ -48,26 +49,16 @@ class OnPremDeployer extends BaseDeployer {
 
     /***
      * Do an on-prem deployment
-     * @param environment - environment name (e.g. DEV, not GUID)
-     * @param appName
      * @param zipFile
-     * @param fileName - The filename to display in the Runtime Manager app GUI. Often used as a version for a label
-     * @param targetServerOrClusterName
-     * @param appProperties - Mule app property overrides (the stuff in the properties tab)
-     * @param overrideByChangingFileInZip - VERY rare. If you have a weird situation where you need to be able to say that you "froze" an app ZIP/JAR for config management purposes and you want to change the properties inside a ZIP file, set this to the filename you want to drop new properties in inside the ZIP (e.g. api.dev.properties)
      */
-    def deploy(String environment,
-               String appName,
-               InputStream zipFile,
-               String fileName,
-               String targetServerOrClusterName,
-               Map<String, String> appProperties = [:],
-               String overrideByChangingFileInZip = null) {
+    def deploy(OnPremDeploymentRequest request,
+               InputStream zipFile) {
+        def appName = request.appName
         if (appName.contains(' ')) {
             throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
         }
         authenticate()
-        def environmentId = locateEnvironment(environment)
+        def environmentId = locateEnvironment(request.environment)
         def existingApp = locateApplication(environmentId,
                                             appName)
         def appId = existingApp ?
@@ -75,16 +66,16 @@ class OnPremDeployer extends BaseDeployer {
                                  appName,
                                  existingApp,
                                  zipFile,
-                                 fileName,
-                                 appProperties,
-                                 overrideByChangingFileInZip) :
+                                 request.fileName,
+                                 request.appProperties,
+                                 request.overrideByChangingFileInZip) :
                 newDeployment(environmentId,
                               appName,
                               zipFile,
-                              fileName,
-                              targetServerOrClusterName,
-                              appProperties,
-                              overrideByChangingFileInZip)
+                              request.fileName,
+                              request.targetServerOrClusterName,
+                              request.appProperties,
+                              request.overrideByChangingFileInZip)
         logger.println 'Now will wait for application to start...'
         def tries = 0
         def deployed = false
@@ -94,7 +85,7 @@ class OnPremDeployer extends BaseDeployer {
             logger.println "*** Try ${tries} ***"
             Set<OnPremDeploymentStatus> status = getAppStatus(environmentId,
                                                               appId,
-                                                              fileName)
+                                                              request.fileName)
             logger.println "Received statuses of ${status}"
             if (status[0] == OnPremDeploymentStatus.RECEIVED) {
                 logger.println 'Still waiting for Runtime Manager to send app to server'
