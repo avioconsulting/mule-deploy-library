@@ -83,7 +83,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
         deployer.getDeploymentStatus('def456',
@@ -133,7 +132,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
         def status = deployer.getDeploymentStatus('def456',
@@ -175,7 +173,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
         def status = deployer.getDeploymentStatus('def456',
@@ -218,7 +215,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
         def status = deployer.getDeploymentStatus('def456',
@@ -258,7 +254,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_new_app() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -269,8 +264,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
                 return mockAuthenticationOk(request)
             }
             request.response().with {
@@ -316,7 +309,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
 
@@ -380,7 +372,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_new_app_no_region() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -391,8 +382,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
                 return mockAuthenticationOk(request)
             }
             request.response().with {
@@ -438,7 +427,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
 
@@ -500,7 +488,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_gav_new_app() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -511,8 +498,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
                 return mockAuthenticationOk(request)
             }
             request.response().with {
@@ -558,7 +543,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
 
         // act
         deployer.deployFromExchange('DEV',
@@ -625,7 +609,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_new_app_property_overrides_runtime_manager() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -636,8 +619,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
                 return mockAuthenticationOk(request)
             }
             request.response().with {
@@ -683,7 +664,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
 
@@ -750,7 +730,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_new_app_property_overrides_via_zip_file() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -764,8 +743,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
                 return mockAuthenticationOk(request)
             }
             request.response().with {
@@ -812,7 +789,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def antBuilder = new AntBuilder()
         def zipFile = new File('target/temp/ourapp.zip')
         if (zipFile.exists()) {
@@ -896,7 +872,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_new_app_persistent_queues() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -907,8 +882,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
                 return mockAuthenticationOk(request)
             }
             request.response().with {
@@ -954,7 +927,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
 
@@ -1018,7 +990,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_new_app_other_props() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -1029,8 +1000,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
                 return mockAuthenticationOk(request)
             }
             request.response().with {
@@ -1076,7 +1045,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
         def otherProperties = [
@@ -1148,7 +1116,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_new_app_other_props_only_ch_settings() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -1159,8 +1126,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
                 return mockAuthenticationOk(request)
             }
             request.response().with {
@@ -1206,7 +1171,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
         def otherProperties = [
@@ -1275,7 +1239,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_new_app_other_props_both() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -1286,8 +1249,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
                 return mockAuthenticationOk(request)
             }
             request.response().with {
@@ -1333,7 +1294,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
         def otherProperties = [
@@ -1408,7 +1368,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_upper_case() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -1419,8 +1378,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
                 return mockAuthenticationOk(request)
             }
             request.response().with {
@@ -1466,7 +1423,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
 
@@ -1592,7 +1548,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
 
@@ -1621,7 +1576,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_existing_app() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -1633,8 +1587,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
                 return mockAuthenticationOk(request)
             }
             request.response().with {
@@ -1686,7 +1638,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
 
@@ -1750,7 +1701,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_existing_app_failed_last_but_has_started_ok_once() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -1762,8 +1712,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
                 return mockAuthenticationOk(request)
             }
             request.response().with {
@@ -1854,7 +1802,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
 
@@ -2002,7 +1949,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
 
@@ -2112,7 +2058,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
 
@@ -2208,7 +2153,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
 
@@ -2275,7 +2219,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
 
@@ -2336,7 +2279,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
 
@@ -2397,7 +2339,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
 
@@ -2447,7 +2388,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
         deployer.getAppStatus('def456',
@@ -2482,7 +2422,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
         def status = deployer.getAppStatus('def456',
@@ -2509,7 +2448,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
         def status = deployer.getAppStatus('def456',
@@ -2536,7 +2474,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
         def status = deployer.getAppStatus('def456',
@@ -2559,7 +2496,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end()
             }
         }
-        deployer.authenticate()
 
         // act
         def status = deployer.getAppStatus('def456',
@@ -2586,7 +2522,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
         def status = deployer.getAppStatus('def456',
