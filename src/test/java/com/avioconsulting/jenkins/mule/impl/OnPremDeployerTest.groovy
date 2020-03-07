@@ -57,6 +57,9 @@ class OnPremDeployerTest implements HttpServerUtils {
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
             }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
+            }
             url = request.absoluteURI()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -78,10 +81,9 @@ class OnPremDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        deployer.locateServer('the-env-id',
+        deployer.locateServer('DEV',
                               'servera')
 
         // assert
@@ -92,7 +94,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         assertThat authToken,
                    is(equalTo('Bearer the token'))
         assertThat envId,
-                   is(equalTo('the-env-id'))
+                   is(equalTo('def456'))
         assertThat orgId,
                    is(equalTo('the-org-id'))
     }
@@ -104,6 +106,9 @@ class OnPremDeployerTest implements HttpServerUtils {
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
             }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -111,26 +116,25 @@ class OnPremDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson([
                         data: [
                                 [
-                                        id  : 'abc123',
+                                        id  : '123',
                                         name: 'serverb'
                                 ],
                                 [
-                                        id  : 'def456',
+                                        id  : '456',
                                         name: 'servera'
                                 ]
                         ]
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        def serverId = deployer.locateServer('the-env-id',
+        def serverId = deployer.locateServer('DEV',
                                              'servera')
 
         // assert
         assertThat serverId,
-                   is(equalTo('def456'))
+                   is(equalTo('456'))
     }
 
     @Test
@@ -139,6 +143,9 @@ class OnPremDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
+            }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
             }
             request.response().with {
                 statusCode = 200
@@ -160,10 +167,9 @@ class OnPremDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        def serverId = deployer.locateServer('the-env-id',
+        def serverId = deployer.locateServer('DEV',
                                              'clustera')
 
         // assert
@@ -177,6 +183,9 @@ class OnPremDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
+            }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
             }
             request.response().with {
                 statusCode = 200
@@ -201,7 +210,7 @@ class OnPremDeployerTest implements HttpServerUtils {
 
         // act
         def exception = shouldFail {
-            deployer.locateServer('the-env-id',
+            deployer.locateServer('DEV',
                                   'foobar')
         }
 
@@ -221,6 +230,9 @@ class OnPremDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
+            }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
             }
             url = request.absoluteURI()
             method = request.method()
@@ -243,10 +255,9 @@ class OnPremDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        deployer.locateApplication('the-env-id',
+        deployer.locateApplication('DEV',
                                    'the-app')
 
         // assert
@@ -257,7 +268,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         assertThat authToken,
                    is(equalTo('Bearer the token'))
         assertThat envId,
-                   is(equalTo('the-env-id'))
+                   is(equalTo('def456'))
         assertThat orgId,
                    is(equalTo('the-org-id'))
     }
@@ -268,6 +279,9 @@ class OnPremDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
+            }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
             }
             request.response().with {
                 statusCode = 200
@@ -287,10 +301,9 @@ class OnPremDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        def appId = deployer.locateApplication('the-env-id',
+        def appId = deployer.locateApplication('DEV',
                                                'non-existent-app')
 
         // assert
@@ -306,6 +319,9 @@ class OnPremDeployerTest implements HttpServerUtils {
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
             }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -324,10 +340,9 @@ class OnPremDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        def appId = deployer.locateApplication('the-env-id',
+        def appId = deployer.locateApplication('DEV',
                                                'the-app')
 
         // assert
@@ -338,7 +353,6 @@ class OnPremDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_new_app() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -349,9 +363,10 @@ class OnPremDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
                 return mockAuthenticationOk(request)
+            }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
             }
             request.response().with {
                 statusCode = 200
@@ -432,7 +447,6 @@ class OnPremDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
         def request = new OnPremDeploymentRequest('DEV',
@@ -476,7 +490,6 @@ class OnPremDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_new_app_property_overrides_via_runtime_manager() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -487,9 +500,10 @@ class OnPremDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
                 return mockAuthenticationOk(request)
+            }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
             }
             request.response().with {
                 statusCode = 200
@@ -570,7 +584,6 @@ class OnPremDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
         def request = new OnPremDeploymentRequest('DEV',
@@ -716,7 +729,6 @@ class OnPremDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def antBuilder = new AntBuilder()
         def zipFile = new File('target/temp/ourapp.zip')
         if (zipFile.exists()) {
@@ -781,15 +793,14 @@ class OnPremDeployerTest implements HttpServerUtils {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
-        def request = new OnPremDeploymentRequest('DEV',
-                                                  'some app name',
-                                                  'clustera',
-                                                  file.name,
-                                                  stream)
 
         // act
         def exception = shouldFail {
-            deployer.deploy(request)
+            new OnPremDeploymentRequest('DEV',
+                                        'some app name',
+                                        'clustera',
+                                        file.name,
+                                        stream)
         }
 
         // assert
@@ -800,7 +811,6 @@ class OnPremDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_existing_app() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -811,9 +821,10 @@ class OnPremDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
                 return mockAuthenticationOk(request)
+            }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
             }
             request.response().with {
                 statusCode = 200
@@ -894,7 +905,6 @@ class OnPremDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
         def request = new OnPremDeploymentRequest('DEV',
@@ -1028,7 +1038,6 @@ class OnPremDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
         def request = new OnPremDeploymentRequest('DEV',
@@ -1072,7 +1081,6 @@ class OnPremDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_existing_app_property_overrides_via_zip_file() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -1086,9 +1094,10 @@ class OnPremDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
                 return mockAuthenticationOk(request)
+            }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
             }
             request.response().with {
                 statusCode = 200
@@ -1170,7 +1179,6 @@ class OnPremDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def antBuilder = new AntBuilder()
         def zipFile = new File('target/temp/ourapp.zip')
         if (zipFile.exists()) {
@@ -1238,6 +1246,9 @@ class OnPremDeployerTest implements HttpServerUtils {
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
             }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
+            }
             url = request.absoluteURI()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1270,7 +1281,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         }
 
         // act
-        def status = deployer.getAppStatus('def456',
+        def status = deployer.getAppStatus('DEV',
                                            'appid',
                                            'theFile.zip')
 
@@ -1295,6 +1306,9 @@ class OnPremDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
+            }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
             }
             request.response().with {
                 statusCode = 200
@@ -1324,10 +1338,9 @@ class OnPremDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        def status = deployer.getAppStatus('def456',
+        def status = deployer.getAppStatus('DEV',
                                            'appid',
                                            'theFile.zip')
 
@@ -1342,6 +1355,9 @@ class OnPremDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
+            }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
             }
             request.response().with {
                 statusCode = 200
@@ -1371,10 +1387,9 @@ class OnPremDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        def status = deployer.getAppStatus('def456',
+        def status = deployer.getAppStatus('DEV',
                                            'appid',
                                            'theFile.zip')
 
@@ -1389,6 +1404,9 @@ class OnPremDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
+            }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
             }
             request.response().with {
                 statusCode = 200
@@ -1418,10 +1436,9 @@ class OnPremDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        def status = deployer.getAppStatus('def456',
+        def status = deployer.getAppStatus('DEV',
                                            'appid',
                                            'theFile.zip')
 
@@ -1436,6 +1453,9 @@ class OnPremDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                 return mockAuthenticationOk(request)
+            }
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+                return mockEnvironments(request)
             }
             request.response().with {
                 statusCode = 200
@@ -1473,10 +1493,9 @@ class OnPremDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        def status = deployer.getAppStatus('def456',
+        def status = deployer.getAppStatus('DEV',
                                            'appid',
                                            'theFile.zip')
 
@@ -1492,6 +1511,9 @@ class OnPremDeployerTest implements HttpServerUtils {
         def uri = request.absoluteURI()
         if (uri == 'http://localhost:8080/accounts/login') {
             return mockAuthenticationOk(request)
+        }
+        if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+            return mockEnvironments(request)
         }
         def result = null
         if (uri.endsWith('environments')) {
@@ -1617,7 +1639,6 @@ class OnPremDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
         def request = new OnPremDeploymentRequest('DEV',
@@ -1666,7 +1687,6 @@ class OnPremDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
         def request = new OnPremDeploymentRequest('DEV',
@@ -1705,7 +1725,6 @@ class OnPremDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
         def request = new OnPremDeploymentRequest('DEV',
@@ -1750,7 +1769,6 @@ class OnPremDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
         def request = new OnPremDeploymentRequest('DEV',

@@ -45,7 +45,8 @@ class OnPremDeployer extends BaseDeployer {
      * @param request - deployment request
      */
     def deploy(OnPremDeploymentRequest request) {
-        def existingApp = locateApplication(request)
+        def existingApp = locateApplication(request.environment,
+                                            request.appName)
         def appId = existingApp ?
                 updateDeployment(existingApp,
                                  request) :
@@ -95,14 +96,15 @@ class OnPremDeployer extends BaseDeployer {
      * @return - the app ID
      */
     private String newDeployment(OnPremDeploymentRequest deploymentRequest) {
-        def serverId = locateServer(deploymentRequest)
+        def serverId = locateServer(deploymentRequest.environment,
+                                    deploymentRequest.targetServerOrClusterName)
         def appName = deploymentRequest.appName
         def fileName = deploymentRequest.fileName
         def propertyMap = deploymentRequest.appProperties
         def overrideByChangingFileInZip = deploymentRequest.overrideByChangingFileInZip
         def zipFile = deploymentRequest.app
         logger.println "Deploying '${appName}', ${fileName} as a new application with additional properties ${propertyMap}"
-        def request = new HttpPost("${baseUrl}/hybrid/api/v1/applications").with {
+        def request = new HttpPost("${clientWrapper.baseUrl}/hybrid/api/v1/applications").with {
             addStandardStuff(it,
                              deploymentRequest.environment)
             def configJson = getConfigJson(appName,
@@ -129,10 +131,10 @@ class OnPremDeployer extends BaseDeployer {
             setEntity(entity)
             it
         } as HttpPost
-        def response = httpClient.execute(request)
+        def response = clientWrapper.execute(request)
         try {
-            def result = assertSuccessfulResponseAndReturnJson(response,
-                                                               'deploy application')
+            def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
+                                                                             'deploy application')
             def appId = result.data.id
             logger.println("Application '${appName}'/ID ${appId} has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
             return appId.toString()
@@ -150,7 +152,7 @@ class OnPremDeployer extends BaseDeployer {
         def overrideByChangingFileInZip = deploymentRequest.overrideByChangingFileInZip
         def zipFile = deploymentRequest.app
         logger.println "Deploying '${appName}', ${fileName} as an UPDATED application to existing app id ${appId} with additional properties ${propertyMap}"
-        def request = new HttpPatch("${baseUrl}/hybrid/api/v1/applications/${appId}").with {
+        def request = new HttpPatch("${clientWrapper.baseUrl}/hybrid/api/v1/applications/${appId}").with {
             addStandardStuff(it,
                              deploymentRequest.environment)
             def configJson = getConfigJson(appName,
@@ -173,10 +175,10 @@ class OnPremDeployer extends BaseDeployer {
             setEntity(entity)
             it
         } as HttpPatch
-        def response = httpClient.execute(request)
+        def response = clientWrapper.execute(request)
         try {
-            def result = assertSuccessfulResponseAndReturnJson(response,
-                                                               'deploy application')
+            def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
+                                                                             'deploy application')
             logger.println("Application '${appName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
             return appId
         }
@@ -280,10 +282,11 @@ class OnPremDeployer extends BaseDeployer {
         }
     }
 
-    String locateApplication(OnPremDeploymentRequest deploymentRequest) {
+    String locateApplication(String environmentName,
+                             String appName) {
         def request = new HttpGet("${clientWrapper.baseUrl}/hybrid/api/v1/applications").with {
             addStandardStuff(it,
-                             deploymentRequest.environment)
+                             environmentName)
             it
         }
         def response = clientWrapper.execute(request)
@@ -292,7 +295,7 @@ class OnPremDeployer extends BaseDeployer {
                                                                              'Retrieve applications')
             def listing = result.data
             def app = listing.find { app ->
-                app.name == deploymentRequest.appName
+                app.name == appName
             }
             app?.id
         }

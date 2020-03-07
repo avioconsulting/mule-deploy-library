@@ -40,6 +40,25 @@ trait HttpServerUtils {
         ]))
     }
 
+    def mockEnvironments(HttpServerRequest request) {
+        def response = request.response()
+        response.statusCode = 200
+        response.putHeader('Content-Type',
+                           'application/json')
+        response.end(JsonOutput.toJson([
+                data: [
+                        [
+                                id  : 'abc123',
+                                name: 'Design'
+                        ],
+                        [
+                                id  : 'def456',
+                                name: 'DEV'
+                        ]
+                ]
+        ]))
+    }
+
     List<String> capturedStandardHeaders(HttpServerRequest request) {
         ['Authorization',
          'X-ANYPNT-ORG-ID',
