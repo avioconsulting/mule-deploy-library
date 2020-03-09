@@ -5,8 +5,17 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.io.IOUtils
 
 trait MuleFileUtils {
+    /**
+     * The filename to display in the Runtime Manager app GUI. Often used as a version for a label
+     */
     abstract String getFileName()
+    /**
+     * Stream of the ZIP/JAR containing the application to deploy
+     */
     abstract InputStream getApp()
+    /**
+     * VERY rare. If you have a weird situation where you need to be able to say that you "froze" an app ZIP/JAR for config management purposes and you want to change the properties inside a ZIP file, set this to the filename you want to drop new properties in inside the ZIP (e.g. api.dev.properties)
+     */
     abstract String getOverrideByChangingFileInZip()
     abstract Map<String, String> getAppProperties()
 
