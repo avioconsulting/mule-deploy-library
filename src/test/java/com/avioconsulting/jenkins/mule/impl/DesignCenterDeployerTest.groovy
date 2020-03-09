@@ -2,6 +2,7 @@ package com.avioconsulting.jenkins.mule.impl
 
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.models.FileBasedDeploymentRequest
+import com.avioconsulting.jenkins.mule.impl.models.RamlFile
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServer
 import org.apache.commons.io.FileUtils
@@ -9,6 +10,10 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+
+import static org.hamcrest.MatcherAssert.assertThat
+import static org.hamcrest.Matchers.equalTo
+import static org.hamcrest.Matchers.is
 
 class DesignCenterDeployerTest implements HttpServerUtils {
     HttpServer httpServer
@@ -49,12 +54,16 @@ class DesignCenterDeployerTest implements HttpServerUtils {
                                  'stuff.yaml'))
         def folder = new File(apiDirectory,
                               'folder')
-        FileUtils.touch(new File(folder,
-                                 'lib.yaml'))
+        def file = new File(folder,
+                            'lib.yaml')
+        FileUtils.touch(file)
+        file.text = 'howdy1'
         def exchangeModules = new File(apiDirectory,
                                        'exchange_modules')
-        FileUtils.touch(new File(exchangeModules,
-                                 'junk'))
+        file = new File(exchangeModules,
+                        'junk')
+        FileUtils.touch(file)
+        file.text = 'howdy2'
         FileUtils.touch(new File(apiDirectory,
                                  'exchange.json'))
         def antBuilder = new AntBuilder()
@@ -74,7 +83,13 @@ class DesignCenterDeployerTest implements HttpServerUtils {
         def result = deployer.getRamlFilesFromApp(request)
 
         // assert
-        Assert.fail("write it, assert RAML contents, build a temporary ZIP file")
+        assertThat result,
+                   is(equalTo([
+                           new RamlFile('stuff.yaml',
+                                        'howdy1'),
+                           new RamlFile('folder/lib.yaml',
+                                        'howdy2')
+                   ]))
     }
 
     @Test
