@@ -6,7 +6,7 @@ import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
 
-class OnPremDeploymentRequest implements FileBasedDeploymentRequest {
+class OnPremDeploymentRequest implements FileBasedAppDeploymentRequest {
     /**
      * environment name (e.g. DEV, not GUID)
      */
@@ -17,10 +17,6 @@ class OnPremDeploymentRequest implements FileBasedDeploymentRequest {
      */
     final String fileName
     /**
-     * VERY rare. If you have a weird situation where you need to be able to say that you "froze" an app ZIP/JAR for config management purposes and you want to change the properties inside a ZIP file, set this to the filename you want to drop new properties in inside the ZIP (e.g. api.dev.properties)
-     */
-    final String overrideByChangingFileInZip
-    /**
      * Mule app property overrides (the stuff in the properties tab)
      */
     final Map<String, String> appProperties
@@ -29,6 +25,7 @@ class OnPremDeploymentRequest implements FileBasedDeploymentRequest {
      */
     final InputStream app
 
+    private boolean modifiedPropertiesViaZip
 
     OnPremDeploymentRequest(String environment,
                             String appName,
@@ -45,8 +42,19 @@ class OnPremDeploymentRequest implements FileBasedDeploymentRequest {
         this.fileName = fileName
         this.appProperties = appProperties
         this.app = app
+        this.modifiedPropertiesViaZip = false
     }
 
+    /***
+     *
+     * @param environment
+     * @param appName
+     * @param targetServerOrClusterName
+     * @param fileName
+     * @param app
+     * @param appProperties
+     * @param overrideByChangingFileInZip - VERY rare. If you have a weird situation where you need to be able to say that you "froze" an app ZIP/JAR for config management purposes and you want to change the properties inside a ZIP file, set this to the filename you want to drop new properties in inside the ZIP (e.g. api.dev.properties)
+     */
     OnPremDeploymentRequest(String environment,
                             String appName,
                             String targetServerOrClusterName,
@@ -58,23 +66,34 @@ class OnPremDeploymentRequest implements FileBasedDeploymentRequest {
              appName,
              targetServerOrClusterName,
              fileName,
-             app,
+             dealWithApp(overrideByChangingFileInZip,
+                         appProperties,
+                         app,
+                         fileName),
              appProperties)
-        this.overrideByChangingFileInZip = overrideByChangingFileInZip
+        this.modifiedPropertiesViaZip = true
+    }
+
+    private static InputStream dealWithApp(String overrideByChangingFileInZip,
+                                           Map<String, String> appProperties,
+                                           InputStream app,
+                                           String fileName) {
+        def appFileInfo = new AppFileInfo(fileName,
+                                          app)
+        overrideByChangingFileInZip ? getPropertyModifiedStream(overrideByChangingFileInZip,
+                                                                appProperties,
+                                                                appFileInfo).app : app
     }
 
     private String getConfigJson() {
         def map = [
                 'mule.agent.application.properties.service': [
                         applicationName: appName,
-                        properties     : overrideByChangingFileInZip ? [:] : appProperties
+                        // don't want to use ARM props if we took care of this in a file
+                        properties     : modifiedPropertiesViaZip ? [:] : appProperties
                 ]
         ]
         JsonOutput.toJson(map)
-    }
-
-    private InputStream getFixedApp() {
-        overrideByChangingFileInZip ? modifyZipFileWithNewProperties() : app
     }
 
     HttpEntity getUpdateHttpPayload() {
@@ -84,7 +103,7 @@ class OnPremDeploymentRequest implements FileBasedDeploymentRequest {
                 .addTextBody('configuration',
                              configJson)
                 .addBinaryBody('file',
-                               fixedApp,
+                               app,
                                ContentType.APPLICATION_OCTET_STREAM,
                                fileName)
                 .build()
@@ -101,7 +120,7 @@ class OnPremDeploymentRequest implements FileBasedDeploymentRequest {
                 .addTextBody('configuration',
                              configJson)
                 .addBinaryBody('file',
-                               fixedApp,
+                               app,
                                ContentType.APPLICATION_OCTET_STREAM,
                                fileName)
                 .build()

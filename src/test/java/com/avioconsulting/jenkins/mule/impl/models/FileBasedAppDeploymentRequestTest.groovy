@@ -1,22 +1,16 @@
 package com.avioconsulting.jenkins.mule.impl.models
 
-import groovy.transform.Canonical
 import org.junit.Test
-
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
-class FileBasedDeploymentRequestTest {
-    @Canonical
-    class DummyRequest implements FileBasedDeploymentRequest {
-        String fileName, overrideByChangingFileInZip
-        InputStream app
-        Map<String, String> appProperties
+class FileBasedAppDeploymentRequestTest {
+    class DummyRequest implements FileBasedAppDeploymentRequest {
     }
 
     @Test
-    void modifyZipFileWithNewProperties_no_changes() {
+    void getPropertyModifiedStream_no_changes() {
         // arrange
         def antBuilder = new AntBuilder()
         def zipFile = new File('target/temp/ourapp.zip')
@@ -26,13 +20,13 @@ class FileBasedDeploymentRequestTest {
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
         def inputStream = new FileInputStream(zipFile)
-        def request = new DummyRequest(zipFile.name,
-                                       'api.dev.properties',
-                                       inputStream,
-                                       [:])
+        def appFileInfo = new AppFileInfo(zipFile.name,
+                                          inputStream)
 
         // act
-        def stream = request.modifyZipFileWithNewProperties()
+        def stream = DummyRequest.getPropertyModifiedStream('api.dev.properties',
+                                                            [:],
+                                                            appFileInfo).app
 
         // assert
         assertThat 'No properties to change so do not do anything',
@@ -41,7 +35,7 @@ class FileBasedDeploymentRequestTest {
     }
 
     @Test
-    void modifyZipFileWithNewProperties_mule3() {
+    void getPropertyModifiedStream_mule3() {
         // arrange
         def antBuilder = new AntBuilder()
         def zipFile = new File('target/temp/ourapp.zip')
@@ -50,15 +44,15 @@ class FileBasedDeploymentRequestTest {
         }
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
-        def request = new DummyRequest(zipFile.name,
-                                       'api.dev.properties',
-                                       zipFile.newInputStream(),
-                                       [
-                                               existing: 'changed'
-                                       ])
+        def appFileInfo = new AppFileInfo(zipFile.name,
+                                          zipFile.newInputStream())
 
         // act
-        def stream = request.modifyZipFileWithNewProperties()
+        def stream = DummyRequest.getPropertyModifiedStream('api.dev.properties',
+                                                            [
+                                                                    existing: 'changed'
+                                                            ],
+                                                            appFileInfo).app
 
         // assert
         def destination = new File('target/temp/modifiedapp')
@@ -88,7 +82,7 @@ class FileBasedDeploymentRequestTest {
     }
 
     @Test
-    void modifyZipFileWithNewProperties_mule4() {
+    void getPropertyModifiedStream_mule4() {
         // arrange
         def antBuilder = new AntBuilder()
         def zipFile = new File('target/temp/ourapp.jar')
@@ -97,15 +91,15 @@ class FileBasedDeploymentRequestTest {
         }
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
-        def request = new DummyRequest(zipFile.name,
-                                       'api.dev.properties',
-                                       zipFile.newInputStream(),
-                                       [
-                                               mule4_existing: 'changed'
-                                       ])
+        def appFileInfo = new AppFileInfo(zipFile.name,
+                                          zipFile.newInputStream())
 
         // act
-        def stream = request.modifyZipFileWithNewProperties()
+        def stream = DummyRequest.getPropertyModifiedStream('api.dev.properties',
+                                                            [
+                                                                    mule4_existing: 'changed'
+                                                            ],
+                                                            appFileInfo).app
 
         // assert
         def destination = new File('target/temp/modifiedapp')
@@ -128,7 +122,7 @@ class FileBasedDeploymentRequestTest {
     }
 
     @Test
-    void modifyZipFileWithNewProperties_not_found() {
+    void getPropertyModifiedStream_not_found() {
         // arrange
         def antBuilder = new AntBuilder()
         def zipFile = new File('target/temp/ourapp.zip')
@@ -137,15 +131,15 @@ class FileBasedDeploymentRequestTest {
         }
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
-        def request = new DummyRequest(zipFile.name,
-                                       'doesnotexist',
-                                       zipFile.newInputStream(),
-                                       [
-                                               existing: 'changed'
-                                       ])
+        def appFileInfo = new AppFileInfo(zipFile.name,
+                                          zipFile.newInputStream())
 
         // act
-        def stream = request.modifyZipFileWithNewProperties()
+        def stream = DummyRequest.getPropertyModifiedStream('doesnotexist',
+                                                            [
+                                                                    existing: 'changed'
+                                                            ],
+                                                            appFileInfo).app
 
         stream.bytes
     }

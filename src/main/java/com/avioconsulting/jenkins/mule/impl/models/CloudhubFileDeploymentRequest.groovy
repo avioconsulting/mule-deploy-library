@@ -6,7 +6,7 @@ import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
 
-class CloudhubFileDeploymentRequest extends BaseCloudhubDeploymentRequest implements FileBasedDeploymentRequest {
+class CloudhubFileDeploymentRequest extends BaseCloudhubDeploymentRequest implements FileBasedAppDeploymentRequest {
     /**
      * Stream of the ZIP/JAR containing the application to deploy
      */
@@ -33,7 +33,11 @@ class CloudhubFileDeploymentRequest extends BaseCloudhubDeploymentRequest implem
               cloudHubAppPrefix,
               appProperties,
               otherCloudHubProperties)
-        this.app = app
+        def appFileInfo = new AppFileInfo(fileName,
+                                          app)
+        this.app = overrideByChangingFileInZip ? getPropertyModifiedStream(overrideByChangingFileInZip,
+                                                                           appProperties,
+                                                                           appFileInfo).app : app
     }
 
     CloudhubFileDeploymentRequest(InputStream app,
@@ -59,15 +63,15 @@ class CloudhubFileDeploymentRequest extends BaseCloudhubDeploymentRequest implem
               appProperties,
               overrideByChangingFileInZip,
               otherCloudHubProperties)
-        this.app = app
+        def appFileInfo = new AppFileInfo(fileName,
+                                          app)
+        this.app = overrideByChangingFileInZip ? getPropertyModifiedStream(overrideByChangingFileInZip,
+                                                                           appProperties,
+                                                                           appFileInfo).app : app
     }
 
     @Override
     HttpEntity getHttpPayload() {
-        def zipFile = app
-        if (overrideByChangingFileInZip) {
-            zipFile = modifyZipFileWithNewProperties()
-        }
         MultipartEntityBuilder.create()
                 .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
         // without autoStart, the app won't actually start after we push this request out
@@ -76,7 +80,7 @@ class CloudhubFileDeploymentRequest extends BaseCloudhubDeploymentRequest implem
                 .addTextBody('appInfoJson',
                              cloudhubAppInfoAsJson)
                 .addBinaryBody('file',
-                               zipFile,
+                               this.app,
                                ContentType.APPLICATION_OCTET_STREAM,
                                fileName)
                 .build()
