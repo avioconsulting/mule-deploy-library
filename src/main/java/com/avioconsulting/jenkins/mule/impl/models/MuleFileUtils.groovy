@@ -4,7 +4,11 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.io.IOUtils
 
-trait FileUtils {
+trait MuleFileUtils {
+    boolean isMule4File(String zipFileName) {
+        zipFileName.endsWith('.jar')
+    }
+
     InputStream modifyZipFileWithNewProperties(InputStream inputZipFile,
                                                String zipFileName,
                                                String propertiesFileToAddTo,
@@ -12,7 +16,7 @@ trait FileUtils {
         if (propertiesToAdd.isEmpty()) {
             return inputZipFile
         }
-        def isMule4 = zipFileName.endsWith('.jar')
+        def isMule4 = isMule4File(zipFileName)
         // Mule 4 props files live at the root of the JAR. Mule 3's are in a classes subdirectory
         propertiesFileToAddTo = isMule4 ? propertiesFileToAddTo : "classes/${propertiesFileToAddTo}"
         def factory = new ArchiveStreamFactory()
