@@ -1,6 +1,6 @@
 package com.avioconsulting.jenkins.mule.impl.models
 
-class OnPremDeploymentRequest {
+class OnPremDeploymentRequest implements FileBasedDeploymentRequest {
     /**
      * environment name (e.g. DEV, not GUID)
      */
