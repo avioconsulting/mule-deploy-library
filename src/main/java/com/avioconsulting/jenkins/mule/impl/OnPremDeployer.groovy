@@ -2,18 +2,14 @@ package com.avioconsulting.jenkins.mule.impl
 
 import com.avioconsulting.jenkins.mule.impl.httpapi.EnvironmentLocator
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
-import com.avioconsulting.jenkins.mule.impl.models.MuleFileUtils
 import com.avioconsulting.jenkins.mule.impl.models.OnPremDeploymentRequest
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPatch
 import org.apache.http.client.methods.HttpPost
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.mime.HttpMultipartMode
-import org.apache.http.entity.mime.MultipartEntityBuilder
 
-class OnPremDeployer extends BaseDeployer implements MuleFileUtils {
+class OnPremDeployer extends BaseDeployer {
     /***
      * Instantiate using default anypoint.mulesoft.com URL
      * @param anypointOrganizationId
@@ -103,35 +99,11 @@ class OnPremDeployer extends BaseDeployer implements MuleFileUtils {
                                     deploymentRequest.targetServerOrClusterName)
         def appName = deploymentRequest.appName
         def fileName = deploymentRequest.fileName
-        def propertyMap = deploymentRequest.appProperties
-        def overrideByChangingFileInZip = deploymentRequest.overrideByChangingFileInZip
-        def zipFile = deploymentRequest.app
-        logger.println "Deploying '${appName}', ${fileName} as a new application with additional properties ${propertyMap}"
+        logger.println "Deploying '${appName}', ${fileName} as a new application with additional properties ${deploymentRequest.appProperties}"
         def request = new HttpPost("${clientWrapper.baseUrl}/hybrid/api/v1/applications").with {
             addStandardStuff(it,
                              deploymentRequest.environment)
-            def configJson = getConfigJson(appName,
-                                           overrideByChangingFileInZip ? [:] : propertyMap)
-            if (overrideByChangingFileInZip) {
-                zipFile = modifyZipFileWithNewProperties(zipFile,
-                                                         fileName,
-                                                         overrideByChangingFileInZip,
-                                                         propertyMap)
-            }
-            def entity = MultipartEntityBuilder.create()
-                    .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
-                    .addTextBody('targetId',
-                                 serverId)
-                    .addTextBody('artifactName',
-                                 appName)
-                    .addTextBody('configuration',
-                                 configJson)
-                    .addBinaryBody('file',
-                                   zipFile,
-                                   ContentType.APPLICATION_OCTET_STREAM,
-                                   fileName)
-                    .build()
-            setEntity(entity)
+            setEntity(deploymentRequest.getHttpPayload(serverId))
             it
         } as HttpPost
         def response = clientWrapper.execute(request)
@@ -151,31 +123,11 @@ class OnPremDeployer extends BaseDeployer implements MuleFileUtils {
                                     OnPremDeploymentRequest deploymentRequest) {
         def appName = deploymentRequest.appName
         def fileName = deploymentRequest.fileName
-        def propertyMap = deploymentRequest.appProperties
-        def overrideByChangingFileInZip = deploymentRequest.overrideByChangingFileInZip
-        def zipFile = deploymentRequest.app
-        logger.println "Deploying '${appName}', ${fileName} as an UPDATED application to existing app id ${appId} with additional properties ${propertyMap}"
+        logger.println "Deploying '${appName}', ${fileName} as an UPDATED application to existing app id ${appId} with additional properties ${deploymentRequest.appProperties}"
         def request = new HttpPatch("${clientWrapper.baseUrl}/hybrid/api/v1/applications/${appId}").with {
             addStandardStuff(it,
                              deploymentRequest.environment)
-            def configJson = getConfigJson(appName,
-                                           overrideByChangingFileInZip ? [:] : propertyMap)
-            if (overrideByChangingFileInZip) {
-                zipFile = modifyZipFileWithNewProperties(zipFile,
-                                                         fileName,
-                                                         overrideByChangingFileInZip,
-                                                         propertyMap)
-            }
-            def entity = MultipartEntityBuilder.create()
-                    .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
-                    .addTextBody('configuration',
-                                 configJson)
-                    .addBinaryBody('file',
-                                   zipFile,
-                                   ContentType.APPLICATION_OCTET_STREAM,
-                                   fileName)
-                    .build()
-            setEntity(entity)
+            it.setEntity(deploymentRequest.updateHttpPayload)
             it
         } as HttpPatch
         def response = clientWrapper.execute(request)
@@ -188,17 +140,6 @@ class OnPremDeployer extends BaseDeployer implements MuleFileUtils {
         finally {
             response.close()
         }
-    }
-
-    private static String getConfigJson(String appName,
-                                        Map propertyMap) {
-        def map = [
-                'mule.agent.application.properties.service': [
-                        applicationName: appName,
-                        properties     : propertyMap
-                ]
-        ]
-        JsonOutput.toJson(map)
     }
 
     Set<OnPremDeploymentStatus> getAppStatus(String environmentName,

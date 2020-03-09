@@ -1,6 +1,12 @@
 package com.avioconsulting.jenkins.mule.impl.models
 
-class OnPremDeploymentRequest implements FileBasedDeploymentRequest {
+import groovy.json.JsonOutput
+import org.apache.http.HttpEntity
+import org.apache.http.entity.ContentType
+import org.apache.http.entity.mime.HttpMultipartMode
+import org.apache.http.entity.mime.MultipartEntityBuilder
+
+class OnPremDeploymentRequest implements FileBasedDeploymentRequest, MuleFileUtils {
     /**
      * environment name (e.g. DEV, not GUID)
      */
@@ -55,5 +61,52 @@ class OnPremDeploymentRequest implements FileBasedDeploymentRequest {
              app,
              appProperties)
         this.overrideByChangingFileInZip = overrideByChangingFileInZip
+    }
+
+    private String getConfigJson() {
+        def map = [
+                'mule.agent.application.properties.service': [
+                        applicationName: appName,
+                        properties     : overrideByChangingFileInZip ? [:] : appProperties
+                ]
+        ]
+        JsonOutput.toJson(map)
+    }
+
+    private InputStream getFixedApp() {
+        overrideByChangingFileInZip ? modifyZipFileWithNewProperties(app,
+                                                                     fileName,
+                                                                     overrideByChangingFileInZip,
+                                                                     appProperties) : app
+    }
+
+    HttpEntity getUpdateHttpPayload() {
+        def configJson = getConfigJson()
+        MultipartEntityBuilder.create()
+                .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+                .addTextBody('configuration',
+                             configJson)
+                .addBinaryBody('file',
+                               fixedApp,
+                               ContentType.APPLICATION_OCTET_STREAM,
+                               fileName)
+                .build()
+    }
+
+    HttpEntity getHttpPayload(String serverId) {
+        def configJson = getConfigJson()
+        MultipartEntityBuilder.create()
+                .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
+                .addTextBody('targetId',
+                             serverId)
+                .addTextBody('artifactName',
+                             appName)
+                .addTextBody('configuration',
+                             configJson)
+                .addBinaryBody('file',
+                               fixedApp,
+                               ContentType.APPLICATION_OCTET_STREAM,
+                               fileName)
+                .build()
     }
 }
