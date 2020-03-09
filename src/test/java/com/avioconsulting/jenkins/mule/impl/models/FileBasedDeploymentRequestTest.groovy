@@ -1,32 +1,18 @@
 package com.avioconsulting.jenkins.mule.impl.models
 
+import groovy.transform.Canonical
 import org.junit.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
-class MuleFileUtilsTest {
-    class DummyRequest implements MuleFileUtils {
-        @Override
-        String getFileName() {
-            return null
-        }
-
-        @Override
-        InputStream getApp() {
-            return null
-        }
-
-        @Override
-        String getOverrideByChangingFileInZip() {
-            return null
-        }
-
-        @Override
-        Map<String, String> getAppProperties() {
-            return null
-        }
+class FileBasedDeploymentRequestTest {
+    @Canonical
+    class DummyRequest implements FileBasedDeploymentRequest {
+        String fileName, overrideByChangingFileInZip
+        InputStream app
+        Map<String, String> appProperties
     }
 
     @Test
@@ -40,13 +26,13 @@ class MuleFileUtilsTest {
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
         def inputStream = new FileInputStream(zipFile)
-        def request = new DummyRequest()
+        def request = new DummyRequest(zipFile.name,
+                                       'api.dev.properties',
+                                       inputStream,
+                                       [:])
 
         // act
-        def stream = request.modifyZipFileWithNewProperties(inputStream,
-                                                            zipFile.name,
-                                                            'api.dev.properties',
-                                                            [:])
+        def stream = request.modifyZipFileWithNewProperties()
 
         // assert
         assertThat 'No properties to change so do not do anything',
@@ -64,15 +50,15 @@ class MuleFileUtilsTest {
         }
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
-        def request = new DummyRequest()
+        def request = new DummyRequest(zipFile.name,
+                                       'api.dev.properties',
+                                       zipFile.newInputStream(),
+                                       [
+                                               existing: 'changed'
+                                       ])
 
         // act
-        def stream = request.modifyZipFileWithNewProperties(new FileInputStream(zipFile),
-                                                            zipFile.name,
-                                                            'api.dev.properties',
-                                                            [
-                                                                    existing: 'changed'
-                                                            ])
+        def stream = request.modifyZipFileWithNewProperties()
 
         // assert
         def destination = new File('target/temp/modifiedapp')
@@ -111,15 +97,15 @@ class MuleFileUtilsTest {
         }
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
-        def request = new DummyRequest()
+        def request = new DummyRequest(zipFile.name,
+                                       'api.dev.properties',
+                                       zipFile.newInputStream(),
+                                       [
+                                               mule4_existing: 'changed'
+                                       ])
 
         // act
-        def stream = request.modifyZipFileWithNewProperties(new FileInputStream(zipFile),
-                                                            zipFile.name,
-                                                            'api.dev.properties',
-                                                            [
-                                                                    mule4_existing: 'changed'
-                                                            ])
+        def stream = request.modifyZipFileWithNewProperties()
 
         // assert
         def destination = new File('target/temp/modifiedapp')
@@ -151,15 +137,15 @@ class MuleFileUtilsTest {
         }
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
-        def request = new DummyRequest()
+        def request = new DummyRequest(zipFile.name,
+                                       'doesnotexist',
+                                       zipFile.newInputStream(),
+                                       [
+                                               existing: 'changed'
+                                       ])
 
         // act
-        def stream = request.modifyZipFileWithNewProperties(new FileInputStream(zipFile),
-                                                            zipFile.name,
-                                                            'doesnotexist',
-                                                            [
-                                                                    existing: 'changed'
-                                                            ])
+        def stream = request.modifyZipFileWithNewProperties()
 
         stream.bytes
     }

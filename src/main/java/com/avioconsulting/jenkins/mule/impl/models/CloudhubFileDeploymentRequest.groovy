@@ -6,7 +6,7 @@ import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
 
-class CloudhubFileDeploymentRequest extends BaseCloudhubDeploymentRequest implements MuleFileUtils, FileBasedDeploymentRequest {
+class CloudhubFileDeploymentRequest extends BaseCloudhubDeploymentRequest implements FileBasedDeploymentRequest {
     /**
      * Stream of the ZIP/JAR containing the application to deploy
      */

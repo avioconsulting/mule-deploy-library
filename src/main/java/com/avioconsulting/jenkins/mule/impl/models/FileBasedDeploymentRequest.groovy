@@ -4,7 +4,7 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.io.IOUtils
 
-trait MuleFileUtils {
+trait FileBasedDeploymentRequest {
     /**
      * The filename to display in the Runtime Manager app GUI. Often used as a version for a label
      */

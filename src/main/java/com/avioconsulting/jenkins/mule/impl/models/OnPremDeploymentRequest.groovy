@@ -6,7 +6,7 @@ import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
 
-class OnPremDeploymentRequest implements FileBasedDeploymentRequest, MuleFileUtils {
+class OnPremDeploymentRequest implements FileBasedDeploymentRequest {
     /**
      * environment name (e.g. DEV, not GUID)
      */
