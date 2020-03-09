@@ -110,6 +110,9 @@ class IntegrationTest {
                                                         System.out)
         cloudHubDeployer = new CloudHubDeployer(this.clientWrapper,
                                                 environmentLocator,
+                                                10000,
+                                                // faster testing
+                                                100,
                                                 System.out)
         try {
             deleteCloudHubApp(cloudhubDeploymentRequest)
