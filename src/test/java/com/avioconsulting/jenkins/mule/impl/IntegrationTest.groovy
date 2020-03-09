@@ -1,8 +1,10 @@
 package com.avioconsulting.jenkins.mule.impl
 
-import com.avioconsulting.jenkins.mule.impl.models.AwsRegions
+import com.avioconsulting.jenkins.mule.impl.httpapi.EnvironmentLocator
+import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
+import com.avioconsulting.jenkins.mule.impl.models.CloudhubFileDeploymentRequest
+import com.avioconsulting.jenkins.mule.impl.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.jenkins.mule.impl.models.OnPremDeploymentRequest
-import com.avioconsulting.jenkins.mule.impl.models.WorkerTypes
 import org.apache.maven.shared.invoker.DefaultInvocationRequest
 import org.apache.maven.shared.invoker.DefaultInvoker
 import org.junit.Before
@@ -27,6 +29,9 @@ class IntegrationTest {
     public static final String AVIO_ENVIRONMENT_DEV = 'DEV'
     private CloudHubDeployer cloudHubDeployer
     private OnPremDeployer onPremDeployer
+    private HttpClientWrapper clientWrapper
+    private CloudhubFileDeploymentRequest cloudhubDeploymentRequest
+    private OnPremDeploymentRequest onPremDeploymentRequest
 
     private static File getProjectDir(String proj) {
         def pomFileUrl = IntegrationTest.getResource("/${proj}/pom.xml")
@@ -59,51 +64,55 @@ class IntegrationTest {
         assert result.exitCode == 0
     }
 
-    def getFullAppName(String appName,
-                       String prefix,
-                       String environment) {
-        cloudHubDeployer.normalizeAppName(appName,
-                                          prefix,
-                                          environment)
-    }
-
-    def deleteCloudHubApp(String appName,
-                          String prefix,
-                          String environment) {
-        appName = getFullAppName(appName,
-                                 prefix,
-                                 environment)
-        def environmentId = cloudHubDeployer.locateEnvironment(environment)
+    def deleteCloudHubApp(CloudhubFileDeploymentRequest request) {
+        def appName = request.normalizedAppName
         println "Attempting to clean out existing app ${appName}"
-        cloudHubDeployer.deleteApp(environmentId,
-                                   appName)
+        cloudHubDeployer.deleteApp(request.environment,
+                                   request.normalizedAppName)
         println 'Waiting for app deletion to finish'
-        cloudHubDeployer.waitForAppDeletion(environmentId,
+        cloudHubDeployer.waitForAppDeletion(request.environment,
                                             appName)
     }
 
-    def deleteOnPremApp(String appName,
-                        String environment) {
-        def environmentId = onPremDeployer.locateEnvironment(environment)
-        def existingAppId = onPremDeployer.locateApplication(environmentId,
-                                                             appName)
+    def deleteOnPremApp(OnPremDeploymentRequest request) {
+        def existingAppId = onPremDeployer.locateApplication(request.environment,
+                                                             request.appName)
         if (existingAppId) {
-            onPremDeployer.deleteApp(environmentId,
+            onPremDeployer.deleteApp(request.environment,
                                      existingAppId)
         }
     }
 
     @Before
     void cleanup() {
-        cloudHubDeployer = new CloudHubDeployer(AVIO_ORG_ID,
-                                                ANYPOINT_USERNAME,
-                                                ANYPOINT_PASSWORD,
+        onPremDeploymentRequest = new OnPremDeploymentRequest(AVIO_ENVIRONMENT_DEV,
+                                                              ONPREM_APP_NAME,
+                                                              ON_PREM_SERVER_NAME,
+                                                              builtFile.name,
+                                                              builtFile.newInputStream(),
+                                                              [env: AVIO_ENVIRONMENT_DEV])
+        cloudhubDeploymentRequest = new CloudhubFileDeploymentRequest(builtFile.newInputStream(),
+                                                                      AVIO_ENVIRONMENT_DEV,
+                                                                      CLOUDHUB_APP_NAME,
+                                                                      new CloudhubWorkerSpecRequest('4.2.2',
+                                                                                                    false,
+                                                                                                    1),
+                                                                      builtFile.name,
+                                                                      'abcdefg',
+                                                                      'someid',
+                                                                      'somesecret',
+                                                                      CLOUDHUB_APP_PREFIX)
+        clientWrapper = new HttpClientWrapper(ANYPOINT_USERNAME,
+                                              ANYPOINT_PASSWORD,
+                                              AVIO_ORG_ID,
+                                              System.out)
+        def environmentLocator = new EnvironmentLocator(this.clientWrapper,
+                                                        System.out)
+        cloudHubDeployer = new CloudHubDeployer(this.clientWrapper,
+                                                environmentLocator,
                                                 System.out)
-        cloudHubDeployer.authenticate()
         try {
-            deleteCloudHubApp(CLOUDHUB_APP_NAME,
-                              CLOUDHUB_APP_PREFIX,
-                              AVIO_ENVIRONMENT_DEV)
+            deleteCloudHubApp(cloudhubDeploymentRequest)
         } catch (e) {
             if (e.message.contains('HTTP 404')) {
                 println "Got ${e} while trying to delete app, no problem, it's not there"
@@ -111,40 +120,22 @@ class IntegrationTest {
                 throw e
             }
         }
-        onPremDeployer = new OnPremDeployer(AVIO_ORG_ID,
-                                            ANYPOINT_USERNAME,
-                                            ANYPOINT_PASSWORD,
+        onPremDeployer = new OnPremDeployer(this.clientWrapper,
+                                            environmentLocator,
                                             System.out)
-        onPremDeployer.authenticate()
     }
 
     @Test
     void cloudhub() {
         // arrange
-        def zipFile = builtFile.newInputStream()
 
         // act
         try {
-            cloudHubDeployer.deployFromFile(AVIO_ENVIRONMENT_DEV,
-                                            CLOUDHUB_APP_NAME,
-                                            CLOUDHUB_APP_PREFIX,
-                                            zipFile,
-                                            builtFile.name,
-                                            'abcdefg',
-                                            '4.2.2',
-                                            false,
-                                            WorkerTypes.Micro,
-                                            1,
-                                            'someid',
-                                            'somesecret',
-                                            AwsRegions.UsWest2)
+            cloudHubDeployer.deploy(cloudhubDeploymentRequest)
             println 'test: app deployed OK, now trying to hit its HTTP listener'
 
             // assert
-            def actualAppName = getFullAppName(CLOUDHUB_APP_NAME,
-                                               CLOUDHUB_APP_PREFIX,
-                                               AVIO_ENVIRONMENT_DEV)
-            def url = "http://${actualAppName}.us-w2.cloudhub.io/".toURL()
+            def url = "http://${cloudhubDeploymentRequest.normalizedAppName}.us-w2.cloudhub.io/".toURL()
             println "Hitting app @ ${url}"
             assertThat url.text,
                        is(equalTo('hello there'))
@@ -153,9 +144,7 @@ class IntegrationTest {
         finally {
             println 'test has finished one way or the other, now cleaning up our mess'
             // don't be dirty!
-            deleteCloudHubApp(CLOUDHUB_APP_NAME,
-                              CLOUDHUB_APP_PREFIX,
-                              AVIO_ENVIRONMENT_DEV)
+            deleteCloudHubApp(cloudhubDeploymentRequest)
         }
     }
 
@@ -165,21 +154,13 @@ class IntegrationTest {
         assumeTrue('Need a configured AND RUNNING -Dmule4.onprem.server.name to run this test',
                    ON_PREM_SERVER_NAME != '' && ON_PREM_SERVER_NAME != null)
         println 'Cleaning up existing app'
-        def deleteResult = deleteOnPremApp(ONPREM_APP_NAME,
-                                           AVIO_ENVIRONMENT_DEV)
+        def deleteResult = deleteOnPremApp(onPremDeploymentRequest)
         if (deleteResult == 404) {
             println 'Existing app does not exist, no problem'
         }
-        def zipFile = builtFile.newInputStream()
-        def request = new OnPremDeploymentRequest(AVIO_ENVIRONMENT_DEV,
-                                                  ONPREM_APP_NAME,
-                                                  ON_PREM_SERVER_NAME,
-                                                  builtFile.name,
-                                                  zipFile,
-                                                  [env: AVIO_ENVIRONMENT_DEV])
 
         // act
-        onPremDeployer.deploy(request)
+        onPremDeployer.deploy(onPremDeploymentRequest)
         println 'test: app deployed OK, now trying to hit its HTTP listener'
 
         // assert
@@ -192,8 +173,7 @@ class IntegrationTest {
         }
         finally {
             println 'test has finished one way or the other, now cleaning up our mess'
-            deleteOnPremApp(ONPREM_APP_NAME,
-                            AVIO_ENVIRONMENT_DEV)
+            deleteOnPremApp(onPremDeploymentRequest)
         }
     }
 }

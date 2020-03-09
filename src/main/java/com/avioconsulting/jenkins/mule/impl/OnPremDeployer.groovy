@@ -307,14 +307,14 @@ class OnPremDeployer extends BaseDeployer implements FileUtils {
         }
     }
 
-    def deleteApp(String environmentId,
+    def deleteApp(String environmentName,
                   String appId) {
-        def request = new HttpDelete("${baseUrl}/hybrid/api/v1/applications/${appId}").with {
+        def request = new HttpDelete("${clientWrapper.baseUrl}/hybrid/api/v1/applications/${appId}").with {
             addStandardStuff(it,
-                             environmentId)
+                             environmentName)
             it
         }
-        def response = httpClient.execute(request)
+        def response = clientWrapper.execute(request)
         response.statusLine.statusCode
     }
 }
