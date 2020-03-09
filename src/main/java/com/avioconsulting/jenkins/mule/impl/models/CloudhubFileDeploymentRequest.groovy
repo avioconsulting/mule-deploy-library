@@ -66,10 +66,7 @@ class CloudhubFileDeploymentRequest extends BaseCloudhubDeploymentRequest implem
     HttpEntity getHttpPayload() {
         def zipFile = app
         if (overrideByChangingFileInZip) {
-            zipFile = modifyZipFileWithNewProperties(zipFile,
-                                                     fileName,
-                                                     overrideByChangingFileInZip,
-                                                     appProperties)
+            zipFile = modifyZipFileWithNewProperties()
         }
         MultipartEntityBuilder.create()
                 .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)

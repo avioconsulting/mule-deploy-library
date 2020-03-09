@@ -5,18 +5,22 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.io.IOUtils
 
 trait MuleFileUtils {
-    boolean isMule4File(String zipFileName) {
-        zipFileName.endsWith('.jar')
+    abstract String getFileName()
+    abstract InputStream getApp()
+    abstract String getOverrideByChangingFileInZip()
+    abstract Map<String, String> getAppProperties()
+
+    boolean isMule4Request() {
+        getFileName().endsWith('.jar')
     }
 
-    InputStream modifyZipFileWithNewProperties(InputStream inputZipFile,
-                                               String zipFileName,
-                                               String propertiesFileToAddTo,
-                                               Map propertiesToAdd) {
+    InputStream modifyZipFileWithNewProperties() {
+        def propertiesToAdd = getAppProperties()
         if (propertiesToAdd.isEmpty()) {
-            return inputZipFile
+            return getApp()
         }
-        def isMule4 = isMule4File(zipFileName)
+        def propertiesFileToAddTo = getOverrideByChangingFileInZip()
+        def isMule4 = isMule4Request()
         // Mule 4 props files live at the root of the JAR. Mule 3's are in a classes subdirectory
         propertiesFileToAddTo = isMule4 ? propertiesFileToAddTo : "classes/${propertiesFileToAddTo}"
         def factory = new ArchiveStreamFactory()
@@ -24,7 +28,7 @@ trait MuleFileUtils {
         // complain if it's not set right
         def format = isMule4 ? ArchiveStreamFactory.JAR : ArchiveStreamFactory.ZIP
         def archiveIn = factory.createArchiveInputStream(format,
-                                                         inputZipFile)
+                                                         getApp())
         def pos = new PipedOutputStream()
         def archiveOut = factory.createArchiveOutputStream(format,
                                                            pos)

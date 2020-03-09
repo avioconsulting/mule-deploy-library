@@ -74,10 +74,7 @@ class OnPremDeploymentRequest implements FileBasedDeploymentRequest, MuleFileUti
     }
 
     private InputStream getFixedApp() {
-        overrideByChangingFileInZip ? modifyZipFileWithNewProperties(app,
-                                                                     fileName,
-                                                                     overrideByChangingFileInZip,
-                                                                     appProperties) : app
+        overrideByChangingFileInZip ? modifyZipFileWithNewProperties() : app
     }
 
     HttpEntity getUpdateHttpPayload() {

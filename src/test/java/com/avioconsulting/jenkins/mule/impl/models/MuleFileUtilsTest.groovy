@@ -8,6 +8,25 @@ import static org.hamcrest.Matchers.is
 
 class MuleFileUtilsTest {
     class DummyRequest implements MuleFileUtils {
+        @Override
+        String getFileName() {
+            return null
+        }
+
+        @Override
+        InputStream getApp() {
+            return null
+        }
+
+        @Override
+        String getOverrideByChangingFileInZip() {
+            return null
+        }
+
+        @Override
+        Map<String, String> getAppProperties() {
+            return null
+        }
     }
 
     @Test
