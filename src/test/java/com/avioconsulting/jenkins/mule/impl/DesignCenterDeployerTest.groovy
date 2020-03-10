@@ -1,7 +1,7 @@
 package com.avioconsulting.jenkins.mule.impl
 
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
-import com.avioconsulting.jenkins.mule.impl.models.FileBasedDeploymentRequest
+import com.avioconsulting.jenkins.mule.impl.models.AppFileInfo
 import com.avioconsulting.jenkins.mule.impl.models.RamlFile
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServer
@@ -72,15 +72,11 @@ class DesignCenterDeployerTest implements HttpServerUtils {
         FileUtils.deleteQuietly(zipFile)
         antBuilder.zip(destfile: zipFile,
                        basedir: tempAppDirectory)
-        def request = new FileBasedDeploymentRequest() {
-            @Override
-            InputStream getApp() {
-                zipFile.newInputStream()
-            }
-        }
+        def request = new AppFileInfo(zipFile.name,
+                                      zipFile.newInputStream())
 
         // act
-        def result = deployer.getRamlFilesFromApp(request)
+        def result = deployer.getRamlFilesFromApp(request).sort()
 
         // assert
         assertThat result,

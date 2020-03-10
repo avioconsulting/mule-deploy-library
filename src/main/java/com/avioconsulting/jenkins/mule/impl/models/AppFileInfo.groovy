@@ -1,6 +1,8 @@
 package com.avioconsulting.jenkins.mule.impl.models
 
 import groovy.transform.Canonical
+import org.apache.commons.compress.archivers.ArchiveInputStream
+import org.apache.commons.compress.archivers.ArchiveStreamFactory
 
 @Canonical
 class AppFileInfo {
@@ -15,5 +17,17 @@ class AppFileInfo {
 
     boolean isMule4Request() {
         fileName.endsWith('.jar')
+    }
+
+    String getArchiveFormat() {
+        // small semantic difference between JAR and ZIP and on-prem/Mule 4 Runtime Manager will
+        // complain if it's not set right
+        mule4Request ? ArchiveStreamFactory.JAR : ArchiveStreamFactory.ZIP
+    }
+
+    ArchiveInputStream openArchiveStream() {
+        def factory = new ArchiveStreamFactory()
+        factory.createArchiveInputStream(archiveFormat,
+                                         app)
     }
 }

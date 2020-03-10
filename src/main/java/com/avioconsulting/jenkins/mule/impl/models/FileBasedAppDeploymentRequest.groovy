@@ -14,14 +14,10 @@ trait FileBasedAppDeploymentRequest {
         def isMule4 = appFileInfo.isMule4Request()
         // Mule 4 props files live at the root of the JAR. Mule 3's are in a classes subdirectory
         propertiesFileToAddTo = isMule4 ? propertiesFileToAddTo : "classes/${propertiesFileToAddTo}"
-        def factory = new ArchiveStreamFactory()
-        // small semantic difference between JAR and ZIP and on-prem/Mule 4 Runtime Manager will
-        // complain if it's not set right
-        def format = isMule4 ? ArchiveStreamFactory.JAR : ArchiveStreamFactory.ZIP
-        def archiveIn = factory.createArchiveInputStream(format,
-                                                         appFileInfo.app)
+        def archiveIn = appFileInfo.openArchiveStream()
         def pos = new PipedOutputStream()
-        def archiveOut = factory.createArchiveOutputStream(format,
+        def factory = new ArchiveStreamFactory()
+        def archiveOut = factory.createArchiveOutputStream(appFileInfo.archiveFormat,
                                                            pos)
         Thread.start {
             ZipArchiveEntry inputEntry
