@@ -12,9 +12,9 @@ class DesignCenterDeployer {
     private final HttpClientWrapper clientWrapper
     private final PrintStream logger
     private static final List<String> IGNORE_DC_FILES = [
-            'exchange_modules',
+            'exchange_modules', // we don't deal with Exchange dependencies
             '.gitignore',
-            'exchange.json',
+            'exchange.json', // see above
             '.designer.json'
     ]
 
