@@ -45,7 +45,8 @@ class DesignCenterDeployer {
                 inputEntryFile = relativeToApiDirectory.toFile()
                 def parentFile = inputEntryFile.parentFile
                 if (!IGNORE_DC_FILES.contains(inputEntryFile.name) && !IGNORE_DC_FILES.contains(parentFile?.name)) {
-                    def nonWindowsPath = inputEntryFile.toString()
+                    def nonWindowsPath = inputEntryFile
+                            .toString()
                             .replace(File.separator,
                                      '/')
                     // Design center will always use this syntax even if we're running this code on Windows
@@ -54,7 +55,7 @@ class DesignCenterDeployer {
                                                              Charset.defaultCharset()))
                 }
             }
-            results
+            return results
         } finally {
             archiveIn.close()
         }
