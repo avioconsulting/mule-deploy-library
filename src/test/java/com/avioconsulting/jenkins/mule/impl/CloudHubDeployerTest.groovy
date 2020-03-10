@@ -56,9 +56,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String envId = null
         String orgId = null
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -111,9 +109,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void check_deployment_status_failed() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -155,9 +151,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void check_deployment_status_started() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -200,9 +194,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void check_deployment_status_starting() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -278,9 +270,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -397,9 +387,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -513,9 +501,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         Map sentBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -635,9 +621,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -760,9 +744,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -899,9 +881,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1018,9 +998,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1145,9 +1123,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1268,9 +1244,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1398,9 +1372,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1537,9 +1509,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         // arrange
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1609,9 +1579,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         def firstCheck = true
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1735,9 +1703,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         def firstCheck = true
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1897,9 +1863,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         def deployed = false
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -2007,9 +1971,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         def deployed = false
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -2109,9 +2071,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
     def mockInitialDeployment(HttpServerRequest request) {
         def uri = request.absoluteURI()
-        if (uri == 'http://localhost:8080/accounts/login') {
-            return mockAuthenticationOk(request)
-        }
+        mockAuthenticationOk(request)
         request.response().with {
             statusCode = 200
             putHeader('Content-Type',
@@ -2404,9 +2364,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String envId = null
         String orgId = null
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -2444,9 +2402,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getAppStatus_undeployed() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -2473,9 +2429,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getAppStatus_failed() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -2502,9 +2456,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getAppStatus_started() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -2531,9 +2483,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getAppStatus_not_found() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -2556,9 +2506,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getAppStatus_unknown() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }

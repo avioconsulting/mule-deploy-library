@@ -56,9 +56,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         String envId = null
         String orgId = null
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -105,9 +103,7 @@ class OnPremDeployerTest implements HttpServerUtils {
     void locate_server_or_cluster_found_server() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -143,9 +139,7 @@ class OnPremDeployerTest implements HttpServerUtils {
     void locate_server_or_cluster_found_cluster() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -183,9 +177,7 @@ class OnPremDeployerTest implements HttpServerUtils {
     void locate_server_or_cluster_not_found() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -230,9 +222,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         String envId = null
         String orgId = null
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -279,9 +269,7 @@ class OnPremDeployerTest implements HttpServerUtils {
     void locate_app_not_found() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -318,9 +306,7 @@ class OnPremDeployerTest implements HttpServerUtils {
     void locate_app_found() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -364,9 +350,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -501,9 +485,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -633,7 +615,6 @@ class OnPremDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_new_app_property_overrides_via_zip_file() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -646,11 +627,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         }
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -822,9 +799,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -946,7 +921,6 @@ class OnPremDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_existing_app_property_overrides_via_runtime_manager() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -956,11 +930,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1095,9 +1065,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         }
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -1245,9 +1213,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         String envId = null
         String orgId = null
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -1306,9 +1272,7 @@ class OnPremDeployerTest implements HttpServerUtils {
     void check_deployment_status_failed() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -1355,9 +1319,7 @@ class OnPremDeployerTest implements HttpServerUtils {
     void check_deployment_status_started() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -1404,9 +1366,7 @@ class OnPremDeployerTest implements HttpServerUtils {
     void check_deployment_status_starting() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -1453,9 +1413,7 @@ class OnPremDeployerTest implements HttpServerUtils {
     void check_deployment_status_multiple_servers() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
                 return mockEnvironments(request)
             }
@@ -1511,9 +1469,7 @@ class OnPremDeployerTest implements HttpServerUtils {
 
     def mockInitialDeployment(HttpServerRequest request) {
         def uri = request.absoluteURI()
-        if (uri == 'http://localhost:8080/accounts/login') {
-            return mockAuthenticationOk(request)
-        }
+        mockAuthenticationOk(request)
         if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
             return mockEnvironments(request)
         }

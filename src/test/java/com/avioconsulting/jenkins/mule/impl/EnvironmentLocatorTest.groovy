@@ -46,9 +46,7 @@ class EnvironmentLocatorTest implements HttpServerUtils {
         String method = null
         String authToken = null
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             url = request.absoluteURI()
             method = request.method()
             authToken = request.getHeader('Authorization')
@@ -89,9 +87,7 @@ class EnvironmentLocatorTest implements HttpServerUtils {
     void getEnvironmentId_not_found() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -125,9 +121,7 @@ class EnvironmentLocatorTest implements HttpServerUtils {
     void getEnvironmentId_401() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
-            }
+            mockAuthenticationOk(request)
             request.response().with {
                 statusCode = 401
                 putHeader('Content-Type',
