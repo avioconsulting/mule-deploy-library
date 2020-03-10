@@ -50,12 +50,14 @@ class DesignCenterDeployerTest implements HttpServerUtils {
         tempAppDirectory.mkdirs()
         def apiDirectory = new File(tempAppDirectory,
                                     'api')
-        FileUtils.touch(new File(apiDirectory,
-                                 'stuff.yaml'))
+        def file = new File(apiDirectory,
+                            'stuff.yaml')
+        FileUtils.touch(file)
+        file.text = 'howdy2'
         def folder = new File(apiDirectory,
                               'folder')
-        def file = new File(folder,
-                            'lib.yaml')
+        file = new File(folder,
+                        'lib.yaml')
         FileUtils.touch(file)
         file.text = 'howdy1'
         def exchangeModules = new File(apiDirectory,
@@ -63,7 +65,6 @@ class DesignCenterDeployerTest implements HttpServerUtils {
         file = new File(exchangeModules,
                         'junk')
         FileUtils.touch(file)
-        file.text = 'howdy2'
         FileUtils.touch(new File(apiDirectory,
                                  'exchange.json'))
         def antBuilder = new AntBuilder()
@@ -76,14 +77,15 @@ class DesignCenterDeployerTest implements HttpServerUtils {
                                       zipFile.newInputStream())
 
         // act
-        def result = deployer.getRamlFilesFromApp(request).sort()
+        def result = deployer.getRamlFilesFromApp(request)
+                .sort { item -> item.fileName } // consistent for test
 
         // assert
         assertThat result,
                    is(equalTo([
-                           new RamlFile('stuff.yaml',
-                                        'howdy1'),
                            new RamlFile('folder/lib.yaml',
+                                        'howdy1'),
+                           new RamlFile('stuff.yaml',
                                         'howdy2')
                    ]))
     }

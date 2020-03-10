@@ -4,6 +4,9 @@ import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.models.AppFileInfo
 import com.avioconsulting.jenkins.mule.impl.models.RamlFile
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
+import org.apache.commons.io.IOUtils
+
+import java.nio.charset.Charset
 
 class DesignCenterDeployer {
     private final HttpClientWrapper clientWrapper
@@ -39,7 +42,8 @@ class DesignCenterDeployer {
                             .replace(File.separator,
                                      '/') // Design center will always use this syntax
                     results << new RamlFile(nonWindowsPath,
-                                            'foobar')
+                                            IOUtils.toString(archiveIn,
+                                                             Charset.defaultCharset()))
                 }
             }
             results
