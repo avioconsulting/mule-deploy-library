@@ -36,16 +36,17 @@ class DesignCenterDeployer {
                     continue
                 }
                 def inputEntryFile = new File(inputEntry.name)
-                if (!inputEntryFile.toPath().startsWith(apiDirectoryPath)) {
+                def inputEntryPath = inputEntryFile.toPath()
+                if (!inputEntryPath.startsWith(apiDirectoryPath)) {
                     continue
                 }
-                def relativeToApiDirectory = apiDirectoryPath.relativize(inputEntryFile.toPath())
+                def relativeToApiDirectory = apiDirectoryPath.relativize(inputEntryPath)
                 inputEntryFile = relativeToApiDirectory.toFile()
                 if (!IGNORE_DC_FILES.contains(inputEntryFile.name) &&
                         (!inputEntryFile.parentFile || !IGNORE_DC_FILES.contains(inputEntryFile.parentFile.name))) {
                     def nonWindowsPath = inputEntryFile.toString()
                             .replace(File.separator,
-                                     '/') // Design center will always use this syntax
+                                     '/') // Design center will always use this syntax even if we're running this code on Windows
                     results << new RamlFile(nonWindowsPath,
                                             IOUtils.toString(archiveIn,
                                                              Charset.defaultCharset()))
