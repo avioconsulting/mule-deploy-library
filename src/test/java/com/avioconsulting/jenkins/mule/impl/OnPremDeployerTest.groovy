@@ -57,9 +57,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         String orgId = null
         withHttpServer { HttpServerRequest request ->
             mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-                return mockEnvironments(request)
-            }
+            mockEnvironments(request)
             url = request.absoluteURI()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -104,9 +102,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         // arrange
         withHttpServer { HttpServerRequest request ->
             mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-                return mockEnvironments(request)
-            }
+            mockEnvironments(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -140,9 +136,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         // arrange
         withHttpServer { HttpServerRequest request ->
             mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-                return mockEnvironments(request)
-            }
+            mockEnvironments(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -178,9 +172,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         // arrange
         withHttpServer { HttpServerRequest request ->
             mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-                return mockEnvironments(request)
-            }
+            mockEnvironments(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -223,9 +215,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         String orgId = null
         withHttpServer { HttpServerRequest request ->
             mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-                return mockEnvironments(request)
-            }
+            mockEnvironments(request)
             url = request.absoluteURI()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -270,9 +260,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         // arrange
         withHttpServer { HttpServerRequest request ->
             mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-                return mockEnvironments(request)
-            }
+            mockEnvironments(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -307,9 +295,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         // arrange
         withHttpServer { HttpServerRequest request ->
             mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-                return mockEnvironments(request)
-            }
+            mockEnvironments(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -351,9 +337,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-                return mockEnvironments(request)
-            }
+            mockEnvironments(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -486,9 +470,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-                return mockEnvironments(request)
-            }
+            mockEnvironments(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -800,9 +782,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-                return mockEnvironments(request)
-            }
+            mockEnvironments(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1066,9 +1046,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
             mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-                return mockEnvironments(request)
-            }
+            mockEnvironments(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1214,9 +1192,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         String orgId = null
         withHttpServer { HttpServerRequest request ->
             mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-                return mockEnvironments(request)
-            }
+            mockEnvironments(request)
             url = request.absoluteURI()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1273,9 +1249,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         // arrange
         withHttpServer { HttpServerRequest request ->
             mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-                return mockEnvironments(request)
-            }
+            mockEnvironments(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1320,9 +1294,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         // arrange
         withHttpServer { HttpServerRequest request ->
             mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-                return mockEnvironments(request)
-            }
+            mockEnvironments(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1367,9 +1339,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         // arrange
         withHttpServer { HttpServerRequest request ->
             mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-                return mockEnvironments(request)
-            }
+            mockEnvironments(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1414,9 +1384,7 @@ class OnPremDeployerTest implements HttpServerUtils {
         // arrange
         withHttpServer { HttpServerRequest request ->
             mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-                return mockEnvironments(request)
-            }
+            mockEnvironments(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1470,9 +1438,7 @@ class OnPremDeployerTest implements HttpServerUtils {
     def mockInitialDeployment(HttpServerRequest request) {
         def uri = request.absoluteURI()
         mockAuthenticationOk(request)
-        if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
-            return mockEnvironments(request)
-        }
+        mockEnvironments(request)
         def result = null
         if (uri.endsWith('environments')) {
             result = [
