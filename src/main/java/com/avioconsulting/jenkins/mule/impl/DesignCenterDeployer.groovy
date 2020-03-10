@@ -4,6 +4,7 @@ import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.httpapi.LazyHeader
 import com.avioconsulting.jenkins.mule.impl.models.AppFileInfo
 import com.avioconsulting.jenkins.mule.impl.models.RamlFile
+import groovy.json.JsonSlurper
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.io.IOUtils
 import org.apache.http.client.methods.HttpGet
@@ -77,9 +78,14 @@ class DesignCenterDeployer {
                         !IGNORE_DC_FILES.contains(asFile.name) &&
                         !IGNORE_DC_FILES.contains(asFile.parentFile?.name)
             }
+            def jsonSlurper = new JsonSlurper()
             return filesWeCareAbout.collect { result ->
-                new RamlFile(result.path,
-                             'nope')
+                def file = result.path
+                executeDesignCenterRequest(new HttpGet("${url}/${file}"),
+                                           "Fetching file ${file}") { String contentsAsJson ->
+                    new RamlFile(file,
+                                 jsonSlurper.parseText(contentsAsJson))
+                }
             }
         }
     }
