@@ -503,14 +503,101 @@ class DesignCenterDeployerTest implements HttpServerUtils {
                    ]))
     }
 
+    static def mockDesignCenterProjectId(HttpServerRequest request,
+                                         String projectName,
+                                         String projectId) {
+        def mocked = false
+        if (request.absoluteURI() == 'http://localhost:8080/designcenter/api-designer/projects') {
+            mocked = true
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                end(JsonOutput.toJson([
+                        [
+                                id  : projectId,
+                                name: projectName
+                        ]
+                ]))
+            }
+        }
+        mocked
+    }
+
+    static def mockFileUpload(HttpServerRequest request,
+                              String projectId) {
+        def mocked = false
+        if (request.absoluteURI() == "http://localhost:8080/designcenter/api-designer/projects/${projectId}/branches/master/save?commit=true&message=fromAPI") {
+            mocked = true
+            request.response().with {
+                statusCode = 204
+                end()
+            }
+        }
+        mocked
+    }
+
+    static def mockExchangePush(HttpServerRequest request,
+                                String projectId) {
+        def mocked = false
+        if (request.absoluteURI() == "http://localhost:8080/designcenter/api-designer/projects/${projectId}/branches/master/publish/exchange") {
+            mocked = true
+            request.response().with {
+                statusCode = 204
+                end()
+            }
+        }
+        mocked
+    }
+
     @Test
     void synchronizeDesignCenter_no_existing_files() {
         // arrange
+        def filesUploaded = false
+        def exchangePushed = false
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockDesignCenterProjectId(request,
+                                          'Hello API',
+                                          'abcd')) {
+                return
+            }
+            if (mockFileUpload(request,
+                               'abcd')) {
+                filesUploaded = true
+                return
+            }
+            if (mockExchangePush(request,
+                                 'abcd')) {
+                exchangePushed = true
+                return
+            }
+            request.response().with {
+                statusCode = 404
+                end("Unexpected request ${request.absoluteURI()}")
+            }
+        }
+        def apiSpec = new ApiSpecification('Hello API')
+        def files = [
+                new RamlFile('file1.raml',
+                             'the contents'),
+                new RamlFile('file2.raml',
+                             'the contents2')
+        ]
 
         // act
+        deployer.synchronizeDesignCenter(apiSpec,
+                                         files,
+                                         '1.2.3')
 
         // assert
-        Assert.fail("write it")
+        assertThat filesUploaded,
+                   is(equalTo(true))
+        assertThat exchangePushed,
+                   is(equalTo(true))
+        Assert.fail("write it, need to add acquire and release locks")
     }
 
     @Test
