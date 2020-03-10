@@ -7,6 +7,7 @@ import com.avioconsulting.jenkins.mule.impl.models.RamlFile
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.io.IOUtils
 import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.HttpUriRequest
 
 import java.nio.charset.Charset
 
@@ -27,9 +28,10 @@ class DesignCenterDeployer {
         this.clientWrapper = clientWrapper
     }
 
-    String getDesignCenterProjectId(String projectName) {
-        logger.println "Looking up ID for Design Center project '${projectName}'"
-        def request = new HttpGet("${clientWrapper.baseUrl}/designcenter/api-designer/projects").with {
+    private def executeDesignCenterRequest(HttpUriRequest request,
+                                           String failureContext,
+                                           Closure resultHandler) {
+        request.with {
             setHeader('X-ORGANIZATION-ID',
                       clientWrapper.anypointOrganizationId)
             setHeader('cache-control',
@@ -39,11 +41,18 @@ class DesignCenterDeployer {
                                      {
                                          clientWrapper.ownerGuid
                                      }))
-            it
         }
+        return clientWrapper.executeWithSuccessfulCloseableResponse(request,
+                                                                    failureContext,
+                                                                    resultHandler)
+    }
+
+    String getDesignCenterProjectId(String projectName) {
+        logger.println "Looking up ID for Design Center project '${projectName}'"
+        def request = new HttpGet("${clientWrapper.baseUrl}/designcenter/api-designer/projects")
         def failureContext = "fetch design center project ID for '${projectName}'"
-        clientWrapper.executeWithSuccessfulCloseableResponse(request,
-                                                             failureContext) { results ->
+        executeDesignCenterRequest(request,
+                                   failureContext) { results ->
             def id = results.find { result ->
                 result.name == projectName
             }?.id
@@ -57,7 +66,16 @@ class DesignCenterDeployer {
     }
 
     List<RamlFile> getExistingDesignCenterFiles(String projectId) {
-        []
+        logger.println('Fetching existing Design Center RAML files')
+        def url = "${clientWrapper.baseUrl}/designcenter/api-designer/projects/${projectId}/branches/master/files"
+        def request = new HttpGet(url)
+        executeDesignCenterRequest(request,
+                                   'Fetching project files') { results ->
+            results.collect { result ->
+                new RamlFile(result.path,
+                             'nope')
+            }
+        }
     }
 
     List<RamlFile> getRamlFilesFromApp(AppFileInfo deploymentRequest) {
