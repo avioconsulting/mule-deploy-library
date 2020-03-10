@@ -172,8 +172,11 @@ class DesignCenterDeployer {
                        String projectId,
                        List<RamlFile> ramlFiles,
                        String appVersion) {
+        def mainRamlFile = apiSpec.mainRamlFile ?: ramlFiles.find { ramlFile ->
+            new File(ramlFile.fileName).parentFile == null
+        }.fileName
         def requestPayload = [
-                main      : apiSpec.mainRamlFile,
+                main      : mainRamlFile,
                 apiVersion: apiSpec.apiMajorVersion,
                 version   : appVersion,
                 assetId   : apiSpec.exchangeAssetId,
