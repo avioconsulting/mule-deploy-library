@@ -1,6 +1,7 @@
 package com.avioconsulting.jenkins.mule.impl
 
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
+import com.avioconsulting.jenkins.mule.impl.models.ApiSpecification
 import com.avioconsulting.jenkins.mule.impl.models.AppFileInfo
 import com.avioconsulting.jenkins.mule.impl.models.RamlFile
 import groovy.json.JsonOutput
@@ -372,6 +373,132 @@ class DesignCenterDeployerTest implements HttpServerUtils {
                                    path   : 'file2.raml',
                                    content: 'the contents2'
                            ]
+                   ]))
+    }
+
+    @Test
+    void pushToExchange_no_main_raml_file_specified() {
+        // arrange
+        String anypointOrgId = null
+        String url = null
+        String method = null
+        String ownerGuid = null
+        Map sentPayload = null
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            anypointOrgId = request.getHeader('X-ORGANIZATION-ID')
+            url = request.absoluteURI()
+            method = request.method().toString()
+            ownerGuid = request.getHeader('X-OWNER-ID')
+            request.bodyHandler { body ->
+                sentPayload = new JsonSlurper().parseText(body.toString())
+            }
+            request.response().with {
+                statusCode = 204
+                end()
+            }
+        }
+        def apiSpec = new ApiSpecification('Hello API')
+        def files = [
+                new RamlFile('folder/file3.raml',
+                             'the contents3'),
+                new RamlFile('file1.raml',
+                             'the contents'),
+                new RamlFile('file2.raml',
+                             'the contents2')
+        ]
+
+        // act
+        deployer.pushToExchange(apiSpec,
+                                'ourprojectId',
+                                files,
+                                '1.2.3')
+
+        // assert
+        assertThat method,
+                   is(equalTo('POST'))
+        assertThat url,
+                   is(equalTo('http://localhost:8080/designcenter/api-designer/projects/ourprojectId/branches/master/publish/exchange'))
+        assertThat anypointOrgId,
+                   is(equalTo('the-org-id'))
+        assertThat 'Design center needs this',
+                   ownerGuid,
+                   is(equalTo('the_id'))
+        assertThat sentPayload,
+                   is(equalTo([
+                           main      : 'file1.raml',
+                           apiVersion: 'v1',
+                           version   : '1.2.3',
+                           assetId   : 'hello-api',
+                           name      : 'Hello API',
+                           groupId   : 'the-org-id',
+                           classifier: 'raml'
+                   ]))
+    }
+
+    @Test
+    void pushToExchange_main_raml_file_specified() {
+        // arrange
+        String anypointOrgId = null
+        String url = null
+        String method = null
+        String ownerGuid = null
+        Map sentPayload = null
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            anypointOrgId = request.getHeader('X-ORGANIZATION-ID')
+            url = request.absoluteURI()
+            method = request.method().toString()
+            ownerGuid = request.getHeader('X-OWNER-ID')
+            request.bodyHandler { body ->
+                sentPayload = new JsonSlurper().parseText(body.toString())
+            }
+            request.response().with {
+                statusCode = 204
+                end()
+            }
+        }
+        def apiSpec = new ApiSpecification('Hello API',
+                                           'v1',
+                                           'file2.raml')
+        def files = [
+                new RamlFile('folder/file3.raml',
+                             'the contents3'),
+                new RamlFile('file1.raml',
+                             'the contents'),
+                new RamlFile('file2.raml',
+                             'the contents2')
+        ]
+
+        // act
+        deployer.pushToExchange(apiSpec,
+                                'ourprojectId',
+                                files,
+                                '1.2.3')
+
+        // assert
+        assertThat method,
+                   is(equalTo('POST'))
+        assertThat url,
+                   is(equalTo('http://localhost:8080/designcenter/api-designer/projects/ourprojectId/branches/master/publish/exchange'))
+        assertThat anypointOrgId,
+                   is(equalTo('the-org-id'))
+        assertThat 'Design center needs this',
+                   ownerGuid,
+                   is(equalTo('the_id'))
+        assertThat sentPayload,
+                   is(equalTo([
+                           main      : 'file2.raml',
+                           apiVersion: 'v1',
+                           version   : '1.2.3',
+                           assetId   : 'hello-api',
+                           name      : 'Hello API',
+                           groupId   : 'the-org-id',
+                           classifier: 'raml'
                    ]))
     }
 }

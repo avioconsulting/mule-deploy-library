@@ -2,6 +2,7 @@ package com.avioconsulting.jenkins.mule.impl
 
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.httpapi.LazyHeader
+import com.avioconsulting.jenkins.mule.impl.models.ApiSpecification
 import com.avioconsulting.jenkins.mule.impl.models.AppFileInfo
 import com.avioconsulting.jenkins.mule.impl.models.RamlFile
 import groovy.json.JsonOutput
@@ -83,13 +84,14 @@ class DesignCenterDeployer {
 
     def uploadDesignCenterFiles(String projectId,
                                 List<RamlFile> files) {
+        logger.println('Uploading files to Design Center')
         def requestPayload = files.collect { file ->
             [
                     path   : file.fileName,
                     content: file.contents
             ]
         }
-        def request = new HttpPost("${clientWrapper.baseUrl}/designcenter/api-designer/projects/${projectId}/branches/master/save?commit=true&message=fromAPI").with {
+        def request = new HttpPost("${getMasterUrl(projectId)}/save?commit=true&message=fromAPI").with {
             setEntity(new StringEntity(JsonOutput.toJson(requestPayload),
                                        ContentType.APPLICATION_JSON))
             it
@@ -98,8 +100,12 @@ class DesignCenterDeployer {
                                    'Uploading design center files')
     }
 
-    def getFilesUrl(String projectId) {
-        "${clientWrapper.baseUrl}/designcenter/api-designer/projects/${projectId}/branches/master/files"
+    private def getMasterUrl(String projectId) {
+        "${clientWrapper.baseUrl}/designcenter/api-designer/projects/${projectId}/branches/master"
+    }
+
+    private def getFilesUrl(String projectId) {
+        "${getMasterUrl(projectId)}/files"
     }
 
     List<RamlFile> getExistingDesignCenterFiles(String projectId) {
@@ -160,5 +166,29 @@ class DesignCenterDeployer {
         } finally {
             archiveIn.close()
         }
+    }
+
+    def pushToExchange(ApiSpecification apiSpec,
+                       String projectId,
+                       List<RamlFile> ramlFiles,
+                       String appVersion) {
+        def requestPayload = [
+                main      : apiSpec.mainRamlFile,
+                apiVersion: apiSpec.apiMajorVersion,
+                version   : appVersion,
+                assetId   : apiSpec.exchangeAssetId,
+                name      : apiSpec.name,
+                groupId   : clientWrapper.anypointOrganizationId,
+                classifier: 'raml'
+        ]
+        def requestJson = JsonOutput.toJson(requestPayload)
+        logger.println "Pushing to Exchange with payload ${JsonOutput.prettyPrint(requestJson)}"
+        def request = new HttpPost("${getMasterUrl(projectId)}/publish/exchange").with {
+            setEntity(new StringEntity(requestJson,
+                                       ContentType.APPLICATION_JSON))
+            it
+        }
+        executeDesignCenterRequest(request,
+                                   'Publishing to Exchange')
     }
 }
