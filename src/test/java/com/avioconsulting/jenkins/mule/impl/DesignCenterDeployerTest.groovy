@@ -9,13 +9,12 @@ import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerRequest
 import org.apache.commons.io.FileUtils
 import org.junit.After
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
+import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.Matchers.equalTo
-import static org.hamcrest.Matchers.is
+import static org.hamcrest.Matchers.*
 
 class DesignCenterDeployerTest implements HttpServerUtils {
     HttpServer httpServer
@@ -168,11 +167,34 @@ class DesignCenterDeployerTest implements HttpServerUtils {
     @Test
     void getDesignCenterProjectId_not_found() {
         // arrange
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                end(JsonOutput.toJson([
+                        [
+                                id  : 'blah',
+                                name: 'the project'
+                        ],
+                        [
+                                id  : 'foo',
+                                name: 'other project'
+                        ]
+                ]))
+            }
+        }
 
         // act
-        def result = deployer.getDesignCenterProjectId('the project')
+        def exception = shouldFail {
+            deployer.getDesignCenterProjectId('not found project')
+        }
 
         // assert
-        Assert.fail("write it")
+        assertThat exception.message,
+                   is(containsString("Unable to find ID for Design Center project 'not found project'"))
     }
 }

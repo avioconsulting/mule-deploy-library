@@ -28,6 +28,7 @@ class DesignCenterDeployer {
     }
 
     String getDesignCenterProjectId(String projectName) {
+        logger.println "Looking up ID for Design Center project '${projectName}'"
         def request = new HttpGet("${clientWrapper.baseUrl}/designcenter/api-designer/projects").with {
             setHeader('X-ORGANIZATION-ID',
                       clientWrapper.anypointOrganizationId)
@@ -43,9 +44,15 @@ class DesignCenterDeployer {
         def failureContext = "fetch design center project ID for '${projectName}'"
         clientWrapper.executeWithSuccessfulCloseableResponse(request,
                                                              failureContext) { results ->
-            results.find { result ->
+            def id = results.find { result ->
                 result.name == projectName
-            }.id
+            }?.id
+            if (id) {
+                logger.println "Identified Design Center project '${projectName}' as ID ${id}"
+            } else {
+                throw new Exception("Unable to find ID for Design Center project '${projectName}'")
+            }
+            return id
         }
     }
 
