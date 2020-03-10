@@ -11,6 +11,7 @@ import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerRequest
 import org.apache.commons.io.FileUtils
 import org.junit.After
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -500,5 +501,75 @@ class DesignCenterDeployerTest implements HttpServerUtils {
                            groupId   : 'the-org-id',
                            classifier: 'raml'
                    ]))
+    }
+
+    @Test
+    void synchronizeDesignCenter_no_existing_files() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void synchronizeDesignCenter_main_raml_does_not_exist() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void synchronizeDesignCenter_nothing_to_sync() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void synchronizeDesignCenter_removes_existing_files() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void synchronizeDesignCenter_raml_not_changed() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void synchronizeDesignCenter_raml_changed() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void synchronizeDesignCenterFromApp() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
     }
 }

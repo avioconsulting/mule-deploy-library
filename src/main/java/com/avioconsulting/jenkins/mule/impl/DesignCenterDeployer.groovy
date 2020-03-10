@@ -194,4 +194,16 @@ class DesignCenterDeployer {
         executeDesignCenterRequest(request,
                                    'Publishing to Exchange')
     }
+
+    def synchronizeDesignCenterFromApp(ApiSpecification apiSpec,
+                                       AppFileInfo appFileInfo,
+                                       String appVersion) {
+
+    }
+
+    def synchronizeDesignCenter(ApiSpecification apiSpec,
+                                List<RamlFile> ramlFiles,
+                                String appVersion) {
+
+    }
 }
