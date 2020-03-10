@@ -27,16 +27,21 @@ class DesignCenterDeployer {
 
     List<RamlFile> getRamlFilesFromApp(AppFileInfo deploymentRequest) {
         def archiveIn = deploymentRequest.openArchiveStream()
-        def apiDirectory = new File('api').toPath()
+        def apiDirectoryPath = new File('api').toPath()
         try {
             ZipArchiveEntry inputEntry
             List<RamlFile> results = []
             while ((inputEntry = archiveIn.nextEntry as ZipArchiveEntry) != null) {
+                if (inputEntry.directory) {
+                    continue
+                }
                 def inputEntryFile = new File(inputEntry.name)
-                def relativeToApiDirectory = apiDirectory.relativize(inputEntryFile.toPath())
+                if (!inputEntryFile.toPath().startsWith(apiDirectoryPath)) {
+                    continue
+                }
+                def relativeToApiDirectory = apiDirectoryPath.relativize(inputEntryFile.toPath())
                 inputEntryFile = relativeToApiDirectory.toFile()
-                if (!inputEntry.directory &&
-                        !IGNORE_DC_FILES.contains(inputEntryFile.name) &&
+                if (!IGNORE_DC_FILES.contains(inputEntryFile.name) &&
                         (!inputEntryFile.parentFile || !IGNORE_DC_FILES.contains(inputEntryFile.parentFile.name))) {
                     def nonWindowsPath = inputEntryFile.toString()
                             .replace(File.separator,

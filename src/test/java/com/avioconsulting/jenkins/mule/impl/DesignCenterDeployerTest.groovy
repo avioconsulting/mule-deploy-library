@@ -67,14 +67,8 @@ class DesignCenterDeployerTest implements HttpServerUtils {
         FileUtils.touch(file)
         FileUtils.touch(new File(apiDirectory,
                                  'exchange.json'))
-        def antBuilder = new AntBuilder()
-        def zipFile = new File(tempDir,
-                               'designcenterapp.zip')
-        FileUtils.deleteQuietly(zipFile)
-        antBuilder.zip(destfile: zipFile,
-                       basedir: tempAppDirectory)
-        def request = new AppFileInfo(zipFile.name,
-                                      zipFile.newInputStream())
+        def request = buildZip(tempDir,
+                               tempAppDirectory)
 
         // act
         def result = deployer.getRamlFilesFromApp(request)
@@ -90,13 +84,37 @@ class DesignCenterDeployerTest implements HttpServerUtils {
                    ]))
     }
 
+    private static AppFileInfo buildZip(File tempDir, File tempAppDirectory) {
+        def antBuilder = new AntBuilder()
+        def zipFile = new File(tempDir,
+                               'designcenterapp.zip')
+        FileUtils.deleteQuietly(zipFile)
+        antBuilder.zip(destfile: zipFile,
+                       basedir: tempAppDirectory)
+        new AppFileInfo(zipFile.name,
+                        zipFile.newInputStream())
+    }
+
     @Test
     void getRamlFilesFromApp_is_not_apikit() {
         // arrange
+        def tempDir = new File('target/temp')
+        def tempAppDirectory = new File(tempDir,
+                                        'designcenterapp')
+        tempAppDirectory.deleteDir()
+        tempAppDirectory.mkdirs()
+        def file = new File(tempAppDirectory,
+                            'stuff.xml')
+        FileUtils.touch(file)
+        file.text = '<hi/>'
+        def request = buildZip(tempDir,
+                               tempAppDirectory)
 
         // act
+        def result = deployer.getRamlFilesFromApp(request)
 
         // assert
-        Assert.fail("write it")
+        assertThat result,
+                   is(equalTo([]))
     }
 }
