@@ -18,7 +18,7 @@ import org.apache.http.entity.StringEntity
 
 import java.nio.charset.Charset
 
-class DesignCenterDeployer {
+class DesignCenterDeployer implements DesignCenterHttpFunctionality {
     private final HttpClientWrapper clientWrapper
     private final PrintStream logger
     private static final List<String> IGNORE_DC_FILES = [
@@ -33,25 +33,6 @@ class DesignCenterDeployer {
 
         this.logger = logger
         this.clientWrapper = clientWrapper
-    }
-
-    private def executeDesignCenterRequest(HttpUriRequest request,
-                                           String failureContext,
-                                           Closure resultHandler = null) {
-        request.with {
-            setHeader('X-ORGANIZATION-ID',
-                      clientWrapper.anypointOrganizationId)
-            setHeader('cache-control',
-                      'no-cache')
-            // At the time we run this, we might not yet have the ownerGuid value since that happens during authentication
-            setHeader(new LazyHeader('X-OWNER-ID',
-                                     {
-                                         clientWrapper.ownerGuid
-                                     }))
-        }
-        return clientWrapper.executeWithSuccessfulCloseableResponse(request,
-                                                                    failureContext,
-                                                                    resultHandler)
     }
 
     String getDesignCenterProjectId(String projectName) {
@@ -100,12 +81,22 @@ class DesignCenterDeployer {
                                    'Uploading design center files')
     }
 
-    private def getMasterUrl(String projectId) {
-        "${clientWrapper.baseUrl}/designcenter/api-designer/projects/${projectId}/branches/master"
+    def getMasterUrl(String projectId) {
+        getMasterUrl(clientWrapper,
+                     projectId)
     }
 
     private def getFilesUrl(String projectId) {
         "${getMasterUrl(projectId)}/files"
+    }
+
+    def executeDesignCenterRequest(HttpUriRequest request,
+                                           String failureContext,
+                                           Closure resultHandler = null) {
+        executeDesignCenterRequest(clientWrapper,
+                                   request,
+                                   failureContext,
+                                   resultHandler)
     }
 
     List<RamlFile> getExistingDesignCenterFiles(String projectId) {
@@ -205,11 +196,15 @@ class DesignCenterDeployer {
                                 List<RamlFile> ramlFiles,
                                 String appVersion) {
         def projectId = getDesignCenterProjectId(apiSpec.name)
-        uploadDesignCenterFiles(projectId,
-                                ramlFiles)
-        pushToExchange(apiSpec,
-                       projectId,
-                       ramlFiles,
-                       appVersion)
+        new DesignCenterLock(clientWrapper,
+                             logger,
+                             projectId).withCloseable {
+            uploadDesignCenterFiles(projectId,
+                                    ramlFiles)
+            pushToExchange(apiSpec,
+                           projectId,
+                           ramlFiles,
+                           appVersion)
+        }
     }
 }

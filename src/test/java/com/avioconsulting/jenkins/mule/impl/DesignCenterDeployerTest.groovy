@@ -589,11 +589,13 @@ class DesignCenterDeployerTest implements HttpServerUtils {
             if (mockAuthenticationOk(request)) {
                 return
             }
-            if (mockAcquireLock(request, 'abcd')) {
+            if (mockAcquireLock(request,
+                                'abcd')) {
                 locked = true
                 return
             }
-            if (mockReleaseLock(request, 'abcd')) {
+            if (mockReleaseLock(request,
+                                'abcd')) {
                 locked = false
                 return
             }
@@ -635,7 +637,9 @@ class DesignCenterDeployerTest implements HttpServerUtils {
                    is(equalTo(true))
         assertThat exchangePushed,
                    is(equalTo(true))
-        Assert.fail("write it, need to add acquire and release locks")
+        assertThat 'We should always unlock if we lock',
+                   locked,
+                   is(equalTo(false))
     }
 
     @Test
