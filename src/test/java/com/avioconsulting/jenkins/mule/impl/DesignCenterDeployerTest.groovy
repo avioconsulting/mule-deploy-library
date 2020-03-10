@@ -233,8 +233,13 @@ class DesignCenterDeployerTest implements HttpServerUtils {
                             [
                                     path: 'howdy',
                                     type: 'FOLDER'
-                            ], [
+                            ],
+                            [
                                     path: '.designer.json',
+                                    type: 'FILE'
+                            ],
+                            [
+                                    path: 'exchange_modules/something',
                                     type: 'FILE'
                             ]
                     ]

@@ -70,8 +70,14 @@ class DesignCenterDeployer {
         def url = "${clientWrapper.baseUrl}/designcenter/api-designer/projects/${projectId}/branches/master/files"
         def request = new HttpGet(url)
         executeDesignCenterRequest(request,
-                                   'Fetching project files') { results ->
-            results.collect { result ->
+                                   'Fetching project files') { List<Map> results ->
+            def filesWeCareAbout = results.findAll { result ->
+                def asFile = new File(result.path)
+                result.type != 'FOLDER' &&
+                        !IGNORE_DC_FILES.contains(asFile.name) &&
+                        !IGNORE_DC_FILES.contains(asFile.parentFile?.name)
+            }
+            return filesWeCareAbout.collect { result ->
                 new RamlFile(result.path,
                              'nope')
             }
