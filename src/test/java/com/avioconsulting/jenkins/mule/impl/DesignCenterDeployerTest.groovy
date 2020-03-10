@@ -4,6 +4,7 @@ import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.models.AppFileInfo
 import com.avioconsulting.jenkins.mule.impl.models.RamlFile
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerRequest
@@ -313,6 +314,64 @@ class DesignCenterDeployerTest implements HttpServerUtils {
                    is(equalTo([
                            'http://localhost:8080/designcenter/api-designer/projects/ourprojectId/branches/master/files/file1',
                            'http://localhost:8080/designcenter/api-designer/projects/ourprojectId/branches/master/files/file2'
+                   ]))
+    }
+
+    @Test
+    void uploadDesignCenterFiles_correct_request() {
+        // arrange
+        String anypointOrgId = null
+        String url = null
+        String method = null
+        String ownerGuid = null
+        List<Map> sentPayload = null
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            anypointOrgId = request.getHeader('X-ORGANIZATION-ID')
+            url = request.absoluteURI()
+            method = request.method().toString()
+            ownerGuid = request.getHeader('X-OWNER-ID')
+            request.bodyHandler { body ->
+                sentPayload = new JsonSlurper().parseText(body.toString())
+            }
+            request.response().with {
+                statusCode = 204
+                end()
+            }
+        }
+        def files = [
+                new RamlFile('file1.raml',
+                             'the contents'),
+                new RamlFile('file2.raml',
+                             'the contents2')
+        ]
+
+        // act
+        deployer.uploadDesignCenterFiles('ourprojectId',
+                                         files)
+
+        // assert
+        assertThat method,
+                   is(equalTo('POST'))
+        assertThat url,
+                   is(equalTo('http://localhost:8080/designcenter/api-designer/projects/ourprojectId/branches/master/save?commit=true&message=fromAPI'))
+        assertThat anypointOrgId,
+                   is(equalTo('the-org-id'))
+        assertThat 'Design center needs this',
+                   ownerGuid,
+                   is(equalTo('the_id'))
+        assertThat sentPayload,
+                   is(equalTo([
+                           [
+                                   path   : 'file1.raml',
+                                   content: 'the contents'
+                           ],
+                           [
+                                   path   : 'file2.raml',
+                                   content: 'the contents2'
+                           ]
                    ]))
     }
 }

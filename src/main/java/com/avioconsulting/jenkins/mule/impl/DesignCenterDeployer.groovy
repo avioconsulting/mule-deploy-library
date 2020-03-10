@@ -4,12 +4,16 @@ import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.httpapi.LazyHeader
 import com.avioconsulting.jenkins.mule.impl.models.AppFileInfo
 import com.avioconsulting.jenkins.mule.impl.models.RamlFile
+import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.io.IOUtils
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpUriRequest
+import org.apache.http.entity.ContentType
+import org.apache.http.entity.StringEntity
 
 import java.nio.charset.Charset
 
@@ -75,6 +79,23 @@ class DesignCenterDeployer {
             executeDesignCenterRequest(new HttpDelete("${getFilesUrl(projectId)}/${file}"),
                                        "Removing file ${file}")
         }
+    }
+
+    def uploadDesignCenterFiles(String projectId,
+                                List<RamlFile> files) {
+        def requestPayload = files.collect { file ->
+            [
+                    path   : file.fileName,
+                    content: file.contents
+            ]
+        }
+        def request = new HttpPost("${clientWrapper.baseUrl}/designcenter/api-designer/projects/${projectId}/branches/master/save?commit=true&message=fromAPI").with {
+            setEntity(new StringEntity(JsonOutput.toJson(requestPayload),
+                                       ContentType.APPLICATION_JSON))
+            it
+        }
+        executeDesignCenterRequest(request,
+                                   'Uploading design center files')
     }
 
     def getFilesUrl(String projectId) {
