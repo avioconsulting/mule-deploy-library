@@ -204,6 +204,12 @@ class DesignCenterDeployer {
     def synchronizeDesignCenter(ApiSpecification apiSpec,
                                 List<RamlFile> ramlFiles,
                                 String appVersion) {
-
+        def projectId = getDesignCenterProjectId(apiSpec.name)
+        uploadDesignCenterFiles(projectId,
+                                ramlFiles)
+        pushToExchange(apiSpec,
+                       projectId,
+                       ramlFiles,
+                       appVersion)
     }
 }
