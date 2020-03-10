@@ -10,7 +10,8 @@ class CloudHubDeployer extends BaseDeployer {
     static final Map<String, AppStatus> AppStatusMappings = [
             STARTED      : AppStatus.Started,
             DEPLOY_FAILED: AppStatus.Failed,
-            UNDEPLOYED   : AppStatus.Undeployed
+            UNDEPLOYED   : AppStatus.Undeployed,
+            DELETED      : AppStatus.Deleted
     ]
 
     /***

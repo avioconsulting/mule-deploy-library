@@ -2544,4 +2544,29 @@ class CloudHubDeployerTest implements HttpServerUtils {
         assertThat exception.message,
                    is(containsString('Unknown status value of FOOBAR detected from CloudHub!'))
     }
+
+    @Test
+    void getAppStatus_deleted() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            mockAuthenticationOk(request)
+            mockEnvironments(request)
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                end(JsonOutput.toJson([
+                        status: 'DELETED'
+                ]))
+            }
+        }
+
+        // act
+        def status = deployer.getAppStatus('DEV',
+                                           'the-app')
+
+        // assert
+        assertThat status,
+                   is(equalTo(AppStatus.Deleted))
+    }
 }
