@@ -2,7 +2,6 @@ package com.avioconsulting.jenkins.mule.impl.models
 
 import org.junit.Test
 
-import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
@@ -12,6 +11,7 @@ class ApiSpecificationTest {
         // arrange
 
         // act
+
         def result = new ApiSpecification('Product API')
 
         // assert
@@ -49,11 +49,9 @@ class ApiSpecificationTest {
 
         // act
         def result = new ApiSpecification('SystemStuff API',
-                                          [
-                                                  apiMajorVersion: 'v2',
-                                                  exchangeAssetId: 'nope',
-                                                  mainRamlFile   : 'hello.raml'
-                                          ])
+                                          'v2',
+                                          'hello.raml',
+                                          'nope')
 
         // assert
         assertThat result.name,
@@ -64,20 +62,5 @@ class ApiSpecificationTest {
                    is(equalTo('nope'))
         assertThat result.mainRamlFile,
                    is(equalTo('hello.raml'))
-    }
-
-    @Test
-    void wrong_params() {
-        // arrange
-
-        // act
-        def exception = shouldFail {
-            new ApiSpecification('SystemStuff API',
-                                 [nope: 'bad'])
-        }
-
-        // assert
-        assertThat exception.message,
-                   is(containsString('No such property: nope for class'))
     }
 }

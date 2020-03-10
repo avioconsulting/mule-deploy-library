@@ -23,14 +23,13 @@ class ApiSpecification {
     final String mainRamlFile
 
     ApiSpecification(String name,
-                     Map<String, String> optionalParams = [:]) {
+                     String apiMajorVersion = 'v1',
+                     String mainRamlFile = null,
+                     String exchangeAssetId = null) {
         this.name = name
-        this.apiMajorVersion = 'v1'
-        this.mainRamlFile = null
-        this.exchangeAssetId = name.toLowerCase().replace(' ',
-                                                          '-')
-        optionalParams.each { k, v ->
-            this[k] = v
-        }
+        this.apiMajorVersion = apiMajorVersion ?: 'v1'
+        this.mainRamlFile = mainRamlFile
+        this.exchangeAssetId = exchangeAssetId ?: name.toLowerCase().replace(' ',
+                                                                             '-')
     }
 }
