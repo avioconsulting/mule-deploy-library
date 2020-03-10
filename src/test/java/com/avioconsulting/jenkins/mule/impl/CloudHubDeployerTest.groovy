@@ -1798,9 +1798,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    // TODO: Fix this?
                     result = getAppResponsePayload('client-new-app-dev',
-                                                   AppStatus.Failed)
+                                                   AppStatus.Started) // apps that have had at least 1 successful deploy will show this
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
