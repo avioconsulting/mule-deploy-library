@@ -611,7 +611,7 @@ class DesignCenterDeployerTest implements HttpServerUtils {
     }
 
     @Test
-    void synchronizeDesignCenter_nothing_to_sync() {
+    void synchronizeDesignCenter_no_raml_files() {
         // arrange
 
         // act
