@@ -270,4 +270,49 @@ class DesignCenterDeployerTest implements HttpServerUtils {
                    ownerGuid,
                    is(equalTo('the_id'))
     }
+
+    @Test
+    void deleteDesignCenterFiles() {
+        // arrange
+        String anypointOrgId = null
+        List<String> urls = []
+        List<String> methods = []
+        String ownerGuid = null
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            anypointOrgId = request.getHeader('X-ORGANIZATION-ID')
+            urls << request.absoluteURI()
+            methods << request.method().toString()
+            ownerGuid = request.getHeader('X-OWNER-ID')
+            request.response().with {
+                statusCode = 204
+                end()
+            }
+        }
+
+        // act
+        deployer.deleteDesignCenterFiles('ourprojectId',
+                                         [
+                                                 new RamlFile('file1',
+                                                              'blah'),
+                                                 new RamlFile('file2',
+                                                              'blah')
+                                         ])
+
+        // assert
+        assertThat methods.unique(),
+                   is(equalTo(['DELETE']))
+        assertThat anypointOrgId,
+                   is(equalTo('the-org-id'))
+        assertThat 'Design center needs this',
+                   ownerGuid,
+                   is(equalTo('the_id'))
+        assertThat urls,
+                   is(equalTo([
+                           'http://localhost:8080/designcenter/api-designer/projects/ourprojectId/branches/master/files/file1',
+                           'http://localhost:8080/designcenter/api-designer/projects/ourprojectId/branches/master/files/file2'
+                   ]))
+    }
 }

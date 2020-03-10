@@ -109,11 +109,15 @@ class HttpClientWrapper implements HttpRequestInterceptor {
 
     def executeWithSuccessfulCloseableResponse(HttpUriRequest request,
                                                String failureContext,
-                                               Closure closure) {
+                                               Closure closure = null) {
         execute(request).withCloseable { response ->
-            def parsed = assertSuccessfulResponseAndReturnJson(response,
-                                                               failureContext)
-            return closure(parsed)
+            if (closure) {
+                def parsed = assertSuccessfulResponseAndReturnJson(response,
+                                                                   failureContext)
+                return closure(parsed)
+            }
+            assertSuccessfulResponse(response,
+                                     failureContext)
         }
     }
 

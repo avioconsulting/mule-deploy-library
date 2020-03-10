@@ -7,6 +7,7 @@ import com.avioconsulting.jenkins.mule.impl.models.RamlFile
 import groovy.json.JsonSlurper
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.io.IOUtils
+import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpUriRequest
 
@@ -31,7 +32,7 @@ class DesignCenterDeployer {
 
     private def executeDesignCenterRequest(HttpUriRequest request,
                                            String failureContext,
-                                           Closure resultHandler) {
+                                           Closure resultHandler = null) {
         request.with {
             setHeader('X-ORGANIZATION-ID',
                       clientWrapper.anypointOrganizationId)
@@ -66,9 +67,23 @@ class DesignCenterDeployer {
         }
     }
 
+    def deleteDesignCenterFiles(String projectId,
+                                List<RamlFile> files) {
+        files.each { ramlFile ->
+            def file = ramlFile.fileName
+            logger.println("Removing unused file from Design Center: ${file}")
+            executeDesignCenterRequest(new HttpDelete("${getFilesUrl(projectId)}/${file}"),
+                                       "Removing file ${file}")
+        }
+    }
+
+    def getFilesUrl(String projectId) {
+        "${clientWrapper.baseUrl}/designcenter/api-designer/projects/${projectId}/branches/master/files"
+    }
+
     List<RamlFile> getExistingDesignCenterFiles(String projectId) {
         logger.println('Fetching existing Design Center RAML files')
-        def url = "${clientWrapper.baseUrl}/designcenter/api-designer/projects/${projectId}/branches/master/files"
+        def url = getFilesUrl(projectId)
         def request = new HttpGet(url)
         executeDesignCenterRequest(request,
                                    'Fetching project files') { List<Map> results ->
