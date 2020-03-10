@@ -48,7 +48,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
     }
 
     @Test
-    void check_deployment_requests_properly() {
+    void getDeploymentStatus_requests_properly() {
         // arrange
         String url = null
         String method = null
@@ -104,7 +104,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
     }
 
     @Test
-    void check_deployment_status_failed() {
+    void getDeploymentStatus_failed() {
         // arrange
         withHttpServer { HttpServerRequest request ->
             mockAuthenticationOk(request)
@@ -144,7 +144,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
     }
 
     @Test
-    void check_deployment_status_started() {
+    void getDeploymentStatus_started() {
         // arrange
         withHttpServer { HttpServerRequest request ->
             mockAuthenticationOk(request)
@@ -185,7 +185,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
     }
 
     @Test
-    void check_deployment_status_starting() {
+    void getDeploymentStatus_starting() {
         // arrange
         withHttpServer { HttpServerRequest request ->
             mockAuthenticationOk(request)
@@ -250,6 +250,19 @@ class CloudHubDeployerTest implements HttpServerUtils {
         ]
     }
 
+    static final Map<AppStatus, String> ReverseAppStatusMappings = CloudHubDeployer.AppStatusMappings.collectEntries {
+        k, v ->
+            [v, k]
+    }
+
+    static def getAppResponsePayload(String appName,
+                                     AppStatus appStatus) {
+        [
+                domain: appName,
+                status: ReverseAppStatusMappings[appStatus]
+        ]
+    }
+
     @Test
     void perform_deployment_correct_request_new_app() {
         // arrange
@@ -262,7 +275,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -291,9 +306,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'new-app'
-                    ]
+                    result = getAppResponsePayload('new-app',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -379,7 +393,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -408,9 +424,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'new-app'
-                    ]
+                    result = getAppResponsePayload('new-app',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -493,7 +508,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         Map sentBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -522,9 +539,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'new-app'
-                    ]
+                    result = getAppResponsePayload('new-app',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -613,7 +629,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -642,9 +660,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'new-app'
-                    ]
+                    result = getAppResponsePayload('new-app',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -736,7 +753,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -765,9 +784,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'new-app'
-                    ]
+                    result = getAppResponsePayload('new-app',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -873,7 +891,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -902,9 +922,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'client-new-app-dev'
-                    ]
+                    result = getAppResponsePayload('client-new-app-dev',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -990,7 +1009,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1019,9 +1040,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'client-new-app-dev'
-                    ]
+                    result = getAppResponsePayload('client-new-app-dev',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1115,7 +1135,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1144,9 +1166,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'client-new-app-dev'
-                    ]
+                    result = getAppResponsePayload('client-new-app-dev',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1265,9 +1286,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'client-new-app-dev'
-                    ]
+                    result = getAppResponsePayload('client-new-app-dev',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1364,7 +1384,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1393,9 +1415,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'client-new-app-dev'
-                    ]
+                    result = getAppResponsePayload('client-new-app-dev',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1501,7 +1522,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         // arrange
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1592,6 +1615,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                     ]
                             ]
                     ]
+                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                    result = getAppResponsePayload('client-new-app-dev',
+                                                   AppStatus.Started)
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     // existing app check + status is the same
                     if (firstCheck) {
@@ -1608,9 +1634,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'client-new-app-dev'
-                    ]
+                    result = getAppResponsePayload('client-new-app-dev',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1773,9 +1798,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'client-new-app-dev'
-                    ]
+                    // TODO: Fix this?
+                    result = getAppResponsePayload('client-new-app-dev',
+                                                   AppStatus.Failed)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1884,15 +1909,14 @@ class CloudHubDeployerTest implements HttpServerUtils {
                     if (firstCheck) {
                         statusCode = 200
                         firstCheck = false
-                        result = [
-                                status: 'UNDEPLOYED'
-                        ]
+                        result = getAppResponsePayload('client-new-app-dev',
+                                                       AppStatus.Undeployed)
                     } else if (appDeleteRequested && !firstCheckAfterDeleteComplete) {
                         // the deletion operation takes a second, simulate that
                         firstCheckAfterDeleteComplete = true
                         statusCode = 200
-                        result = getDeploymentStatusJson('TERMINATED',
-                                                         'TERMINATED')
+                        result = getAppResponsePayload('client-new-app-dev',
+                                                       AppStatus.Undeployed)
                     } else if (appDeleteRequested && firstCheckAfterDeleteComplete) {
                         // now our app is deleted
                         appDeleteComplete = true
@@ -1923,9 +1947,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                     } else {
                         statusCode = 200
                         deployed = true
-                        result = [
-                                domain: 'client-new-app-dev'
-                        ]
+                        result = getAppResponsePayload('client-new-app-dev',
+                                                       AppStatus.Started)
                     }
                 } else {
                     statusCode = 500
@@ -1994,15 +2017,14 @@ class CloudHubDeployerTest implements HttpServerUtils {
                     if (firstCheck) {
                         statusCode = 200
                         firstCheck = false
-                        result = [
-                                status: 'DEPLOY_FAILED'
-                        ]
+                        result = getAppResponsePayload('client-new-app-dev',
+                                                       AppStatus.Failed)
                     } else if (appDeleteRequested && !firstCheckAfterDeleteComplete) {
                         // the deletion operation takes a second, simulate that
                         firstCheckAfterDeleteComplete = true
                         statusCode = 200
-                        result = getDeploymentStatusJson('TERMINATED',
-                                                         'TERMINATED')
+                        result = getAppResponsePayload('client-new-app-dev',
+                                                       AppStatus.Failed)
                     } else if (appDeleteRequested && firstCheckAfterDeleteComplete) {
                         // now our app is deleted
                         appDeleteComplete = true
@@ -2033,9 +2055,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                     } else {
                         statusCode = 200
                         deployed = true
-                        result = [
-                                domain: 'client-new-app-dev'
-                        ]
+                        result = getAppResponsePayload('client-new-app-dev',
+                                                       AppStatus.Started)
                     }
                 } else {
                     statusCode = 500
@@ -2071,7 +2092,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
     def mockInitialDeployment(HttpServerRequest request) {
         def uri = request.absoluteURI()
-        mockAuthenticationOk(request)
+        if (mockAuthenticationOk(request)) {
+            return
+        }
         request.response().with {
             statusCode = 200
             putHeader('Content-Type',
@@ -2095,9 +2118,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
             } else {
                 // deployment service returns this
                 statusCode = 200
-                result = [
-                        domain: 'client-new-app-dev'
-                ]
+                result = getAppResponsePayload('client-new-app-dev',
+                                               AppStatus.Started)
             }
             end(JsonOutput.toJson(result))
         }

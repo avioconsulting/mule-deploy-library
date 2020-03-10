@@ -7,6 +7,12 @@ import groovy.json.JsonOutput
 import org.apache.http.client.methods.*
 
 class CloudHubDeployer extends BaseDeployer {
+    static final Map<String, AppStatus> AppStatusMappings = [
+            STARTED      : AppStatus.Started,
+            DEPLOY_FAILED: AppStatus.Failed,
+            UNDEPLOYED   : AppStatus.Undeployed
+    ]
+
     /***
      * Instantiate using default anypoint.mulesoft.com URL
      * @param anypointOrganizationId
@@ -192,19 +198,12 @@ class CloudHubDeployer extends BaseDeployer {
             }
             def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
                                                                              'app status')
-            def mapStatus = { String input ->
-                switch (input) {
-                    case 'STARTED':
-                        return AppStatus.Started
-                    case 'DEPLOY_FAILED':
-                        return AppStatus.Failed
-                    case 'UNDEPLOYED':
-                        return AppStatus.Undeployed
-                    default:
-                        throw new Exception("Unknown status value of ${input} detected from CloudHub!")
-                }
+            def input = result.status
+            def mappedStatus = AppStatusMappings[input]
+            if (!mappedStatus) {
+                throw new Exception("Unknown status value of ${input} detected from CloudHub!")
             }
-            return mapStatus(result.status)
+            return mappedStatus
         }
         finally {
             response.close()
