@@ -40,13 +40,15 @@ class DesignCenterDeployer {
                 if (!inputEntryPath.startsWith(apiDirectoryPath)) {
                     continue
                 }
+                // design center won't care about API directories
                 def relativeToApiDirectory = apiDirectoryPath.relativize(inputEntryPath)
                 inputEntryFile = relativeToApiDirectory.toFile()
-                if (!IGNORE_DC_FILES.contains(inputEntryFile.name) &&
-                        (!inputEntryFile.parentFile || !IGNORE_DC_FILES.contains(inputEntryFile.parentFile.name))) {
+                def parentFile = inputEntryFile.parentFile
+                if (!IGNORE_DC_FILES.contains(inputEntryFile.name) && !IGNORE_DC_FILES.contains(parentFile?.name)) {
                     def nonWindowsPath = inputEntryFile.toString()
                             .replace(File.separator,
-                                     '/') // Design center will always use this syntax even if we're running this code on Windows
+                                     '/')
+                    // Design center will always use this syntax even if we're running this code on Windows
                     results << new RamlFile(nonWindowsPath,
                                             IOUtils.toString(archiveIn,
                                                              Charset.defaultCharset()))
