@@ -56,6 +56,10 @@ class DesignCenterDeployer {
         }
     }
 
+    List<RamlFile> getExistingDesignCenterFiles(String projectId) {
+        []
+    }
+
     List<RamlFile> getRamlFilesFromApp(AppFileInfo deploymentRequest) {
         def archiveIn = deploymentRequest.openArchiveStream()
         def apiDirectoryPath = new File('api').toPath()

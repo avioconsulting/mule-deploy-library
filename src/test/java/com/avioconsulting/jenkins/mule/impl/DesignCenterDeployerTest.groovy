@@ -197,4 +197,72 @@ class DesignCenterDeployerTest implements HttpServerUtils {
         assertThat exception.message,
                    is(containsString("Unable to find ID for Design Center project 'not found project'"))
     }
+
+    @Test
+    void getExistingDesignCenterFiles() {
+        // arrange
+        String anypointOrgId = null
+        List<String> urls = []
+        String ownerGuid = null
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            anypointOrgId = request.getHeader('X-ORGANIZATION-ID')
+            urls << request.absoluteURI()
+            ownerGuid = request.getHeader('X-OWNER-ID')
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def jsonResult = null
+                if (request.absoluteURI().endsWith('files')) {
+                    jsonResult = [
+                            [
+                                    path: '.gitignore',
+                                    type: 'FILE'
+                            ],
+                            [
+                                    path: 'exchange.json',
+                                    type: 'FILE'
+                            ],
+                            [
+                                    path: 'stuff.raml',
+                                    type: 'FILE'
+                            ],
+                            [
+                                    path: 'howdy',
+                                    type: 'FOLDER'
+                            ], [
+                                    path: '.designer.json',
+                                    type: 'FILE'
+                            ]
+                    ]
+                } else {
+                    jsonResult = '"the contents'
+                }
+                end(JsonOutput.toJson(jsonResult))
+            }
+        }
+
+        // act
+        def result = deployer.getExistingDesignCenterFiles('ourprojectId')
+
+        // assert
+        assertThat result,
+                   is(equalTo([
+                           new RamlFile('stuff.raml',
+                                        'the contents')
+                   ]))
+        assertThat urls,
+                   is(equalTo([
+                           'http://localhost:8080/designcenter/api-designer/projects/ourprojectId/branches/master/files',
+                           'http://localhost:8080/designcenter/api-designer/projects/ourprojectId/branches/master/files/stuff.raml'
+                   ]))
+        assertThat anypointOrgId,
+                   is(equalTo('the-org-id'))
+        assertThat 'Design center needs this',
+                   ownerGuid,
+                   is(equalTo('the_id'))
+    }
 }
