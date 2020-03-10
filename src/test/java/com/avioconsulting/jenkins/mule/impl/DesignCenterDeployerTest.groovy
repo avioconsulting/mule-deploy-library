@@ -7,6 +7,7 @@ import com.avioconsulting.jenkins.mule.impl.models.RamlFile
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerRequest
 import org.apache.commons.io.FileUtils
@@ -550,13 +551,50 @@ class DesignCenterDeployerTest implements HttpServerUtils {
         mocked
     }
 
+    static def mockAcquireLock(HttpServerRequest request,
+                               String projectId) {
+        def mocked = false
+        if (request.absoluteURI() == "http://localhost:8080/designcenter/api-designer/projects/${projectId}/branches/master/acquireLock"
+                && request.method() == HttpMethod.POST) {
+            mocked = true
+            request.response().with {
+                statusCode = 200
+                end()
+            }
+        }
+        mocked
+    }
+
+    static def mockReleaseLock(HttpServerRequest request,
+                               String projectId) {
+        def mocked = false
+        if (request.absoluteURI() == "http://localhost:8080/designcenter/api-designer/projects/${projectId}/branches/master/releaseLock"
+                && request.method() == HttpMethod.POST) {
+            mocked = true
+            request.response().with {
+                statusCode = 200
+                end()
+            }
+        }
+        mocked
+    }
+
     @Test
     void synchronizeDesignCenter_no_existing_files() {
         // arrange
         def filesUploaded = false
         def exchangePushed = false
+        def locked = false
         withHttpServer { HttpServerRequest request ->
             if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockAcquireLock(request, 'abcd')) {
+                locked = true
+                return
+            }
+            if (mockReleaseLock(request, 'abcd')) {
+                locked = false
                 return
             }
             if (mockDesignCenterProjectId(request,
@@ -564,13 +602,13 @@ class DesignCenterDeployerTest implements HttpServerUtils {
                                           'abcd')) {
                 return
             }
-            if (mockFileUpload(request,
-                               'abcd')) {
+            if (locked && mockFileUpload(request,
+                                         'abcd')) {
                 filesUploaded = true
                 return
             }
-            if (mockExchangePush(request,
-                                 'abcd')) {
+            if (locked && mockExchangePush(request,
+                                           'abcd')) {
                 exchangePushed = true
                 return
             }
