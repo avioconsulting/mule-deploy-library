@@ -201,7 +201,7 @@ class CloudHubDeployer extends BaseDeployer {
                     case 'UNDEPLOYED':
                         return AppStatus.Undeployed
                     default:
-                        return AppStatus.Unknown
+                        throw new Exception("Unknown status value of ${input} detected from CloudHub!")
                 }
             }
             return mapStatus(result.status)

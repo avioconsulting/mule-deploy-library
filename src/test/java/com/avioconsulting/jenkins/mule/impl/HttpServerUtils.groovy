@@ -58,7 +58,9 @@ trait HttpServerUtils {
     }
 
     def mockEnvironments(HttpServerRequest request) {
+        def mocked = false
         if (request.absoluteURI() == 'http://localhost:8080/accounts/api/organizations/the-org-id/environments') {
+            mocked = true
             def response = request.response()
             response.statusCode = 200
             response.putHeader('Content-Type',
@@ -76,6 +78,7 @@ trait HttpServerUtils {
                     ]
             ]))
         }
+        mocked
     }
 
     List<String> capturedStandardHeaders(HttpServerRequest request) {

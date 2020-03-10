@@ -1571,7 +1571,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         def firstCheck = true
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1695,7 +1697,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         def firstCheck = true
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1855,7 +1859,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         def deployed = false
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1963,7 +1969,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         def deployed = false
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -2488,8 +2496,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getAppStatus_unknown() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -2501,11 +2513,13 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
 
         // act
-        def status = deployer.getAppStatus('DEV',
-                                           'the-app')
+        def exception = shouldFail {
+            deployer.getAppStatus('DEV',
+                                  'the-app')
+        }
 
         // assert
-        assertThat status,
-                   is(equalTo(AppStatus.Unknown))
+        assertThat exception.message,
+                   is(containsString('Unknown status value of FOOBAR detected from CloudHub!'))
     }
 }

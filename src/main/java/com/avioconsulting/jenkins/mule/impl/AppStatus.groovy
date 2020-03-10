@@ -4,6 +4,5 @@ enum AppStatus {
     Undeployed,
     Failed,
     Started,
-    NotFound,
-    Unknown
+    NotFound
 }
