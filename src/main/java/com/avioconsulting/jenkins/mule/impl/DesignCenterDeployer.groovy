@@ -1,10 +1,12 @@
 package com.avioconsulting.jenkins.mule.impl
 
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
+import com.avioconsulting.jenkins.mule.impl.httpapi.LazyHeader
 import com.avioconsulting.jenkins.mule.impl.models.AppFileInfo
 import com.avioconsulting.jenkins.mule.impl.models.RamlFile
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.io.IOUtils
+import org.apache.http.client.methods.HttpGet
 
 import java.nio.charset.Charset
 
@@ -23,6 +25,28 @@ class DesignCenterDeployer {
 
         this.logger = logger
         this.clientWrapper = clientWrapper
+    }
+
+    String getDesignCenterProjectId(String projectName) {
+        def request = new HttpGet("${clientWrapper.baseUrl}/designcenter/api-designer/projects").with {
+            setHeader('X-ORGANIZATION-ID',
+                      clientWrapper.anypointOrganizationId)
+            setHeader('cache-control',
+                      'no-cache')
+            // At the time we run this, we might not yet have the ownerGuid value since that happens during authentication
+            setHeader(new LazyHeader('X-OWNER-ID',
+                                     {
+                                         clientWrapper.ownerGuid
+                                     }))
+            it
+        }
+        def failureContext = "fetch design center project ID for '${projectName}'"
+        clientWrapper.executeWithSuccessfulCloseableResponse(request,
+                                                             failureContext) { results ->
+            results.find { result ->
+                result.name == projectName
+            }.id
+        }
     }
 
     List<RamlFile> getRamlFilesFromApp(AppFileInfo deploymentRequest) {

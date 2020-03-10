@@ -3,8 +3,10 @@ package com.avioconsulting.jenkins.mule.impl
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.models.AppFileInfo
 import com.avioconsulting.jenkins.mule.impl.models.RamlFile
+import groovy.json.JsonOutput
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServer
+import io.vertx.core.http.HttpServerRequest
 import org.apache.commons.io.FileUtils
 import org.junit.After
 import org.junit.Assert
@@ -116,5 +118,61 @@ class DesignCenterDeployerTest implements HttpServerUtils {
         // assert
         assertThat result,
                    is(equalTo([]))
+    }
+
+    @Test
+    void getDesignCenterProjectId_found() {
+        // arrange
+        String anypointOrgId = null
+        String url = null
+        String ownerGuid = null
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            anypointOrgId = request.getHeader('X-ORGANIZATION-ID')
+            url = request.absoluteURI()
+            ownerGuid = request.getHeader('X-OWNER-ID')
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                end(JsonOutput.toJson([
+                        [
+                                id  : 'blah',
+                                name: 'the project'
+                        ],
+                        [
+                                id  : 'foo',
+                                name: 'other project'
+                        ]
+                ]))
+            }
+        }
+
+        // act
+        def result = deployer.getDesignCenterProjectId('the project')
+
+        // assert
+        assertThat result,
+                   is(equalTo('blah'))
+        assertThat url,
+                   is(equalTo('http://localhost:8080/designcenter/api-designer/projects'))
+        assertThat anypointOrgId,
+                   is(equalTo('the-org-id'))
+        assertThat 'Design center needs this',
+                   ownerGuid,
+                   is(equalTo('the_id'))
+    }
+
+    @Test
+    void getDesignCenterProjectId_not_found() {
+        // arrange
+
+        // act
+        def result = deployer.getDesignCenterProjectId('the project')
+
+        // assert
+        Assert.fail("write it")
     }
 }

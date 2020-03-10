@@ -31,6 +31,7 @@ trait HttpServerUtils {
     }
 
     def mockAuthenticationOk(HttpServerRequest request) {
+        def mocked = false
         if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
             def response = request.response()
             response.statusCode = 200
@@ -39,6 +40,7 @@ trait HttpServerUtils {
             response.end(JsonOutput.toJson([
                     access_token: 'the token'
             ]))
+            mocked = true
         } else if (request.absoluteURI() == 'http://localhost:8080/accounts/api/me') {
             def response = request.response()
             response.statusCode = 200
@@ -50,7 +52,9 @@ trait HttpServerUtils {
                             username: 'the_username'
                     ]
             ]))
+            mocked = true
         }
+        return mocked
     }
 
     def mockEnvironments(HttpServerRequest request) {

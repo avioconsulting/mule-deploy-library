@@ -64,9 +64,8 @@ class HttpClientWrapper implements HttpRequestInterceptor {
     private def fetchUserInfo() {
         logger.println('Fetching user information')
         def request = new HttpGet("${baseUrl}/accounts/api/me")
-        httpClient.execute(request).withCloseable { response ->
-            def result = assertSuccessfulResponseAndReturnJson(response,
-                                                               'fetch user info')
+        executeWithSuccessfulCloseableResponse(request,
+                                               'fetch user info') { result ->
             this.ownerGuid = result.user.id
         }
     }
@@ -106,6 +105,16 @@ class HttpClientWrapper implements HttpRequestInterceptor {
         def contentType = response.getFirstHeader('Content-Type')
         assert contentType?.value?.contains('application/json'): "Expected a JSON response but got ${contentType}!"
         new JsonSlurper().parse(response.entity.content)
+    }
+
+    def executeWithSuccessfulCloseableResponse(HttpUriRequest request,
+                                               String failureContext,
+                                               Closure closure) {
+        execute(request).withCloseable { response ->
+            def parsed = assertSuccessfulResponseAndReturnJson(response,
+                                                               failureContext)
+            closure(parsed)
+        }
     }
 
     def close() {
