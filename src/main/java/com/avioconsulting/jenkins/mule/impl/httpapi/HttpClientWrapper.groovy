@@ -6,6 +6,7 @@ import org.apache.http.HttpException
 import org.apache.http.HttpRequest
 import org.apache.http.HttpRequestInterceptor
 import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.StringEntity
@@ -17,6 +18,7 @@ class HttpClientWrapper implements HttpRequestInterceptor {
     private final String username
     private final String password
     private String accessToken
+    private String ownerGuid
     private final PrintStream logger
     final String baseUrl
     private final CloseableHttpClient httpClient
@@ -55,9 +57,21 @@ class HttpClientWrapper implements HttpRequestInterceptor {
      * @return - an auth token
      */
     private def authenticate() {
-        if (this.accessToken) {
-            return this.accessToken
+        fetchAccessToken()
+        fetchUserInfo()
+    }
+
+    private def fetchUserInfo() {
+        logger.println('Fetching user information')
+        def request = new HttpGet("${baseUrl}/accounts/api/me")
+        httpClient.execute(request).withCloseable { response ->
+            def result = assertSuccessfulResponseAndReturnJson(response,
+                                                               'fetch user info')
+            this.ownerGuid = result.user.id
         }
+    }
+
+    private def fetchAccessToken() {
         logger.println "Authenticating to Anypoint as user '${username}'"
         def payload = [
                 username: username,
@@ -69,15 +83,11 @@ class HttpClientWrapper implements HttpRequestInterceptor {
                       'application/json')
             it
         }
-        def response = httpClient.execute(request)
-        try {
+        httpClient.execute(request).with { response ->
             def result = assertSuccessfulResponseAndReturnJson(response,
                                                                "authenticate to Anypoint as '${username}'")
             logger.println 'Successfully authenticated'
             accessToken = result.access_token
-        }
-        finally {
-            response.close()
         }
     }
 
@@ -107,6 +117,10 @@ class HttpClientWrapper implements HttpRequestInterceptor {
             authenticate()
         }
         httpClient.execute(request)
+    }
+
+    String getOwnerGuid() {
+        this.ownerGuid
     }
 
     @Override

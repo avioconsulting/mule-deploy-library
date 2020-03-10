@@ -46,20 +46,15 @@ class HttpClientWrapperTest implements HttpServerUtils {
         Map sentJson = null
         String authHeader = null
         withHttpServer { HttpServerRequest request ->
-            url = request.absoluteURI()
-            method = request.method().name()
-            contentType = request.getHeader('Content-Type')
-            authHeader = request.getHeader('Authorization')
-            request.bodyHandler { body ->
-                sentJson = new JsonSlurper().parseText(body.toString())
-            }
-            request.response().with {
-                putHeader('Content-Type',
-                          'application/json')
-                statusCode = 200
-                end(JsonOutput.toJson([
-                        access_token: 'the token'
-                ]))
+            mockAuthenticationOk(request)
+            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
+                url = request.absoluteURI()
+                method = request.method().name()
+                contentType = request.getHeader('Content-Type')
+                authHeader = request.getHeader('Authorization')
+                request.bodyHandler { body ->
+                    sentJson = new JsonSlurper().parseText(body.toString())
+                }
             }
         }
 
@@ -95,20 +90,32 @@ class HttpClientWrapperTest implements HttpServerUtils {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                end(JsonOutput.toJson([
-                        access_token: 'the token'
-                ]))
+                Map jsonPayload = null
+                if (request.absoluteURI() == 'http://localhost:8080/accounts/api/me') {
+                    jsonPayload = [
+                            user: [
+                                    id      : 'the_id',
+                                    username: 'the_username'
+                            ]
+                    ]
+                } else {
+                    jsonPayload = [
+                            access_token: 'the token'
+                    ]
+                }
+                end(JsonOutput.toJson(jsonPayload))
             }
         }
 
         // act
         clientWrapper.authenticate()
-        def response = clientWrapper.execute(new HttpGet("${clientWrapper.baseUrl}/foobar"))
-        response.close()
 
         // assert
         assertThat tokenOnNextRequest,
                    is(equalTo('Bearer the token'))
+        assertThat 'Some APIs like Design Center need this',
+                   clientWrapper.ownerGuid,
+                   is(equalTo('the_id'))
     }
 
     @Test
@@ -120,6 +127,7 @@ class HttpClientWrapperTest implements HttpServerUtils {
                 if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                     tokenFetches++
                 }
+                mockAuthenticationOk(request)
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')

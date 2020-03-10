@@ -31,13 +31,26 @@ trait HttpServerUtils {
     }
 
     def mockAuthenticationOk(HttpServerRequest request) {
-        def response = request.response()
-        response.statusCode = 200
-        response.putHeader('Content-Type',
-                           'application/json')
-        response.end(JsonOutput.toJson([
-                access_token: 'the token'
-        ]))
+        if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
+            def response = request.response()
+            response.statusCode = 200
+            response.putHeader('Content-Type',
+                               'application/json')
+            response.end(JsonOutput.toJson([
+                    access_token: 'the token'
+            ]))
+        } else if (request.absoluteURI() == 'http://localhost:8080/accounts/api/me') {
+            def response = request.response()
+            response.statusCode = 200
+            response.putHeader('Content-Type',
+                               'application/json')
+            response.end(JsonOutput.toJson([
+                    user: [
+                            id      : 'the_id',
+                            username: 'the_username'
+                    ]
+            ]))
+        }
     }
 
     def mockEnvironments(HttpServerRequest request) {
