@@ -110,7 +110,8 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
     }
 
     def deleteApp(String environment,
-                  String appName) {
+                  String appName,
+                  String defaultFailReason = 'remove failed app deployment') {
         def request = new HttpDelete("${clientWrapper.baseUrl}/cloudhub/api/v2/applications/${appName}").with {
             addStandardStuff(it,
                              environment)
@@ -119,7 +120,7 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
         def response = clientWrapper.execute(request)
         try {
             clientWrapper.assertSuccessfulResponse(response,
-                                                   'remove failed app deployment')
+                                                   defaultFailReason)
         }
         finally {
             response.close()

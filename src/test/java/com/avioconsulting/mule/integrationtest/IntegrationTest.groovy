@@ -74,7 +74,8 @@ class IntegrationTest {
         def appName = request.normalizedAppName
         println "Attempting to clean out existing app ${appName}"
         cloudHubDeployer.deleteApp(request.environment,
-                                   request.normalizedAppName)
+                                   request.normalizedAppName,
+                                   'integration test app cleanup')
         println 'Waiting for app deletion to finish'
         cloudHubDeployer.waitForAppDeletion(request.environment,
                                             appName)
@@ -134,8 +135,9 @@ class IntegrationTest {
                                             environmentLocator,
                                             System.out)
         overallDeployer = new Deployer(clientWrapper,
-                                       environmentLocator,
-                                       System.out)
+                                       System.out,
+                                       ['DEV'],
+                                       environmentLocator)
     }
 
     @Test
@@ -175,7 +177,11 @@ class IntegrationTest {
         finally {
             println 'test has finished one way or the other, now cleaning up our mess'
             // don't be dirty!
-            deleteCloudHubApp(cloudhubDeploymentRequest)
+            try {
+                deleteCloudHubApp(cloudhubDeploymentRequest)
+            } catch (e) {
+                println "Unable to cleanup ${e}"
+            }
         }
     }
 
