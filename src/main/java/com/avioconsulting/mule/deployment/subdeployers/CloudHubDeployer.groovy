@@ -119,7 +119,7 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
         def response = clientWrapper.execute(request)
         try {
             clientWrapper.assertSuccessfulResponse(response,
-                                                   'Removing failed app deployment')
+                                                   'remove failed app deployment')
         }
         finally {
             response.close()
