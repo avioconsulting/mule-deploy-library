@@ -3,7 +3,7 @@ package com.avioconsulting.mule.deployment.integration
 import com.avioconsulting.mule.deployment.MuleUtil
 import com.avioconsulting.mule.deployment.httpapi.EnvironmentLocator
 import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
-import com.avioconsulting.mule.deployment.models.CloudhubFileDeploymentRequest
+import com.avioconsulting.mule.deployment.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.models.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.subdeployers.CloudHubDeployer
@@ -33,7 +33,7 @@ class IntegrationTest {
     private CloudHubDeployer cloudHubDeployer
     private OnPremDeployer onPremDeployer
     private HttpClientWrapper clientWrapper
-    private CloudhubFileDeploymentRequest cloudhubDeploymentRequest
+    private CloudhubDeploymentRequest cloudhubDeploymentRequest
     private OnPremDeploymentRequest onPremDeploymentRequest
 
     private static File getProjectDir(String proj) {
@@ -67,7 +67,7 @@ class IntegrationTest {
         assert result.exitCode == 0
     }
 
-    def deleteCloudHubApp(CloudhubFileDeploymentRequest request) {
+    def deleteCloudHubApp(CloudhubDeploymentRequest request) {
         def appName = request.normalizedAppName
         println "Attempting to clean out existing app ${appName}"
         cloudHubDeployer.deleteApp(request.environment,
@@ -94,17 +94,17 @@ class IntegrationTest {
                                                               builtFile.name,
                                                               builtFile.newInputStream(),
                                                               [env: AVIO_ENVIRONMENT_DEV])
-        cloudhubDeploymentRequest = new CloudhubFileDeploymentRequest(builtFile.newInputStream(),
-                                                                      AVIO_ENVIRONMENT_DEV,
-                                                                      CLOUDHUB_APP_NAME,
-                                                                      new CloudhubWorkerSpecRequest('4.2.2',
+        cloudhubDeploymentRequest = new CloudhubDeploymentRequest(builtFile.newInputStream(),
+                                                                  AVIO_ENVIRONMENT_DEV,
+                                                                  CLOUDHUB_APP_NAME,
+                                                                  new CloudhubWorkerSpecRequest('4.2.2',
                                                                                                     false,
                                                                                                     1),
-                                                                      builtFile.name,
-                                                                      'abcdefg',
-                                                                      'someid',
-                                                                      'somesecret',
-                                                                      CLOUDHUB_APP_PREFIX)
+                                                                  builtFile.name,
+                                                                  'abcdefg',
+                                                                  'someid',
+                                                                  'somesecret',
+                                                                  CLOUDHUB_APP_PREFIX)
         clientWrapper = new HttpClientWrapper(ANYPOINT_USERNAME,
                                               ANYPOINT_PASSWORD,
                                               AVIO_ORG_ID,

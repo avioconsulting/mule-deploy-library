@@ -6,7 +6,7 @@ import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
 
-class CloudhubFileDeploymentRequest implements FileBasedAppDeploymentRequest {
+class CloudhubDeploymentRequest implements FileBasedAppDeploymentRequest {
     /**
      * environment name (e.g. DEV, not GUID)
      */
@@ -55,17 +55,17 @@ class CloudhubFileDeploymentRequest implements FileBasedAppDeploymentRequest {
      */
     final InputStream app
 
-    CloudhubFileDeploymentRequest(InputStream app,
-                                  String environment,
-                                  String appName,
-                                  CloudhubWorkerSpecRequest workerSpecRequest,
-                                  String fileName,
-                                  String cryptoKey,
-                                  String anypointClientId,
-                                  String anypointClientSecret,
-                                  String cloudHubAppPrefix,
-                                  Map<String, String> appProperties = [:],
-                                  Map<String, String> otherCloudHubProperties = [:]) {
+    CloudhubDeploymentRequest(InputStream app,
+                              String environment,
+                              String appName,
+                              CloudhubWorkerSpecRequest workerSpecRequest,
+                              String fileName,
+                              String cryptoKey,
+                              String anypointClientId,
+                              String anypointClientSecret,
+                              String cloudHubAppPrefix,
+                              Map<String, String> appProperties = [:],
+                              Map<String, String> otherCloudHubProperties = [:]) {
        this(app,
             environment,
             appName,
@@ -80,18 +80,18 @@ class CloudhubFileDeploymentRequest implements FileBasedAppDeploymentRequest {
             otherCloudHubProperties)
     }
 
-    CloudhubFileDeploymentRequest(InputStream app,
-                                  String environment,
-                                  String appName,
-                                  CloudhubWorkerSpecRequest workerSpecRequest,
-                                  String fileName,
-                                  String cryptoKey,
-                                  String anypointClientId,
-                                  String anypointClientSecret,
-                                  String cloudHubAppPrefix,
-                                  Map<String, String> appProperties,
-                                  String overrideByChangingFileInZip,
-                                  Map<String, String> otherCloudHubProperties = [:]) {
+    CloudhubDeploymentRequest(InputStream app,
+                              String environment,
+                              String appName,
+                              CloudhubWorkerSpecRequest workerSpecRequest,
+                              String fileName,
+                              String cryptoKey,
+                              String anypointClientId,
+                              String anypointClientSecret,
+                              String cloudHubAppPrefix,
+                              Map<String, String> appProperties,
+                              String overrideByChangingFileInZip,
+                              Map<String, String> otherCloudHubProperties = [:]) {
         this.environment = environment
         this.appName = appName
         this.workerSpecRequest = workerSpecRequest

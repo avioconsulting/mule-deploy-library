@@ -3,7 +3,7 @@ package com.avioconsulting.mule.deployment.subdeployers
 import com.avioconsulting.mule.deployment.httpapi.EnvironmentLocator
 import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
 import com.avioconsulting.mule.deployment.models.AppStatus
-import com.avioconsulting.mule.deployment.models.CloudhubFileDeploymentRequest
+import com.avioconsulting.mule.deployment.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.models.DeploymentStatus
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.*
@@ -50,7 +50,7 @@ class CloudHubDeployer extends BaseDeployer {
      * Deploy via a supplied file
      * @return
      */
-    def deploy(CloudhubFileDeploymentRequest deploymentRequest) {
+    def deploy(CloudhubDeploymentRequest deploymentRequest) {
         def existingAppStatus = getAppStatus(deploymentRequest.environment,
                                              deploymentRequest.normalizedAppName)
         def request = getDeploymentHttpRequest(existingAppStatus,
@@ -89,7 +89,7 @@ class CloudHubDeployer extends BaseDeployer {
     }
 
     private def doDeployment(HttpEntityEnclosingRequestBase request,
-                             CloudhubFileDeploymentRequest deploymentRequest) {
+                             CloudhubDeploymentRequest deploymentRequest) {
         logger.println "Deploying using settings: ${JsonOutput.prettyPrint(deploymentRequest.cloudhubAppInfoAsJson)}"
         request = request.with {
             addStandardStuff(it,
