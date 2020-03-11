@@ -2,6 +2,7 @@ package com.avioconsulting.mule.deployment.models
 
 import com.avioconsulting.mule.deployment.models.AppFileInfo
 import org.junit.Test
+
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is

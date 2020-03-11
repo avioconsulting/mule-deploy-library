@@ -2,11 +2,11 @@ package com.avioconsulting.mule.deployment.integration
 
 import com.avioconsulting.mule.deployment.MuleUtil
 import com.avioconsulting.mule.deployment.httpapi.EnvironmentLocator
+import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
 import com.avioconsulting.mule.deployment.models.CloudhubFileDeploymentRequest
 import com.avioconsulting.mule.deployment.models.CloudhubWorkerSpecRequest
-import com.avioconsulting.mule.deployment.subdeployers.CloudHubDeployer
-import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
 import com.avioconsulting.mule.deployment.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.subdeployers.CloudHubDeployer
 import com.avioconsulting.mule.deployment.subdeployers.OnPremDeployer
 import org.apache.maven.shared.invoker.DefaultInvocationRequest
 import org.apache.maven.shared.invoker.DefaultInvoker

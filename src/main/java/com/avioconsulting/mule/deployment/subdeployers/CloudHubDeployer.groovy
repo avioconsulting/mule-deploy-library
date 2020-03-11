@@ -1,10 +1,10 @@
 package com.avioconsulting.mule.deployment.subdeployers
 
-import com.avioconsulting.mule.deployment.models.AppStatus
-import com.avioconsulting.mule.deployment.models.DeploymentStatus
 import com.avioconsulting.mule.deployment.httpapi.EnvironmentLocator
 import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
+import com.avioconsulting.mule.deployment.models.AppStatus
 import com.avioconsulting.mule.deployment.models.BaseCloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.models.DeploymentStatus
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.*
 

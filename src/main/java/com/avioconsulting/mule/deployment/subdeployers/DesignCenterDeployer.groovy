@@ -67,7 +67,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality {
 
     def uploadDesignCenterFiles(String projectId,
                                 List<RamlFile> files) {
-        logger.println("Uploading files: ${files.collect {f -> f.fileName}} to Design Center")
+        logger.println("Uploading files: ${files.collect { f -> f.fileName }} to Design Center")
         def requestPayload = files.collect { file ->
             [
                     path   : file.fileName,
@@ -93,8 +93,8 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality {
     }
 
     def executeDesignCenterRequest(HttpUriRequest request,
-                                           String failureContext,
-                                           Closure resultHandler = null) {
+                                   String failureContext,
+                                   Closure resultHandler = null) {
         executeDesignCenterRequest(clientWrapper,
                                    request,
                                    failureContext,
@@ -211,7 +211,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality {
         }
         def mainRamlFile = getMainRamlFile(apiSpec,
                                            ramlFiles)
-        if (!ramlFiles.any { file -> file.fileName == mainRamlFile}) {
+        if (!ramlFiles.any { file -> file.fileName == mainRamlFile }) {
             throw new Exception("You specified '${mainRamlFile}' as your main RAML file but it does not exist in your application!")
         }
         def projectId = getDesignCenterProjectId(apiSpec.name)
@@ -222,8 +222,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality {
             def changes = ramlFiles - existingFiles
             if (changes.empty) {
                 logger.println('New RAML contents match the old contents, will not update Design Center')
-            }
-            else {
+            } else {
                 logger.println('RAML quantity/contents have changed, will update Design Center')
                 def noLongerExist = existingFiles.findAll { file ->
                     !ramlFiles.any { toBeFile -> file.fileName == toBeFile.fileName }

@@ -1,9 +1,9 @@
 package com.avioconsulting.mule.deployment.subdeployers
 
-import com.avioconsulting.mule.deployment.models.OnPremDeploymentStatus
 import com.avioconsulting.mule.deployment.httpapi.EnvironmentLocator
 import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
 import com.avioconsulting.mule.deployment.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.models.OnPremDeploymentStatus
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
