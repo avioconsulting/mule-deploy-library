@@ -12,21 +12,26 @@ trait HttpServerUtils {
 
     def withHttpServer(Handler<HttpServerRequest> closure) {
         httpServer.requestHandler(closure).listen(port)
-        def connected = false
+        def exception = null
         5.times {
-            if (connected) {
+            if (exception == null) {
                 return
             }
             try {
                 def socket = new Socket('localhost',
                                         port)
-                connected = true
+                exception = null
                 socket.close()
             }
             catch (e) {
-                println 'Server not up yet, sleeping'
+                exception = e
+                println 'Server not up yet, sleeping and trying again'
                 Thread.sleep(100)
             }
+        }
+        if (exception) {
+            throw new Exception("Tried 5 times and was unable to connect to server",
+                                exception)
         }
     }
 

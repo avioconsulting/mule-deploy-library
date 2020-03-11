@@ -45,8 +45,18 @@ class OnPremDeployerTest implements HttpServerUtils {
 
     @After
     void stopServer() {
-        clientWrapper.close()
-        httpServer.close()
+        try {
+            clientWrapper.close()
+        }
+        catch (e) {
+            println "could not close ${e}"
+        }
+        try {
+            httpServer.close()
+        }
+        catch (e) {
+            println "could not close ${e}"
+        }
     }
 
     @Test
