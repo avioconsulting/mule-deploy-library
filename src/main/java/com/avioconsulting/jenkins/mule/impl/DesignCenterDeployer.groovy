@@ -159,13 +159,19 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality {
         }
     }
 
+    private static String getMainRamlFile(ApiSpecification apiSpec,
+                                          List<RamlFile> ramlFiles) {
+        apiSpec.mainRamlFile ?: ramlFiles.find { ramlFile ->
+            new File(ramlFile.fileName).parentFile == null
+        }.fileName
+    }
+
     def pushToExchange(ApiSpecification apiSpec,
                        String projectId,
                        List<RamlFile> ramlFiles,
                        String appVersion) {
-        def mainRamlFile = apiSpec.mainRamlFile ?: ramlFiles.find { ramlFile ->
-            new File(ramlFile.fileName).parentFile == null
-        }.fileName
+        def mainRamlFile = getMainRamlFile(apiSpec,
+                                           ramlFiles)
         def requestPayload = [
                 main      : mainRamlFile,
                 apiVersion: apiSpec.apiMajorVersion,
@@ -198,6 +204,11 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality {
         if (ramlFiles.empty) {
             logger.println 'No RAML fils in project, therefore nothing to sync'
             return
+        }
+        def mainRamlFile = getMainRamlFile(apiSpec,
+                                           ramlFiles)
+        if (!ramlFiles.any { file -> file.fileName == mainRamlFile}) {
+            throw new Exception("You specified '${mainRamlFile}' as your main RAML file but it does not exist in your application!")
         }
         def projectId = getDesignCenterProjectId(apiSpec.name)
         new DesignCenterLock(clientWrapper,
