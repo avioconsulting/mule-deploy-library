@@ -6,6 +6,8 @@ import com.avioconsulting.mule.deployment.models.ApiSpecification
 import com.avioconsulting.mule.deployment.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.models.Features
 import com.avioconsulting.mule.deployment.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.subdeployers.CloudHubDeployer
+import com.avioconsulting.mule.deployment.subdeployers.ICloudHubDeployer
 
 /***
  * Top level deployer. This is what most of your interaction should be with
@@ -14,6 +16,7 @@ class Deployer {
     private final PrintStream logger
     private final EnvironmentLocator environmentLocator
     private final HttpClientWrapper clientWrapper
+    private final ICloudHubDeployer cloudHubDeployer
 
     /**
      *
@@ -28,22 +31,26 @@ class Deployer {
              String anypointOrganizationId,
              PrintStream logger,
              String baseUrl = 'https://anypoint.mulesoft.com') {
-        this.clientWrapper = new HttpClientWrapper(baseUrl,
-                                                   username,
-                                                   password,
-                                                   anypointOrganizationId,
-                                                   logger)
-        this.environmentLocator = new EnvironmentLocator(this.clientWrapper,
-                                                         logger)
-        this.logger = logger
+        this(new HttpClientWrapper(baseUrl,
+                                   username,
+                                   password,
+                                   anypointOrganizationId,
+                                   logger),
+             logger)
     }
 
+
     private Deployer(HttpClientWrapper httpClientWrapper,
-                     EnvironmentLocator environmentLocator,
-                     PrintStream logger) {
+                     PrintStream logger,
+                     EnvironmentLocator environmentLocator = null,
+                     ICloudHubDeployer cloudHubDeployer = null) {
         this.logger = logger
         this.clientWrapper = httpClientWrapper
-        this.environmentLocator = environmentLocator
+        this.environmentLocator = environmentLocator ?: new EnvironmentLocator(this.clientWrapper,
+                                                                               logger)
+        this.cloudHubDeployer = cloudHubDeployer ?: new CloudHubDeployer(this.clientWrapper,
+                                                                         this.environmentLocator,
+                                                                         logger)
     }
 
     /**
@@ -57,7 +64,8 @@ class Deployer {
                           String appVersion,
                           ApiSpecification apiSpecification = null,
                           List<Features> enabledFeatures = [Features.All]) {
-
+        logger.println('Step 1: Deploying application to CloudHub')
+        cloudHubDeployer.deploy(appDeploymentRequest)
     }
 
     /**

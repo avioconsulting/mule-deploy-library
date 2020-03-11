@@ -8,7 +8,7 @@ import com.avioconsulting.mule.deployment.models.DeploymentStatus
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.*
 
-class CloudHubDeployer extends BaseDeployer {
+class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
     static final Map<String, AppStatus> AppStatusMappings = [
             STARTED      : AppStatus.Started,
             DEPLOY_FAILED: AppStatus.Failed,
