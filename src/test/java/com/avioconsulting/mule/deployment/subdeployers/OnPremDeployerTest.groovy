@@ -1103,10 +1103,6 @@ class OnPremDeployerTest extends BaseTest {
 
         // act
         deployer.deploy(request)
-        println 'Closing server to force ZIP file write to complete'
-        // ZIP file write from server seems to be async and we need to assert the contents
-        stopServer()
-        println 'Server closed, now running assertions'
 
         // assert
         assertThat url,
@@ -1130,18 +1126,32 @@ class OnPremDeployerTest extends BaseTest {
                            ]
                    ]))
         def destination = new File('target/temp/modifiedapp')
-        if (destination.exists()) {
-            assert destination.deleteDir()
+        Exception problem = null
+        5.times {
+            if (destination.exists()) {
+                assert destination.deleteDir()
+            }
+            try {
+                antBuilder.unzip(src: newZipFile.absolutePath,
+                                 dest: destination)
+                def newProps = new Properties()
+                newProps.load(new FileInputStream(new File(destination,
+                                                           'classes/api.dev.properties')))
+                assertThat newProps,
+                           is(equalTo([
+                                   existing: 'changed',
+                           ]))
+                problem = null
+            }
+            catch (e) {
+                problem = e
+                println 'Problem with zip, waiting 500ms and retrying due to async web server'
+                Thread.sleep(500)
+            }
         }
-        antBuilder.unzip(src: newZipFile.absolutePath,
-                         dest: destination)
-        def newProps = new Properties()
-        newProps.load(new FileInputStream(new File(destination,
-                                                   'classes/api.dev.properties')))
-        assertThat newProps,
-                   is(equalTo([
-                           existing: 'changed',
-                   ]))
+        if (problem) {
+            throw problem
+        }
     }
 
     @Test
