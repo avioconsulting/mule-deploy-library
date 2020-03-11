@@ -140,12 +140,12 @@ class DeployerTest {
     }
 
     @Test
-    void deployApplication_no_dc_deployment_for_dev_environment() {
+    void deployApplication_no_dc_deployment_for_tst_environment() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
         def stream = new FileInputStream(file)
         def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+                                                    'TST',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
@@ -167,7 +167,7 @@ class DeployerTest {
         // assert
         assertThat deployedChApps.size(),
                    is(equalTo(1))
-        assertThat 'Not DEV',
+        assertThat 'Not deploying to DEV, should not be a DC deployment',
                    designCenterSyncs.size(),
                    is(equalTo(0))
     }
@@ -192,7 +192,8 @@ class DeployerTest {
         // assert
         assertThat deployedOnPremApps.size(),
                    is(equalTo(1))
-        Assert.fail("write it, add design center stuff")
+        assertThat designCenterSyncs.size(),
+                   is(equalTo(1))
     }
 
     @Test

@@ -79,7 +79,8 @@ class Deployer {
         stepNumber = 0
         performCommonDeploymentTasks(apiSpecification,
                                      appVersion,
-                                     appDeploymentRequest)
+                                     appDeploymentRequest,
+                                     appDeploymentRequest.environment)
         executeStep(false,
                     'CloudHub app deployment',
                     null) {
@@ -101,7 +102,8 @@ class Deployer {
         stepNumber = 0
         performCommonDeploymentTasks(apiSpecification,
                                      appVersion,
-                                     appDeploymentRequest)
+                                     appDeploymentRequest,
+                                     appDeploymentRequest.environment)
         executeStep(false,
                     'on-prem app deployment',
                     null) {
@@ -132,10 +134,11 @@ class Deployer {
 
     private def performCommonDeploymentTasks(ApiSpecification apiSpecification,
                                              String appVersion,
-                                             FileBasedAppDeploymentRequest appDeploymentRequest) {
-        executeStep(false,
+                                             FileBasedAppDeploymentRequest appDeploymentRequest,
+                                             String environment) {
+        executeStep(!this.environmentsToDoDesignCenterDeploymentOn.contains(environment),
                     'Design Center Deployment',
-                    'foo') {
+                    "Deploying to '${environment}', only ${this.environmentsToDoDesignCenterDeploymentOn} triggers Design Center deploys") {
             designCenterDeployer.synchronizeDesignCenterFromApp(apiSpecification,
                                                                 appDeploymentRequest,
                                                                 appVersion)
