@@ -1,11 +1,8 @@
 package com.avioconsulting.mule.deployment.httpapi
 
-import com.avioconsulting.mule.deployment.HttpServerUtils
+import com.avioconsulting.mule.deployment.BaseTest
 import groovy.json.JsonOutput
-import io.vertx.core.Vertx
-import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerRequest
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
@@ -13,39 +10,13 @@ import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-class EnvironmentLocatorTest implements HttpServerUtils {
-    HttpServer httpServer
-    int port
-    private HttpClientWrapper clientWrapper
+class EnvironmentLocatorTest extends BaseTest {
     private EnvironmentLocator envLocator
 
     @Before
-    void startServer() {
-        httpServer = Vertx.vertx().createHttpServer()
-        port = 8080
-        clientWrapper = new HttpClientWrapper("http://localhost:${port}",
-                                              'the user',
-                                              'the password',
-                                              'the-org-id',
-                                              System.out)
+    void setupLocator() {
         envLocator = new EnvironmentLocator(clientWrapper,
                                             System.out)
-    }
-
-    @After
-    void stopServer() {
-        try {
-            clientWrapper.close()
-        }
-        catch (e) {
-            println "could not close ${e}"
-        }
-        try {
-            httpServer.close()
-        }
-        catch (e) {
-            println "could not close ${e}"
-        }
     }
 
     @Test
@@ -58,7 +29,7 @@ class EnvironmentLocatorTest implements HttpServerUtils {
             if (mockAuthenticationOk(request)) {
                 return
             }
-            url = request.absoluteURI()
+            url = request.uri()
             method = request.method()
             authToken = request.getHeader('Authorization')
             request.response().with {
@@ -85,7 +56,7 @@ class EnvironmentLocatorTest implements HttpServerUtils {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/accounts/api/organizations/the-org-id/environments'))
+                   is(equalTo('/accounts/api/organizations/the-org-id/environments'))
         assertThat method,
                    is(equalTo('GET'))
         assertThat authToken,

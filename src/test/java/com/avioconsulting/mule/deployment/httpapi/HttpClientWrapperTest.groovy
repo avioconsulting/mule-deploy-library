@@ -1,52 +1,17 @@
 package com.avioconsulting.mule.deployment.httpapi
 
-import com.avioconsulting.mule.deployment.HttpServerUtils
+import com.avioconsulting.mule.deployment.BaseTest
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import io.vertx.core.Vertx
-import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerRequest
 import org.apache.http.client.methods.HttpGet
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-class HttpClientWrapperTest implements HttpServerUtils {
-    HttpServer httpServer
-    int port
-    private HttpClientWrapper clientWrapper
-
-    @Before
-    void startServer() {
-        httpServer = Vertx.vertx().createHttpServer()
-        port = 8080
-        clientWrapper = new HttpClientWrapper("http://localhost:${port}",
-                                              'the user',
-                                              'the password',
-                                              'the-org-id',
-                                              System.out)
-    }
-
-    @After
-    void stopServer() {
-        try {
-            clientWrapper.close()
-        }
-        catch (e) {
-            println "could not close ${e}"
-        }
-        try {
-            httpServer.close()
-        }
-        catch (e) {
-            println "could not close ${e}"
-        }
-    }
-
+class HttpClientWrapperTest extends BaseTest {
     @Test
     void authenticate_correct_request() {
         // arrange
@@ -56,15 +21,31 @@ class HttpClientWrapperTest implements HttpServerUtils {
         Map sentJson = null
         String authHeader = null
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                url = request.absoluteURI()
+            def payload = null
+            if (request.uri() == '/accounts/login') {
+                url = request.uri()
                 method = request.method().name()
                 contentType = request.getHeader('Content-Type')
                 authHeader = request.getHeader('Authorization')
                 request.bodyHandler { body ->
                     sentJson = new JsonSlurper().parseText(body.toString())
                 }
+                payload = [
+                        access_token: 'the token'
+                ]
+            } else if (request.uri() == '/accounts/api/me') {
+                payload = [
+                        user: [
+                                id      : 'the_id',
+                                username: 'the_username'
+                        ]
+                ]
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                end(JsonOutput.toJson(payload))
             }
         }
 
@@ -73,7 +54,7 @@ class HttpClientWrapperTest implements HttpServerUtils {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/accounts/login'))
+                   is(equalTo('/accounts/login'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat contentType,
@@ -94,14 +75,14 @@ class HttpClientWrapperTest implements HttpServerUtils {
         def tokenOnNextRequest = null
         withHttpServer { HttpServerRequest request ->
             request.response().with {
-                if (request.absoluteURI() != 'http://localhost:8080/accounts/login') {
+                if (request.uri() != '/accounts/login') {
                     tokenOnNextRequest = request.getHeader('Authorization')
                 }
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 Map jsonPayload = null
-                if (request.absoluteURI() == 'http://localhost:8080/accounts/api/me') {
+                if (request.uri() == '/accounts/api/me') {
                     jsonPayload = [
                             user: [
                                     id      : 'the_id',
@@ -134,7 +115,7 @@ class HttpClientWrapperTest implements HttpServerUtils {
         def tokenFetches = 0
         withHttpServer { HttpServerRequest request ->
             request.response().with {
-                if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
+                if (request.uri() == '/accounts/login') {
                     tokenFetches++
                 }
                 if (mockAuthenticationOk(request)) {

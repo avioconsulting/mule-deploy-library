@@ -26,6 +26,7 @@ class EnvironmentLocator {
     }
 
     private Map<String, String> getEnvironments() {
+        logger.println('Fetching all environment GUIDs')
         def anypointOrganizationId = clientWrapper.anypointOrganizationId
         def request = new HttpGet("${clientWrapper.baseUrl}/accounts/api/organizations/${anypointOrganizationId}/environments")
         def response = clientWrapper.execute(request)

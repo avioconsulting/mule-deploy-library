@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.subdeployers
 
-import com.avioconsulting.mule.deployment.HttpServerUtils
+import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
 import com.avioconsulting.mule.deployment.models.ApiSpecification
 import com.avioconsulting.mule.deployment.models.AppFileInfo
@@ -20,39 +20,13 @@ import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-class DesignCenterDeployerTest implements HttpServerUtils {
-    HttpServer httpServer
+class DesignCenterDeployerTest extends BaseTest {
     private DesignCenterDeployer deployer
-    int port
-    private HttpClientWrapper clientWrapper
 
     @Before
-    void startServer() {
-        httpServer = Vertx.vertx().createHttpServer()
-        port = 8080
-        clientWrapper = new HttpClientWrapper("http://localhost:${port}",
-                                              'the user',
-                                              'the password',
-                                              'the-org-id',
-                                              System.out)
+    void setupDeployer() {
         deployer = new DesignCenterDeployer(clientWrapper,
                                             System.out)
-    }
-
-    @After
-    void stopServer() {
-        try {
-            clientWrapper.close()
-        }
-        catch (e) {
-            println "could not close ${e}"
-        }
-        try {
-            httpServer.close()
-        }
-        catch (e) {
-            println "could not close ${e}"
-        }
     }
 
     @Test

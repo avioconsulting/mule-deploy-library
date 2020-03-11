@@ -1,15 +1,12 @@
 package com.avioconsulting.mule.deployment.subdeployers
 
-import com.avioconsulting.mule.deployment.HttpServerUtils
-import com.avioconsulting.mule.deployment.models.OnPremDeploymentStatus
+import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.httpapi.EnvironmentLocator
-import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
 import com.avioconsulting.mule.deployment.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.models.OnPremDeploymentStatus
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
-import io.vertx.core.Vertx
-import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerRequest
 import org.junit.After
 import org.junit.Before
@@ -19,21 +16,11 @@ import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-class OnPremDeployerTest implements HttpServerUtils {
-    HttpServer httpServer
+class OnPremDeployerTest extends BaseTest {
     private OnPremDeployer deployer
-    int port
-    private HttpClientWrapper clientWrapper
 
     @Before
-    void startServer() {
-        httpServer = Vertx.vertx().createHttpServer()
-        port = 8080
-        clientWrapper = new HttpClientWrapper("http://localhost:${port}",
-                                              'the user',
-                                              'the password',
-                                              'the-org-id',
-                                              System.out)
+    void setupDeployer() {
         def envLocator = new EnvironmentLocator(clientWrapper,
                                                 System.out)
         deployer = new OnPremDeployer(this.clientWrapper,
@@ -41,22 +28,6 @@ class OnPremDeployerTest implements HttpServerUtils {
                                       500,
                                       10,
                                       System.out)
-    }
-
-    @After
-    void stopServer() {
-        try {
-            clientWrapper.close()
-        }
-        catch (e) {
-            println "could not close ${e}"
-        }
-        try {
-            httpServer.close()
-        }
-        catch (e) {
-            println "could not close ${e}"
-        }
     }
 
     @Test
