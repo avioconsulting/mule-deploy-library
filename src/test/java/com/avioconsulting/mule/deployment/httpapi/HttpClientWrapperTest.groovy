@@ -127,7 +127,9 @@ class HttpClientWrapperTest implements HttpServerUtils {
                 if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
                     tokenFetches++
                 }
-                mockAuthenticationOk(request)
+                if (mockAuthenticationOk(request)) {
+                    return
+                }
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')

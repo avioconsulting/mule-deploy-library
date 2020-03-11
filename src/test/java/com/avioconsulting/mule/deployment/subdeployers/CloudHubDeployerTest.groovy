@@ -57,8 +57,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String envId = null
         String orgId = null
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             url = request.absoluteURI()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -108,8 +112,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getDeploymentStatus_failed() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -148,8 +156,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getDeploymentStatus_started() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -189,8 +201,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getDeploymentStatus_starting() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1258,7 +1274,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -2387,8 +2405,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String envId = null
         String orgId = null
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             url = request.absoluteURI()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -2423,8 +2445,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getAppStatus_undeployed() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -2448,8 +2474,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getAppStatus_failed() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -2473,8 +2503,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getAppStatus_started() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -2498,8 +2532,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getAppStatus_not_found() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 404
                 end()
@@ -2550,8 +2588,12 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getAppStatus_deleted() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
