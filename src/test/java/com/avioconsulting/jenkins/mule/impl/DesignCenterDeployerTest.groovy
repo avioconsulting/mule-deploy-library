@@ -248,7 +248,7 @@ class DesignCenterDeployerTest implements HttpServerUtils {
                             ]
                     ]
                 } else {
-                    jsonResult = '"the contents'
+                    jsonResult = 'the contents'
                 }
                 end(JsonOutput.toJson(jsonResult))
             }
@@ -599,7 +599,8 @@ class DesignCenterDeployerTest implements HttpServerUtils {
             }
         }
         filenames.each { fileName ->
-            if (request.absoluteURI() == "http://localhost:8080/designcenter/api-designer/projects/${projectId}/branches/master/files/${fileName}") {
+            if (request.absoluteURI() == "http://localhost:8080/designcenter/api-designer/projects/${projectId}/branches/master/files/${fileName}" &&
+                    request.method() == HttpMethod.GET) {
                 mocked = true
                 request.response().with {
                     statusCode = 200
@@ -660,6 +661,11 @@ class DesignCenterDeployerTest implements HttpServerUtils {
             if (locked && mockExchangePush(request,
                                            'abcd')) {
                 exchangePushed = true
+                return
+            }
+            if (locked && mockGetExistingFiles(request,
+                                               'abcd',
+                                               [])) {
                 return
             }
             request.response().with {

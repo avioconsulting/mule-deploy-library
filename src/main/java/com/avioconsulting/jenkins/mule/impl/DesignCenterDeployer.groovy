@@ -111,13 +111,12 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality {
                         !IGNORE_DC_FILES.contains(asFile.name) &&
                         !IGNORE_DC_FILES.contains(asFile.parentFile?.name)
             }
-            def jsonSlurper = new JsonSlurper()
             return filesWeCareAbout.collect { result ->
                 def file = result.path
                 executeDesignCenterRequest(new HttpGet("${url}/${file}"),
-                                           "Fetching file ${file}") { String contentsAsJson ->
+                                           "Fetching file ${file}") { String contents ->
                     new RamlFile(file,
-                                 jsonSlurper.parseText(contentsAsJson))
+                                 contents)
                 }
             }
         }
@@ -214,6 +213,14 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality {
         new DesignCenterLock(clientWrapper,
                              logger,
                              projectId).withCloseable {
+            def existingFiles = getExistingDesignCenterFiles(projectId)
+            def noLongerExist = existingFiles.findAll { file ->
+                !ramlFiles.any { toBeFile -> file.fileName == toBeFile.fileName}
+            }
+            if (noLongerExist.any()) {
+                deleteDesignCenterFiles(projectId,
+                                        noLongerExist)
+            }
             uploadDesignCenterFiles(projectId,
                                     ramlFiles)
             pushToExchange(apiSpec,
