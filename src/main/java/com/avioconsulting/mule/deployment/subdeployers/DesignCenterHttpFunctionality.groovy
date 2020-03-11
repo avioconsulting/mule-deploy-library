@@ -29,5 +29,4 @@ trait DesignCenterHttpFunctionality {
                      String projectId) {
         "${clientWrapper.baseUrl}/designcenter/api-designer/projects/${projectId}/branches/master"
     }
-
 }
