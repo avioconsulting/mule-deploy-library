@@ -5,7 +5,6 @@ import com.avioconsulting.mule.deployment.subdeployers.ICloudHubDeployer
 import com.avioconsulting.mule.deployment.subdeployers.IDesignCenterDeployer
 import com.avioconsulting.mule.deployment.subdeployers.IOnPremDeployer
 import groovy.transform.Canonical
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -231,11 +230,35 @@ class DeployerTest {
     @Test
     void deployApplication_app_deployment_feature_disabled() {
         // arrange
+        def file = new File('src/test/resources/some_file.txt')
+        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest(stream,
+                                                    'DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file.name,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
+        def apiSpec = new ApiSpecification('Hello API')
 
         // act
+        deployer.deployApplication(request,
+                                   '1.2.3',
+                                   apiSpec,
+                                   [Features.DesignCenterSync])
 
         // assert
-        Assert.fail("write it")
+        assertThat 'We did not include the feature',
+                   deployedChApps.size(),
+                   is(equalTo(0))
+        assertThat designCenterSyncs.size(),
+                   is(equalTo(1))
     }
 
     @Test
