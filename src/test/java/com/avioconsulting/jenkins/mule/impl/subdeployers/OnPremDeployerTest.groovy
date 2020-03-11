@@ -1,11 +1,10 @@
 package com.avioconsulting.jenkins.mule.impl.subdeployers
 
 import com.avioconsulting.jenkins.mule.impl.HttpServerUtils
-import com.avioconsulting.jenkins.mule.impl.OnPremDeploymentStatus
+import com.avioconsulting.jenkins.mule.impl.models.OnPremDeploymentStatus
 import com.avioconsulting.jenkins.mule.impl.httpapi.EnvironmentLocator
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.models.OnPremDeploymentRequest
-import com.avioconsulting.jenkins.mule.impl.subdeployers.OnPremDeployer
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap

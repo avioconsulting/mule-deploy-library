@@ -1,6 +1,6 @@
 package com.avioconsulting.jenkins.mule.impl.subdeployers
 
-import com.avioconsulting.jenkins.mule.impl.OnPremDeploymentStatus
+import com.avioconsulting.jenkins.mule.impl.models.OnPremDeploymentStatus
 import com.avioconsulting.jenkins.mule.impl.httpapi.EnvironmentLocator
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.models.OnPremDeploymentRequest
