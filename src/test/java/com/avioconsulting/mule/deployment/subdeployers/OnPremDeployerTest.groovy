@@ -1530,20 +1530,7 @@ class OnPremDeployerTest implements HttpServerUtils {
             return
         }
         def result = null
-        if (uri.endsWith('environments')) {
-            result = [
-                    data: [
-                            [
-                                    id  : 'abc123',
-                                    name: 'Design'
-                            ],
-                            [
-                                    id  : 'def456',
-                                    name: 'DEV'
-                            ]
-                    ]
-            ]
-        } else if (uri.endsWith('servers')) {
+        if (uri.endsWith('servers')) {
             result = [
                     data: [
                             [
