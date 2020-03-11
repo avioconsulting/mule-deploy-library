@@ -141,11 +141,26 @@ class IntegrationTest {
             println 'test: app deployed OK, now trying to hit its HTTP listener'
 
             // assert
+            def exception = null
+            5.times {
+                try {
             def url = "http://${cloudhubDeploymentRequest.normalizedAppName}.us-w2.cloudhub.io/".toURL()
             println "Hitting app @ ${url}"
             assertThat url.text,
                        is(equalTo('hello there'))
+                    exception = null
+                }
+                catch (e) {
+                    println 'Test failed, waiting 500 ms and trying again'
+                    exception = e
+                    Thread.sleep(500)
+                }
+            }
+            if (exception) {
+                throw exception
+            } else {
             println 'test passed'
+        }
         }
         finally {
             println 'test has finished one way or the other, now cleaning up our mess'
