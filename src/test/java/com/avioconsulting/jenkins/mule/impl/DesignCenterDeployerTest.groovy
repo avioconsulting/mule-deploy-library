@@ -579,6 +579,54 @@ class DesignCenterDeployerTest implements HttpServerUtils {
         mocked
     }
 
+    static def mockGetExistingFiles(HttpServerRequest request,
+                                    String projectId,
+                                    List<String> filenames) {
+        def mocked = false
+        if (request.absoluteURI() == "http://localhost:8080/designcenter/api-designer/projects/${projectId}/branches/master/files") {
+            mocked = true
+            def responsePayload = filenames.collect { fileName ->
+                [
+                        path: fileName,
+                        type: 'FILE'
+                ]
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                end(JsonOutput.toJson(responsePayload))
+            }
+        }
+        filenames.each { fileName ->
+            if (request.absoluteURI() == "http://localhost:8080/designcenter/api-designer/projects/${projectId}/branches/master/files/${fileName}") {
+                mocked = true
+                request.response().with {
+                    statusCode = 200
+                    putHeader('Content-Type',
+                              'application/json')
+                    end(JsonOutput.toJson('the file contents'))
+                }
+            }
+        }
+        mocked
+    }
+
+    static def mockDeleteFile(HttpServerRequest request,
+                              String projectId,
+                              String fileName) {
+        def mocked = false
+        if (request.absoluteURI() == "http://localhost:8080/designcenter/api-designer/projects/${projectId}/branches/master/files/${fileName}"
+                && request.method() == HttpMethod.DELETE) {
+            mocked = true
+            request.response().with {
+                statusCode = 204
+                end()
+            }
+        }
+        mocked
+    }
+
     @Test
     void synchronizeDesignCenter_no_existing_files() {
         // arrange
@@ -689,11 +737,78 @@ class DesignCenterDeployerTest implements HttpServerUtils {
     @Test
     void synchronizeDesignCenter_removes_existing_files() {
         // arrange
+        def filesUploaded = false
+        def exchangePushed = false
+        def locked = false
+        def deleted = false
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockAcquireLock(request,
+                                'abcd')) {
+                locked = true
+                return
+            }
+            if (mockReleaseLock(request,
+                                'abcd')) {
+                locked = false
+                return
+            }
+            if (mockDesignCenterProjectId(request,
+                                          'Hello API',
+                                          'abcd')) {
+                return
+            }
+            if (locked && mockFileUpload(request,
+                                         'abcd')) {
+                filesUploaded = true
+                return
+            }
+            if (locked && mockExchangePush(request,
+                                           'abcd')) {
+                exchangePushed = true
+                return
+            }
+            if (locked && mockGetExistingFiles(request,
+                                               'abcd',
+                                               ['file_to_be_deleted.raml'])) {
+                return
+            }
+            if (locked && mockDeleteFile(request,
+                                         'abcd',
+                                         'file_to_be_deleted.raml')) {
+                deleted = true
+                return
+            }
+            request.response().with {
+                statusCode = 404
+                end("Unexpected request ${request.absoluteURI()}")
+            }
+        }
+        def apiSpec = new ApiSpecification('Hello API')
+        def files = [
+                new RamlFile('file1.raml',
+                             'the contents'),
+                new RamlFile('file2.raml',
+                             'the contents2')
+        ]
 
         // act
+        deployer.synchronizeDesignCenter(apiSpec,
+                                         files,
+                                         '1.2.3')
 
         // assert
-        Assert.fail("write it")
+        assertThat filesUploaded,
+                   is(equalTo(true))
+        assertThat exchangePushed,
+                   is(equalTo(true))
+        assertThat 'We should always unlock if we lock',
+                   locked,
+                   is(equalTo(false))
+        assertThat deleted,
+                   is(equalTo(true))
     }
 
     @Test
