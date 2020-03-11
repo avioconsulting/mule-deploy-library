@@ -1,4 +1,4 @@
-package com.avioconsulting.mule.deployment.integration
+package com.avioconsulting.mule.integrationtest
 
 import com.avioconsulting.mule.deployment.Deployer
 import com.avioconsulting.mule.deployment.MuleUtil
