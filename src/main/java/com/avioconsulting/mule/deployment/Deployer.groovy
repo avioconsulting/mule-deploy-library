@@ -80,9 +80,9 @@ class Deployer {
         performCommonDeploymentTasks(apiSpecification,
                                      appVersion,
                                      appDeploymentRequest,
-                                     appDeploymentRequest.environment)
-        executeStep(false,
-                    'CloudHub app deployment',
+                                     appDeploymentRequest.environment,
+                                     enabledFeatures)
+        executeStep('CloudHub app deployment',
                     null) {
             cloudHubDeployer.deploy(appDeploymentRequest)
         }
@@ -103,21 +103,20 @@ class Deployer {
         performCommonDeploymentTasks(apiSpecification,
                                      appVersion,
                                      appDeploymentRequest,
-                                     appDeploymentRequest.environment)
-        executeStep(false,
-                    'on-prem app deployment',
+                                     appDeploymentRequest.environment,
+                                     enabledFeatures)
+        executeStep('on-prem app deployment',
                     null) {
             onPremDeployer.deploy(appDeploymentRequest)
         }
     }
 
-    private def executeStep(boolean skip,
-                            String description,
+    private def executeStep(String description,
                             String skipReason,
                             Closure stuff) {
         stepNumber++
         def prefix = "---------------- Step ${stepNumber}: ${description}"
-        if (skip) {
+        if (skipReason) {
             logger.println("${prefix} - SKIPPING due to ${skipReason}")
         } else {
             logger.println("${prefix} - EXECUTING")
@@ -135,10 +134,22 @@ class Deployer {
     private def performCommonDeploymentTasks(ApiSpecification apiSpecification,
                                              String appVersion,
                                              FileBasedAppDeploymentRequest appDeploymentRequest,
-                                             String environment) {
-        executeStep(!this.environmentsToDoDesignCenterDeploymentOn.contains(environment),
-                    'Design Center Deployment',
-                    "Deploying to '${environment}', only ${this.environmentsToDoDesignCenterDeploymentOn} triggers Design Center deploys") {
+                                             String environment,
+                                             List<Features> enabledFeatures) {
+        def isFeatureDisabled = { Features feature ->
+            def enabled = enabledFeatures.contains(Features.All) || enabledFeatures.contains(feature)
+            enabled ? null : "Feature ${feature} was not supplied"
+        }
+        String skipReason = null
+        if (!apiSpecification) {
+            skipReason = "no API spec was provided"
+        } else if (!this.environmentsToDoDesignCenterDeploymentOn.contains(environment)) {
+            skipReason = "Deploying to '${environment}', only ${this.environmentsToDoDesignCenterDeploymentOn} triggers Design Center deploys"
+        } else {
+            skipReason = isFeatureDisabled(Features.DesignCenterSync)
+        }
+        executeStep('Design Center Deployment',
+                    skipReason) {
             designCenterDeployer.synchronizeDesignCenterFromApp(apiSpecification,
                                                                 appDeploymentRequest,
                                                                 appVersion)
