@@ -1,18 +1,14 @@
 package com.avioconsulting.mule.deployment.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
-import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
 import com.avioconsulting.mule.deployment.models.ApiSpecification
 import com.avioconsulting.mule.deployment.models.AppFileInfo
 import com.avioconsulting.mule.deployment.models.RamlFile
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import io.vertx.core.Vertx
 import io.vertx.core.http.HttpMethod
-import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerRequest
 import org.apache.commons.io.FileUtils
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
@@ -118,7 +114,7 @@ class DesignCenterDeployerTest extends BaseTest {
                 return
             }
             anypointOrgId = request.getHeader('X-ORGANIZATION-ID')
-            url = request.absoluteURI()
+            url = request.uri()
             ownerGuid = request.getHeader('X-OWNER-ID')
             request.response().with {
                 statusCode = 200
@@ -144,7 +140,7 @@ class DesignCenterDeployerTest extends BaseTest {
         assertThat result,
                    is(equalTo('blah'))
         assertThat url,
-                   is(equalTo('http://localhost:8080/designcenter/api-designer/projects'))
+                   is(equalTo('/designcenter/api-designer/projects'))
         assertThat anypointOrgId,
                    is(equalTo('the-org-id'))
         assertThat 'Design center needs this',
@@ -197,7 +193,7 @@ class DesignCenterDeployerTest extends BaseTest {
                 return
             }
             anypointOrgId = request.getHeader('X-ORGANIZATION-ID')
-            urls << request.absoluteURI()
+            urls << request.uri()
             ownerGuid = request.getHeader('X-OWNER-ID')
             request.response().with {
                 statusCode = 200
@@ -249,8 +245,8 @@ class DesignCenterDeployerTest extends BaseTest {
                    ]))
         assertThat urls,
                    is(equalTo([
-                           'http://localhost:8080/designcenter/api-designer/projects/ourprojectId/branches/master/files',
-                           'http://localhost:8080/designcenter/api-designer/projects/ourprojectId/branches/master/files/stuff.raml'
+                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files',
+                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/stuff.raml'
                    ]))
         assertThat anypointOrgId,
                    is(equalTo('the-org-id'))
@@ -271,7 +267,7 @@ class DesignCenterDeployerTest extends BaseTest {
                 return
             }
             anypointOrgId = request.getHeader('X-ORGANIZATION-ID')
-            urls << request.absoluteURI()
+            urls << request.uri()
             methods << request.method().toString()
             ownerGuid = request.getHeader('X-OWNER-ID')
             request.response().with {
@@ -299,8 +295,8 @@ class DesignCenterDeployerTest extends BaseTest {
                    is(equalTo('the_id'))
         assertThat urls,
                    is(equalTo([
-                           'http://localhost:8080/designcenter/api-designer/projects/ourprojectId/branches/master/files/file1',
-                           'http://localhost:8080/designcenter/api-designer/projects/ourprojectId/branches/master/files/file2'
+                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/file1',
+                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/file2'
                    ]))
     }
 
@@ -317,7 +313,7 @@ class DesignCenterDeployerTest extends BaseTest {
                 return
             }
             anypointOrgId = request.getHeader('X-ORGANIZATION-ID')
-            url = request.absoluteURI()
+            url = request.uri()
             method = request.method().toString()
             ownerGuid = request.getHeader('X-OWNER-ID')
             request.bodyHandler { body ->
@@ -343,7 +339,7 @@ class DesignCenterDeployerTest extends BaseTest {
         assertThat method,
                    is(equalTo('POST'))
         assertThat url,
-                   is(equalTo('http://localhost:8080/designcenter/api-designer/projects/ourprojectId/branches/master/save?commit=true&message=fromAPI'))
+                   is(equalTo('/designcenter/api-designer/projects/ourprojectId/branches/master/save?commit=true&message=fromAPI'))
         assertThat anypointOrgId,
                    is(equalTo('the-org-id'))
         assertThat 'Design center needs this',
@@ -375,7 +371,7 @@ class DesignCenterDeployerTest extends BaseTest {
                 return
             }
             anypointOrgId = request.getHeader('X-ORGANIZATION-ID')
-            url = request.absoluteURI()
+            url = request.uri()
             method = request.method().toString()
             ownerGuid = request.getHeader('X-OWNER-ID')
             request.bodyHandler { body ->
@@ -406,7 +402,7 @@ class DesignCenterDeployerTest extends BaseTest {
         assertThat method,
                    is(equalTo('POST'))
         assertThat url,
-                   is(equalTo('http://localhost:8080/designcenter/api-designer/projects/ourprojectId/branches/master/publish/exchange'))
+                   is(equalTo('/designcenter/api-designer/projects/ourprojectId/branches/master/publish/exchange'))
         assertThat anypointOrgId,
                    is(equalTo('the-org-id'))
         assertThat 'Design center needs this',
@@ -437,7 +433,7 @@ class DesignCenterDeployerTest extends BaseTest {
                 return
             }
             anypointOrgId = request.getHeader('X-ORGANIZATION-ID')
-            url = request.absoluteURI()
+            url = request.uri()
             method = request.method().toString()
             ownerGuid = request.getHeader('X-OWNER-ID')
             request.bodyHandler { body ->
@@ -470,7 +466,7 @@ class DesignCenterDeployerTest extends BaseTest {
         assertThat method,
                    is(equalTo('POST'))
         assertThat url,
-                   is(equalTo('http://localhost:8080/designcenter/api-designer/projects/ourprojectId/branches/master/publish/exchange'))
+                   is(equalTo('/designcenter/api-designer/projects/ourprojectId/branches/master/publish/exchange'))
         assertThat anypointOrgId,
                    is(equalTo('the-org-id'))
         assertThat 'Design center needs this',
@@ -492,7 +488,7 @@ class DesignCenterDeployerTest extends BaseTest {
                                          String projectName,
                                          String projectId) {
         def mocked = false
-        if (request.absoluteURI() == 'http://localhost:8080/designcenter/api-designer/projects') {
+        if (request.uri() == '/designcenter/api-designer/projects') {
             mocked = true
             request.response().with {
                 statusCode = 200
@@ -512,7 +508,7 @@ class DesignCenterDeployerTest extends BaseTest {
     static def mockFileUpload(HttpServerRequest request,
                               String projectId) {
         def mocked = false
-        if (request.absoluteURI() == "http://localhost:8080/designcenter/api-designer/projects/${projectId}/branches/master/save?commit=true&message=fromAPI") {
+        if (request.uri() == "/designcenter/api-designer/projects/${projectId}/branches/master/save?commit=true&message=fromAPI") {
             mocked = true
             request.response().with {
                 statusCode = 204
@@ -525,7 +521,7 @@ class DesignCenterDeployerTest extends BaseTest {
     static def mockExchangePush(HttpServerRequest request,
                                 String projectId) {
         def mocked = false
-        if (request.absoluteURI() == "http://localhost:8080/designcenter/api-designer/projects/${projectId}/branches/master/publish/exchange") {
+        if (request.uri() == "/designcenter/api-designer/projects/${projectId}/branches/master/publish/exchange") {
             mocked = true
             request.response().with {
                 statusCode = 204
@@ -538,7 +534,7 @@ class DesignCenterDeployerTest extends BaseTest {
     static def mockAcquireLock(HttpServerRequest request,
                                String projectId) {
         def mocked = false
-        if (request.absoluteURI() == "http://localhost:8080/designcenter/api-designer/projects/${projectId}/branches/master/acquireLock"
+        if (request.uri() == "/designcenter/api-designer/projects/${projectId}/branches/master/acquireLock"
                 && request.method() == HttpMethod.POST) {
             mocked = true
             request.response().with {
@@ -552,7 +548,7 @@ class DesignCenterDeployerTest extends BaseTest {
     static def mockReleaseLock(HttpServerRequest request,
                                String projectId) {
         def mocked = false
-        if (request.absoluteURI() == "http://localhost:8080/designcenter/api-designer/projects/${projectId}/branches/master/releaseLock"
+        if (request.uri() == "/designcenter/api-designer/projects/${projectId}/branches/master/releaseLock"
                 && request.method() == HttpMethod.POST) {
             mocked = true
             request.response().with {
@@ -568,7 +564,7 @@ class DesignCenterDeployerTest extends BaseTest {
                                     Map<String, String> filesAndContents) {
         def mocked = false
         def filenames = filesAndContents.keySet()
-        if (request.absoluteURI() == "http://localhost:8080/designcenter/api-designer/projects/${projectId}/branches/master/files") {
+        if (request.uri() == "/designcenter/api-designer/projects/${projectId}/branches/master/files") {
             mocked = true
             def responsePayload = filenames.collect { fileName ->
                 [
@@ -584,7 +580,7 @@ class DesignCenterDeployerTest extends BaseTest {
             }
         }
         filenames.each { fileName ->
-            if (request.absoluteURI() == "http://localhost:8080/designcenter/api-designer/projects/${projectId}/branches/master/files/${fileName}" &&
+            if (request.uri() == "/designcenter/api-designer/projects/${projectId}/branches/master/files/${fileName}" &&
                     request.method() == HttpMethod.GET) {
                 mocked = true
                 request.response().with {
@@ -602,7 +598,7 @@ class DesignCenterDeployerTest extends BaseTest {
                               String projectId,
                               String fileName) {
         def mocked = false
-        if (request.absoluteURI() == "http://localhost:8080/designcenter/api-designer/projects/${projectId}/branches/master/files/${fileName}"
+        if (request.uri() == "/designcenter/api-designer/projects/${projectId}/branches/master/files/${fileName}"
                 && request.method() == HttpMethod.DELETE) {
             mocked = true
             request.response().with {
