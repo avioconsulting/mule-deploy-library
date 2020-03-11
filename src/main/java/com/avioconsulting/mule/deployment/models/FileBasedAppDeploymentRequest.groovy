@@ -7,16 +7,14 @@ import org.apache.commons.io.IOUtils
 
 trait FileBasedAppDeploymentRequest {
     boolean isMule4Request() {
-        isMule4Request(fileName)
+        isMule4Request(file.name)
     }
 
     static boolean isMule4Request(String fileName) {
         fileName.endsWith('.jar')
     }
 
-    abstract InputStream getApp()
-
-    abstract String getFileName()
+    abstract File getFile()
 
     ArchiveInputStream openArchiveStream() {
         openArchiveStream(archiveFormat,

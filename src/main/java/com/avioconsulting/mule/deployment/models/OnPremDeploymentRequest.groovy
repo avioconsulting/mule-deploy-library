@@ -13,31 +13,25 @@ class OnPremDeploymentRequest implements FileBasedAppDeploymentRequest {
     final String environment
     final String appName, targetServerOrClusterName
     /**
-     * The filename to display in the Runtime Manager app GUI. Often used as a version for a label
+     * The file to deploy. The name of this file will also be used for the Runtime Manager settings pane
      */
-    final String fileName
+    final File file
     /**
      * Mule app property overrides (the stuff in the properties tab)
      */
     final Map<String, String> appProperties
-    /**
-     * Stream of the ZIP/JAR containing the application to deploy
-     */
-    final InputStream app
 
     private boolean modifiedPropertiesViaZip
 
     OnPremDeploymentRequest(String environment,
                             String appName,
                             String targetServerOrClusterName,
-                            String fileName,
-                            InputStream app,
+                            File file,
                             Map<String, String> appProperties = [:]) {
         this(environment,
              appName,
              targetServerOrClusterName,
-             fileName,
-             app,
+             file,
              appProperties,
              null)
     }
@@ -47,16 +41,14 @@ class OnPremDeploymentRequest implements FileBasedAppDeploymentRequest {
      * @param environment
      * @param appName
      * @param targetServerOrClusterName
-     * @param fileName
-     * @param app
+     * @param file
      * @param appProperties
      * @param overrideByChangingFileInZip - VERY rare. If you have a weird situation where you need to be able to say that you "froze" an app ZIP/JAR for config management purposes and you want to change the properties inside a ZIP file, set this to the filename you want to drop new properties in inside the ZIP (e.g. api.dev.properties)
      */
     OnPremDeploymentRequest(String environment,
                             String appName,
                             String targetServerOrClusterName,
-                            String fileName,
-                            InputStream app,
+                            File file,
                             Map<String, String> appProperties,
                             String overrideByChangingFileInZip) {
         if (appName.contains(' ')) {
@@ -65,7 +57,7 @@ class OnPremDeploymentRequest implements FileBasedAppDeploymentRequest {
         this.environment = environment
         this.appName = appName
         this.targetServerOrClusterName = targetServerOrClusterName
-        this.fileName = fileName
+        this.file = file
         this.appProperties = appProperties
         this.app = overrideByChangingFileInZip ? getPropertyModifiedStream(overrideByChangingFileInZip,
                                                                            appProperties,
@@ -92,9 +84,9 @@ class OnPremDeploymentRequest implements FileBasedAppDeploymentRequest {
                 .addTextBody('configuration',
                              configJson)
                 .addBinaryBody('file',
-                               app,
+                               this.file,
                                ContentType.APPLICATION_OCTET_STREAM,
-                               fileName)
+                               this.file.name)
                 .build()
     }
 
@@ -109,9 +101,9 @@ class OnPremDeploymentRequest implements FileBasedAppDeploymentRequest {
                 .addTextBody('configuration',
                              configJson)
                 .addBinaryBody('file',
-                               app,
+                               this.file,
                                ContentType.APPLICATION_OCTET_STREAM,
-                               fileName)
+                               this.file.name)
                 .build()
     }
 }

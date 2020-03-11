@@ -14,9 +14,9 @@ class CloudhubDeploymentRequest implements FileBasedAppDeploymentRequest {
     final String appName
     final CloudhubWorkerSpecRequest workerSpecRequest
     /**
-     * The filename to display in the Runtime Manager app GUI. Often used as a version for a label
+     * The file to deploy. The name of this file will also be used for the Runtime Manager settings pane
      */
-    final String fileName
+    final File file
     /**
      * Will be set in the 'crypto.key' CloudHub property
      */
@@ -45,32 +45,25 @@ class CloudhubDeploymentRequest implements FileBasedAppDeploymentRequest {
      * VERY rare. If you have a weird situation where you need to be able to say that you "froze" an app ZIP/JAR for config management purposes and you want to change the properties inside a ZIP file, set this to the filename you want to drop new properties in inside the ZIP (e.g. api.dev.properties)
      */
     final String overrideByChangingFileInZip
-
     /**
      * Derived from app, environment, and prefix, the real name we'll use in CH
      */
     final String normalizedAppName
-    /**
-     * Stream of the ZIP/JAR containing the application to deploy
-     */
-    final InputStream app
 
-    CloudhubDeploymentRequest(InputStream app,
-                              String environment,
+    CloudhubDeploymentRequest(String environment,
                               String appName,
                               CloudhubWorkerSpecRequest workerSpecRequest,
-                              String fileName,
+                              File file,
                               String cryptoKey,
                               String anypointClientId,
                               String anypointClientSecret,
                               String cloudHubAppPrefix,
                               Map<String, String> appProperties = [:],
                               Map<String, String> otherCloudHubProperties = [:]) {
-        this(app,
-             environment,
+        this(environment,
              appName,
              workerSpecRequest,
-             fileName,
+             file,
              cryptoKey,
              anypointClientId,
              anypointClientSecret,
@@ -80,11 +73,10 @@ class CloudhubDeploymentRequest implements FileBasedAppDeploymentRequest {
              otherCloudHubProperties)
     }
 
-    CloudhubDeploymentRequest(InputStream app,
-                              String environment,
+    CloudhubDeploymentRequest(String environment,
                               String appName,
                               CloudhubWorkerSpecRequest workerSpecRequest,
-                              String fileName,
+                              File file,
                               String cryptoKey,
                               String anypointClientId,
                               String anypointClientSecret,
@@ -95,7 +87,7 @@ class CloudhubDeploymentRequest implements FileBasedAppDeploymentRequest {
         this.environment = environment
         this.appName = appName
         this.workerSpecRequest = workerSpecRequest
-        this.fileName = fileName
+        this.file = file
         this.cryptoKey = cryptoKey
         this.anypointClientId = anypointClientId
         this.anypointClientSecret = anypointClientSecret
@@ -127,9 +119,9 @@ class CloudhubDeploymentRequest implements FileBasedAppDeploymentRequest {
                 .addTextBody('appInfoJson',
                              cloudhubAppInfoAsJson)
                 .addBinaryBody('file',
-                               this.app,
+                               this.file,
                                ContentType.APPLICATION_OCTET_STREAM,
-                               fileName)
+                               this.file.name)
                 .build()
     }
 
