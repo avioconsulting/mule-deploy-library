@@ -214,19 +214,28 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality {
                              logger,
                              projectId).withCloseable {
             def existingFiles = getExistingDesignCenterFiles(projectId)
-            def noLongerExist = existingFiles.findAll { file ->
-                !ramlFiles.any { toBeFile -> file.fileName == toBeFile.fileName}
+            def changes = ramlFiles - existingFiles
+            if (changes.empty) {
+                logger.println('New RAML contents match the old contents, will not update Design Center')
             }
-            if (noLongerExist.any()) {
-                deleteDesignCenterFiles(projectId,
-                                        noLongerExist)
+            else {
+                logger.println('RAML quantity/contents have changed, will update Design Center')
+                def noLongerExist = existingFiles.findAll { file ->
+                    !ramlFiles.any { toBeFile -> file.fileName == toBeFile.fileName }
+                }
+                if (noLongerExist.any()) {
+                    deleteDesignCenterFiles(projectId,
+                                            noLongerExist)
+                } else {
+                    logger.println('No existing files to delete')
+                }
+                uploadDesignCenterFiles(projectId,
+                                        ramlFiles)
+                pushToExchange(apiSpec,
+                               projectId,
+                               ramlFiles,
+                               appVersion)
             }
-            uploadDesignCenterFiles(projectId,
-                                    ramlFiles)
-            pushToExchange(apiSpec,
-                           projectId,
-                           ramlFiles,
-                           appVersion)
         }
     }
 }
