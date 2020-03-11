@@ -1,16 +1,12 @@
 package com.avioconsulting.mule.deployment.subdeployers
 
-import com.avioconsulting.mule.deployment.HttpServerUtils
+import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.httpapi.EnvironmentLocator
-import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
 import com.avioconsulting.mule.deployment.models.*
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
-import io.vertx.core.Vertx
-import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerRequest
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
@@ -18,21 +14,11 @@ import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-class CloudHubDeployerTest implements HttpServerUtils {
-    HttpServer httpServer
+class CloudHubDeployerTest extends BaseTest {
     private CloudHubDeployer deployer
-    int port
-    private HttpClientWrapper clientWrapper
 
     @Before
-    void startServer() {
-        httpServer = Vertx.vertx().createHttpServer()
-        port = 8080
-        clientWrapper = new HttpClientWrapper("http://localhost:${port}",
-                                              'the user',
-                                              'the password',
-                                              'the-org-id',
-                                              System.out)
+    void setupDeployer() {
         def envLocator = new EnvironmentLocator(clientWrapper,
                                                 System.out)
         deployer = new CloudHubDeployer(this.clientWrapper,
@@ -40,22 +26,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                                         500,
                                         10,
                                         System.out)
-    }
-
-    @After
-    void stopServer() {
-        try {
-            clientWrapper.close()
-        }
-        catch (e) {
-            println "could not close ${e}"
-        }
-        try {
-            httpServer.close()
-        }
-        catch (e) {
-            println "could not close ${e}"
-        }
     }
 
     @Test
@@ -73,7 +43,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
             if (mockEnvironments(request)) {
                 return
             }
-            url = request.absoluteURI()
+            url = request.uri()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
             request.response().with {
@@ -107,7 +77,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications/theapp/deployments?orderByDate=DESC'))
+                   is(equalTo('/cloudhub/api/v2/applications/theapp/deployments?orderByDate=DESC'))
         assertThat method,
                    is(equalTo('GET'))
         assertThat authToken,
@@ -301,8 +271,11 @@ class CloudHubDeployerTest implements HttpServerUtils {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
                 return
             }
             request.response().with {
@@ -310,20 +283,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -368,7 +328,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -419,8 +379,11 @@ class CloudHubDeployerTest implements HttpServerUtils {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
                 return
             }
             request.response().with {
@@ -428,20 +391,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -484,7 +434,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -534,8 +484,11 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String sentContentType = null
         Map sentBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
                 return
             }
             request.response().with {
@@ -543,20 +496,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -599,7 +539,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -655,8 +595,11 @@ class CloudHubDeployerTest implements HttpServerUtils {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
                 return
             }
             request.response().with {
@@ -664,20 +607,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -723,7 +653,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -779,8 +709,11 @@ class CloudHubDeployerTest implements HttpServerUtils {
             assert newZipFile.delete()
         }
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
                 return
             }
             request.response().with {
@@ -788,20 +721,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -855,7 +775,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -917,8 +837,11 @@ class CloudHubDeployerTest implements HttpServerUtils {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
                 return
             }
             request.response().with {
@@ -926,20 +849,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -984,7 +894,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -1035,8 +945,11 @@ class CloudHubDeployerTest implements HttpServerUtils {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
                 return
             }
             request.response().with {
@@ -1044,20 +957,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -1110,7 +1010,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -1161,8 +1061,11 @@ class CloudHubDeployerTest implements HttpServerUtils {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
                 return
             }
             request.response().with {
@@ -1170,20 +1073,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -1232,7 +1122,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -1283,8 +1173,11 @@ class CloudHubDeployerTest implements HttpServerUtils {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
                 return
             }
             request.response().with {
@@ -1292,20 +1185,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -1359,7 +1239,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -1412,8 +1292,11 @@ class CloudHubDeployerTest implements HttpServerUtils {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
                 return
             }
             request.response().with {
@@ -1421,20 +1304,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -1479,7 +1349,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -1554,25 +1424,15 @@ class CloudHubDeployerTest implements HttpServerUtils {
             if (mockAuthenticationOk(request)) {
                 return
             }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else {
                     // deployment service returns this
@@ -1622,8 +1482,11 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         def firstCheck = true
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
                 return
             }
             request.response().with {
@@ -1631,20 +1494,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     result = getAppResponsePayload('client-new-app-dev',
                                                    AppStatus.Started)
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
@@ -1698,7 +1548,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications/client-new-app-dev'))
+                   is(equalTo('/cloudhub/api/v2/applications/client-new-app-dev'))
         assertThat method,
                    is(equalTo('PUT'))
         assertThat authToken,
@@ -1750,8 +1600,11 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         def firstCheck = true
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
                 return
             }
             request.response().with {
@@ -1759,20 +1612,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     // existing app check + status is the same
                     if (firstCheck) {
                         statusCode = 200
@@ -1863,7 +1703,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications/client-new-app-dev'))
+                   is(equalTo('/cloudhub/api/v2/applications/client-new-app-dev'))
         assertThat method,
                    is(equalTo('PUT'))
         assertThat authToken,
@@ -1916,25 +1756,15 @@ class CloudHubDeployerTest implements HttpServerUtils {
             if (mockAuthenticationOk(request)) {
                 return
             }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     if (firstCheck) {
                         statusCode = 200
                         firstCheck = false
@@ -2024,25 +1854,15 @@ class CloudHubDeployerTest implements HttpServerUtils {
             if (mockAuthenticationOk(request)) {
                 return
             }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     if (firstCheck) {
                         statusCode = 200
                         firstCheck = false
@@ -2124,25 +1944,15 @@ class CloudHubDeployerTest implements HttpServerUtils {
         if (mockAuthenticationOk(request)) {
             return
         }
+        if (mockEnvironments(request)) {
+            return
+        }
         request.response().with {
             statusCode = 200
             putHeader('Content-Type',
                       'application/json')
             def result = null
-            if (uri.endsWith('environments')) {
-                result = [
-                        data: [
-                                [
-                                        id  : 'abc123',
-                                        name: 'Design'
-                                ],
-                                [
-                                        id  : 'def456',
-                                        name: 'DEV'
-                                ]
-                        ]
-                ]
-            } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+            if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                 statusCode = 404
             } else {
                 // deployment service returns this
@@ -2421,7 +2231,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
             if (mockEnvironments(request)) {
                 return
             }
-            url = request.absoluteURI()
+            url = request.uri()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
             request.response().with {
@@ -2440,7 +2250,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications/theapp'))
+                   is(equalTo('/cloudhub/api/v2/applications/theapp'))
         assertThat method,
                    is(equalTo('GET'))
         assertThat authToken,
