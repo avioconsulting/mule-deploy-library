@@ -16,6 +16,7 @@ class Deployer {
     private final IOnPremDeployer onPremDeployer
     private final IDesignCenterDeployer designCenterDeployer
     private final List<String> environmentsToDoDesignCenterDeploymentOn
+    private int stepNumber
 
     /**
      *
@@ -75,11 +76,15 @@ class Deployer {
                           String appVersion,
                           ApiSpecification apiSpecification = null,
                           List<Features> enabledFeatures = [Features.All]) {
-        def stepCounter = performCommonDeploymentTasks(apiSpecification,
-                                                       appVersion,
-                                                       appDeploymentRequest)
-        logger.println("Step ${stepCounter}: Deploying application to CloudHub")
-        cloudHubDeployer.deploy(appDeploymentRequest)
+        stepNumber = 0
+        performCommonDeploymentTasks(apiSpecification,
+                                     appVersion,
+                                     appDeploymentRequest)
+        executeStep(false,
+                    'CloudHub app deployment',
+                    null) {
+            cloudHubDeployer.deploy(appDeploymentRequest)
+        }
     }
 
     /**
@@ -93,29 +98,41 @@ class Deployer {
                           String appVersion,
                           ApiSpecification apiSpecification = null,
                           List<Features> enabledFeatures = [Features.All]) {
-        def stepCounter = performCommonDeploymentTasks(apiSpecification,
-                                                       appVersion,
-                                                       appDeploymentRequest)
-        logger.println("Step ${stepCounter}: Deploying application to on-prem")
-        onPremDeployer.deploy(appDeploymentRequest)
+        stepNumber = 0
+        performCommonDeploymentTasks(apiSpecification,
+                                     appVersion,
+                                     appDeploymentRequest)
+        executeStep(false,
+                    'on-prem app deployment',
+                    null) {
+            onPremDeployer.deploy(appDeploymentRequest)
+        }
+    }
+
+    private def executeStep(boolean skip,
+                            String description,
+                            String skipReason,
+                            Closure stuff) {
+        stepNumber++
+        def prefix = "---------------- Step ${stepNumber}: ${description}"
+        if (skip) {
+            logger.println("${prefix} - SKIPPING due to ${skipReason}")
+        } else {
+            logger.println("${prefix} - EXECUTING")
+            try {
+                stuff()
+                logger.println("${prefix} - DONE")
+            }
+            catch (e) {
+                logger.println("${prefix} - FAILED due to ${e.cause.message}")
+                throw e
+            }
+        }
     }
 
     private def performCommonDeploymentTasks(ApiSpecification apiSpecification,
                                              String appVersion,
                                              FileBasedAppDeploymentRequest appDeploymentRequest) {
-        int stepCount = 0
-        def executeStep = { boolean skip,
-                            String description,
-                            String skipReason,
-                            Closure stuff ->
-            stepCount++
-            def prefix = "Step ${stepCount}: ${description}"
-            if (skip) {
-                logger.println("${prefix} - Skipping due to ${skipReason}")
-            } else {
-                stuff()
-            }
-        }
         executeStep(false,
                     'Design Center Deployment',
                     'foo') {
@@ -123,6 +140,5 @@ class Deployer {
                                                                 appDeploymentRequest,
                                                                 appVersion)
         }
-        return stepCount
     }
 }

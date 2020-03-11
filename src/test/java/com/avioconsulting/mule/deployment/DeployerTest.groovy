@@ -9,15 +9,16 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
+import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.Matchers.equalTo
-import static org.hamcrest.Matchers.is
+import static org.hamcrest.Matchers.*
 
 class DeployerTest {
     private Deployer deployer
     private List<CloudhubDeploymentRequest> deployedChApps
     private List<OnPremDeploymentRequest> deployedOnPremApps
     private List<DesignCenterSync> designCenterSyncs
+    private boolean failDeployment
 
     @Canonical
     class DesignCenterSync {
@@ -31,8 +32,12 @@ class DeployerTest {
         deployedChApps = []
         deployedOnPremApps = []
         designCenterSyncs = []
+        failDeployment = false
         def mockCloudHubDeployer = [
                 deploy: { CloudhubDeploymentRequest request ->
+                    if (failDeployment) {
+                        throw new Exception('something did not work')
+                    }
                     deployedChApps << request
                 }
         ] as ICloudHubDeployer
@@ -53,10 +58,44 @@ class DeployerTest {
         deployer = new Deployer(null,
                                 System.out,
                                 ['DEV'],
-                                null, // shouldn't need this since we mock so much
+                                null,
+                                // shouldn't need this since we mock so much
                                 mockCloudHubDeployer,
                                 mockOnPremDeployer,
                                 mockDcDeployer)
+    }
+
+    @Test
+    void deployApplication_fail() {
+        // arrange
+        failDeployment = true
+        def file = new File('src/test/resources/some_file.txt')
+        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest(stream,
+                                                    'DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file.name,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
+        def apiSpec = new ApiSpecification('Hello API')
+
+        // act
+        def exception = shouldFail {
+            deployer.deployApplication(request,
+                                       '1.2.3',
+                                       apiSpec)
+        }
+
+        // assert
+        assertThat exception.cause.message,
+                   is(containsString('something did not work'))
     }
 
     @Test
