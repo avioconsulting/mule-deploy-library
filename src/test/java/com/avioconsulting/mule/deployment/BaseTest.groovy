@@ -9,6 +9,8 @@ import io.vertx.core.http.HttpServerRequest
 import org.junit.After
 import org.junit.Before
 
+import java.util.concurrent.CompletableFuture
+
 class BaseTest {
     protected HttpServer httpServer
     protected HttpClientWrapper clientWrapper
@@ -40,18 +42,14 @@ class BaseTest {
             return
         }
         try {
-            def test = this
+            def future = new CompletableFuture()
             println 'Closing mock web server'
             // closing is async
             httpServer.close {
-                synchronized (test) {
-                    test.notify()
-                }
+                future.complete('done')
             }
             println 'Waiting for web server to close'
-            synchronized (test) {
-                test.wait()
-            }
+            future.get()
             println 'Web server closed'
             httpServer = null
         }
@@ -76,7 +74,7 @@ class BaseTest {
             }
             closure.handle(request)
         }
-        def test = this
+        def future = new CompletableFuture()
         // 0 means any available port
         def server = Vertx.vertx()
                 .createHttpServer()
@@ -84,14 +82,10 @@ class BaseTest {
                 .listen(0,
                         {
                             // listen is an async operation but we can/will block until it's up
-                            synchronized (test) {
-                                test.notify()
-                            }
+                            future.complete('done')
                         })
         println 'Waiting for server to come up'
-        synchronized (test) {
-            test.wait()
-        }
+        future.get()
         println 'Server is up'
         server
     }
