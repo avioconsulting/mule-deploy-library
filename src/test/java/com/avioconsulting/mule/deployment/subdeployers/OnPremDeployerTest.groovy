@@ -58,8 +58,12 @@ class OnPremDeployerTest implements HttpServerUtils {
         String envId = null
         String orgId = null
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             url = request.absoluteURI()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -103,8 +107,12 @@ class OnPremDeployerTest implements HttpServerUtils {
     void locate_server_or_cluster_found_server() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -137,8 +145,12 @@ class OnPremDeployerTest implements HttpServerUtils {
     void locate_server_or_cluster_found_cluster() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -173,8 +185,12 @@ class OnPremDeployerTest implements HttpServerUtils {
     void locate_server_or_cluster_not_found() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -216,8 +232,12 @@ class OnPremDeployerTest implements HttpServerUtils {
         String envId = null
         String orgId = null
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             url = request.absoluteURI()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -261,8 +281,12 @@ class OnPremDeployerTest implements HttpServerUtils {
     void locate_app_not_found() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -296,8 +320,12 @@ class OnPremDeployerTest implements HttpServerUtils {
     void locate_app_found() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -338,8 +366,12 @@ class OnPremDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -471,8 +503,12 @@ class OnPremDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -611,7 +647,12 @@ class OnPremDeployerTest implements HttpServerUtils {
         }
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -783,8 +824,12 @@ class OnPremDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -912,7 +957,12 @@ class OnPremDeployerTest implements HttpServerUtils {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1047,8 +1097,12 @@ class OnPremDeployerTest implements HttpServerUtils {
         }
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1193,8 +1247,12 @@ class OnPremDeployerTest implements HttpServerUtils {
         String envId = null
         String orgId = null
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             url = request.absoluteURI()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1250,8 +1308,12 @@ class OnPremDeployerTest implements HttpServerUtils {
     void check_deployment_status_failed() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1295,8 +1357,12 @@ class OnPremDeployerTest implements HttpServerUtils {
     void check_deployment_status_started() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1340,8 +1406,12 @@ class OnPremDeployerTest implements HttpServerUtils {
     void check_deployment_status_starting() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1385,8 +1455,12 @@ class OnPremDeployerTest implements HttpServerUtils {
     void check_deployment_status_multiple_servers() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            mockAuthenticationOk(request)
-            mockEnvironments(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -1439,8 +1513,12 @@ class OnPremDeployerTest implements HttpServerUtils {
 
     def mockInitialDeployment(HttpServerRequest request) {
         def uri = request.absoluteURI()
-        mockAuthenticationOk(request)
-        mockEnvironments(request)
+        if (mockAuthenticationOk(request)) {
+            return
+        }
+        if (mockEnvironments(request)) {
+            return
+        }
         def result = null
         if (uri.endsWith('environments')) {
             result = [
