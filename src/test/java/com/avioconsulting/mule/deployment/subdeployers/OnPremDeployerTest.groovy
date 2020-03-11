@@ -8,7 +8,6 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
 import io.vertx.core.http.HttpServerRequest
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
@@ -45,7 +44,7 @@ class OnPremDeployerTest extends BaseTest {
             if (mockEnvironments(request)) {
                 return
             }
-            url = request.absoluteURI()
+            url = request.uri()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
             request.response().with {
@@ -73,7 +72,7 @@ class OnPremDeployerTest extends BaseTest {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/hybrid/api/v1/servers'))
+                   is(equalTo('/hybrid/api/v1/servers'))
         assertThat method,
                    is(equalTo('GET'))
         assertThat authToken,
@@ -219,7 +218,7 @@ class OnPremDeployerTest extends BaseTest {
             if (mockEnvironments(request)) {
                 return
             }
-            url = request.absoluteURI()
+            url = request.uri()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
             request.response().with {
@@ -247,7 +246,7 @@ class OnPremDeployerTest extends BaseTest {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/hybrid/api/v1/applications'))
+                   is(equalTo('/hybrid/api/v1/applications'))
         assertThat method,
                    is(equalTo('GET'))
         assertThat authToken,
@@ -346,7 +345,7 @@ class OnPremDeployerTest extends BaseTest {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
                 return
             }
@@ -358,20 +357,7 @@ class OnPremDeployerTest extends BaseTest {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('servers')) {
+                if (uri.endsWith('servers')) {
                     result = [
                             data: [
                                     [
@@ -445,7 +431,7 @@ class OnPremDeployerTest extends BaseTest {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/hybrid/api/v1/applications'))
+                   is(equalTo('/hybrid/api/v1/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -483,7 +469,7 @@ class OnPremDeployerTest extends BaseTest {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
                 return
             }
@@ -495,20 +481,7 @@ class OnPremDeployerTest extends BaseTest {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('servers')) {
+                if (uri.endsWith('servers')) {
                     result = [
                             data: [
                                     [
@@ -583,7 +556,7 @@ class OnPremDeployerTest extends BaseTest {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/hybrid/api/v1/applications'))
+                   is(equalTo('/hybrid/api/v1/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -627,7 +600,7 @@ class OnPremDeployerTest extends BaseTest {
             assert newZipFile.delete()
         }
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
                 return
             }
@@ -639,20 +612,7 @@ class OnPremDeployerTest extends BaseTest {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('servers')) {
+                if (uri.endsWith('servers')) {
                     result = [
                             data: [
                                     [
@@ -735,7 +695,7 @@ class OnPremDeployerTest extends BaseTest {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/hybrid/api/v1/applications'))
+                   is(equalTo('/hybrid/api/v1/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -804,7 +764,7 @@ class OnPremDeployerTest extends BaseTest {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
                 return
             }
@@ -816,20 +776,7 @@ class OnPremDeployerTest extends BaseTest {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('servers')) {
+                if (uri.endsWith('servers')) {
                     result = [
                             data: [
                                     [
@@ -903,7 +850,7 @@ class OnPremDeployerTest extends BaseTest {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/hybrid/api/v1/applications/app456'))
+                   is(equalTo('/hybrid/api/v1/applications/app456'))
         assertThat method,
                    is(equalTo('PATCH'))
         assertThat authToken,
@@ -937,7 +884,7 @@ class OnPremDeployerTest extends BaseTest {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
                 return
             }
@@ -949,20 +896,7 @@ class OnPremDeployerTest extends BaseTest {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('servers')) {
+                if (uri.endsWith('servers')) {
                     result = [
                             data: [
                                     [
@@ -1037,7 +971,7 @@ class OnPremDeployerTest extends BaseTest {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/hybrid/api/v1/applications/app456'))
+                   is(equalTo('/hybrid/api/v1/applications/app456'))
         assertThat method,
                    is(equalTo('PATCH'))
         assertThat authToken,
@@ -1077,7 +1011,7 @@ class OnPremDeployerTest extends BaseTest {
             assert newZipFile.delete()
         }
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
                 return
             }
@@ -1089,20 +1023,7 @@ class OnPremDeployerTest extends BaseTest {
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('servers')) {
+                if (uri.endsWith('servers')) {
                     result = [
                             data: [
                                     [
@@ -1185,7 +1106,7 @@ class OnPremDeployerTest extends BaseTest {
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/hybrid/api/v1/applications/app456'))
+                   is(equalTo('/hybrid/api/v1/applications/app456'))
         assertThat method,
                    is(equalTo('PATCH'))
         assertThat authToken,
@@ -1234,7 +1155,7 @@ class OnPremDeployerTest extends BaseTest {
             if (mockEnvironments(request)) {
                 return
             }
-            url = request.absoluteURI()
+            url = request.uri()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
             request.response().with {
@@ -1274,7 +1195,7 @@ class OnPremDeployerTest extends BaseTest {
         assertThat status.toList(),
                    is(equalTo([OnPremDeploymentStatus.RECEIVED]))
         assertThat url,
-                   is(equalTo('http://localhost:8080/hybrid/api/v1/applications/appid'))
+                   is(equalTo('/hybrid/api/v1/applications/appid'))
         assertThat method,
                    is(equalTo('GET'))
         assertThat authToken,
