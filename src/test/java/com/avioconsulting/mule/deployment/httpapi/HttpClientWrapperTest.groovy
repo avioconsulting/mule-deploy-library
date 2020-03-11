@@ -160,4 +160,32 @@ class HttpClientWrapperTest extends BaseTest {
         assertThat exception.message,
                    is(equalTo("Unable to authenticate to Anypoint as 'the user', got an HTTP 401 with a response of 'Unauthorized'".toString()))
     }
+
+    @Test
+    void no_cookies() {
+        // arrange
+        String cookieValue = null
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            cookieValue = request.getCookie('FOO')?.value
+            request.response().with {
+                statusCode = 200
+                putHeader('Set-Cookie',
+                          'FOO=BAR')
+                end('Howdy')
+            }
+        }
+
+        // act
+        // server tries to set the cookie
+        clientWrapper.execute(new HttpGet("${clientWrapper.baseUrl}/hello")).withCloseable {}
+        // send another request that should not have the cookie
+        clientWrapper.execute(new HttpGet("${clientWrapper.baseUrl}/hello")).withCloseable {}
+
+        // assert
+        assertThat cookieValue,
+                   is(nullValue())
+    }
 }

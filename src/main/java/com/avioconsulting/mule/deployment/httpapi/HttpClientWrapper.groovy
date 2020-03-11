@@ -36,6 +36,7 @@ class HttpClientWrapper implements HttpRequestInterceptor {
         this.baseUrl = baseUrl
         this.httpClient = HttpClients.custom()
                 .addInterceptorFirst(this)
+                .disableCookieManagement()
                 .build()
     }
 
