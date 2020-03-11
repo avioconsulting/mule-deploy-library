@@ -2,6 +2,7 @@ package com.avioconsulting.mule.deployment
 
 import com.avioconsulting.mule.deployment.models.*
 import com.avioconsulting.mule.deployment.subdeployers.ICloudHubDeployer
+import com.avioconsulting.mule.deployment.subdeployers.IOnPremDeployer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -12,21 +13,28 @@ import static org.hamcrest.Matchers.is
 
 class DeployerTest {
     private Deployer deployer
-    private ICloudHubDeployer mockCloudHubDeployer
-    private List<CloudhubDeploymentRequest> deployedApps
+    private List<CloudhubDeploymentRequest> deployedChApps
+    private List<OnPremDeploymentRequest> deployedOnPremApps
 
     @Before
     void setupDeployer() {
-        deployedApps = []
-        mockCloudHubDeployer = [
+        deployedChApps = []
+        deployedOnPremApps = []
+        def mockCloudHubDeployer = [
                 deploy: { CloudhubDeploymentRequest request ->
-                    deployedApps << request
+                    deployedChApps << request
                 }
         ] as ICloudHubDeployer
+        def mockOnPremDeployer = [
+                deploy: { OnPremDeploymentRequest request ->
+                    deployedOnPremApps << request
+                }
+        ] as IOnPremDeployer
         deployer = new Deployer(null,
                                 System.out,
                                 null,
-                                mockCloudHubDeployer)
+                                mockCloudHubDeployer,
+                                mockOnPremDeployer)
     }
 
     @Test
@@ -55,7 +63,7 @@ class DeployerTest {
                                    apiSpec)
 
         // assert
-        assertThat deployedApps.size(),
+        assertThat deployedChApps.size(),
                    is(equalTo(1))
         Assert.fail("write it, add design center stuff")
     }
@@ -63,11 +71,24 @@ class DeployerTest {
     @Test
     void deployApplication_onprem() {
         // arrange
+        def file = new File('src/test/resources/some_file.txt')
+        def stream = new FileInputStream(file)
+        def apiSpec = new ApiSpecification('Hello API')
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'new-app',
+                                                  'clustera',
+                                                  file.name,
+                                                  stream)
 
         // act
+        deployer.deployApplication(request,
+                                   '1.2.3',
+                                   apiSpec)
 
         // assert
-        Assert.fail("write it")
+        assertThat deployedOnPremApps.size(),
+                   is(equalTo(1))
+        Assert.fail("write it, add design center stuff")
     }
 
     @Test

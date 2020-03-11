@@ -8,6 +8,8 @@ import com.avioconsulting.mule.deployment.models.Features
 import com.avioconsulting.mule.deployment.models.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.subdeployers.CloudHubDeployer
 import com.avioconsulting.mule.deployment.subdeployers.ICloudHubDeployer
+import com.avioconsulting.mule.deployment.subdeployers.IOnPremDeployer
+import com.avioconsulting.mule.deployment.subdeployers.OnPremDeployer
 
 /***
  * Top level deployer. This is what most of your interaction should be with
@@ -17,6 +19,7 @@ class Deployer {
     private final EnvironmentLocator environmentLocator
     private final HttpClientWrapper clientWrapper
     private final ICloudHubDeployer cloudHubDeployer
+    private final IOnPremDeployer onPremDeployer
 
     /**
      *
@@ -43,7 +46,8 @@ class Deployer {
     private Deployer(HttpClientWrapper httpClientWrapper,
                      PrintStream logger,
                      EnvironmentLocator environmentLocator = null,
-                     ICloudHubDeployer cloudHubDeployer = null) {
+                     ICloudHubDeployer cloudHubDeployer = null,
+                     IOnPremDeployer onPremDeployer = null) {
         this.logger = logger
         this.clientWrapper = httpClientWrapper
         this.environmentLocator = environmentLocator ?: new EnvironmentLocator(this.clientWrapper,
@@ -51,6 +55,9 @@ class Deployer {
         this.cloudHubDeployer = cloudHubDeployer ?: new CloudHubDeployer(this.clientWrapper,
                                                                          this.environmentLocator,
                                                                          logger)
+        this.onPremDeployer = onPremDeployer ?: new OnPremDeployer(this.clientWrapper,
+                                                                   this.environmentLocator,
+                                                                   logger)
     }
 
     /**
@@ -79,6 +86,7 @@ class Deployer {
                           String appVersion,
                           ApiSpecification apiSpecification = null,
                           List<Features> enabledFeatures = [Features.All]) {
-
+        logger.println('Step 1: Deploying application to CloudHub')
+        onPremDeployer.deploy(appDeploymentRequest)
     }
 }

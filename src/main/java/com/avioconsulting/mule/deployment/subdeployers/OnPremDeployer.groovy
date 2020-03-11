@@ -10,7 +10,7 @@ import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPatch
 import org.apache.http.client.methods.HttpPost
 
-class OnPremDeployer extends BaseDeployer {
+class OnPremDeployer extends BaseDeployer implements IOnPremDeployer {
     /***
      * Instantiate using default anypoint.mulesoft.com URL
      * @param anypointOrganizationId
