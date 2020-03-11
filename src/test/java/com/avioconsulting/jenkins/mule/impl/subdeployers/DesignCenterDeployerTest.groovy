@@ -1,5 +1,6 @@
-package com.avioconsulting.jenkins.mule.impl
+package com.avioconsulting.jenkins.mule.impl.subdeployers
 
+import com.avioconsulting.jenkins.mule.impl.HttpServerUtils
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.models.ApiSpecification
 import com.avioconsulting.jenkins.mule.impl.models.AppFileInfo
@@ -12,7 +13,6 @@ import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerRequest
 import org.apache.commons.io.FileUtils
 import org.junit.After
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 

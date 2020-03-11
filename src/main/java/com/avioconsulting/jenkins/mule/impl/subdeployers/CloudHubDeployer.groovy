@@ -1,5 +1,7 @@
-package com.avioconsulting.jenkins.mule.impl
+package com.avioconsulting.jenkins.mule.impl.subdeployers
 
+import com.avioconsulting.jenkins.mule.impl.AppStatus
+import com.avioconsulting.jenkins.mule.impl.DeploymentStatus
 import com.avioconsulting.jenkins.mule.impl.httpapi.EnvironmentLocator
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.models.BaseCloudhubDeploymentRequest

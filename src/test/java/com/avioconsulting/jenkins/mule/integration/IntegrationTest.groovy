@@ -1,8 +1,8 @@
 package com.avioconsulting.jenkins.mule.integration
 
-import com.avioconsulting.jenkins.mule.impl.CloudHubDeployer
+import com.avioconsulting.jenkins.mule.impl.subdeployers.CloudHubDeployer
 import com.avioconsulting.jenkins.mule.impl.MuleUtil
-import com.avioconsulting.jenkins.mule.impl.OnPremDeployer
+import com.avioconsulting.jenkins.mule.impl.subdeployers.OnPremDeployer
 import com.avioconsulting.jenkins.mule.impl.httpapi.EnvironmentLocator
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.models.CloudhubFileDeploymentRequest

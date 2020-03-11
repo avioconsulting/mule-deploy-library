@@ -1,4 +1,4 @@
-package com.avioconsulting.jenkins.mule.impl
+package com.avioconsulting.jenkins.mule.impl.subdeployers
 
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import com.avioconsulting.jenkins.mule.impl.httpapi.LazyHeader

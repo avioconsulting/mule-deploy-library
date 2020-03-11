@@ -1,5 +1,6 @@
-package com.avioconsulting.jenkins.mule.impl
+package com.avioconsulting.jenkins.mule.impl.subdeployers
 
+import com.avioconsulting.jenkins.mule.impl.subdeployers.DesignCenterHttpFunctionality
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import org.apache.http.client.methods.HttpPost
 

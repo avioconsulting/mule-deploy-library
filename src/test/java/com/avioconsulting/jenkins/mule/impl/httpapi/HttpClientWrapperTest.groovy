@@ -1,5 +1,6 @@
-package com.avioconsulting.jenkins.mule.impl
+package com.avioconsulting.jenkins.mule.impl.httpapi
 
+import com.avioconsulting.jenkins.mule.impl.HttpServerUtils
 import com.avioconsulting.jenkins.mule.impl.httpapi.HttpClientWrapper
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
