@@ -6,26 +6,7 @@ class EnvironmentLocator {
     private final HttpClientWrapper clientWrapper
     private final PrintStream logger
     @Lazy
-    private final Map<String, String> environments = {
-        getEnvironments()
-    }
-
-    EnvironmentLocator(HttpClientWrapper httpClientWrapper,
-                       PrintStream logger) {
-        this.logger = logger
-        this.clientWrapper = httpClientWrapper
-    }
-
-    def getEnvironmentId(String environmentName) {
-        def environment = environments[environmentName]
-        if (!environment) {
-            def valids = environments.keySet()
-            throw new Exception("Unable to find environment '${environmentName}'. Valid environments are ${valids}")
-        }
-        return environment
-    }
-
-    private Map<String, String> getEnvironments() {
+    private Map<String, String> environments = {
         logger.println('Fetching all environment GUIDs')
         def anypointOrganizationId = clientWrapper.anypointOrganizationId
         def request = new HttpGet("${clientWrapper.baseUrl}/accounts/api/organizations/${anypointOrganizationId}/environments")
@@ -40,5 +21,20 @@ class EnvironmentLocator {
         finally {
             response.close()
         }
+    }()
+
+    EnvironmentLocator(HttpClientWrapper httpClientWrapper,
+                       PrintStream logger) {
+        this.logger = logger
+        this.clientWrapper = httpClientWrapper
+    }
+
+    def getEnvironmentId(String environmentName) {
+        def environment = environments[environmentName]
+        if (!environment) {
+            def valids = environments.keySet()
+            throw new Exception("Unable to find environment '${environmentName}'. Valid environments are ${valids}")
+        }
+        return environment
     }
 }
