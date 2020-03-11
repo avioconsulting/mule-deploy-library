@@ -2,7 +2,9 @@ package com.avioconsulting.mule.deployment
 
 import com.avioconsulting.mule.deployment.models.*
 import com.avioconsulting.mule.deployment.subdeployers.ICloudHubDeployer
+import com.avioconsulting.mule.deployment.subdeployers.IDesignCenterDeployer
 import com.avioconsulting.mule.deployment.subdeployers.IOnPremDeployer
+import groovy.transform.Canonical
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -15,11 +17,20 @@ class DeployerTest {
     private Deployer deployer
     private List<CloudhubDeploymentRequest> deployedChApps
     private List<OnPremDeploymentRequest> deployedOnPremApps
+    private List<DesignCenterSync> designCenterSyncs
+
+    @Canonical
+    class DesignCenterSync {
+        ApiSpecification apiSpec
+        FileBasedAppDeploymentRequest appFileInfo
+        String appVersion
+    }
 
     @Before
     void setupDeployer() {
         deployedChApps = []
         deployedOnPremApps = []
+        designCenterSyncs = []
         def mockCloudHubDeployer = [
                 deploy: { CloudhubDeploymentRequest request ->
                     deployedChApps << request
@@ -30,11 +41,22 @@ class DeployerTest {
                     deployedOnPremApps << request
                 }
         ] as IOnPremDeployer
+        def mockDcDeployer = [
+                synchronizeDesignCenterFromApp: { ApiSpecification apiSpec,
+                                                  FileBasedAppDeploymentRequest appFileInfo,
+                                                  String appVersion ->
+                    designCenterSyncs << new DesignCenterSync(apiSpec,
+                                                              appFileInfo,
+                                                              appVersion)
+                }
+        ] as IDesignCenterDeployer
         deployer = new Deployer(null,
                                 System.out,
-                                null,
+                                ['DEV'],
+                                null, // shouldn't need this since we mock so much
                                 mockCloudHubDeployer,
-                                mockOnPremDeployer)
+                                mockOnPremDeployer,
+                                mockDcDeployer)
     }
 
     @Test
@@ -65,7 +87,50 @@ class DeployerTest {
         // assert
         assertThat deployedChApps.size(),
                    is(equalTo(1))
-        Assert.fail("write it, add design center stuff")
+        assertThat designCenterSyncs.size(),
+                   is(equalTo(1))
+        def sync = designCenterSyncs[0]
+        assertThat sync.appVersion,
+                   is(equalTo('1.2.3'))
+        assertThat sync.apiSpec,
+                   is(equalTo(apiSpec))
+        assertThat sync.appFileInfo.fileName,
+                   is(equalTo(file.name))
+        assertThat sync.appFileInfo.app,
+                   is(equalTo(stream))
+    }
+
+    @Test
+    void deployApplication_no_dc_deployment_for_dev_environment() {
+        // arrange
+        def file = new File('src/test/resources/some_file.txt')
+        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest(stream,
+                                                    'DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file.name,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
+        def apiSpec = new ApiSpecification('Hello API')
+
+        // act
+        deployer.deployApplication(request,
+                                   '1.2.3',
+                                   apiSpec)
+
+        // assert
+        assertThat deployedChApps.size(),
+                   is(equalTo(1))
+        assertThat 'Not DEV',
+                   designCenterSyncs.size(),
+                   is(equalTo(0))
     }
 
     @Test

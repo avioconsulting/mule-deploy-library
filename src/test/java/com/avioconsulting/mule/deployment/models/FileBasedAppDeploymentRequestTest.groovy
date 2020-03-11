@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.models
 
-import com.avioconsulting.mule.deployment.models.AppFileInfo
+import groovy.transform.Canonical
 import org.junit.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
@@ -8,7 +8,10 @@ import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
 class FileBasedAppDeploymentRequestTest {
+    @Canonical
     class DummyRequest implements FileBasedAppDeploymentRequest {
+        InputStream app
+        String fileName
     }
 
     @Test
@@ -22,13 +25,12 @@ class FileBasedAppDeploymentRequestTest {
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
         def inputStream = new FileInputStream(zipFile)
-        def appFileInfo = new AppFileInfo(zipFile.name,
-                                          inputStream)
 
         // act
         def stream = DummyRequest.getPropertyModifiedStream('api.dev.properties',
                                                             [:],
-                                                            appFileInfo).app
+                                                            inputStream,
+                                                            zipFile.name)
 
         // assert
         assertThat 'No properties to change so do not do anything',
@@ -46,15 +48,14 @@ class FileBasedAppDeploymentRequestTest {
         }
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
-        def appFileInfo = new AppFileInfo(zipFile.name,
-                                          zipFile.newInputStream())
 
         // act
         def stream = DummyRequest.getPropertyModifiedStream('api.dev.properties',
                                                             [
                                                                     existing: 'changed'
                                                             ],
-                                                            appFileInfo).app
+                                                            zipFile.newInputStream(),
+                                                            zipFile.name)
 
         // assert
         def destination = new File('target/temp/modifiedapp')
@@ -93,15 +94,14 @@ class FileBasedAppDeploymentRequestTest {
         }
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
-        def appFileInfo = new AppFileInfo(zipFile.name,
-                                          zipFile.newInputStream())
 
         // act
         def stream = DummyRequest.getPropertyModifiedStream('api.dev.properties',
                                                             [
                                                                     mule4_existing: 'changed'
                                                             ],
-                                                            appFileInfo).app
+                                                            zipFile.newInputStream(),
+                                                            zipFile.name)
 
         // assert
         def destination = new File('target/temp/modifiedapp')
@@ -133,15 +133,14 @@ class FileBasedAppDeploymentRequestTest {
         }
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
-        def appFileInfo = new AppFileInfo(zipFile.name,
-                                          zipFile.newInputStream())
 
         // act
         def stream = DummyRequest.getPropertyModifiedStream('doesnotexist',
                                                             [
                                                                     existing: 'changed'
                                                             ],
-                                                            appFileInfo).app
+                                                            zipFile.newInputStream(),
+                                                            zipFile.name)
 
         stream.bytes
     }

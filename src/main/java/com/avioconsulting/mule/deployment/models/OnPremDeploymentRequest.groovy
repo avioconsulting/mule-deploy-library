@@ -33,16 +33,13 @@ class OnPremDeploymentRequest implements FileBasedAppDeploymentRequest {
                             String fileName,
                             InputStream app,
                             Map<String, String> appProperties = [:]) {
-        if (appName.contains(' ')) {
-            throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
-        }
-        this.environment = environment
-        this.appName = appName
-        this.targetServerOrClusterName = targetServerOrClusterName
-        this.fileName = fileName
-        this.appProperties = appProperties
-        this.app = app
-        this.modifiedPropertiesViaZip = false
+        this(environment,
+             appName,
+             targetServerOrClusterName,
+             fileName,
+             app,
+             appProperties,
+             null)
     }
 
     /***
@@ -62,27 +59,19 @@ class OnPremDeploymentRequest implements FileBasedAppDeploymentRequest {
                             InputStream app,
                             Map<String, String> appProperties,
                             String overrideByChangingFileInZip) {
-        this(environment,
-             appName,
-             targetServerOrClusterName,
-             fileName,
-             dealWithApp(overrideByChangingFileInZip,
-                         appProperties,
-                         app,
-                         fileName),
-             appProperties)
-        this.modifiedPropertiesViaZip = true
-    }
-
-    private static InputStream dealWithApp(String overrideByChangingFileInZip,
-                                           Map<String, String> appProperties,
-                                           InputStream app,
-                                           String fileName) {
-        def appFileInfo = new AppFileInfo(fileName,
-                                          app)
-        overrideByChangingFileInZip ? getPropertyModifiedStream(overrideByChangingFileInZip,
-                                                                appProperties,
-                                                                appFileInfo).app : app
+        if (appName.contains(' ')) {
+            throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
+        }
+        this.environment = environment
+        this.appName = appName
+        this.targetServerOrClusterName = targetServerOrClusterName
+        this.fileName = fileName
+        this.appProperties = appProperties
+        this.app = overrideByChangingFileInZip ? getPropertyModifiedStream(overrideByChangingFileInZip,
+                                                                           appProperties,
+                                                                           app,
+                                                                           fileName) : app
+        this.modifiedPropertiesViaZip = overrideByChangingFileInZip != null
     }
 
     private String getConfigJson() {

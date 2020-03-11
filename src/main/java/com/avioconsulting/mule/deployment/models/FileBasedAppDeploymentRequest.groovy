@@ -1,23 +1,61 @@
 package com.avioconsulting.mule.deployment.models
 
+import org.apache.commons.compress.archivers.ArchiveInputStream
 import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.io.IOUtils
 
 trait FileBasedAppDeploymentRequest {
-    static AppFileInfo getPropertyModifiedStream(String propertiesFileToAddTo,
+    boolean isMule4Request() {
+        isMule4Request(fileName)
+    }
+
+    static boolean isMule4Request(String fileName) {
+        fileName.endsWith('.jar')
+    }
+
+    abstract InputStream getApp()
+
+    abstract String getFileName()
+
+    ArchiveInputStream openArchiveStream() {
+        openArchiveStream(archiveFormat,
+                          app)
+    }
+
+    static ArchiveInputStream openArchiveStream(String archiveFormat,
+                                                InputStream app) {
+        def factory = new ArchiveStreamFactory()
+        factory.createArchiveInputStream(archiveFormat,
+                                         app)
+    }
+
+    String getArchiveFormat() {
+        getArchiveFormat(mule4Request)
+    }
+
+    static String getArchiveFormat(boolean mule4Request) {
+        // small semantic difference between JAR and ZIP and on-prem/Mule 4 Runtime Manager will
+        // complain if it's not set right
+        mule4Request ? ArchiveStreamFactory.JAR : ArchiveStreamFactory.ZIP
+    }
+
+    static InputStream getPropertyModifiedStream(String propertiesFileToAddTo,
                                                  Map<String, String> propertiesToAdd,
-                                                 AppFileInfo appFileInfo) {
+                                                 InputStream app,
+                                                 String fileName) {
         if (propertiesToAdd.isEmpty()) {
-            return appFileInfo
+            return app
         }
-        def isMule4 = appFileInfo.isMule4Request()
+        def isMule4 = isMule4Request(fileName)
         // Mule 4 props files live at the root of the JAR. Mule 3's are in a classes subdirectory
         propertiesFileToAddTo = isMule4 ? propertiesFileToAddTo : "classes/${propertiesFileToAddTo}"
-        def archiveIn = appFileInfo.openArchiveStream()
+        def archiveFormat = getArchiveFormat(isMule4)
+        def archiveIn = openArchiveStream(archiveFormat,
+                                          app)
         def pos = new PipedOutputStream()
         def factory = new ArchiveStreamFactory()
-        def archiveOut = factory.createArchiveOutputStream(appFileInfo.archiveFormat,
+        def archiveOut = factory.createArchiveOutputStream(archiveFormat,
                                                            pos)
         Thread.start {
             ZipArchiveEntry inputEntry
@@ -58,8 +96,7 @@ trait FileBasedAppDeploymentRequest {
                 throw new Exception("ERROR: Expected to find the properties file you wanted to modify, ${propertiesFileToAddTo}, in the ZIP archive, but did not! Only files seen were ${propertiesFilesFound}.")
             }
         }
-        new AppFileInfo(appFileInfo.fileName,
-                        new PipedInputStream(pos))
+        new PipedInputStream(pos)
     }
 
     static InputStream modifyProperties(InputStream input,

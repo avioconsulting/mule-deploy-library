@@ -2,10 +2,11 @@ package com.avioconsulting.mule.deployment.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.models.ApiSpecification
-import com.avioconsulting.mule.deployment.models.AppFileInfo
+import com.avioconsulting.mule.deployment.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.models.RamlFile
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
+import groovy.transform.Canonical
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
 import org.apache.commons.io.FileUtils
@@ -23,6 +24,12 @@ class DesignCenterDeployerTest extends BaseTest {
     void setupDeployer() {
         deployer = new DesignCenterDeployer(clientWrapper,
                                             System.out)
+    }
+
+    @Canonical
+    static class DummyRequest implements FileBasedAppDeploymentRequest {
+        InputStream app
+        String fileName
     }
 
     @Test
@@ -69,15 +76,16 @@ class DesignCenterDeployerTest extends BaseTest {
                    ]))
     }
 
-    private static AppFileInfo buildZip(File tempDir, File tempAppDirectory) {
+    private static FileBasedAppDeploymentRequest buildZip(File tempDir,
+                                                          File tempAppDirectory) {
         def antBuilder = new AntBuilder()
         def zipFile = new File(tempDir,
                                'designcenterapp.zip')
         FileUtils.deleteQuietly(zipFile)
         antBuilder.zip(destfile: zipFile,
                        basedir: tempAppDirectory)
-        new AppFileInfo(zipFile.name,
-                        zipFile.newInputStream())
+        new DummyRequest(zipFile.newInputStream(),
+                         zipFile.name)
     }
 
     @Test

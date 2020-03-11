@@ -66,18 +66,18 @@ class CloudhubDeploymentRequest implements FileBasedAppDeploymentRequest {
                               String cloudHubAppPrefix,
                               Map<String, String> appProperties = [:],
                               Map<String, String> otherCloudHubProperties = [:]) {
-       this(app,
-            environment,
-            appName,
-            workerSpecRequest,
-            fileName,
-            cryptoKey,
-            anypointClientId,
-            anypointClientSecret,
-            cloudHubAppPrefix,
-            appProperties,
-            null,
-            otherCloudHubProperties)
+        this(app,
+             environment,
+             appName,
+             workerSpecRequest,
+             fileName,
+             cryptoKey,
+             anypointClientId,
+             anypointClientSecret,
+             cloudHubAppPrefix,
+             appProperties,
+             null,
+             otherCloudHubProperties)
     }
 
     CloudhubDeploymentRequest(InputStream app,
@@ -112,11 +112,10 @@ class CloudhubDeploymentRequest implements FileBasedAppDeploymentRequest {
             newAppName = appNameLowerCase
         }
         normalizedAppName = newAppName
-        def appFileInfo = new AppFileInfo(fileName,
-                                          app)
         this.app = overrideByChangingFileInZip ? getPropertyModifiedStream(overrideByChangingFileInZip,
                                                                            appProperties,
-                                                                           appFileInfo).app : app
+                                                                           app,
+                                                                           fileName) : app
     }
 
     HttpEntity getHttpPayload() {

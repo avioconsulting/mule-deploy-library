@@ -3,7 +3,7 @@ package com.avioconsulting.mule.deployment.subdeployers
 import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
 import com.avioconsulting.mule.deployment.httpapi.LazyHeader
 import com.avioconsulting.mule.deployment.models.ApiSpecification
-import com.avioconsulting.mule.deployment.models.AppFileInfo
+import com.avioconsulting.mule.deployment.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.models.RamlFile
 import com.avioconsulting.mule.deployment.subdeployers.DesignCenterHttpFunctionality
 import com.avioconsulting.mule.deployment.subdeployers.DesignCenterLock
@@ -20,7 +20,7 @@ import org.apache.http.entity.StringEntity
 
 import java.nio.charset.Charset
 
-class DesignCenterDeployer implements DesignCenterHttpFunctionality {
+class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCenterDeployer {
     private final HttpClientWrapper clientWrapper
     private final PrintStream logger
     private static final List<String> IGNORE_DC_FILES = [
@@ -124,7 +124,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality {
         }
     }
 
-    List<RamlFile> getRamlFilesFromApp(AppFileInfo deploymentRequest) {
+    List<RamlFile> getRamlFilesFromApp(FileBasedAppDeploymentRequest deploymentRequest) {
         def archiveIn = deploymentRequest.openArchiveStream()
         def apiDirectoryPath = new File('api').toPath()
         try {
@@ -194,7 +194,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality {
     }
 
     def synchronizeDesignCenterFromApp(ApiSpecification apiSpec,
-                                       AppFileInfo appFileInfo,
+                                       FileBasedAppDeploymentRequest appFileInfo,
                                        String appVersion) {
         def ramlFiles = getRamlFilesFromApp(appFileInfo)
         synchronizeDesignCenter(apiSpec,
