@@ -1,8 +1,10 @@
 package com.avioconsulting.mule.deployment.integration
 
+import com.avioconsulting.mule.deployment.Deployer
 import com.avioconsulting.mule.deployment.MuleUtil
 import com.avioconsulting.mule.deployment.httpapi.EnvironmentLocator
 import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
+import com.avioconsulting.mule.deployment.models.ApiSpecification
 import com.avioconsulting.mule.deployment.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.models.OnPremDeploymentRequest
@@ -32,6 +34,7 @@ class IntegrationTest {
     public static final String AVIO_ENVIRONMENT_DEV = 'DEV'
     private CloudHubDeployer cloudHubDeployer
     private OnPremDeployer onPremDeployer
+    private Deployer overallDeployer
     private HttpClientWrapper clientWrapper
     private CloudhubDeploymentRequest cloudhubDeploymentRequest
     private OnPremDeploymentRequest onPremDeploymentRequest
@@ -98,14 +101,15 @@ class IntegrationTest {
                                                                   AVIO_ENVIRONMENT_DEV,
                                                                   CLOUDHUB_APP_NAME,
                                                                   new CloudhubWorkerSpecRequest('4.2.2',
-                                                                                                    false,
-                                                                                                    1),
+                                                                                                false,
+                                                                                                1),
                                                                   builtFile.name,
                                                                   'abcdefg',
                                                                   'someid',
                                                                   'somesecret',
                                                                   CLOUDHUB_APP_PREFIX)
-        clientWrapper = new HttpClientWrapper(ANYPOINT_USERNAME,
+        clientWrapper = new HttpClientWrapper('https://anypoint.mulesoft.com',
+                                              ANYPOINT_USERNAME,
                                               ANYPOINT_PASSWORD,
                                               AVIO_ORG_ID,
                                               System.out)
@@ -129,25 +133,31 @@ class IntegrationTest {
         onPremDeployer = new OnPremDeployer(this.clientWrapper,
                                             environmentLocator,
                                             System.out)
+        overallDeployer = new Deployer(clientWrapper,
+                                       environmentLocator,
+                                       System.out)
     }
 
     @Test
     void cloudhub() {
         // arrange
+        def apiSpec = new ApiSpecification('Mule Deploy Design Center Test Project')
 
         // act
         try {
-            cloudHubDeployer.deploy(cloudhubDeploymentRequest)
+            overallDeployer.deployApplication(cloudhubDeploymentRequest,
+                                              '1.2.3',
+                                              apiSpec)
             println 'test: app deployed OK, now trying to hit its HTTP listener'
 
             // assert
             def exception = null
             5.times {
                 try {
-            def url = "http://${cloudhubDeploymentRequest.normalizedAppName}.us-w2.cloudhub.io/".toURL()
-            println "Hitting app @ ${url}"
-            assertThat url.text,
-                       is(equalTo('hello there'))
+                    def url = "http://${cloudhubDeploymentRequest.normalizedAppName}.us-w2.cloudhub.io/".toURL()
+                    println "Hitting app @ ${url}"
+                    assertThat url.text,
+                               is(equalTo('hello there'))
                     exception = null
                 }
                 catch (e) {
@@ -159,8 +169,8 @@ class IntegrationTest {
             if (exception) {
                 throw exception
             } else {
-            println 'test passed'
-        }
+                println 'test passed'
+            }
         }
         finally {
             println 'test has finished one way or the other, now cleaning up our mess'
@@ -179,9 +189,12 @@ class IntegrationTest {
         if (deleteResult == 404) {
             println 'Existing app does not exist, no problem'
         }
+        def apiSpec = new ApiSpecification('Mule Deploy Design Center Test Project')
 
         // act
-        onPremDeployer.deploy(onPremDeploymentRequest)
+        overallDeployer.deployApplication(onPremDeploymentRequest,
+                                          '1.2.3',
+                                          apiSpec)
         println 'test: app deployed OK, now trying to hit its HTTP listener'
 
         // assert

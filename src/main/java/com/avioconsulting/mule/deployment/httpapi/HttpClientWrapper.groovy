@@ -39,17 +39,6 @@ class HttpClientWrapper implements HttpRequestInterceptor {
                 .build()
     }
 
-    HttpClientWrapper(String username,
-                      String password,
-                      String anypointOrganizationId,
-                      PrintStream logger) {
-        this('https://anypoint.mulesoft.com',
-             username,
-             password,
-             anypointOrganizationId,
-             logger)
-    }
-
     /**
      *
      * @param username
