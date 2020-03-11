@@ -206,7 +206,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                                 List<RamlFile> ramlFiles,
                                 String appVersion) {
         if (ramlFiles.empty) {
-            logger.println 'No RAML fils in project, therefore nothing to sync'
+            logger.println 'No RAML files in project, therefore nothing to sync'
             return
         }
         def mainRamlFile = getMainRamlFile(apiSpec,
