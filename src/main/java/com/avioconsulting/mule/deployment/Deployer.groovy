@@ -82,8 +82,10 @@ class Deployer {
                                      appDeploymentRequest,
                                      appDeploymentRequest.environment,
                                      enabledFeatures)
+        def skipReason = getFeatureSkipReason(enabledFeatures,
+                                              Features.AppDeployment)
         executeStep('CloudHub app deployment',
-                    null) {
+                    skipReason) {
             cloudHubDeployer.deploy(appDeploymentRequest)
         }
     }
@@ -105,8 +107,10 @@ class Deployer {
                                      appDeploymentRequest,
                                      appDeploymentRequest.environment,
                                      enabledFeatures)
+        def skipReason = getFeatureSkipReason(enabledFeatures,
+                                              Features.AppDeployment)
         executeStep('on-prem app deployment',
-                    null) {
+                    skipReason) {
             onPremDeployer.deploy(appDeploymentRequest)
         }
     }
@@ -131,14 +135,20 @@ class Deployer {
         }
     }
 
+    private static String getFeatureSkipReason(List<Features> enabledFeatures,
+                                               Features feature) {
+        def enabled = enabledFeatures.contains(Features.All) || enabledFeatures.contains(feature)
+        enabled ? null : "Feature ${feature} was not supplied"
+    }
+
     private def performCommonDeploymentTasks(ApiSpecification apiSpecification,
                                              String appVersion,
                                              FileBasedAppDeploymentRequest appDeploymentRequest,
                                              String environment,
                                              List<Features> enabledFeatures) {
         def isFeatureDisabled = { Features feature ->
-            def enabled = enabledFeatures.contains(Features.All) || enabledFeatures.contains(feature)
-            enabled ? null : "Feature ${feature} was not supplied"
+            getFeatureSkipReason(enabledFeatures,
+                                 feature)
         }
         String skipReason = null
         if (!apiSpecification) {
