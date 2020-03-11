@@ -655,11 +655,20 @@ class DesignCenterDeployerTest implements HttpServerUtils {
     @Test
     void synchronizeDesignCenter_no_raml_files() {
         // arrange
+        withHttpServer { HttpServerRequest request ->
+            request.response().with {
+                statusCode = 404
+                end("Unexpected request ${request.absoluteURI()}")
+            }
+        }
+        def apiSpec = new ApiSpecification('Hello API')
 
         // act
+        deployer.synchronizeDesignCenter(apiSpec,
+                                         [],
+                                         '1.2.3')
 
         // assert
-        Assert.fail("write it")
     }
 
     @Test

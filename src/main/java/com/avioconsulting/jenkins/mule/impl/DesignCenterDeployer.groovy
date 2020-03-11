@@ -195,6 +195,10 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality {
     def synchronizeDesignCenter(ApiSpecification apiSpec,
                                 List<RamlFile> ramlFiles,
                                 String appVersion) {
+        if (ramlFiles.empty) {
+            logger.println 'No RAML fils in project, therefore nothing to sync'
+            return
+        }
         def projectId = getDesignCenterProjectId(apiSpec.name)
         new DesignCenterLock(clientWrapper,
                              logger,
