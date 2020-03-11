@@ -2,10 +2,7 @@ package com.avioconsulting.mule.deployment
 
 import com.avioconsulting.mule.deployment.httpapi.EnvironmentLocator
 import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
-import com.avioconsulting.mule.deployment.models.ApiSpecification
-import com.avioconsulting.mule.deployment.models.CloudhubDeploymentRequest
-import com.avioconsulting.mule.deployment.models.Features
-import com.avioconsulting.mule.deployment.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.models.*
 import com.avioconsulting.mule.deployment.subdeployers.*
 
 /***
@@ -78,7 +75,10 @@ class Deployer {
                           String appVersion,
                           ApiSpecification apiSpecification = null,
                           List<Features> enabledFeatures = [Features.All]) {
-        logger.println('Step 1: Deploying application to CloudHub')
+        def stepCounter = performCommonDeploymentTasks(apiSpecification,
+                                                       appVersion,
+                                                       appDeploymentRequest)
+        logger.println("Step ${stepCounter}: Deploying application to CloudHub")
         cloudHubDeployer.deploy(appDeploymentRequest)
     }
 
@@ -93,16 +93,36 @@ class Deployer {
                           String appVersion,
                           ApiSpecification apiSpecification = null,
                           List<Features> enabledFeatures = [Features.All]) {
-        logger.println('Step 1: Deploying application to CloudHub')
+        def stepCounter = performCommonDeploymentTasks(apiSpecification,
+                                                       appVersion,
+                                                       appDeploymentRequest)
+        logger.println("Step ${stepCounter}: Deploying application to on-prem")
         onPremDeployer.deploy(appDeploymentRequest)
     }
 
     private def performCommonDeploymentTasks(ApiSpecification apiSpecification,
                                              String appVersion,
-                                             int stepCount) {
-        designCenterDeployer.synchronizeDesignCenterFromApp(apiSpecification,
-                                                            fileInfo,
-                                                            appVersion)
+                                             FileBasedAppDeploymentRequest appDeploymentRequest) {
+        int stepCount = 0
+        def executeStep = { boolean skip,
+                            String description,
+                            String skipReason,
+                            Closure stuff ->
+            stepCount++
+            def prefix = "Step ${stepCount}: ${description}"
+            if (skip) {
+                logger.println("${prefix} - Skipping due to ${skipReason}")
+            } else {
+                stuff()
+            }
+        }
+        executeStep(false,
+                    'Design Center Deployment',
+                    'foo') {
+            designCenterDeployer.synchronizeDesignCenterFromApp(apiSpecification,
+                                                                appDeploymentRequest,
+                                                                appVersion)
+        }
         return stepCount
     }
 }
