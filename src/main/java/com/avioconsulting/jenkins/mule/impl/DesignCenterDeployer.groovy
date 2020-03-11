@@ -65,7 +65,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality {
 
     def uploadDesignCenterFiles(String projectId,
                                 List<RamlFile> files) {
-        logger.println('Uploading files to Design Center')
+        logger.println("Uploading files: ${files.collect {f -> f.fileName}} to Design Center")
         def requestPayload = files.collect { file ->
             [
                     path   : file.fileName,
@@ -230,7 +230,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality {
                     logger.println('No existing files to delete')
                 }
                 uploadDesignCenterFiles(projectId,
-                                        ramlFiles)
+                                        changes)
                 pushToExchange(apiSpec,
                                projectId,
                                ramlFiles,

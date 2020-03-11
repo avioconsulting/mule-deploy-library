@@ -894,11 +894,72 @@ class DesignCenterDeployerTest implements HttpServerUtils {
     @Test
     void synchronizeDesignCenter_raml_changed() {
         // arrange
+        def filesUploaded = false
+        def exchangePushed = false
+        def locked = false
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockAcquireLock(request,
+                                'abcd')) {
+                locked = true
+                return
+            }
+            if (mockReleaseLock(request,
+                                'abcd')) {
+                locked = false
+                return
+            }
+            if (mockDesignCenterProjectId(request,
+                                          'Hello API',
+                                          'abcd')) {
+                return
+            }
+            if (locked && mockFileUpload(request,
+                                         'abcd')) {
+                filesUploaded = true
+                return
+            }
+            if (locked && mockExchangePush(request,
+                                           'abcd')) {
+                exchangePushed = true
+                return
+            }
+            if (locked && mockGetExistingFiles(request,
+                                               'abcd',
+                                               [
+                                                       'file1.raml': 'the contents',
+                                                       'file2.raml': 'the contents2'
+                                               ])) {
+                return
+            }
+            request.response().with {
+                statusCode = 404
+                end("Unexpected request ${request.absoluteURI()}")
+            }
+        }
+        def apiSpec = new ApiSpecification('Hello API')
+        def files = [
+                new RamlFile('file1.raml',
+                             'the contents'),
+                new RamlFile('file2.raml',
+                             'the contents updated')
+        ]
 
         // act
+        deployer.synchronizeDesignCenter(apiSpec,
+                                         files,
+                                         '1.2.3')
 
         // assert
-        Assert.fail("write it")
+        assertThat filesUploaded,
+                   is(equalTo(true))
+        assertThat exchangePushed,
+                   is(equalTo(true))
+        assertThat 'We should always unlock if we lock',
+                   locked,
+                   is(equalTo(false))
     }
 
     @Test
