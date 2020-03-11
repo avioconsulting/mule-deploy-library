@@ -199,11 +199,33 @@ class DeployerTest {
     @Test
     void deployApplication_features_all_no_api_spec() {
         // arrange
+        def file = new File('src/test/resources/some_file.txt')
+        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest(stream,
+                                                    'DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file.name,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
 
         // act
+        deployer.deployApplication(request,
+                                   '1.2.3',
+                                   null)
 
         // assert
-        Assert.fail("write it")
+        assertThat deployedChApps.size(),
+                   is(equalTo(1))
+        assertThat 'null apispec supplied',
+                   designCenterSyncs.size(),
+                   is(equalTo(0))
     }
 
     @Test
@@ -219,10 +241,34 @@ class DeployerTest {
     @Test
     void deployApplication_design_center_feature_disabled() {
         // arrange
+        def file = new File('src/test/resources/some_file.txt')
+        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest(stream,
+                                                    'DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file.name,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
+        def apiSpec = new ApiSpecification('Hello API')
 
         // act
+        deployer.deployApplication(request,
+                                   '1.2.3',
+                                   apiSpec,
+                                   [Features.AppDeployment])
 
         // assert
-        Assert.fail("write it")
+        assertThat deployedChApps.size(),
+                   is(equalTo(1))
+        assertThat 'Feature disabled',
+                   designCenterSyncs.size(),
+                   is(equalTo(0))
     }
 }
