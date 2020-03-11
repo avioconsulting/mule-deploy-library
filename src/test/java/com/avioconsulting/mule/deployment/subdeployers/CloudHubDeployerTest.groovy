@@ -772,6 +772,10 @@ class CloudHubDeployerTest extends BaseTest {
 
         // act
         deployer.deploy(request)
+        println 'Closing server to force ZIP file write to complete'
+        // ZIP file write from server seems to be async and we need to assert the contents
+        stopServer()
+        println 'Server closed, now running assertions'
 
         // assert
         assertThat url,

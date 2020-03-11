@@ -28,10 +28,16 @@ class BaseTest {
     @After
     void stopServer() {
         try {
-            clientWrapper.close()
+            if (clientWrapper) {
+                clientWrapper.close()
+                clientWrapper = null
+            }
         }
         catch (e) {
             println "could not close ${e}"
+        }
+        if (!httpServer) {
+            return
         }
         try {
             def test = this
@@ -47,6 +53,7 @@ class BaseTest {
                 test.wait()
             }
             println 'Web server closed'
+            httpServer = null
         }
         catch (e) {
             println "could not close ${e}"
