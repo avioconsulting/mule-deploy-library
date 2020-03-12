@@ -46,7 +46,7 @@ class ApiManagerDeployer {
                 endpoint: [
                         uri                : apiManagerDefinition.endpoint,
                         proxyUri           : null,
-                        muleVersion4OrAbove: true,
+                        muleVersion4OrAbove: apiManagerDefinition.muleVersion.startsWith('4'),
                         isCloudHub         : null
                 ],
                 instanceLabel: apiManagerDefinition.instanceLabel
