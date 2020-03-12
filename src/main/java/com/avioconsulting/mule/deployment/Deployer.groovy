@@ -129,7 +129,7 @@ class Deployer {
                 logger.println("${prefix} - DONE")
             }
             catch (e) {
-                logger.println("${prefix} - FAILED due to ${e.cause.message}")
+                logger.println("${prefix} - FAILED due to ${e}")
                 throw e
             }
         }
