@@ -82,6 +82,11 @@ class DesignCenterDeployerTest extends BaseTest {
             File getFile() {
                 zipFile
             }
+
+            @Override
+            def setAutoDiscoveryId(String autoDiscoveryId) {
+                return null
+            }
         }
     }
 
