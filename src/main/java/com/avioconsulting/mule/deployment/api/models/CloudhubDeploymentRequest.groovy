@@ -55,6 +55,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
     final String normalizedAppName
 
     private boolean modifiedPropertiesViaZip
+    private CloudhubAppProperties cloudhubAppProperties
 
     /**
      * Construct a "standard" request. See properties for parameter info.
@@ -119,6 +120,10 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                                                                   appProperties,
                                                                   file) : file
         this.modifiedPropertiesViaZip = overrideByChangingFileInZip != null
+        this.cloudhubAppProperties = new CloudhubAppProperties(environment.toLowerCase(),
+                                                               cryptoKey,
+                                                               anypointClientId,
+                                                               anypointClientSecret)
     }
 
     HttpEntity getHttpPayload() {
@@ -136,17 +141,9 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                 .build()
     }
 
-    private Map<String, String> getCloudhubProperties() {
-        def props = new CloudhubAppProperties(environment.toLowerCase(),
-                                              cryptoKey,
-                                              anypointClientId,
-                                              anypointClientSecret)
-        new ObjectMapper().convertValue(props,
-                                        Map)
-    }
-
     Map<String, String> getCloudhubAppInfo() {
-        def props = getCloudhubProperties()
+        def props =  new ObjectMapper().convertValue(this.cloudhubAppProperties,
+                                                     Map)
         def result = [
                 // CloudHub's API calls the Mule application the 'domain'
                 domain               : normalizedAppName,
@@ -181,5 +178,10 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
 
     String getCloudhubAppInfoAsJson() {
         JsonOutput.toJson(cloudhubAppInfo)
+    }
+
+    @Override
+    def setAutoDiscoveryId(String autoDiscoveryId) {
+        return null
     }
 }

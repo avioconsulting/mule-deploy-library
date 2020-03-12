@@ -13,6 +13,7 @@ abstract class FileBasedAppDeploymentRequest {
     }
 
     abstract File getFile()
+    abstract def setAutoDiscoveryId(String autoDiscoveryId)
 
     static File modifyFileProps(String propertiesFileToAddTo,
                                 Map<String, String> propertiesToAdd,
