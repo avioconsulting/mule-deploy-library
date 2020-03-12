@@ -1,4 +1,4 @@
-package com.avioconsulting.mule.deployment.subdeployers
+package com.avioconsulting.mule.deployment.internal.subdeployers
 
 
 import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper

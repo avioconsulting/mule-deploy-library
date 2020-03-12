@@ -1,5 +1,6 @@
 package com.avioconsulting.mule.deployment
 
+import com.avioconsulting.mule.deployment.api.Deployer
 import com.avioconsulting.mule.deployment.models.*
 import com.avioconsulting.mule.deployment.subdeployers.ICloudHubDeployer
 import com.avioconsulting.mule.deployment.subdeployers.IDesignCenterDeployer

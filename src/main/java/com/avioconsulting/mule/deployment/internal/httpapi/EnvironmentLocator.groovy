@@ -1,4 +1,4 @@
-package com.avioconsulting.mule.deployment.httpapi
+package com.avioconsulting.mule.deployment.internal.httpapi
 
 import org.apache.http.client.methods.HttpGet
 

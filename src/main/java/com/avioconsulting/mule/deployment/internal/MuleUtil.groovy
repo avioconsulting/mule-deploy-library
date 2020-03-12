@@ -1,4 +1,4 @@
-package com.avioconsulting.mule.deployment
+package com.avioconsulting.mule.deployment.internal
 
 class MuleUtil {
     static String getFileName(String appName,

@@ -1,4 +1,4 @@
-package com.avioconsulting.mule.deployment
+package com.avioconsulting.mule.deployment.api
 
 import com.avioconsulting.mule.deployment.httpapi.EnvironmentLocator
 import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper

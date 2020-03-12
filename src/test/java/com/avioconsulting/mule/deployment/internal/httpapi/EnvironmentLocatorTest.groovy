@@ -1,4 +1,4 @@
-package com.avioconsulting.mule.deployment.httpapi
+package com.avioconsulting.mule.deployment.internal.httpapi
 
 import com.avioconsulting.mule.deployment.BaseTest
 import groovy.json.JsonOutput

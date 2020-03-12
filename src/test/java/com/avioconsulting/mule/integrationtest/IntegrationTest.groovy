@@ -1,7 +1,7 @@
 package com.avioconsulting.mule.integrationtest
 
-import com.avioconsulting.mule.deployment.Deployer
-import com.avioconsulting.mule.deployment.MuleUtil
+import com.avioconsulting.mule.deployment.api.Deployer
+import com.avioconsulting.mule.deployment.internal.MuleUtil
 import com.avioconsulting.mule.deployment.httpapi.EnvironmentLocator
 import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
 import com.avioconsulting.mule.deployment.models.ApiSpecification
