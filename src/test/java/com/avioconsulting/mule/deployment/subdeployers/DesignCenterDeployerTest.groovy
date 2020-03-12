@@ -6,7 +6,6 @@ import com.avioconsulting.mule.deployment.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.models.RamlFile
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import groovy.transform.Canonical
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
 import org.apache.commons.io.FileUtils

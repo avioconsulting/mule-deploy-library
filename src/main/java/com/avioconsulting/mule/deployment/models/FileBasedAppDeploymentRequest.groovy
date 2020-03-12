@@ -1,8 +1,5 @@
 package com.avioconsulting.mule.deployment.models
 
-import org.apache.commons.compress.archivers.ArchiveInputStream
-import org.apache.commons.compress.archivers.ArchiveStreamFactory
-
 import java.nio.file.FileSystems
 import java.nio.file.Files
 
@@ -16,28 +13,6 @@ abstract class FileBasedAppDeploymentRequest {
     }
 
     abstract File getFile()
-
-    ArchiveInputStream openArchiveStream() {
-        openArchiveStream(archiveFormat,
-                          file)
-    }
-
-    static ArchiveInputStream openArchiveStream(String archiveFormat,
-                                                File file) {
-        def factory = new ArchiveStreamFactory()
-        factory.createArchiveInputStream(archiveFormat,
-                                         new FileInputStream(file))
-    }
-
-    String getArchiveFormat() {
-        getArchiveFormat(mule4Request)
-    }
-
-    static String getArchiveFormat(boolean mule4Request) {
-        // small semantic difference between JAR and ZIP and on-prem/Mule 4 Runtime Manager will
-        // complain if it's not set right
-        mule4Request ? ArchiveStreamFactory.JAR : ArchiveStreamFactory.ZIP
-    }
 
     static File modifyFileProps(String propertiesFileToAddTo,
                                 Map<String, String> propertiesToAdd,

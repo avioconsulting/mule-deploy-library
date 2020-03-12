@@ -9,7 +9,6 @@ import com.avioconsulting.mule.deployment.subdeployers.DesignCenterHttpFunctiona
 import com.avioconsulting.mule.deployment.subdeployers.DesignCenterLock
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.io.IOUtils
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
@@ -19,6 +18,8 @@ import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 
 import java.nio.charset.Charset
+import java.nio.file.FileSystems
+import java.nio.file.Files
 
 class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCenterDeployer {
     private final HttpClientWrapper clientWrapper
@@ -125,38 +126,22 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
     }
 
     List<RamlFile> getRamlFilesFromApp(FileBasedAppDeploymentRequest deploymentRequest) {
-        def archiveIn = deploymentRequest.openArchiveStream()
-        def apiDirectoryPath = new File('api').toPath()
-        try {
-            ZipArchiveEntry inputEntry
-            List<RamlFile> results = []
-            while ((inputEntry = archiveIn.nextEntry as ZipArchiveEntry) != null) {
-                if (inputEntry.directory) {
-                    continue
-                }
-                def inputEntryFile = new File(inputEntry.name)
-                def inputEntryPath = inputEntryFile.toPath()
-                if (!inputEntryPath.startsWith(apiDirectoryPath)) {
-                    continue
-                }
-                // design center won't care about API directories
-                def relativeToApiDirectory = apiDirectoryPath.relativize(inputEntryPath)
-                inputEntryFile = relativeToApiDirectory.toFile()
-                def parentFile = inputEntryFile.parentFile
-                if (!IGNORE_DC_FILES.contains(inputEntryFile.name) && !IGNORE_DC_FILES.contains(parentFile?.name)) {
-                    def nonWindowsPath = inputEntryFile
-                            .toString()
-                            .replace(File.separator,
-                                     '/')
-                    // Design center will always use this syntax even if we're running this code on Windows
-                    results << new RamlFile(nonWindowsPath,
-                                            IOUtils.toString(archiveIn,
-                                                             Charset.defaultCharset()))
-                }
+        return FileSystems.newFileSystem(deploymentRequest.file.toPath(),
+                                  null).withCloseable { fs ->
+            def apiPath = fs.getPath('/api')
+            if (!Files.exists(apiPath)) {
+                return []
             }
-            return results
-        } finally {
-            archiveIn.close()
+            Files.walk(apiPath).findAll {p ->
+                def relativeToApiDirectory = apiPath.relativize(p)
+                !Files.isDirectory(p) &&
+                        !IGNORE_DC_FILES.contains(relativeToApiDirectory.toString()) &&
+                        !IGNORE_DC_FILES.contains(relativeToApiDirectory.parent.toString())
+            }.collect { p ->
+                def relativeToApiDirectory = apiPath.relativize(p)
+                new RamlFile(relativeToApiDirectory.toString(),
+                             p.text)
+            }
         }
     }
 
