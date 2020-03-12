@@ -157,7 +157,7 @@ class IntegrationTest {
 
             // assert
             def exception = null
-            5.times {
+            10.times {
                 try {
                     def url = "http://${cloudhubDeploymentRequest.normalizedAppName}.us-w2.cloudhub.io/".toURL()
                     println "Hitting app @ ${url}"
