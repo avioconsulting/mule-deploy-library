@@ -1,4 +1,4 @@
-package com.avioconsulting.mule.deployment.internal.httpapi
+package com.avioconsulting.mule.deployment.internal.http
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper

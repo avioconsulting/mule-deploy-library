@@ -1,4 +1,4 @@
-package com.avioconsulting.mule.deployment.internal.httpapi
+package com.avioconsulting.mule.deployment.internal.http
 
 import groovy.transform.Memoized
 import org.apache.http.message.BasicHeader
