@@ -3,9 +3,9 @@ package com.avioconsulting.mule.deployment.models
 import groovy.transform.Canonical
 import org.junit.Test
 
+import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.Matchers.equalTo
-import static org.hamcrest.Matchers.is
+import static org.hamcrest.Matchers.*
 
 class FileBasedAppDeploymentRequestTest {
     @Canonical
@@ -14,7 +14,7 @@ class FileBasedAppDeploymentRequestTest {
     }
 
     @Test
-    void getPropertyModifiedStream_no_changes() {
+    void modifyFileProps_no_changes() {
         // arrange
         def antBuilder = new AntBuilder()
         def zipFile = new File('target/temp/ourapp.zip')
@@ -23,22 +23,20 @@ class FileBasedAppDeploymentRequestTest {
         }
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
-        def inputStream = new FileInputStream(zipFile)
 
         // act
-        def stream = DummyRequest.getPropertyModifiedStream('api.dev.properties',
-                                                            [:],
-                                                            inputStream,
-                                                            zipFile.name)
+        def file = DummyRequest.modifyFileProps('api.dev.properties',
+                                                [:],
+                                                zipFile)
 
         // assert
         assertThat 'No properties to change so do not do anything',
-                   stream,
-                   is(equalTo(inputStream))
+                   file,
+                   is(equalTo(zipFile))
     }
 
     @Test
-    void getPropertyModifiedStream_mule3() {
+    void modifyFileProps_mule3() {
         // arrange
         def antBuilder = new AntBuilder()
         def zipFile = new File('target/temp/ourapp.zip')
@@ -49,22 +47,17 @@ class FileBasedAppDeploymentRequestTest {
                        basedir: 'src/test/resources/testapp')
 
         // act
-        def stream = DummyRequest.getPropertyModifiedStream('api.dev.properties',
-                                                            [
-                                                                    existing: 'changed'
-                                                            ],
-                                                            zipFile.newInputStream(),
-                                                            zipFile.name)
+        def newZipFile = DummyRequest.modifyFileProps('api.dev.properties',
+                                                      [
+                                                              existing: 'changed'
+                                                      ],
+                                                      zipFile)
 
         // assert
         def destination = new File('target/temp/modifiedapp')
         if (destination.exists()) {
             assert destination.deleteDir()
         }
-        def newZipFile = new File('target/temp/newapp.zip')
-        println 'begin reading bytes'
-        newZipFile.bytes = stream.bytes
-        println 'finished reading bytes'
         antBuilder.unzip(src: newZipFile.absolutePath,
                          dest: destination)
         def newProps = new Properties()
@@ -84,7 +77,7 @@ class FileBasedAppDeploymentRequestTest {
     }
 
     @Test
-    void getPropertyModifiedStream_mule4() {
+    void modifyFileProps_mule4() {
         // arrange
         def antBuilder = new AntBuilder()
         def zipFile = new File('target/temp/ourapp.jar')
@@ -95,22 +88,17 @@ class FileBasedAppDeploymentRequestTest {
                        basedir: 'src/test/resources/testapp')
 
         // act
-        def stream = DummyRequest.getPropertyModifiedStream('api.dev.properties',
-                                                            [
-                                                                    mule4_existing: 'changed'
-                                                            ],
-                                                            zipFile.newInputStream(),
-                                                            zipFile.name)
+        def newZipFile = DummyRequest.modifyFileProps('api.dev.properties',
+                                                      [
+                                                              mule4_existing: 'changed'
+                                                      ],
+                                                      zipFile)
 
         // assert
         def destination = new File('target/temp/modifiedapp')
         if (destination.exists()) {
             assert destination.deleteDir()
         }
-        def newZipFile = new File('target/temp/newapp.zip')
-        println 'begin reading bytes'
-        newZipFile.bytes = stream.bytes
-        println 'finished reading bytes'
         antBuilder.unzip(src: newZipFile.absolutePath,
                          dest: destination)
         def newProps = new Properties()
@@ -123,7 +111,7 @@ class FileBasedAppDeploymentRequestTest {
     }
 
     @Test
-    void getPropertyModifiedStream_not_found() {
+    void modifyFileProps_not_found() {
         // arrange
         def antBuilder = new AntBuilder()
         def zipFile = new File('target/temp/ourapp.zip')
@@ -134,13 +122,16 @@ class FileBasedAppDeploymentRequestTest {
                        basedir: 'src/test/resources/testapp')
 
         // act
-        def stream = DummyRequest.getPropertyModifiedStream('doesnotexist',
-                                                            [
-                                                                    existing: 'changed'
-                                                            ],
-                                                            zipFile.newInputStream(),
-                                                            zipFile.name)
+        def exception = shouldFail {
+            DummyRequest.modifyFileProps('doesnotexist',
+                                         [
+                                                 existing: 'changed'
+                                         ],
+                                         zipFile)
+        }
 
-        stream.bytes
+        // assert
+        assertThat exception.message,
+                   is(containsString('Expected to find the properties file you wanted to modify'))
     }
 }
