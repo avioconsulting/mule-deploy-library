@@ -1,7 +1,6 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
-import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.models.OnPremDeploymentStatus
 import groovy.json.JsonOutput
@@ -20,10 +19,8 @@ class OnPremDeployerTest extends BaseTest {
 
     @Before
     void setupDeployer() {
-        def envLocator = new EnvironmentLocator(clientWrapper,
-                                                System.out)
         deployer = new OnPremDeployer(this.clientWrapper,
-                                      envLocator,
+                                      environmentLocator,
                                       500,
                                       10,
                                       System.out)

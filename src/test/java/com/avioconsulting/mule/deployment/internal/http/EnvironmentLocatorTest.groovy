@@ -3,7 +3,6 @@ package com.avioconsulting.mule.deployment.internal.http
 import com.avioconsulting.mule.deployment.BaseTest
 import groovy.json.JsonOutput
 import io.vertx.core.http.HttpServerRequest
-import org.junit.Before
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -11,14 +10,6 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
 class EnvironmentLocatorTest extends BaseTest {
-    private EnvironmentLocator envLocator
-
-    @Before
-    void setupLocator() {
-        envLocator = new EnvironmentLocator(clientWrapper,
-                                            System.out)
-    }
-
     @Test
     void getEnvironmentId_found() {
         // arrange
@@ -52,7 +43,7 @@ class EnvironmentLocatorTest extends BaseTest {
         }
 
         // act
-        def environmentId = envLocator.getEnvironmentId('DEV')
+        def environmentId = environmentLocator.getEnvironmentId('DEV')
 
         // assert
         assertThat url,
@@ -93,7 +84,7 @@ class EnvironmentLocatorTest extends BaseTest {
 
         // act
         def exception = shouldFail {
-            envLocator.getEnvironmentId('FOO')
+            environmentLocator.getEnvironmentId('FOO')
         }
 
         // assert
@@ -118,7 +109,7 @@ class EnvironmentLocatorTest extends BaseTest {
 
         // act
         def exception = shouldFail {
-            envLocator.getEnvironmentId('FOO')
+            environmentLocator.getEnvironmentId('FOO')
         }
 
         // assert

@@ -1,5 +1,6 @@
 package com.avioconsulting.mule.deployment
 
+import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import groovy.json.JsonOutput
 import io.vertx.core.Handler
@@ -14,6 +15,7 @@ import java.util.concurrent.CompletableFuture
 class BaseTest {
     protected HttpServer httpServer
     protected HttpClientWrapper clientWrapper
+    protected EnvironmentLocator environmentLocator
     protected Handler<HttpServerRequest> closure
 
     @Before
@@ -25,6 +27,8 @@ class BaseTest {
                                               'the password',
                                               'the-org-id',
                                               System.out)
+        environmentLocator = new EnvironmentLocator(clientWrapper,
+                                                    System.out)
     }
 
     @After

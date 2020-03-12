@@ -5,8 +5,8 @@ import com.avioconsulting.mule.deployment.api.models.AwsRegions
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.WorkerTypes
-import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
-import com.avioconsulting.mule.deployment.internal.models.*
+import com.avioconsulting.mule.deployment.internal.models.AppStatus
+import com.avioconsulting.mule.deployment.internal.models.DeploymentStatus
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
@@ -23,10 +23,8 @@ class CloudHubDeployerTest extends BaseTest {
 
     @Before
     void setupDeployer() {
-        def envLocator = new EnvironmentLocator(clientWrapper,
-                                                System.out)
         deployer = new CloudHubDeployer(this.clientWrapper,
-                                        envLocator,
+                                        environmentLocator,
                                         500,
                                         10,
                                         System.out)
