@@ -38,9 +38,18 @@ class ApiManagerDeployer {
     def createApiDefinition(ApiManagerDefinition apiManagerDefinition) {
         def groupId = clientWrapper.anypointOrganizationId
         def requestPayload = [
-                spec: [
-                        groupId: groupId
-                ]
+                spec    : [
+                        groupId: groupId,
+                        assetId: apiManagerDefinition.exchangeAssetId,
+                        version: apiManagerDefinition.exchangeAssetVersion
+                ],
+                endpoint: [
+                        uri                : apiManagerDefinition.endpoint,
+                        proxyUri           : null,
+                        muleVersion4OrAbove: true,
+                        isCloudHub         : null
+                ],
+                instanceLabel: apiManagerDefinition.instanceLabel
         ]
         def requestJson = JsonOutput.toJson(requestPayload)
         logger.println "Creating API definition using payload: ${JsonOutput.prettyPrint(requestJson)}"
