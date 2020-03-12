@@ -124,4 +124,8 @@ class ApiManagerDeployer {
         return ExistingApiManagerDefinition.createFrom(apiManagerDefinition.environment,
                                                        createResponse)
     }
+
+    def updateApiDefinition(ExistingApiManagerDefinition apiManagerDefinition) {
+
+    }
 }

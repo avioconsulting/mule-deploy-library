@@ -3,6 +3,7 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.internal.models.ApiManagerDefinition
 import com.avioconsulting.mule.deployment.internal.models.ApiQueryResponse
+import com.avioconsulting.mule.deployment.internal.models.ExistingApiManagerDefinition
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -349,5 +350,63 @@ class ApiManagerDeployerTest extends BaseTest {
                                                        'DEV',
                                                        'DEV - Automated',
                                                        false)))
+    }
+
+    @Test
+    void updateApiDefinition() {
+        // arrange
+        String url = null
+        HttpMethod method = null
+        Map sentPayload = null
+        String envHeader, auth, org = null
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            url = request.uri()
+            method = request.method()
+            request.bodyHandler { body ->
+                sentPayload = new JsonSlurper().parseText(body.toString())
+            }
+            (auth, org, envHeader) = capturedStandardHeaders(request)
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                end()
+            }
+        }
+        def desiredApiDefinition = ApiManagerDefinition.createWithDefaultLabel('the-asset-id',
+                                                                               '1.3.3',
+                                                                               'https://some.endpoint',
+                                                                               'DEV',
+                                                                               false)
+
+
+        // act
+        deployer.updateApiDefinition(new ExistingApiManagerDefinition('1234',
+                                                                      desiredApiDefinition))
+
+        // assert
+        assertThat url,
+                   is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis'))
+        assertThat method,
+                   is(equalTo(HttpMethod.PATCH))
+        assertThat envHeader,
+                   is(equalTo('def456'))
+        assertThat sentPayload,
+                   is(equalTo([
+                           assetVersion : '1.3.3',
+                           instanceLabel: 'DEV - Automated',
+                           endpoint     : [
+                                   uri                : 'https://some.endpoint',
+                                   proxyUri           : null,
+                                   muleVersion4OrAbove: false,
+                                   isCloudHub         : null
+                           ]
+                   ]))
     }
 }
