@@ -20,6 +20,7 @@ class ApiManagerDeployerTest extends BaseTest {
     @Before
     void setupDeployer() {
         deployer = new ApiManagerDeployer(clientWrapper,
+                                          environmentLocator,
                                           System.out)
     }
 
@@ -54,7 +55,6 @@ class ApiManagerDeployerTest extends BaseTest {
         }
         def apiDefinition = new ApiManagerDefinition('the-asset-id',
                                                      '1.2.3',
-                                                     'someguid',
                                                      'https://some.endpoint',
                                                      'DEV',
                                                      '4.2.2')
@@ -66,7 +66,7 @@ class ApiManagerDeployerTest extends BaseTest {
         assertThat id,
                    is(equalTo('123'))
         assertThat url,
-                   is(equalTo('/apimanager/api/v1/organizations/someguid/environments/def456/apis'))
+                   is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis'))
         assertThat method,
                    is(equalTo(HttpMethod.POST))
         assertThat env,
@@ -74,7 +74,7 @@ class ApiManagerDeployerTest extends BaseTest {
         assertThat sentPayload,
                    is(equalTo([
                            spec         : [
-                                   groupId: 'someguid',
+                                   groupId: 'the-org-id',
                                    assetId: 'the-asset-id',
                                    version: '1.2.3'
                            ],

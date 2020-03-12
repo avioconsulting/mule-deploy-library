@@ -4,7 +4,7 @@ import groovy.transform.Immutable
 
 @Immutable
 class ApiManagerDefinition {
-    String exchangeAssetId, exchangeAssetVersion, groupId, endpoint, environment, muleVersion
+    String exchangeAssetId, exchangeAssetVersion, endpoint, environment, muleVersion
 
     def getInstanceLabel() {
         "${environment} - Automated"
