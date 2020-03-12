@@ -10,6 +10,8 @@ import com.avioconsulting.mule.deployment.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.models.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.subdeployers.CloudHubDeployer
 import com.avioconsulting.mule.deployment.subdeployers.OnPremDeployer
+import org.apache.logging.log4j.Level
+import org.apache.logging.log4j.core.config.Configurator
 import org.apache.maven.shared.invoker.DefaultInvocationRequest
 import org.apache.maven.shared.invoker.DefaultInvoker
 import org.junit.Before
@@ -46,6 +48,9 @@ class IntegrationTest {
 
     @BeforeClass
     static void setup() {
+        // cut down on the unit test noise here
+        Configurator.setLevel('org.apache.http.wire',
+                              Level.INFO)
         assert ANYPOINT_USERNAME: 'Did you forget -Danypoint.username?'
         assert ANYPOINT_PASSWORD: 'Did you forget -Danypoint.password?'
         def pomFile = getProjectDir('mule4_project')
