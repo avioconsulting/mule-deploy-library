@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.models
 
-import groovy.transform.Canonical
+
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -8,11 +8,6 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
 class FileBasedAppDeploymentRequestTest {
-    @Canonical
-    class DummyRequest implements FileBasedAppDeploymentRequest {
-        File file
-    }
-
     @Test
     void modifyFileProps_no_changes() {
         // arrange
@@ -25,9 +20,9 @@ class FileBasedAppDeploymentRequestTest {
                        basedir: 'src/test/resources/testapp')
 
         // act
-        def file = DummyRequest.modifyFileProps('api.dev.properties',
-                                                [:],
-                                                zipFile)
+        def file = FileBasedAppDeploymentRequest.modifyFileProps('api.dev.properties',
+                                                                 [:],
+                                                                 zipFile)
 
         // assert
         assertThat 'No properties to change so do not do anything',
@@ -47,11 +42,11 @@ class FileBasedAppDeploymentRequestTest {
                        basedir: 'src/test/resources/testapp')
 
         // act
-        def newZipFile = DummyRequest.modifyFileProps('api.dev.properties',
-                                                      [
-                                                              existing: 'changed'
-                                                      ],
-                                                      zipFile)
+        def newZipFile = FileBasedAppDeploymentRequest.modifyFileProps('api.dev.properties',
+                                                                       [
+                                                                               existing: 'changed'
+                                                                       ],
+                                                                       zipFile)
 
         // assert
         def destination = new File('target/temp/modifiedapp')
@@ -88,11 +83,11 @@ class FileBasedAppDeploymentRequestTest {
                        basedir: 'src/test/resources/testapp')
 
         // act
-        def newZipFile = DummyRequest.modifyFileProps('api.dev.properties',
-                                                      [
-                                                              mule4_existing: 'changed'
-                                                      ],
-                                                      zipFile)
+        def newZipFile = FileBasedAppDeploymentRequest.modifyFileProps('api.dev.properties',
+                                                                       [
+                                                                               mule4_existing: 'changed'
+                                                                       ],
+                                                                       zipFile)
 
         // assert
         def destination = new File('target/temp/modifiedapp')
@@ -123,11 +118,11 @@ class FileBasedAppDeploymentRequestTest {
 
         // act
         def exception = shouldFail {
-            DummyRequest.modifyFileProps('doesnotexist',
-                                         [
-                                                 existing: 'changed'
-                                         ],
-                                         zipFile)
+            FileBasedAppDeploymentRequest.modifyFileProps('doesnotexist',
+                                                          [
+                                                                  existing: 'changed'
+                                                          ],
+                                                          zipFile)
         }
 
         // assert

@@ -5,7 +5,7 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry
 import org.apache.commons.io.IOUtils
 
-trait FileBasedAppDeploymentRequest {
+abstract class FileBasedAppDeploymentRequest {
     boolean isMule4Request() {
         isMule4Request(file)
     }

@@ -26,11 +26,6 @@ class DesignCenterDeployerTest extends BaseTest {
                                             System.out)
     }
 
-    @Canonical
-    static class DummyRequest implements FileBasedAppDeploymentRequest {
-        File file
-    }
-
     @Test
     void getRamlFilesFromApp_is_apikit() {
         // arrange
@@ -83,7 +78,12 @@ class DesignCenterDeployerTest extends BaseTest {
         FileUtils.deleteQuietly(zipFile)
         antBuilder.zip(destfile: zipFile,
                        basedir: tempAppDirectory)
-        new DummyRequest(zipFile)
+        new FileBasedAppDeploymentRequest() {
+            @Override
+            File getFile() {
+                zipFile
+            }
+        }
     }
 
     @Test

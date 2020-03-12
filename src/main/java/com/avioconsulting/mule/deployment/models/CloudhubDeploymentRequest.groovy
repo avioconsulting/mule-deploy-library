@@ -6,7 +6,7 @@ import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
 
-class CloudhubDeploymentRequest implements FileBasedAppDeploymentRequest {
+class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
     /**
      * environment name (e.g. DEV, not GUID)
      */

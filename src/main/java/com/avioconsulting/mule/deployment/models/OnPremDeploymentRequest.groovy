@@ -6,7 +6,7 @@ import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
 
-class OnPremDeploymentRequest implements FileBasedAppDeploymentRequest {
+class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
     /**
      * environment name (e.g. DEV, not GUID)
      */
