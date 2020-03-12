@@ -1,8 +1,12 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
-import com.avioconsulting.mule.deployment.httpapi.EnvironmentLocator
-import com.avioconsulting.mule.deployment.models.*
+import com.avioconsulting.mule.deployment.api.models.AwsRegions
+import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
+import com.avioconsulting.mule.deployment.api.models.WorkerTypes
+import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
+import com.avioconsulting.mule.deployment.internal.models.*
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap

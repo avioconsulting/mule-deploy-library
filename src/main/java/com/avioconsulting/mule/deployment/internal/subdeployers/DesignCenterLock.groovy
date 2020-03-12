@@ -1,7 +1,6 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
-
-import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
+import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import org.apache.http.client.methods.HttpPost
 
 class DesignCenterLock implements Closeable, DesignCenterHttpFunctionality {

@@ -2,14 +2,14 @@ package com.avioconsulting.mule.integrationtest
 
 import com.avioconsulting.mule.deployment.api.Deployer
 import com.avioconsulting.mule.deployment.internal.MuleUtil
-import com.avioconsulting.mule.deployment.httpapi.EnvironmentLocator
-import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
-import com.avioconsulting.mule.deployment.models.ApiSpecification
-import com.avioconsulting.mule.deployment.models.CloudhubDeploymentRequest
-import com.avioconsulting.mule.deployment.models.CloudhubWorkerSpecRequest
-import com.avioconsulting.mule.deployment.models.OnPremDeploymentRequest
-import com.avioconsulting.mule.deployment.subdeployers.CloudHubDeployer
-import com.avioconsulting.mule.deployment.subdeployers.OnPremDeployer
+import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
+import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
+import com.avioconsulting.mule.deployment.api.models.ApiSpecification
+import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
+import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.internal.subdeployers.CloudHubDeployer
+import com.avioconsulting.mule.deployment.internal.subdeployers.OnPremDeployer
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.core.config.Configurator
 import org.apache.maven.shared.invoker.DefaultInvocationRequest

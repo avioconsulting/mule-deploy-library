@@ -1,4 +1,4 @@
-package com.avioconsulting.mule.deployment.models
+package com.avioconsulting.mule.deployment.api.models
 
 enum AwsRegions {
     UsEast1('us-east-1'),

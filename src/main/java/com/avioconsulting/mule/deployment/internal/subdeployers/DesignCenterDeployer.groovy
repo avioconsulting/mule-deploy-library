@@ -1,12 +1,12 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
-import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
-import com.avioconsulting.mule.deployment.httpapi.LazyHeader
-import com.avioconsulting.mule.deployment.models.ApiSpecification
-import com.avioconsulting.mule.deployment.models.FileBasedAppDeploymentRequest
-import com.avioconsulting.mule.deployment.models.RamlFile
-import com.avioconsulting.mule.deployment.subdeployers.DesignCenterHttpFunctionality
-import com.avioconsulting.mule.deployment.subdeployers.DesignCenterLock
+import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
+import com.avioconsulting.mule.deployment.internal.http.LazyHeader
+import com.avioconsulting.mule.deployment.api.models.ApiSpecification
+import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.internal.models.RamlFile
+import com.avioconsulting.mule.deployment.internal.subdeployers.DesignCenterHttpFunctionality
+import com.avioconsulting.mule.deployment.internal.subdeployers.DesignCenterLock
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.apache.commons.io.IOUtils

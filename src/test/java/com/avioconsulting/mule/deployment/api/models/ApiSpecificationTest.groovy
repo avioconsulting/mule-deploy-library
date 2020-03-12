@@ -1,6 +1,5 @@
-package com.avioconsulting.mule.deployment.models
+package com.avioconsulting.mule.deployment.api.models
 
-import com.avioconsulting.mule.deployment.models.ApiSpecification
 import org.junit.Test
 
 import static org.hamcrest.MatcherAssert.assertThat

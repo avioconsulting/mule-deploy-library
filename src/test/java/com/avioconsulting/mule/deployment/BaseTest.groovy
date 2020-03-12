@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment
 
-import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
+import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import groovy.json.JsonOutput
 import io.vertx.core.Handler
 import io.vertx.core.Vertx

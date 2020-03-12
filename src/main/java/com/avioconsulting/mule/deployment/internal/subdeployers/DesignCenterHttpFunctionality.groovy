@@ -1,7 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
-import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
-import com.avioconsulting.mule.deployment.httpapi.LazyHeader
+import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
+import com.avioconsulting.mule.deployment.internal.http.LazyHeader
 import org.apache.http.client.methods.HttpUriRequest
 
 trait DesignCenterHttpFunctionality {

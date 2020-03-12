@@ -1,7 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
-import com.avioconsulting.mule.deployment.httpapi.EnvironmentLocator
-import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
+import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
+import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import org.apache.http.client.methods.HttpUriRequest
 
 abstract class BaseDeployer {

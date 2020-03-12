@@ -1,4 +1,4 @@
-package com.avioconsulting.mule.deployment.models
+package com.avioconsulting.mule.deployment.api.models
 
 // right now, all of the 'codes' Mulesoft expects are valid ENUM identifiers. If that changes
 // an approach similar to the AwsRegions ENUM in this project can be followed

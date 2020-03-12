@@ -1,4 +1,4 @@
-package com.avioconsulting.mule.deployment.models
+package com.avioconsulting.mule.deployment.internal.models
 
 import groovy.transform.Immutable
 

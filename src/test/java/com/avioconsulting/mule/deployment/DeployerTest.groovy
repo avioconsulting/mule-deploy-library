@@ -1,10 +1,17 @@
 package com.avioconsulting.mule.deployment
 
 import com.avioconsulting.mule.deployment.api.Deployer
-import com.avioconsulting.mule.deployment.models.*
-import com.avioconsulting.mule.deployment.subdeployers.ICloudHubDeployer
-import com.avioconsulting.mule.deployment.subdeployers.IDesignCenterDeployer
-import com.avioconsulting.mule.deployment.subdeployers.IOnPremDeployer
+import com.avioconsulting.mule.deployment.api.models.ApiSpecification
+import com.avioconsulting.mule.deployment.api.models.AwsRegions
+import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
+import com.avioconsulting.mule.deployment.api.models.Features
+import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.WorkerTypes
+import com.avioconsulting.mule.deployment.internal.subdeployers.ICloudHubDeployer
+import com.avioconsulting.mule.deployment.internal.subdeployers.IDesignCenterDeployer
+import com.avioconsulting.mule.deployment.internal.subdeployers.IOnPremDeployer
 import groovy.transform.Canonical
 import org.junit.Before
 import org.junit.Test
