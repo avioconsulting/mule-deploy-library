@@ -109,7 +109,7 @@ class Deployer {
                                      enabledFeatures)
         def skipReason = getFeatureSkipReason(enabledFeatures,
                                               Features.AppDeployment)
-        executeStep('on-prem app deployment',
+        executeStep('On-prem app deployment',
                     skipReason) {
             onPremDeployer.deploy(appDeploymentRequest)
         }
