@@ -1,9 +1,9 @@
-package com.avioconsulting.jenkins.mule.impl
+package com.avioconsulting.mule.deployment.models
 
 enum AppStatus {
     Undeployed,
     Failed,
     Started,
     NotFound,
-    Unknown
+    Deleted
 }

@@ -1,12 +1,12 @@
-package com.avioconsulting.jenkins.mule.impl
+package com.avioconsulting.mule.deployment.subdeployers
 
+import com.avioconsulting.mule.deployment.BaseTest
+import com.avioconsulting.mule.deployment.httpapi.EnvironmentLocator
+import com.avioconsulting.mule.deployment.models.*
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
-import io.vertx.core.Vertx
-import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerRequest
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
@@ -14,32 +14,22 @@ import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-class CloudHubDeployerTest implements HttpServerUtils {
-    HttpServer httpServer
+class CloudHubDeployerTest extends BaseTest {
     private CloudHubDeployer deployer
-    int port
 
     @Before
-    void startServer() {
-        httpServer = Vertx.vertx().createHttpServer()
-        port = 8080
-        deployer = new CloudHubDeployer("http://localhost:${port}",
-                                        'the-org-id',
-                                        'the user',
-                                        'the password',
+    void setupDeployer() {
+        def envLocator = new EnvironmentLocator(clientWrapper,
+                                                System.out)
+        deployer = new CloudHubDeployer(this.clientWrapper,
+                                        envLocator,
                                         500,
                                         10,
                                         System.out)
     }
 
-    @After
-    void stopServer() {
-        deployer.close()
-        httpServer.close()
-    }
-
     @Test
-    void check_deployment_requests_properly() {
+    void getDeploymentStatus_requests_properly() {
         // arrange
         String url = null
         String method = null
@@ -47,10 +37,13 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String envId = null
         String orgId = null
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
             }
-            url = request.absoluteURI()
+            if (mockEnvironments(request)) {
+                return
+            }
+            url = request.uri()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
             request.response().with {
@@ -77,15 +70,14 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        deployer.getDeploymentStatus('def456',
+        deployer.getDeploymentStatus('DEV',
                                      'theapp')
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications/theapp/deployments?orderByDate=DESC'))
+                   is(equalTo('/cloudhub/api/v2/applications/theapp/deployments?orderByDate=DESC'))
         assertThat method,
                    is(equalTo('GET'))
         assertThat authToken,
@@ -97,11 +89,14 @@ class CloudHubDeployerTest implements HttpServerUtils {
     }
 
     @Test
-    void check_deployment_status_failed() {
+    void getDeploymentStatus_failed() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
@@ -127,10 +122,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        def status = deployer.getDeploymentStatus('def456',
+        def status = deployer.getDeploymentStatus('DEV',
                                                   'the-app')
 
         // assert
@@ -139,11 +133,14 @@ class CloudHubDeployerTest implements HttpServerUtils {
     }
 
     @Test
-    void check_deployment_status_started() {
+    void getDeploymentStatus_started() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
@@ -169,10 +166,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        def status = deployer.getDeploymentStatus('def456',
+        def status = deployer.getDeploymentStatus('DEV',
                                                   'appid'
         )
 
@@ -182,11 +178,14 @@ class CloudHubDeployerTest implements HttpServerUtils {
     }
 
     @Test
-    void check_deployment_status_starting() {
+    void getDeploymentStatus_starting() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
@@ -212,10 +211,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        def status = deployer.getDeploymentStatus('def456',
+        def status = deployer.getDeploymentStatus('DEV',
                                                   'appid'
         )
 
@@ -249,10 +247,22 @@ class CloudHubDeployerTest implements HttpServerUtils {
         ]
     }
 
+    static final Map<AppStatus, String> ReverseAppStatusMappings = CloudHubDeployer.AppStatusMappings.collectEntries {
+        k, v ->
+            [v, k]
+    }
+
+    static def getAppResponsePayload(String appName,
+                                     AppStatus appStatus) {
+        [
+                domain: appName,
+                status: ReverseAppStatusMappings[appStatus]
+        ]
+    }
+
     @Test
     void perform_deployment_correct_request_new_app() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -261,31 +271,19 @@ class CloudHubDeployerTest implements HttpServerUtils {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
-                return mockAuthenticationOk(request)
+            def uri = request.uri()
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -295,9 +293,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'new-app'
-                    ]
+                    result = getAppResponsePayload('new-app',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -310,28 +307,26 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'CLIENT',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -374,7 +369,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_new_app_no_region() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -383,31 +377,19 @@ class CloudHubDeployerTest implements HttpServerUtils {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
-                return mockAuthenticationOk(request)
+            def uri = request.uri()
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -417,9 +399,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'new-app'
-                    ]
+                    result = getAppResponsePayload('new-app',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -432,27 +413,24 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'CLIENT',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret')
+        deployer.deploy(request)
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -492,134 +470,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
     }
 
     @Test
-    void perform_deployment_gav_new_app() {
-        // arrange
-        def authenticated = false
-        String url = null
-        String method = null
-        String authToken = null
-        String envId = null
-        String orgId = null
-        String sentContentType = null
-        Map sentBody = null
-        withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
-                return mockAuthenticationOk(request)
-            }
-            request.response().with {
-                statusCode = 200
-                putHeader('Content-Type',
-                          'application/json')
-                def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
-                    statusCode = 404
-                } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
-                    statusCode = 200
-                    // we test most of this in other methods
-                    result = getDeploymentStatusJson('STARTED',
-                                                     'STARTED')
-                } else {
-                    // deployment service returns this
-                    statusCode = 200
-                    result = [
-                            domain: 'new-app'
-                    ]
-                    url = uri
-                    method = request.method()
-                    (authToken, orgId, envId) = capturedStandardHeaders(request)
-                    sentContentType = request.getHeader('Content-Type')
-                    request.bodyHandler { buffer ->
-                        def rawBody = buffer.toString()
-                        sentBody = new JsonSlurper().parseText(rawBody)
-                    }
-                }
-                end(JsonOutput.toJson(result))
-            }
-        }
-        deployer.authenticate()
-
-        // act
-        deployer.deployFromExchange('DEV',
-                                    'new-app',
-                                    'CLIENT',
-                                    'com.group',
-                                    '1.0.0',
-                                    'theKey',
-                                    '3.9.1',
-                                    false,
-                                    WorkerTypes.Micro,
-                                    1,
-                                    'theClientId',
-                                    'theSecret',
-                                    AwsRegions.UsEast1)
-
-        // assert
-        assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
-        assertThat method,
-                   is(equalTo('POST'))
-        assertThat authToken,
-                   is(equalTo('Bearer the token'))
-        assertThat envId,
-                   is(equalTo('def456'))
-        assertThat orgId,
-                   is(equalTo('the-org-id'))
-        assertThat sentContentType,
-                   is(equalTo('application/json; charset=UTF-8'))
-        assertThat sentBody,
-                   is(equalTo([
-                           applicationSource: [
-                                   groupId   : 'com.group',
-                                   artifactId: 'new-app',
-                                   version   : '1.0.0',
-                                   source    : 'EXCHANGE'
-                           ],
-                           applicationInfo  : [
-                                   domain               : 'client-new-app-dev',
-                                   muleVersion          : [
-                                           version: '3.9.1'
-                                   ],
-                                   region               : 'us-east-1',
-                                   monitoringAutoRestart: true,
-                                   workers              : [
-                                           type  : [
-                                                   name: 'Micro'
-                                           ],
-                                           amount: 1
-                                   ],
-                                   persistentQueues     : false,
-                                   properties           : [
-                                           env                              : 'dev',
-                                           'crypto.key'                     : 'theKey',
-                                           'anypoint.platform.client_id'    : 'theClientId',
-                                           'anypoint.platform.client_secret': 'theSecret'
-                                   ],
-                                   fileName             : 'new-app-1.0.0.zip'
-                           ],
-                           autoStart        : true
-                   ]))
-    }
-
-    @Test
     void perform_deployment_correct_request_new_app_property_overrides_runtime_manager() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -628,31 +480,19 @@ class CloudHubDeployerTest implements HttpServerUtils {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
-                return mockAuthenticationOk(request)
+            def uri = request.uri()
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -662,9 +502,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'new-app'
-                    ]
+                    result = getAppResponsePayload('new-app',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -677,29 +516,27 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client',
+                                                    [prop1: 'foo', prop2: 'bar'])
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'CLIENT',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1,
-                                [prop1: 'foo', prop2: 'bar'])
+        deployer.deploy(request)
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -744,7 +581,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_new_app_property_overrides_via_zip_file() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -756,31 +592,19 @@ class CloudHubDeployerTest implements HttpServerUtils {
             assert newZipFile.delete()
         }
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
-                return mockAuthenticationOk(request)
+            def uri = request.uri()
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -790,9 +614,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'new-app'
-                    ]
+                    result = getAppResponsePayload('new-app',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -806,7 +629,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def antBuilder = new AntBuilder()
         def zipFile = new File('target/temp/ourapp.zip')
         if (zipFile.exists()) {
@@ -814,29 +636,27 @@ class CloudHubDeployerTest implements HttpServerUtils {
         }
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
-        def stream = new FileInputStream(zipFile)
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    zipFile,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client',
+                                                    [existing: 'changed'],
+                                                    'api.dev.properties')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'CLIENT',
-                                stream,
-                                zipFile.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1,
-                                [existing: 'changed'],
-                                [:],
-                                'api.dev.properties')
+        deployer.deploy(request)
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -873,24 +693,37 @@ class CloudHubDeployerTest implements HttpServerUtils {
                            ]
                    ]))
         def destination = new File('target/temp/modifiedapp')
-        if (destination.exists()) {
-            assert destination.deleteDir()
+        Exception problem = null
+        5.times {
+            if (destination.exists()) {
+                assert destination.deleteDir()
+            }
+            try {
+                antBuilder.unzip(src: newZipFile.absolutePath,
+                                 dest: destination)
+                def newProps = new Properties()
+                newProps.load(new FileInputStream(new File(destination,
+                                                           'classes/api.dev.properties')))
+                assertThat newProps,
+                           is(equalTo([
+                                   existing: 'changed',
+                           ]))
+                problem = null
+            }
+            catch (e) {
+                problem = e
+                println 'Problem with zip, waiting 500ms and retrying due to async web server'
+                Thread.sleep(500)
+            }
         }
-        antBuilder.unzip(src: newZipFile.absolutePath,
-                         dest: destination)
-        def newProps = new Properties()
-        newProps.load(new FileInputStream(new File(destination,
-                                                   'classes/api.dev.properties')))
-        assertThat newProps,
-                   is(equalTo([
-                           existing: 'changed',
-                   ]))
+        if (problem) {
+            throw problem
+        }
     }
 
     @Test
     void perform_deployment_correct_request_new_app_persistent_queues() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -899,31 +732,19 @@ class CloudHubDeployerTest implements HttpServerUtils {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
-                return mockAuthenticationOk(request)
+            def uri = request.uri()
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -933,9 +754,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'client-new-app-dev'
-                    ]
+                    result = getAppResponsePayload('client-new-app-dev',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -948,28 +768,26 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  true,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                true,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -1012,7 +830,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_new_app_other_props() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -1021,31 +838,19 @@ class CloudHubDeployerTest implements HttpServerUtils {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
-                return mockAuthenticationOk(request)
+            def uri = request.uri()
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -1055,9 +860,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'client-new-app-dev'
-                    ]
+                    result = getAppResponsePayload('client-new-app-dev',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1070,36 +874,34 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         def otherProperties = [
                 persistentQueues: true,
                 properties      : [
                         env: 'TST'
                 ]
         ] as Map<String, String>
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client',
+                                                    [:],
+                                                    otherProperties)
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1,
-                                [:],
-                                otherProperties)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -1142,7 +944,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_new_app_other_props_only_ch_settings() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -1151,31 +952,19 @@ class CloudHubDeployerTest implements HttpServerUtils {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
-                return mockAuthenticationOk(request)
+            def uri = request.uri()
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -1185,9 +974,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'client-new-app-dev'
-                    ]
+                    result = getAppResponsePayload('client-new-app-dev',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1200,33 +988,30 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         def otherProperties = [
                 persistentQueues: true
         ] as Map<String, String>
-
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client',
+                                                    [:],
+                                                    otherProperties)
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1,
-                                [:],
-                                otherProperties)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -1269,7 +1054,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_correct_request_new_app_other_props_both() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -1278,31 +1062,19 @@ class CloudHubDeployerTest implements HttpServerUtils {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
-                return mockAuthenticationOk(request)
+            def uri = request.uri()
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -1312,9 +1084,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'client-new-app-dev'
-                    ]
+                    result = getAppResponsePayload('client-new-app-dev',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1327,9 +1098,7 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         def otherProperties = [
                 persistentQueues: true,
                 properties      : [
@@ -1337,27 +1106,27 @@ class CloudHubDeployerTest implements HttpServerUtils {
                         prop1: 'should not see this'
                 ]
         ] as Map<String, String>
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client',
+                                                    [prop1: 'foo', prop2: 'bar'],
+                                                    otherProperties)
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1,
-                                [prop1: 'foo', prop2: 'bar'],
-                                otherProperties)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -1402,7 +1171,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_upper_case() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -1411,31 +1179,19 @@ class CloudHubDeployerTest implements HttpServerUtils {
         MultiMap sentFormAttributes = null
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
-                return mockAuthenticationOk(request)
+            def uri = request.uri()
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     statusCode = 200
@@ -1445,9 +1201,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'client-new-app-dev'
-                    ]
+                    result = getAppResponsePayload('client-new-app-dev',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1460,28 +1215,26 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'NEW-APP',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'NEW-APP',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications'))
+                   is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
         assertThat authToken,
@@ -1525,22 +1278,20 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void perform_deployment_space_in_app() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         // act
         def exception = shouldFail {
-            deployer.deployFromFile('DEV',
-                                    'some app name',
-                                    'client',
-                                    stream,
-                                    file.name,
-                                    'theKey',
-                                    '3.9.1',
-                                    false,
-                                    WorkerTypes.Micro,
-                                    1,
-                                    'theClientId',
-                                    'theSecret',
-                                    AwsRegions.UsEast1)
+            new CloudhubDeploymentRequest('DEV',
+                                          'some app name',
+                                          new CloudhubWorkerSpecRequest('3.9.1',
+                                                                        false,
+                                                                        1,
+                                                                        WorkerTypes.Micro,
+                                                                        AwsRegions.UsEast1),
+                                          file,
+                                          'theKey',
+                                          'theClientId',
+                                          'theSecret',
+                                          'client')
         }
 
         // assert
@@ -1553,28 +1304,18 @@ class CloudHubDeployerTest implements HttpServerUtils {
         // arrange
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     statusCode = 404
                 } else {
                     // deployment service returns this
@@ -1586,25 +1327,23 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
 
         // act
         def exception = shouldFail {
-            deployer.deployFromFile('DEV',
-                                    'new-app',
-                                    'client',
-                                    stream,
-                                    file.name,
-                                    'theKey',
-                                    '3.9.1',
-                                    false,
-                                    WorkerTypes.Micro,
-                                    1,
-                                    'theClientId',
-                                    'theSecret',
-                                    AwsRegions.UsEast1)
+            deployer.deploy(request)
         }
 
         // assert
@@ -1615,7 +1354,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_existing_app() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -1625,30 +1363,21 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         def firstCheck = true
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
-                return mockAuthenticationOk(request)
+            def uri = request.uri()
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                    result = getAppResponsePayload('client-new-app-dev',
+                                                   AppStatus.Started)
                 } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     // existing app check + status is the same
                     if (firstCheck) {
@@ -1665,9 +1394,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'client-new-app-dev'
-                    ]
+                    result = getAppResponsePayload('client-new-app-dev',
+                                                   AppStatus.Started)
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1680,28 +1408,26 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications/client-new-app-dev'))
+                   is(equalTo('/cloudhub/api/v2/applications/client-new-app-dev'))
         assertThat method,
                    is(equalTo('PUT'))
         assertThat authToken,
@@ -1744,7 +1470,6 @@ class CloudHubDeployerTest implements HttpServerUtils {
     @Test
     void perform_deployment_existing_app_failed_last_but_has_started_ok_once() {
         // arrange
-        def authenticated = false
         String url = null
         String method = null
         String authToken = null
@@ -1754,31 +1479,19 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String rawBody = null
         def firstCheck = true
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                assert !authenticated: 'Expect only 1 auth!'
-                authenticated = true
-                return mockAuthenticationOk(request)
+            def uri = request.uri()
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
                     // existing app check + status is the same
                     if (firstCheck) {
                         statusCode = 200
@@ -1833,9 +1546,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 } else {
                     // deployment service returns this
                     statusCode = 200
-                    result = [
-                            domain: 'client-new-app-dev'
-                    ]
+                    result = getAppResponsePayload('client-new-app-dev',
+                                                   AppStatus.Started)
+                    // apps that have had at least 1 successful deploy will show this
                     url = uri
                     method = request.method()
                     (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1848,28 +1561,26 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deploy(request)
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications/client-new-app-dev'))
+                   is(equalTo('/cloudhub/api/v2/applications/client-new-app-dev'))
         assertThat method,
                    is(equalTo('PUT'))
         assertThat authToken,
@@ -1919,40 +1630,29 @@ class CloudHubDeployerTest implements HttpServerUtils {
         def deployed = false
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     if (firstCheck) {
                         statusCode = 200
                         firstCheck = false
-                        result = [
-                                status: 'UNDEPLOYED'
-                        ]
+                        result = getAppResponsePayload('client-new-app-dev',
+                                                       AppStatus.Undeployed)
                     } else if (appDeleteRequested && !firstCheckAfterDeleteComplete) {
                         // the deletion operation takes a second, simulate that
                         firstCheckAfterDeleteComplete = true
                         statusCode = 200
-                        result = getDeploymentStatusJson('TERMINATED',
-                                                         'TERMINATED')
+                        result = getAppResponsePayload('client-new-app-dev',
+                                                       AppStatus.Undeployed)
                     } else if (appDeleteRequested && firstCheckAfterDeleteComplete) {
                         // now our app is deleted
                         appDeleteComplete = true
@@ -1983,9 +1683,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                     } else {
                         statusCode = 200
                         deployed = true
-                        result = [
-                                domain: 'client-new-app-dev'
-                        ]
+                        result = getAppResponsePayload('client-new-app-dev',
+                                                       AppStatus.Started)
                     }
                 } else {
                     statusCode = 500
@@ -1996,24 +1695,22 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deploy(request)
 
         // assert
         // our mock assertions should do the work here
@@ -2029,40 +1726,29 @@ class CloudHubDeployerTest implements HttpServerUtils {
         def deployed = false
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
-            if (uri == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
                 def result = null
-                if (uri.endsWith('environments')) {
-                    result = [
-                            data: [
-                                    [
-                                            id  : 'abc123',
-                                            name: 'Design'
-                                    ],
-                                    [
-                                            id  : 'def456',
-                                            name: 'DEV'
-                                    ]
-                            ]
-                    ]
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                     if (firstCheck) {
                         statusCode = 200
                         firstCheck = false
-                        result = [
-                                status: 'DEPLOY_FAILED'
-                        ]
+                        result = getAppResponsePayload('client-new-app-dev',
+                                                       AppStatus.Failed)
                     } else if (appDeleteRequested && !firstCheckAfterDeleteComplete) {
                         // the deletion operation takes a second, simulate that
                         firstCheckAfterDeleteComplete = true
                         statusCode = 200
-                        result = getDeploymentStatusJson('TERMINATED',
-                                                         'TERMINATED')
+                        result = getAppResponsePayload('client-new-app-dev',
+                                                       AppStatus.Failed)
                     } else if (appDeleteRequested && firstCheckAfterDeleteComplete) {
                         // now our app is deleted
                         appDeleteComplete = true
@@ -2093,9 +1779,8 @@ class CloudHubDeployerTest implements HttpServerUtils {
                     } else {
                         statusCode = 200
                         deployed = true
-                        result = [
-                                domain: 'client-new-app-dev'
-                        ]
+                        result = getAppResponsePayload('client-new-app-dev',
+                                                       AppStatus.Started)
                     }
                 } else {
                     statusCode = 500
@@ -2106,24 +1791,22 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deploy(request)
 
         // assert
         // our mock assertions should do the work here
@@ -2131,35 +1814,24 @@ class CloudHubDeployerTest implements HttpServerUtils {
 
     def mockInitialDeployment(HttpServerRequest request) {
         def uri = request.absoluteURI()
-        if (uri == 'http://localhost:8080/accounts/login') {
-            return mockAuthenticationOk(request)
+        if (mockAuthenticationOk(request)) {
+            return
+        }
+        if (mockEnvironments(request)) {
+            return
         }
         request.response().with {
             statusCode = 200
             putHeader('Content-Type',
                       'application/json')
             def result = null
-            if (uri.endsWith('environments')) {
-                result = [
-                        data: [
-                                [
-                                        id  : 'abc123',
-                                        name: 'Design'
-                                ],
-                                [
-                                        id  : 'def456',
-                                        name: 'DEV'
-                                ]
-                        ]
-                ]
-            } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+            if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
                 statusCode = 404
             } else {
                 // deployment service returns this
                 statusCode = 200
-                result = [
-                        domain: 'client-new-app-dev'
-                ]
+                result = getAppResponsePayload('client-new-app-dev',
+                                               AppStatus.Started)
             }
             end(JsonOutput.toJson(result))
         }
@@ -2202,24 +1874,22 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deploy(request)
 
         // assert
         assertThat 'We should check status twice. The initial one for the app (app) and then to see if app started',
@@ -2269,24 +1939,22 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
 
         // act
-        deployer.deployFromFile('DEV',
-                                'new-app',
-                                'client',
-                                stream,
-                                file.name,
-                                'theKey',
-                                '3.9.1',
-                                false,
-                                WorkerTypes.Micro,
-                                1,
-                                'theClientId',
-                                'theSecret',
-                                AwsRegions.UsEast1)
+        deployer.deploy(request)
 
         // assert
         assertThat 'We should check status 3 times. The initial one for the app and then 2 to see if app started',
@@ -2330,25 +1998,23 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
 
         // act
         def exception = shouldFail {
-            deployer.deployFromFile('DEV',
-                                    'new-app',
-                                    'client',
-                                    stream,
-                                    file.name,
-                                    'theKey',
-                                    '3.9.1',
-                                    false,
-                                    WorkerTypes.Micro,
-                                    1,
-                                    'theClientId',
-                                    'theSecret',
-                                    AwsRegions.UsEast1)
+            deployer.deploy(request)
         }
 
         // assert
@@ -2391,25 +2057,23 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 end(JsonOutput.toJson(result))
             }
         }
-        deployer.authenticate()
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
 
         // act
         def exception = shouldFail {
-            deployer.deployFromFile('DEV',
-                                    'new-app',
-                                    'client',
-                                    stream,
-                                    file.name,
-                                    'theKey',
-                                    '3.9.1',
-                                    false,
-                                    WorkerTypes.Micro,
-                                    1,
-                                    'theClientId',
-                                    'theSecret',
-                                    AwsRegions.UsEast1)
+            deployer.deploy(request)
         }
 
         // assert
@@ -2426,10 +2090,13 @@ class CloudHubDeployerTest implements HttpServerUtils {
         String envId = null
         String orgId = null
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
             }
-            url = request.absoluteURI()
+            if (mockEnvironments(request)) {
+                return
+            }
+            url = request.uri()
             method = request.method()
             (authToken, orgId, envId) = capturedStandardHeaders(request)
             request.response().with {
@@ -2441,15 +2108,14 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        deployer.getAppStatus('def456',
+        deployer.getAppStatus('DEV',
                               'theapp')
 
         // assert
         assertThat url,
-                   is(equalTo('http://localhost:8080/cloudhub/api/v2/applications/theapp'))
+                   is(equalTo('/cloudhub/api/v2/applications/theapp'))
         assertThat method,
                    is(equalTo('GET'))
         assertThat authToken,
@@ -2464,8 +2130,11 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getAppStatus_undeployed() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
@@ -2476,10 +2145,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        def status = deployer.getAppStatus('def456',
+        def status = deployer.getAppStatus('DEV',
                                            'the-app')
 
         // assert
@@ -2491,8 +2159,11 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getAppStatus_failed() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
@@ -2503,10 +2174,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        def status = deployer.getAppStatus('def456',
+        def status = deployer.getAppStatus('DEV',
                                            'the-app')
 
         // assert
@@ -2518,8 +2188,11 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getAppStatus_started() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
@@ -2530,10 +2203,9 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        def status = deployer.getAppStatus('def456',
+        def status = deployer.getAppStatus('DEV',
                                            'the-app')
 
         // assert
@@ -2545,18 +2217,20 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getAppStatus_not_found() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 404
                 end()
             }
         }
-        deployer.authenticate()
 
         // act
-        def status = deployer.getAppStatus('def456',
+        def status = deployer.getAppStatus('DEV',
                                            'the-app')
 
         // assert
@@ -2568,8 +2242,11 @@ class CloudHubDeployerTest implements HttpServerUtils {
     void getAppStatus_unknown() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (request.absoluteURI() == 'http://localhost:8080/accounts/login') {
-                return mockAuthenticationOk(request)
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
             }
             request.response().with {
                 statusCode = 200
@@ -2580,14 +2257,44 @@ class CloudHubDeployerTest implements HttpServerUtils {
                 ]))
             }
         }
-        deployer.authenticate()
 
         // act
-        def status = deployer.getAppStatus('def456',
+        def exception = shouldFail {
+            deployer.getAppStatus('DEV',
+                                  'the-app')
+        }
+
+        // assert
+        assertThat exception.message,
+                   is(containsString('Unknown status value of FOOBAR detected from CloudHub!'))
+    }
+
+    @Test
+    void getAppStatus_deleted() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                end(JsonOutput.toJson([
+                        status: 'DELETED'
+                ]))
+            }
+        }
+
+        // act
+        def status = deployer.getAppStatus('DEV',
                                            'the-app')
 
         // assert
         assertThat status,
-                   is(equalTo(AppStatus.Unknown))
+                   is(equalTo(AppStatus.Deleted))
     }
 }
