@@ -6,6 +6,7 @@ import com.avioconsulting.mule.deployment.internal.models.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.methods.HttpPatch
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.ContentType
@@ -126,6 +127,21 @@ class ApiManagerDeployer {
     }
 
     def updateApiDefinition(ExistingApiManagerDefinition apiManagerDefinition) {
-
+        def requestPayload = [
+                foo: 123
+        ]
+        def requestJson = JsonOutput.toJson(requestPayload)
+        logger.println "Updating API definition using payload: ${JsonOutput.prettyPrint(requestJson)}"
+        def request = createApiManagerRequest("/${apiManagerDefinition.id}",
+                                             apiManagerDefinition.details.environment) { url ->
+            new HttpPatch(url).with {
+                setEntity(new StringEntity(requestJson,
+                                           ContentType.APPLICATION_JSON))
+                it
+            }
+        }
+        clientWrapper.executeWithSuccessfulCloseableResponse(request,
+                                                             'Updating API definition')
+        logger.println('Successfully updated API definition')
     }
 }

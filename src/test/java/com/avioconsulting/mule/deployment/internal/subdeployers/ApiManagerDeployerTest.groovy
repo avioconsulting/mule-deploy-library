@@ -392,7 +392,7 @@ class ApiManagerDeployerTest extends BaseTest {
 
         // assert
         assertThat url,
-                   is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis'))
+                   is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234'))
         assertThat method,
                    is(equalTo(HttpMethod.PATCH))
         assertThat envHeader,
