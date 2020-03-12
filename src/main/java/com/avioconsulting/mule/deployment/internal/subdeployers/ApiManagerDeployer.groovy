@@ -2,10 +2,10 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
-import com.avioconsulting.mule.deployment.internal.models.ApiManagerDefinition
-import com.avioconsulting.mule.deployment.internal.models.ApiQueryResponse
+import com.avioconsulting.mule.deployment.internal.models.*
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
+import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.ContentType
@@ -37,22 +37,57 @@ class ApiManagerDeployer {
         }
     }
 
-    def chooseApiDefinitionId(String instanceLabel,
-                              List<ApiQueryResponse> responses) {
+    private ApiQueryResponse chooseApiDefinition(String instanceLabel,
+                                                 List<ApiQueryResponse> responses) {
         if (responses.size() == 1) {
-            return responses[0].id
+            return responses[0]
         }
         def matchViaLabel = responses.find { r ->
             r.instanceLabel == instanceLabel
         }
         if (matchViaLabel) {
-            return matchViaLabel.id
+            return matchViaLabel
         }
         logger.println "There were multiple API definitions for this Exchange asset and none of them were labeled with '${instanceLabel}' so using the first one"
-        responses[0].id
+        responses[0]
     }
 
-    def createApiDefinition(ApiManagerDefinition apiManagerDefinition) {
+    ExistingApiManagerDefinition getExistingApiDefinition(ApiManagerDefinition desiredApiManagerDefinition) {
+        def assetId = desiredApiManagerDefinition.exchangeAssetId
+        println "Checking for existing API Manager definition using Exchange asset ID '${assetId}'"
+        def environment = desiredApiManagerDefinition.environment
+        def request = createApiManagerRequest("?assetId=${assetId}",
+                                              environment) { url ->
+            new HttpGet(url)
+        }
+        def queryResponses = clientWrapper.executeWithSuccessfulCloseableResponse(request,
+                                                                                  'Querying API Definitions') {
+            Map response ->
+                new ObjectMapper().convertValue(response,
+                                                ApiQueryByExchangeAssetIdResponse)
+        } as ApiQueryByExchangeAssetIdResponse
+        if (queryResponses.total == 0) {
+            return null
+        }
+        def allApis = queryResponses.assets.collectMany { a -> a.apis }
+        def correctQueryResponse = chooseApiDefinition(desiredApiManagerDefinition.instanceLabel,
+                                                       allApis)
+        println "Identified API ID ${correctQueryResponse.id}, now retrieving details"
+        def getRequest = createApiManagerRequest("/${correctQueryResponse.id}",
+                                                 environment) { url ->
+            new HttpGet(url)
+        }
+        def getResponse = clientWrapper.executeWithSuccessfulCloseableResponse(getRequest,
+                                                                               'Fetching API definition') {
+            Map response ->
+                new ObjectMapper().convertValue(response,
+                                                ApiGetResponse)
+        } as ApiGetResponse
+        return ExistingApiManagerDefinition.createFrom(environment,
+                                                       getResponse)
+    }
+
+    ExistingApiManagerDefinition createApiDefinition(ApiManagerDefinition apiManagerDefinition) {
         def groupId = clientWrapper.anypointOrganizationId
         def requestPayload = [
                 spec         : [
@@ -63,7 +98,7 @@ class ApiManagerDeployer {
                 endpoint     : [
                         uri                : apiManagerDefinition.endpoint,
                         proxyUri           : null,
-                        muleVersion4OrAbove: apiManagerDefinition.muleVersion.startsWith('4'),
+                        muleVersion4OrAbove: apiManagerDefinition.isMule4OrAbove,
                         isCloudHub         : null
                 ],
                 instanceLabel: apiManagerDefinition.instanceLabel
@@ -79,12 +114,14 @@ class ApiManagerDeployer {
                 it
             }
         }
-        def queryResponse = clientWrapper.executeWithSuccessfulCloseableResponse(request,
-                                                                      'Creating API Definition') { Map response ->
-            new ObjectMapper().convertValue(response,
-                                            ApiQueryResponse)
-        } as ApiQueryResponse
-        logger.println "Created API definition with ID ${queryResponse.id}"
-        return queryResponse.id
+        def createResponse = clientWrapper.executeWithSuccessfulCloseableResponse(request,
+                                                                                  'Creating API Definition') {
+            Map response ->
+                new ObjectMapper().convertValue(response,
+                                                ApiGetResponse)
+        } as ApiGetResponse
+        logger.println "Created API definition with ID ${createResponse.id}"
+        return ExistingApiManagerDefinition.createFrom(apiManagerDefinition.environment,
+                                                       createResponse)
     }
 }

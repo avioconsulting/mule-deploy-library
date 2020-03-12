@@ -3,6 +3,7 @@ package com.avioconsulting.mule.deployment.internal.models
 import groovy.transform.Immutable
 
 @Immutable
-class ApiQueryResponse {
-    String id, instanceLabel
+class ApiGetResponse {
+    String id, instanceLabel, assetId, assetVersion
+    ApiGetEndpointInfo endpoint
 }
