@@ -2,6 +2,7 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.internal.models.ApiManagerDefinition
+import com.avioconsulting.mule.deployment.internal.models.ApiQueryResponse
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpMethod
@@ -135,5 +136,65 @@ class ApiManagerDeployerTest extends BaseTest {
                            ],
                            instanceLabel: 'DEV - Automated'
                    ]))
+    }
+
+    @Test
+    void chooseApiDefinitionId_single() {
+        // arrange
+        def responses = [
+                new ApiQueryResponse('1234',
+                                     'does not matter',
+                                     '1.2.3')
+        ]
+
+        // act
+        def result = deployer.chooseApiDefinitionId('the label',
+                                                    responses)
+
+        // assert
+        assertThat result,
+                   is(equalTo('1234'))
+    }
+
+    @Test
+    void chooseApiDefinitionId_matching_label() {
+        // arrange
+        def responses = [
+                new ApiQueryResponse('1234',
+                                     'does not matter',
+                                     '1.2.3'),
+                new ApiQueryResponse('4567',
+                                     'the label',
+                                     '1.2.3')
+        ]
+
+        // act
+        def result = deployer.chooseApiDefinitionId('the label',
+                                                    responses)
+
+        // assert
+        assertThat result,
+                   is(equalTo('4567'))
+    }
+
+    @Test
+    void chooseApiDefinitionId_no_labels() {
+        // arrange
+        def responses = [
+                new ApiQueryResponse('1234',
+                                     'does not matter',
+                                     '1.2.3'),
+                new ApiQueryResponse('4567',
+                                     'does not matter 2',
+                                     '1.2.3')
+        ]
+
+        // act
+        def result = deployer.chooseApiDefinitionId('the label',
+                                                    responses)
+
+        // assert
+        assertThat result,
+                   is(equalTo('1234'))
     }
 }

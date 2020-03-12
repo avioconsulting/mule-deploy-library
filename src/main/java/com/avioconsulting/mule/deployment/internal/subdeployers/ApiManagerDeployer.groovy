@@ -3,6 +3,8 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.ApiManagerDefinition
+import com.avioconsulting.mule.deployment.internal.models.ApiQueryResponse
+import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.client.methods.HttpUriRequest
@@ -35,15 +37,30 @@ class ApiManagerDeployer {
         }
     }
 
+    def chooseApiDefinitionId(String instanceLabel,
+                              List<ApiQueryResponse> responses) {
+        if (responses.size() == 1) {
+            return responses[0].id
+        }
+        def matchViaLabel = responses.find { r ->
+            r.instanceLabel == instanceLabel
+        }
+        if (matchViaLabel) {
+            return matchViaLabel.id
+        }
+        logger.println "There were multiple API definitions for this Exchange asset and none of them were labeled with '${instanceLabel}' so using the first one"
+        responses[0].id
+    }
+
     def createApiDefinition(ApiManagerDefinition apiManagerDefinition) {
         def groupId = clientWrapper.anypointOrganizationId
         def requestPayload = [
-                spec    : [
+                spec         : [
                         groupId: groupId,
                         assetId: apiManagerDefinition.exchangeAssetId,
                         version: apiManagerDefinition.exchangeAssetVersion
                 ],
-                endpoint: [
+                endpoint     : [
                         uri                : apiManagerDefinition.endpoint,
                         proxyUri           : null,
                         muleVersion4OrAbove: apiManagerDefinition.muleVersion.startsWith('4'),
@@ -62,11 +79,12 @@ class ApiManagerDeployer {
                 it
             }
         }
-        def id = clientWrapper.executeWithSuccessfulCloseableResponse(request,
-                                                                      'Creating API Definition') { response ->
-            response.id
-        }
-        logger.println "Created API definition with ID ${id}"
-        return id.toString()
+        def queryResponse = clientWrapper.executeWithSuccessfulCloseableResponse(request,
+                                                                      'Creating API Definition') { Map response ->
+            new ObjectMapper().convertValue(response,
+                                            ApiQueryResponse)
+        } as ApiQueryResponse
+        logger.println "Created API definition with ID ${queryResponse.id}"
+        return queryResponse.id
     }
 }
