@@ -104,10 +104,10 @@ class CloudhubDeploymentRequest implements FileBasedAppDeploymentRequest {
             newAppName = appNameLowerCase
         }
         normalizedAppName = newAppName
-        this.app = overrideByChangingFileInZip ? getPropertyModifiedStream(overrideByChangingFileInZip,
-                                                                           appProperties,
-                                                                           app,
-                                                                           fileName) : app
+//        this.app = overrideByChangingFileInZip ? getPropertyModifiedStream(overrideByChangingFileInZip,
+//                                                                           appProperties,
+//                                                                           app,
+//                                                                           fileName) : app
     }
 
     HttpEntity getHttpPayload() {

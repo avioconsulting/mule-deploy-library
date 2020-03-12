@@ -54,9 +54,7 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
         def existingAppStatus = getAppStatus(deploymentRequest.environment,
                                              deploymentRequest.normalizedAppName)
         def request = getDeploymentHttpRequest(existingAppStatus,
-                                               deploymentRequest.normalizedAppName,
-                                               deploymentRequest.fileName,
-                                               deploymentRequest.environment)
+                                               deploymentRequest)
         doDeployment(request,
                      deploymentRequest)
         waitForAppToStart(deploymentRequest.environment,
@@ -64,9 +62,9 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
     }
 
     private HttpEntityEnclosingRequestBase getDeploymentHttpRequest(AppStatus existingAppStatus,
-                                                                    String appName,
-                                                                    String fileName,
-                                                                    String environment) {
+                                                                    CloudhubDeploymentRequest deploymentRequest) {
+        def appName = deploymentRequest.normalizedAppName
+        def fileName = deploymentRequest.file.name
         HttpEntityEnclosingRequestBase request
         if (existingAppStatus == AppStatus.NotFound) {
             logger.println "Deploying '${appName}', ${fileName} as a NEW application"
@@ -75,9 +73,9 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
             // If you try and PUT a new version of an app over an existing failed deployment, CloudHub will reject it
             // so we delete first to clear out the failed deployment
             logger.println "Existing deployment of '${appName}' is in status '${existingAppStatus}' and is not currently running. Will remove first and then deploy a new copy"
-            deleteApp(environment,
+            deleteApp(deploymentRequest.environment,
                       appName)
-            waitForAppDeletion(environment,
+            waitForAppDeletion(deploymentRequest.environment,
                                appName)
             logger.println "App deleted, now deploying '${appName}', ${fileName} as a NEW application"
             request = new HttpPost("${clientWrapper.baseUrl}/cloudhub/api/v2/applications")

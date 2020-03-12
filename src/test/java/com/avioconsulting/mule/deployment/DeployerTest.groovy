@@ -69,16 +69,14 @@ class DeployerTest {
         // arrange
         failDeployment = true
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -101,16 +99,14 @@ class DeployerTest {
     void deployApplication_cloudhub() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -132,26 +128,22 @@ class DeployerTest {
                    is(equalTo('1.2.3'))
         assertThat sync.apiSpec,
                    is(equalTo(apiSpec))
-        assertThat sync.appFileInfo.fileName,
-                   is(equalTo(file.name))
-        assertThat sync.appFileInfo.app,
-                   is(equalTo(stream))
+        assertThat sync.appFileInfo.file,
+                   is(equalTo(file))
     }
 
     @Test
     void deployApplication_no_dc_deployment_for_tst_environment() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'TST',
+        def request = new CloudhubDeploymentRequest('TST',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -175,13 +167,11 @@ class DeployerTest {
     void deployApplication_onprem() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         def apiSpec = new ApiSpecification('Hello API')
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
                                                   'clustera',
-                                                  file.name,
-                                                  stream)
+                                                  file)
 
         // act
         deployer.deployApplication(request,
@@ -199,16 +189,14 @@ class DeployerTest {
     void deployApplication_features_all_no_api_spec() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -231,16 +219,14 @@ class DeployerTest {
     void deployApplication_app_deployment_feature_disabled() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -265,16 +251,14 @@ class DeployerTest {
     void deployApplication_design_center_feature_disabled() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',

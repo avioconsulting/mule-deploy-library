@@ -10,8 +10,7 @@ import static org.hamcrest.Matchers.is
 class FileBasedAppDeploymentRequestTest {
     @Canonical
     class DummyRequest implements FileBasedAppDeploymentRequest {
-        InputStream app
-        String fileName
+        File file
     }
 
     @Test

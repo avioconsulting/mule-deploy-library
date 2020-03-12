@@ -60,7 +60,7 @@ class OnPremDeployer extends BaseDeployer implements IOnPremDeployer {
             logger.println "*** Try ${tries} ***"
             Set<OnPremDeploymentStatus> status = getAppStatus(request.environment,
                                                               appId,
-                                                              request.fileName)
+                                                              request.file.name)
             logger.println "Received statuses of ${status}"
             if (status[0] == OnPremDeploymentStatus.RECEIVED) {
                 logger.println 'Still waiting for Runtime Manager to send app to server'
@@ -99,7 +99,7 @@ class OnPremDeployer extends BaseDeployer implements IOnPremDeployer {
         def serverId = locateServer(deploymentRequest.environment,
                                     deploymentRequest.targetServerOrClusterName)
         def appName = deploymentRequest.appName
-        def fileName = deploymentRequest.fileName
+        def fileName = deploymentRequest.file.name
         logger.println "Deploying '${appName}', ${fileName} as a new application with additional properties ${deploymentRequest.appProperties}"
         def request = new HttpPost("${clientWrapper.baseUrl}/hybrid/api/v1/applications").with {
             addStandardStuff(it,
@@ -123,7 +123,7 @@ class OnPremDeployer extends BaseDeployer implements IOnPremDeployer {
     private String updateDeployment(String appId,
                                     OnPremDeploymentRequest deploymentRequest) {
         def appName = deploymentRequest.appName
-        def fileName = deploymentRequest.fileName
+        def fileName = deploymentRequest.file.name
         logger.println "Deploying '${appName}', ${fileName} as an UPDATED application to existing app id ${appId} with additional properties ${deploymentRequest.appProperties}"
         def request = new HttpPatch("${clientWrapper.baseUrl}/hybrid/api/v1/applications/${appId}").with {
             addStandardStuff(it,

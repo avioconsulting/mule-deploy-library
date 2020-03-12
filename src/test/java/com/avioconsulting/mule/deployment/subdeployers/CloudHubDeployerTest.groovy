@@ -308,16 +308,14 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -416,14 +414,12 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -521,16 +517,14 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -642,16 +636,14 @@ class CloudHubDeployerTest extends BaseTest {
         }
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
-        def stream = new FileInputStream(zipFile)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    zipFile.name,
+                                                    zipFile,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -777,16 +769,14 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   true,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -885,22 +875,20 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         def otherProperties = [
                 persistentQueues: true,
                 properties      : [
                         env: 'TST'
                 ]
         ] as Map<String, String>
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -1001,19 +989,17 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         def otherProperties = [
                 persistentQueues: true
         ] as Map<String, String>
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -1113,7 +1099,6 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         def otherProperties = [
                 persistentQueues: true,
                 properties      : [
@@ -1121,15 +1106,14 @@ class CloudHubDeployerTest extends BaseTest {
                         prop1: 'should not see this'
                 ]
         ] as Map<String, String>
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -1232,16 +1216,14 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'NEW-APP',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -1296,18 +1278,16 @@ class CloudHubDeployerTest extends BaseTest {
     void perform_deployment_space_in_app() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         // act
         def exception = shouldFail {
-            new CloudhubDeploymentRequest(stream,
-                                          'DEV',
+            new CloudhubDeploymentRequest('DEV',
                                           'some app name',
                                           new CloudhubWorkerSpecRequest('3.9.1',
                                                                         false,
                                                                         1,
                                                                         WorkerTypes.Micro,
                                                                         AwsRegions.UsEast1),
-                                          file.name,
+                                          file,
                                           'theKey',
                                           'theClientId',
                                           'theSecret',
@@ -1348,16 +1328,14 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -1431,16 +1409,14 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -1586,16 +1562,14 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -1722,16 +1696,14 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -1820,16 +1792,14 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -1905,16 +1875,14 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -1972,16 +1940,14 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -2033,16 +1999,14 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
@@ -2094,16 +2058,14 @@ class CloudHubDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
-        def request = new CloudhubDeploymentRequest(stream,
-                                                    'DEV',
+        def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
                                                                                   WorkerTypes.Micro,
                                                                                   AwsRegions.UsEast1),
-                                                    file.name,
+                                                    file,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',

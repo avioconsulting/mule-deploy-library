@@ -7,25 +7,25 @@ import org.apache.commons.io.IOUtils
 
 trait FileBasedAppDeploymentRequest {
     boolean isMule4Request() {
-        isMule4Request(file.name)
+        isMule4Request(file)
     }
 
-    static boolean isMule4Request(String fileName) {
-        fileName.endsWith('.jar')
+    static boolean isMule4Request(File file) {
+        file.name.endsWith('.jar')
     }
 
     abstract File getFile()
 
     ArchiveInputStream openArchiveStream() {
         openArchiveStream(archiveFormat,
-                          app)
+                          file)
     }
 
     static ArchiveInputStream openArchiveStream(String archiveFormat,
-                                                InputStream app) {
+                                                File file) {
         def factory = new ArchiveStreamFactory()
         factory.createArchiveInputStream(archiveFormat,
-                                         app)
+                                         new FileInputStream(file))
     }
 
     String getArchiveFormat() {
@@ -38,23 +38,23 @@ trait FileBasedAppDeploymentRequest {
         mule4Request ? ArchiveStreamFactory.JAR : ArchiveStreamFactory.ZIP
     }
 
-    static InputStream getPropertyModifiedStream(String propertiesFileToAddTo,
-                                                 Map<String, String> propertiesToAdd,
-                                                 InputStream app,
-                                                 String fileName) {
+    static modifyFileProps(String propertiesFileToAddTo,
+                           Map<String, String> propertiesToAdd,
+                           File file) {
         if (propertiesToAdd.isEmpty()) {
-            return app
+            return
         }
-        def isMule4 = isMule4Request(fileName)
+        def isMule4 = isMule4Request(file)
         // Mule 4 props files live at the root of the JAR. Mule 3's are in a classes subdirectory
         propertiesFileToAddTo = isMule4 ? propertiesFileToAddTo : "classes/${propertiesFileToAddTo}"
         def archiveFormat = getArchiveFormat(isMule4)
         def archiveIn = openArchiveStream(archiveFormat,
-                                          app)
+                                          file)
         def pos = new PipedOutputStream()
         def factory = new ArchiveStreamFactory()
         def archiveOut = factory.createArchiveOutputStream(archiveFormat,
                                                            pos)
+        // TODO: Don't need thread, etc. anymore
         Thread.start {
             ZipArchiveEntry inputEntry
             def found = false

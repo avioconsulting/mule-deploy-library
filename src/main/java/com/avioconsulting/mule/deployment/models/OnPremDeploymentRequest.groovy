@@ -59,10 +59,10 @@ class OnPremDeploymentRequest implements FileBasedAppDeploymentRequest {
         this.targetServerOrClusterName = targetServerOrClusterName
         this.file = file
         this.appProperties = appProperties
-        this.app = overrideByChangingFileInZip ? getPropertyModifiedStream(overrideByChangingFileInZip,
-                                                                           appProperties,
-                                                                           app,
-                                                                           fileName) : app
+//        this.app = overrideByChangingFileInZip ? getPropertyModifiedStream(overrideByChangingFileInZip,
+//                                                                           appProperties,
+//                                                                           app,
+//                                                                           fileName) : app
         this.modifiedPropertiesViaZip = overrideByChangingFileInZip != null
     }
 

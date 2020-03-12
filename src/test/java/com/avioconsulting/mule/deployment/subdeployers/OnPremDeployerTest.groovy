@@ -419,12 +419,10 @@ class OnPremDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
                                                   'clustera',
-                                                  file.name,
-                                                  stream)
+                                                  file)
 
         // act
         deployer.deploy(request)
@@ -543,12 +541,10 @@ class OnPremDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
                                                   'clustera',
-                                                  file.name,
-                                                  stream,
+                                                  file,
                                                   [prop1: 'foo', prop2: 'bar'])
 
         // act
@@ -681,12 +677,10 @@ class OnPremDeployerTest extends BaseTest {
         }
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
-        def stream = new FileInputStream(zipFile)
         def request = new OnPremDeploymentRequest('DEV',
                                                   'testapp',
                                                   'clustera',
-                                                  zipFile.name,
-                                                  stream,
+                                                  zipFile,
                                                   [existing: 'changed'],
                                                   'api.dev.properties')
 
@@ -752,15 +746,13 @@ class OnPremDeployerTest extends BaseTest {
     void perform_deployment_space_in_app_name() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
 
         // act
         def exception = shouldFail {
             new OnPremDeploymentRequest('DEV',
                                         'some app name',
                                         'clustera',
-                                        file.name,
-                                        stream)
+                                        file)
         }
 
         // assert
@@ -853,12 +845,10 @@ class OnPremDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         def request = new OnPremDeploymentRequest('DEV',
                                                   'the-app',
                                                   'clustera',
-                                                  file.name,
-                                                  stream)
+                                                  file)
 
         // act
         deployer.deploy(request)
@@ -973,12 +963,10 @@ class OnPremDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         def request = new OnPremDeploymentRequest('DEV',
                                                   'the-app',
                                                   'clustera',
-                                                  file.name,
-                                                  stream,
+                                                  file,
                                                   [prop1: 'foo', prop2: 'bar'])
 
         // act
@@ -1107,12 +1095,10 @@ class OnPremDeployerTest extends BaseTest {
         }
         antBuilder.zip(destfile: zipFile.absolutePath,
                        basedir: 'src/test/resources/testapp')
-        def stream = new FileInputStream(zipFile)
         def request = new OnPremDeploymentRequest('DEV',
                                                   'the-app',
                                                   'clustera',
-                                                  zipFile.name,
-                                                  stream,
+                                                  zipFile,
                                                   [existing: 'changed'],
                                                   'api.dev.properties')
 
@@ -1562,12 +1548,10 @@ class OnPremDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
                                                   'clustera',
-                                                  file.name,
-                                                  stream)
+                                                  file)
 
         // act
         deployer.deploy(request)
@@ -1610,12 +1594,10 @@ class OnPremDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
                                                   'clustera',
-                                                  file.name,
-                                                  stream)
+                                                  file)
 
         // act
         deployer.deploy(request)
@@ -1648,12 +1630,10 @@ class OnPremDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
                                                   'clustera',
-                                                  file.name,
-                                                  stream)
+                                                  file)
 
         // act
         def exception = shouldFail {
@@ -1692,12 +1672,10 @@ class OnPremDeployerTest extends BaseTest {
             }
         }
         def file = new File('src/test/resources/some_file.txt')
-        def stream = new FileInputStream(file)
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
                                                   'clustera',
-                                                  file.name,
-                                                  stream)
+                                                  file)
 
         // act
         def exception = shouldFail {

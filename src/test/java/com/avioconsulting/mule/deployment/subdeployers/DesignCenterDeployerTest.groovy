@@ -28,8 +28,7 @@ class DesignCenterDeployerTest extends BaseTest {
 
     @Canonical
     static class DummyRequest implements FileBasedAppDeploymentRequest {
-        InputStream app
-        String fileName
+        File file
     }
 
     @Test
@@ -84,8 +83,7 @@ class DesignCenterDeployerTest extends BaseTest {
         FileUtils.deleteQuietly(zipFile)
         antBuilder.zip(destfile: zipFile,
                        basedir: tempAppDirectory)
-        new DummyRequest(zipFile.newInputStream(),
-                         zipFile.name)
+        new DummyRequest(zipFile)
     }
 
     @Test
