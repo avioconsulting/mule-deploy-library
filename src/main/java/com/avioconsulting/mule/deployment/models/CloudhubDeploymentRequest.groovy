@@ -87,7 +87,6 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
         this.environment = environment
         this.appName = appName
         this.workerSpecRequest = workerSpecRequest
-        this.file = file
         this.cryptoKey = cryptoKey
         this.anypointClientId = anypointClientId
         this.anypointClientSecret = anypointClientSecret
@@ -104,10 +103,9 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
             newAppName = appNameLowerCase
         }
         normalizedAppName = newAppName
-//        this.app = overrideByChangingFileInZip ? getPropertyModifiedStream(overrideByChangingFileInZip,
-//                                                                           appProperties,
-//                                                                           app,
-//                                                                           fileName) : app
+        this.file = overrideByChangingFileInZip ? modifyFileProps(overrideByChangingFileInZip,
+                                                                  appProperties,
+                                                                  file) : file
     }
 
     HttpEntity getHttpPayload() {

@@ -20,6 +20,10 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
      * Mule app property overrides (the stuff in the properties tab)
      */
     final Map<String, String> appProperties
+    /**
+     * THe original filename, before any propert
+     */
+    final String originalFileName
 
     private boolean modifiedPropertiesViaZip
 
@@ -57,12 +61,10 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
         this.environment = environment
         this.appName = appName
         this.targetServerOrClusterName = targetServerOrClusterName
-        this.file = file
         this.appProperties = appProperties
-//        this.app = overrideByChangingFileInZip ? getPropertyModifiedStream(overrideByChangingFileInZip,
-//                                                                           appProperties,
-//                                                                           app,
-//                                                                           fileName) : app
+        this.file = overrideByChangingFileInZip ? modifyFileProps(overrideByChangingFileInZip,
+                                                                  appProperties,
+                                                                  file) : file
         this.modifiedPropertiesViaZip = overrideByChangingFileInZip != null
     }
 

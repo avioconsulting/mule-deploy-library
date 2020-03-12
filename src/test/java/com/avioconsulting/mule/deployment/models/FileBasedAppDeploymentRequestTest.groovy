@@ -1,6 +1,5 @@
 package com.avioconsulting.mule.deployment.models
 
-
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
