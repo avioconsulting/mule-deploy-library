@@ -49,6 +49,11 @@ pipeline {
                     quietMaven "clean test-compile surefire:test@integration-test -Danypoint.username=${env.ANYPOINT_CREDS_USR} -Danypoint.password=${env.ANYPOINT_CREDS_PSW}"
                 }
             }
+
+            options {
+                // we manipulate apps in the same environment, etc.
+                lock('anypoint-integration-test')
+            }
         }
 
         stage('Deploy') {
