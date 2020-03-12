@@ -6,7 +6,6 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -30,7 +29,7 @@ class ApiManagerDeployerTest extends BaseTest {
         String url = null
         HttpMethod method = null
         Map sentPayload = null
-        String env, auth, org = null
+        String envHeader, auth, org = null
         withHttpServer { HttpServerRequest request ->
             if (mockAuthenticationOk(request)) {
                 return
@@ -43,7 +42,7 @@ class ApiManagerDeployerTest extends BaseTest {
             request.bodyHandler { body ->
                 sentPayload = new JsonSlurper().parseText(body.toString())
             }
-            (auth, org, env) = capturedStandardHeaders(request)
+            (auth, org, envHeader) = capturedStandardHeaders(request)
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
@@ -69,7 +68,7 @@ class ApiManagerDeployerTest extends BaseTest {
                    is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis'))
         assertThat method,
                    is(equalTo(HttpMethod.POST))
-        assertThat env,
+        assertThat envHeader,
                    is(equalTo('def456'))
         assertThat sentPayload,
                    is(equalTo([
@@ -91,10 +90,50 @@ class ApiManagerDeployerTest extends BaseTest {
     @Test
     void createApiDefinition_mule3() {
         // arrange
+        Map sentPayload = null
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.bodyHandler { body ->
+                sentPayload = new JsonSlurper().parseText(body.toString())
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                end(JsonOutput.toJson([
+                        id: 123
+                ]))
+            }
+        }
+        def apiDefinition = new ApiManagerDefinition('the-asset-id',
+                                                     '1.2.3',
+                                                     'https://some.endpoint',
+                                                     'DEV',
+                                                     '3.9.1')
 
         // act
+        deployer.createApiDefinition(apiDefinition)
 
         // assert
-        Assert.fail("write it")
+        assertThat sentPayload,
+                   is(equalTo([
+                           spec         : [
+                                   groupId: 'the-org-id',
+                                   assetId: 'the-asset-id',
+                                   version: '1.2.3'
+                           ],
+                           endpoint     : [
+                                   uri                : 'https://some.endpoint',
+                                   proxyUri           : null,
+                                   muleVersion4OrAbove: false,
+                                   isCloudHub         : null
+                           ],
+                           instanceLabel: 'DEV - Automated'
+                   ]))
     }
 }
