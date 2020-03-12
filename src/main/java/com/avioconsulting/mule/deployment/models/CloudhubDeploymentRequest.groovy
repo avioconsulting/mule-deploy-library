@@ -11,7 +11,13 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
      * environment name (e.g. DEV, not GUID)
      */
     final String environment
+    /**
+     * Actual name of your application WITHOUT any kind of customer/environment prefix or suffix. Spaces in the name are not allowed and will be rejected.
+     */
     final String appName
+    /**
+     * CloudHub specs
+     */
     final CloudhubWorkerSpecRequest workerSpecRequest
     /**
      * The file to deploy. The name of this file will also be used for the Runtime Manager settings pane
@@ -30,7 +36,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     final String anypointClientSecret
     /**
-     * Your "DNS prefix" for Cloudhub app uniqueness, usually a 3 letter customer ID
+     * Your "DNS prefix" for Cloudhub app uniqueness, usually a 3 letter customer ID to ensure app uniqueness.
      */
     final String cloudHubAppPrefix
     /**
@@ -42,14 +48,15 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     final Map<String, String> otherCloudHubProperties
     /**
-     * VERY rare. If you have a weird situation where you need to be able to say that you "froze" an app ZIP/JAR for config management purposes and you want to change the properties inside a ZIP file, set this to the filename you want to drop new properties in inside the ZIP (e.g. api.dev.properties)
-     */
-    final String overrideByChangingFileInZip
-    /**
-     * Derived from app, environment, and prefix, the real name we'll use in CH
+     * Get only property, derived from app, environment, and prefix, this the real application name that will be used in CloudHub to ensure uniqueness.
      */
     final String normalizedAppName
 
+    private boolean modifiedPropertiesViaZip
+
+    /**
+     * Construct a "standard" request. See properties for parameter info.
+     */
     CloudhubDeploymentRequest(String environment,
                               String appName,
                               CloudhubWorkerSpecRequest workerSpecRequest,
@@ -73,6 +80,10 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
              otherCloudHubProperties)
     }
 
+    /**
+     * Construct a request designed to override properties in a file. This is a niche case. See properties for parameter info.
+     * @param overrideByChangingFileInZip VERY rare. If you have a weird situation where you need to be able to say that you "froze" an app ZIP/JAR for config management purposes and you want to change the properties inside a ZIP file, set this to the filename you want to drop new properties in inside the ZIP (e.g. api.dev.properties)
+     */
     CloudhubDeploymentRequest(String environment,
                               String appName,
                               CloudhubWorkerSpecRequest workerSpecRequest,
@@ -93,7 +104,6 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
         this.cloudHubAppPrefix = cloudHubAppPrefix
         this.appProperties = appProperties
         this.otherCloudHubProperties = otherCloudHubProperties
-        this.overrideByChangingFileInZip = overrideByChangingFileInZip
         if (appName.contains(' ')) {
             throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
         }
@@ -106,6 +116,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
         this.file = overrideByChangingFileInZip ? modifyFileProps(overrideByChangingFileInZip,
                                                                   appProperties,
                                                                   file) : file
+        this.modifiedPropertiesViaZip = overrideByChangingFileInZip != null
     }
 
     HttpEntity getHttpPayload() {
@@ -161,7 +172,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
             otherCloudHubProperties.properties = props + otherCloudHubProperties.properties
         }
         def appInfo = result + otherCloudHubProperties
-        if (!overrideByChangingFileInZip) {
+        if (!modifiedPropertiesViaZip) {
             appInfo.properties = appInfo.properties + appProperties
         }
         appInfo

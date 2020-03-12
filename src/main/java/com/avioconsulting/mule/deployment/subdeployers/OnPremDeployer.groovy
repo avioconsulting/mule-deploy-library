@@ -16,7 +16,7 @@ class OnPremDeployer extends BaseDeployer implements IOnPremDeployer {
      * @param anypointOrganizationId
      * @param username
      * @param password
-     * @param logger - will be used for all your log messages
+     * @param logger will be used for all your log messages
      */
     OnPremDeployer(HttpClientWrapper clientWrapper,
                    EnvironmentLocator environmentLocator,
@@ -40,10 +40,6 @@ class OnPremDeployer extends BaseDeployer implements IOnPremDeployer {
               environmentLocator)
     }
 
-    /***
-     * Do an on-prem deployment
-     * @param request - deployment request
-     */
     def deploy(OnPremDeploymentRequest request) {
         def existingApp = locateApplication(request.environment,
                                             request.appName)

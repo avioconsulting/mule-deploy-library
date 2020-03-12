@@ -16,13 +16,6 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
             DELETED      : AppStatus.Deleted
     ]
 
-    /***
-     * Instantiate using default anypoint.mulesoft.com URL
-     * @param anypointOrganizationId
-     * @param username
-     * @param password
-     * @param logger - will be used for all your log messages
-     */
     CloudHubDeployer(HttpClientWrapper clientWrapper,
                      EnvironmentLocator environmentLocator,
                      PrintStream logger) {
@@ -46,10 +39,6 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
               environmentLocator)
     }
 
-    /**
-     * Deploy via a supplied file
-     * @return
-     */
     def deploy(CloudhubDeploymentRequest deploymentRequest) {
         def existingAppStatus = getAppStatus(deploymentRequest.environment,
                                              deploymentRequest.normalizedAppName)

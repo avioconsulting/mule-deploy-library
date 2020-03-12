@@ -20,12 +20,12 @@ class Deployer {
 
     /**
      *
-     * @param username - anypoint creds to deploy with
-     * @param password - anypoint creds to deploy with
-     * @param anypointOrganizationId - GUID/org ID. Right now this tool doesn't differentiate between biz groups and root orgs
-     * @param logger - all messages will be logged like this. This is Jenkins plugins friendly (or you can supply System.out)
-     * @param baseUrl - Base URL, optional
-     * @param environmentsToDoDesignCenterDeploymentOn - Normally workflow wise you'd only want to do this on DEV
+     * @param username anypoint creds to deploy with
+     * @param password anypoint creds to deploy with
+     * @param anypointOrganizationId GUID/org ID. Right now this tool doesn't differentiate between biz groups and root orgs
+     * @param logger all messages will be logged like this. This is Jenkins plugins friendly (or you can supply System.out)
+     * @param baseUrl Base URL, optional
+     * @param environmentsToDoDesignCenterDeploymentOn Normally workflow wise you'd only want to do this on DEV
      */
     Deployer(String username,
              String password,
@@ -67,10 +67,10 @@ class Deployer {
 
     /**
      * Deploys a CloudHub application, end to end
-     * @param appDeploymentRequest - Details about how to deploy your app
-     * @param apiSpecification - How API specification details work. This can be optional. Doing so will automatically remove Design Center sync from enabled features
-     * @param appVersion - Version of the app you are deploying (e.g. <version> from the POM)
-     * @param enabledFeatures - Which features of this tool to turn on. All by default.
+     * @param appDeploymentRequest Details about how to deploy your app
+     * @param apiSpecification How API specification details work. This can be optional. Doing so will automatically remove Design Center sync from enabled features
+     * @param appVersion Version of the app you are deploying (e.g. <version> from the POM)
+     * @param enabledFeatures Which features of this tool to turn on. All by default.
      */
     def deployApplication(CloudhubDeploymentRequest appDeploymentRequest,
                           String appVersion,
@@ -92,10 +92,10 @@ class Deployer {
 
     /**
      * Deploys an on-prem application, end to end
-     * @param appDeploymentRequest - Details about how to deploy your app
-     * @param apiSpecification - How API specification details work. This can be optional. Doing so will automatically remove Design Center sync from enabled features
-     * @param appVersion - Version of the app you are deploying (e.g. <version> from the POM)
-     * @param enabledFeatures - Which features of this tool to turn on. All by default.
+     * @param appDeploymentRequest Details about how to deploy your app
+     * @param apiSpecification How API specification details work. This can be optional. Doing so will automatically remove Design Center sync from enabled features
+     * @param appVersion Version of the app you are deploying (e.g. <version> from the POM)
+     * @param enabledFeatures Which features of this tool to turn on. All by default.
      */
     def deployApplication(OnPremDeploymentRequest appDeploymentRequest,
                           String appVersion,

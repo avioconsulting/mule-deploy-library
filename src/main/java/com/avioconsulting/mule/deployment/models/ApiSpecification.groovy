@@ -22,6 +22,9 @@ class ApiSpecification {
      */
     final String mainRamlFile
 
+    /***
+     * Standard request - see properties for parameter details
+     */
     ApiSpecification(String name,
                      String apiMajorVersion = 'v1',
                      String mainRamlFile = null,

@@ -104,9 +104,7 @@ class IntegrationTest {
                                                               [env: AVIO_ENVIRONMENT_DEV])
         cloudhubDeploymentRequest = new CloudhubDeploymentRequest(AVIO_ENVIRONMENT_DEV,
                                                                   CLOUDHUB_APP_NAME,
-                                                                  new CloudhubWorkerSpecRequest('4.2.2',
-                                                                                                false,
-                                                                                                1),
+                                                                  new CloudhubWorkerSpecRequest('4.2.2'),
                                                                   builtFile,
                                                                   'abcdefg',
                                                                   'someid',
