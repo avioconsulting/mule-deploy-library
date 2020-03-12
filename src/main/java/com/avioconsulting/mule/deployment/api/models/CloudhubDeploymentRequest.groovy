@@ -1,5 +1,7 @@
 package com.avioconsulting.mule.deployment.api.models
 
+import com.avioconsulting.mule.deployment.internal.models.CloudhubAppProperties
+import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import org.apache.http.HttpEntity
 import org.apache.http.entity.ContentType
@@ -135,13 +137,12 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
     }
 
     private Map<String, String> getCloudhubProperties() {
-        [
-                // env in on-prem environment is lower cased
-                env                              : environment.toLowerCase(),
-                'crypto.key'                     : cryptoKey,
-                'anypoint.platform.client_id'    : anypointClientId,
-                'anypoint.platform.client_secret': anypointClientSecret
-        ]
+        def props = new CloudhubAppProperties(environment.toLowerCase(),
+                                              cryptoKey,
+                                              anypointClientId,
+                                              anypointClientSecret)
+        new ObjectMapper().convertValue(props,
+                                        Map)
     }
 
     Map<String, String> getCloudhubAppInfo() {
