@@ -41,6 +41,17 @@ class ApiManagerDeployer {
         }
     }
 
+    /**
+     * Creates a definition if it does not exist and updates if it does
+     * @param desiredApiManagerDefinition - desired specs
+     * @param appVersion - version of application being deployed
+     * @return Updated, looked up API definition with ID
+     */
+    ExistingApiSpec synchronizeApiDefinition(ApiSpec desiredApiManagerDefinition,
+                                             String appVersion) {
+        null
+    }
+
     private ApiQueryResponse chooseApiDefinition(String instanceLabel,
                                                  List<ApiQueryResponse> responses) {
         if (responses.size() == 1) {
@@ -56,7 +67,7 @@ class ApiManagerDeployer {
         responses[0]
     }
 
-    ExistingApiSpec getExistingApiDefinition(ApiSpec desiredApiManagerDefinition) {
+    private ExistingApiSpec getExistingApiDefinition(ApiSpec desiredApiManagerDefinition) {
         def assetId = desiredApiManagerDefinition.exchangeAssetId
         println "Checking for existing API Manager definition using Exchange asset ID '${assetId}'"
         def environment = desiredApiManagerDefinition.environment
@@ -91,7 +102,7 @@ class ApiManagerDeployer {
                                    getResponse)
     }
 
-    ExistingApiSpec createApiDefinition(ResolvedApiSpec apiManagerDefinition) {
+    private ExistingApiSpec createApiDefinition(ResolvedApiSpec apiManagerDefinition) {
         def groupId = clientWrapper.anypointOrganizationId
         def requestPayload = [
                 spec         : [
@@ -129,7 +140,7 @@ class ApiManagerDeployer {
                                    createResponse)
     }
 
-    def updateApiDefinition(ExistingApiSpec apiManagerDefinition) {
+    private def updateApiDefinition(ExistingApiSpec apiManagerDefinition) {
         def requestPayload = [
                 assetVersion : apiManagerDefinition.exchangeAssetVersion,
                 instanceLabel: apiManagerDefinition.instanceLabel,
@@ -155,8 +166,8 @@ class ApiManagerDeployer {
         logger.println('Successfully updated API definition')
     }
 
-    ResolvedApiSpec resolveAssetVersion(ApiSpec apiManagerDefinition,
-                                        String appVersion) {
+    private ResolvedApiSpec resolveAssetVersion(ApiSpec apiManagerDefinition,
+                                                String appVersion) {
         def assetId = apiManagerDefinition.exchangeAssetId
         def query = new GetAssetsQuery(assetId,
                                        clientWrapper.anypointOrganizationId)

@@ -10,6 +10,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -701,5 +702,69 @@ class ApiManagerDeployerTest extends BaseTest {
         // assert
         assertThat exception.message,
                    is(containsString('Expected to find an asset version <= our app version of 1.0.202010213 but did not! Asset versions found in Exchange were [1.0.202510193, 1.0.202510203, 1.0.202511213]'))
+    }
+
+    @Test
+    void synchronizeApiDefinition_does_not_exist() {
+        // arrange
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               true)
+
+        // act
+        def result = deployer.synchronizeApiDefinition(desiredApiDefinition,
+                                                       '1.0.202010213')
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void synchronizeApiDefinition_already_exists_no_changes() {
+        // arrange
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               true)
+
+        // act
+        def result = deployer.synchronizeApiDefinition(desiredApiDefinition,
+                                                       '1.0.202010213')
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void synchronizeApiDefinition_already_exists_version_wrong() {
+        // arrange
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               true)
+
+        // act
+        def result = deployer.synchronizeApiDefinition(desiredApiDefinition,
+                                                       '1.0.202010213')
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void synchronizeApiDefinition_already_ismule4_wrong() {
+        // arrange
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               true)
+
+        // act
+        def result = deployer.synchronizeApiDefinition(desiredApiDefinition,
+                                                       '1.0.202010213')
+
+        // assert
+        Assert.fail("write it")
     }
 }
