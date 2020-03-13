@@ -266,12 +266,12 @@ class DeployerTest {
     }
 
     @Test
-    void deployApplication_onprem() {
+    void deployApplication_onprem_mule3() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
         def apiSpec = new ApiSpecification('Hello API')
         def request = new OnPremDeploymentRequest('DEV',
-                                                  'new-app',
+                                                  'new-app-mule3',
                                                   'clustera',
                                                   file)
 
@@ -285,7 +285,44 @@ class DeployerTest {
                    is(equalTo(1))
         assertThat designCenterSyncs.size(),
                    is(equalTo(1))
-        Assert.fail('apisync')
+        assertThat apiSyncs.size(),
+                   is(equalTo(1))
+        apiSyncs[0].with {
+            it.apiSpec.with {
+                assertThat it.isMule4OrAbove,
+                           is(equalTo(false))
+            }
+        }
+    }
+
+    @Test
+    void deployApplication_onprem_mule4() {
+        // arrange
+        def file = new File('src/test/resources/some_file.txt')
+        def apiSpec = new ApiSpecification('Hello API')
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'new-ap-mule4',
+                                                  'clustera',
+                                                  file)
+
+        // act
+        deployer.deployApplication(request,
+                                   '1.2.3',
+                                   apiSpec)
+
+        // assert
+        assertThat deployedOnPremApps.size(),
+                   is(equalTo(1))
+        assertThat designCenterSyncs.size(),
+                   is(equalTo(1))
+        assertThat apiSyncs.size(),
+                   is(equalTo(1))
+        apiSyncs[0].with {
+            it.apiSpec.with {
+                assertThat it.isMule4OrAbove,
+                           is(equalTo(true))
+            }
+        }
     }
 
     @Test
