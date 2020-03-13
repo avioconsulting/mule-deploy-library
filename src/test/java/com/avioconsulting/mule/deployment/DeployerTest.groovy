@@ -123,7 +123,7 @@ class DeployerTest {
     }
 
     @Test
-    void deployApplication_cloudhub() {
+    void deployApplication_cloudhub_mule_3() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
@@ -171,7 +171,6 @@ class DeployerTest {
             }
 
         }
-        // assert more
         assertThat deployedChApps[0].cloudhubAppInfo.properties,
                    is(equalTo([
                            env                              : 'dev',
@@ -189,6 +188,44 @@ class DeployerTest {
                    is(equalTo(apiSpec))
         assertThat sync.appFileInfo.file,
                    is(equalTo(file))
+    }
+
+    @Test
+    void deployApplication_cloudhub_mule_4() {
+        // arrange
+        def file = new File('src/test/resources/some_file.txt')
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('4.2.2',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
+        def apiSpec = new ApiSpecification('Hello API',
+                                           'v1',
+                                           'main.raml',
+                                           'the-asset-id',
+                                           'https://foo')
+
+        // act
+        deployer.deployApplication(request,
+                                   '1.2.3',
+                                   apiSpec)
+
+        // assert
+        assertThat apiSyncs.size(),
+                   is(equalTo(1))
+        apiSyncs[0].with {
+            it.apiSpec.with {
+                assertThat it.isMule4OrAbove,
+                           is(equalTo(true))
+            }
+        }
     }
 
     @Test
