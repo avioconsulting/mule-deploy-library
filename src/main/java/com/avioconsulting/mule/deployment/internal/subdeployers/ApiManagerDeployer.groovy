@@ -51,7 +51,8 @@ class ApiManagerDeployer {
                                              String appVersion) {
         def existing = getExistingApiDefinition(desiredApiManagerDefinition)
         if (existing) {
-            return null
+            logger.println 'API definition already exists and is already correct, no changes required'
+            return existing
         }
         def resolvedApiSpec = resolveAssetVersion(desiredApiManagerDefinition,
                                                   appVersion)
