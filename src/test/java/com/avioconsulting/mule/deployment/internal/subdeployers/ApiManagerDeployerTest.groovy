@@ -414,18 +414,67 @@ class ApiManagerDeployerTest extends BaseTest {
     }
 
     @Test
-    void getDesiredAssetVersion_queries_properly() {
+    void resolveAssetVersion_queries_properly() {
+        // arrange
+        String url = null
+        HttpMethod method = null
+        Map sentPayload = null
+        String envHeader, auth, org = null
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            url = request.uri()
+            method = request.method()
+            request.bodyHandler { body ->
+                sentPayload = new JsonSlurper().parseText(body.toString())
+            }
+            (auth, org, envHeader) = capturedStandardHeaders(request)
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                end()
+            }
+        }
+        def desiredApiDefinition = new ResolvedApiSpec('the-asset-id',
+                                                       '1.2.3',
+                                                       'https://some.endpoint',
+                                                       'DEV',
+                                                       true)
+
+        // act
+        deployer.resolveAssetVersion(desiredApiDefinition)
+
+        // assert
+        assertThat url,
+                   is(equalTo('/graph/api/v1/graphql'))
+        assertThat method,
+                   is(equalTo(HttpMethod.POST))
+        assertThat auth,
+                   is(equalTo('Bearer something'))
+        assertThat sentPayload,
+                   is(equalTo([
+                           query: 'foobar'
+                   ]))
+        Assert.fail("write it")
+    }
+
+    @Test
+    void resolveAssetVersion_match_older_than_us() {
         // arrange
 
         // act
-        def result = deployer.getDesiredAssetVersion()
 
         // assert
         Assert.fail("write it")
     }
 
     @Test
-    void getDesiredAssetVersion_match_older_than_us() {
+    void resolveAssetVersion_exact_match_our_app_version() {
         // arrange
 
         // act
@@ -435,7 +484,7 @@ class ApiManagerDeployerTest extends BaseTest {
     }
 
     @Test
-    void getDesiredAssetVersion_exact_match_our_app_version() {
+    void resolveAssetVersion_newer_versions_than_us_exist() {
         // arrange
 
         // act
@@ -445,17 +494,7 @@ class ApiManagerDeployerTest extends BaseTest {
     }
 
     @Test
-    void getDesiredAssetVersion_newer_versions_than_us_exist() {
-        // arrange
-
-        // act
-
-        // assert
-        Assert.fail("write it")
-    }
-
-    @Test
-    void getDesiredAssetVersion_all_versions_are_newer() {
+    void resolveAssetVersion_all_versions_are_newer() {
         // arrange
 
         // act

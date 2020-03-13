@@ -152,7 +152,7 @@ class ApiManagerDeployer {
         logger.println('Successfully updated API definition')
     }
 
-    def getDesiredAssetVersion(ApiSpec apiManagerDefinition) {
+    ResolvedApiSpec resolveAssetVersion(ApiSpec apiManagerDefinition) {
 
     }
 }
