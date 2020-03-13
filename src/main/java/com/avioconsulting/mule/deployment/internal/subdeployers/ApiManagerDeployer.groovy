@@ -49,7 +49,14 @@ class ApiManagerDeployer {
      */
     ExistingApiSpec synchronizeApiDefinition(ApiSpec desiredApiManagerDefinition,
                                              String appVersion) {
-        null
+        def existing = getExistingApiDefinition(desiredApiManagerDefinition)
+        if (existing) {
+            return null
+        }
+        def resolvedApiSpec = resolveAssetVersion(desiredApiManagerDefinition,
+                                                  appVersion)
+        logger.println 'API definition does not yet exist, will create'
+        createApiDefinition(resolvedApiSpec)
     }
 
     private ApiQueryResponse chooseApiDefinition(String instanceLabel,
