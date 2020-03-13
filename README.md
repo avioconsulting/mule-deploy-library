@@ -15,10 +15,17 @@ Just include this dependency in your POM. See [AVIO Nexus](https://devops.avioco
 Roles:
 * Cloudhub Admin (DEV/TST/PRD) - to deploy the actual app
 * Exchange Administrators - to publish Exchange assets
-* API Versions Owner - To manage API definitions
 
 Permissions:
-*  Design Center Developer permission - to update Design Center
+* Design Center Developer permission - to update Design Center
+* API Manager For each environment (DEV/TST/PRD):
+    * API Manager Environment Administrator
+    * Manage APIs Configuration
+    * Manage Contracts
+    * Manage Policies
+    * View APIs Configuration
+    * View Contracts
+    * View Policies
 
 ## In your code
 
