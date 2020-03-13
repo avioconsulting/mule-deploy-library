@@ -10,7 +10,6 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -1098,6 +1097,5 @@ class ApiManagerDeployerTest extends BaseTest {
         assertThat 'Existing version is mule 4 false',
                    updated,
                    is(equalTo(true))
-        Assert.fail("write it")
     }
 }

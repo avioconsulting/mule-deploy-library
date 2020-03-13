@@ -2,7 +2,7 @@ package com.avioconsulting.mule.deployment.internal.models
 
 import groovy.transform.EqualsAndHashCode
 
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
 class ExistingApiSpec extends ResolvedApiSpec {
     final String id
 
