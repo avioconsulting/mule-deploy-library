@@ -9,6 +9,10 @@ import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerRequest
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
+import org.junit.rules.TestRule
+import org.junit.rules.TestWatcher
+import org.junit.runner.Description
 
 import java.util.concurrent.CompletableFuture
 
@@ -17,6 +21,19 @@ class BaseTest {
     protected HttpClientWrapper clientWrapper
     protected EnvironmentLocator environmentLocator
     protected Handler<HttpServerRequest> closure
+
+    @Rule
+    public TestRule watcher = new TestWatcher() {
+        @Override
+        protected void starting(Description description) {
+            println "*** Starting test ${description.methodName} ***"
+        }
+
+        @Override
+        protected void finished(Description description) {
+            println "*** Finishing test ${description.methodName} ***"
+        }
+    }
 
     @Before
     void startServer() {
