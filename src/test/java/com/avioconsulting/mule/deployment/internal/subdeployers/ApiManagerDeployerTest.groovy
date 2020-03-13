@@ -707,6 +707,60 @@ class ApiManagerDeployerTest extends BaseTest {
     @Test
     void synchronizeApiDefinition_does_not_exist() {
         // arrange
+        def created = false
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                Map response = null
+                def uri = request.uri()
+                if (uri.contains('graphql')) {
+                    response = [
+                            data: [
+                                    assets: [
+                                            [
+                                                    '__typename': 'Asset',
+                                                    assetId     : 'foo',
+                                                    version     : '1.0.201910193'
+
+                                            ],
+                                            [
+                                                    '__typename': 'Asset',
+                                                    assetId     : 'foo',
+                                                    version     : '1.0.202010213'
+
+                                            ]
+                                    ]
+                            ]
+                    ]
+                } else if (uri == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis?assetId=the-asset-id') {
+                    response = [
+                            total : 0,
+                            assets: []
+                    ]
+                } else if (uri == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis' && request.method() == HttpMethod.POST) {
+                    created = true
+                    response = [
+                            id           : 123,
+                            endpoint     : [
+                                    uri                : 'https://some.endpoint',
+                                    muleVersion4OrAbove: true
+                            ],
+                            assetId      : 'the-asset-id',
+                            assetVersion : '1.2.3',
+                            instanceLabel: 'DEV - Automated'
+                    ]
+                }
+                end(JsonOutput.toJson(response))
+            }
+        }
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
@@ -717,7 +771,10 @@ class ApiManagerDeployerTest extends BaseTest {
                                                        '1.0.202010213')
 
         // assert
-        Assert.fail("write it")
+        assertThat result.id,
+                   is(equalTo('123'))
+        assertThat created,
+                   is(equalTo(true))
     }
 
     @Test
