@@ -1,10 +1,6 @@
 package com.avioconsulting.mule.deployment.api
 
-import com.avioconsulting.mule.deployment.api.models.ApiSpecification
-import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
-import com.avioconsulting.mule.deployment.api.models.Features
-import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
-import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.*
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.subdeployers.*
@@ -19,6 +15,7 @@ class Deployer {
     private final ICloudHubDeployer cloudHubDeployer
     private final IOnPremDeployer onPremDeployer
     private final IDesignCenterDeployer designCenterDeployer
+    private final IApiManagerDeployer apiManagerDeployer
     private final List<String> environmentsToDoDesignCenterDeploymentOn
     private int stepNumber
 
@@ -53,7 +50,8 @@ class Deployer {
                      EnvironmentLocator environmentLocator = null,
                      ICloudHubDeployer cloudHubDeployer = null,
                      IOnPremDeployer onPremDeployer = null,
-                     IDesignCenterDeployer designCenterDeployer = null) {
+                     IDesignCenterDeployer designCenterDeployer = null,
+                     IApiManagerDeployer apiManagerDeployer = null) {
         this.logger = logger
         this.environmentsToDoDesignCenterDeploymentOn = environmentsToDoDesignCenterDeploymentOn
         this.clientWrapper = httpClientWrapper
@@ -67,6 +65,9 @@ class Deployer {
                                                                    logger)
         this.designCenterDeployer = designCenterDeployer ?: new DesignCenterDeployer(this.clientWrapper,
                                                                                      logger)
+        this.apiManagerDeployer = apiManagerDeployer ?: new ApiManagerDeployer(this.clientWrapper,
+                                                                               this.environmentLocator,
+                                                                               logger)
     }
 
     /**

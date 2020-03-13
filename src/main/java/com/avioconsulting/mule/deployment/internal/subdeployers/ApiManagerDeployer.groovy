@@ -15,7 +15,7 @@ import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 
-class ApiManagerDeployer {
+class ApiManagerDeployer implements IApiManagerDeployer {
     private final HttpClientWrapper clientWrapper
     private final PrintStream logger
     private final EnvironmentLocator environmentLocator
