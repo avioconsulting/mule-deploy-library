@@ -455,12 +455,12 @@ class ApiManagerDeployerTest extends BaseTest {
         assertThat method,
                    is(equalTo(HttpMethod.POST))
         assertThat auth,
-                   is(equalTo('Bearer something'))
+                   is(equalTo('Bearer the token'))
         assertThat sentPayload,
                    is(equalTo([
-                           query: 'foobar'
+                           query    : 'query GetAssets($asset_id: String!, $group_id: String!) { assets(asset: {groupId: $group_id, assetId: $asset_id}) { __typename assetId version } }',
+                           variables: '{"asset_id":"the-asset-id","group_id":"the-org-id"}'
                    ]))
-        Assert.fail("write it")
     }
 
     @Test

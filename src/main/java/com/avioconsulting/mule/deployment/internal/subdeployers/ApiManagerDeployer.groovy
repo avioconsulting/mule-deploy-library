@@ -1,8 +1,10 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
+import com.apollographql.apollo.api.OperationDataJsonSerializer
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.*
+import com.avioconsulting.mule.deployment.internal.models.graphql.GetAssetsQuery
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpGet
@@ -153,6 +155,21 @@ class ApiManagerDeployer {
     }
 
     ResolvedApiSpec resolveAssetVersion(ApiSpec apiManagerDefinition) {
-
+        def assetId = apiManagerDefinition.exchangeAssetId
+        def query = new GetAssetsQuery(assetId,
+                                       clientWrapper.anypointOrganizationId)
+        def requestPayload = [
+                query: query.queryDocument(),
+                variables: query.variables().marshal()
+        ]
+        logger.println "Searching for assets for Exchange asset '${assetId}'"
+        def request = new HttpPost("${clientWrapper.baseUrl}/graph/api/v1/graphql").with {
+            setEntity(new StringEntity(JsonOutput.toJson(requestPayload),
+                                       ContentType.APPLICATION_JSON))
+            it
+        }
+        clientWrapper.executeWithSuccessfulCloseableResponse(request,
+                                                             'Exchange Asset GraphQL query')
+        return null
     }
 }
