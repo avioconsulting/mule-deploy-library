@@ -109,31 +109,6 @@ class BaseTest {
         future.get()
         def port = server.actualPort()
         println "Server is supposedly up on port ${port}"
-        def connectException = null
-        def connected = false
-        10.times {
-            if (connected) {
-                return
-            }
-            try {
-                def socket = new Socket('localhost',
-                                        port)
-                println "Connected oK to server on port ${port}"
-                connectException = null
-                connected = true
-                socket.close()
-            }
-            catch (e) {
-                connectException = e
-                println 'Server not up yet, sleeping 100ms and trying again'
-                Thread.sleep(100)
-            }
-        }
-        if (connectException) {
-            println "Could not connect after 10 tries, throwing exception ${connectException}"
-            throw new Exception('Unable to connect to server',
-                                connectException)
-        }
         server
     }
 
