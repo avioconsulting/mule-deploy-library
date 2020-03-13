@@ -155,7 +155,8 @@ class ApiManagerDeployer {
         logger.println('Successfully updated API definition')
     }
 
-    ResolvedApiSpec resolveAssetVersion(ApiSpec apiManagerDefinition) {
+    ResolvedApiSpec resolveAssetVersion(ApiSpec apiManagerDefinition,
+                                        String appVersion) {
         def assetId = apiManagerDefinition.exchangeAssetId
         def query = new GetAssetsQuery(assetId,
                                        clientWrapper.anypointOrganizationId)
@@ -176,7 +177,15 @@ class ApiManagerDeployer {
             def bufferedSource = Okio.buffer(source)
             query.parse(bufferedSource).data().get().assets
         }
-        println "assets are ${assets[0]}"
-        return null
+        def chosenAsset = pickVersion(appVersion,
+                                      assets)
+        logger.println("Identified asset version ${chosenAsset.version}")
+        new ResolvedApiSpec(apiManagerDefinition,
+                            chosenAsset.version)
+    }
+
+    private GetAssetsQuery.Asset pickVersion(String appVersion,
+                                             List<GetAssetsQuery.Asset> assets) {
+        assets[1]
     }
 }

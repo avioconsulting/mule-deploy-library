@@ -439,7 +439,20 @@ class ApiManagerDeployerTest extends BaseTest {
                           'application/json')
                 def response = [
                         data: [
-                                assets: []
+                                assets: [
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '1.0.201910193'
+
+                                        ],
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '1.0.201910213'
+
+                                        ]
+                                ]
                         ]
                 ]
                 end(JsonOutput.toJson(response))
@@ -451,7 +464,8 @@ class ApiManagerDeployerTest extends BaseTest {
                                                true)
 
         // act
-        deployer.resolveAssetVersion(desiredApiDefinition)
+        deployer.resolveAssetVersion(desiredApiDefinition,
+                                     '1.2.3')
 
         // assert
         assertThat url,
@@ -508,7 +522,8 @@ class ApiManagerDeployerTest extends BaseTest {
                                                true)
 
         // act
-        def result = deployer.resolveAssetVersion(desiredApiDefinition)
+        def result = deployer.resolveAssetVersion(desiredApiDefinition,
+                                                  '1.0.202010213')
 
         // assert
         assertThat result,

@@ -19,4 +19,14 @@ class ResolvedApiSpec extends ApiSpec {
               instanceLabel)
         this.exchangeAssetVersion = exchangeAssetVersion
     }
+
+    ResolvedApiSpec(ApiSpec spec,
+                    String exchangeAssetVersion) {
+        super(spec.exchangeAssetId,
+              spec.endpoint,
+              spec.environment,
+              spec.isMule4OrAbove,
+              spec.instanceLabel)
+        this.exchangeAssetVersion = exchangeAssetVersion
+    }
 }
