@@ -127,13 +127,21 @@ class ApiManagerDeployer {
     }
 
     def updateApiDefinition(ExistingApiManagerDefinition apiManagerDefinition) {
+        def details = apiManagerDefinition.details
         def requestPayload = [
-                foo: 123
+                assetVersion: details.exchangeAssetVersion,
+                instanceLabel: details.instanceLabel,
+                endpoint: [
+                        uri: details.endpoint,
+                        proxyUri           : null,
+                        muleVersion4OrAbove: details.isMule4OrAbove,
+                        isCloudHub         : null
+                ]
         ]
         def requestJson = JsonOutput.toJson(requestPayload)
         logger.println "Updating API definition using payload: ${JsonOutput.prettyPrint(requestJson)}"
         def request = createApiManagerRequest("/${apiManagerDefinition.id}",
-                                             apiManagerDefinition.details.environment) { url ->
+                                              details.environment) { url ->
             new HttpPatch(url).with {
                 setEntity(new StringEntity(requestJson,
                                            ContentType.APPLICATION_JSON))
