@@ -184,8 +184,21 @@ class ApiManagerDeployer {
                             chosenAsset.version)
     }
 
-    private GetAssetsQuery.Asset pickVersion(String appVersion,
-                                             List<GetAssetsQuery.Asset> assets) {
-        assets[1]
+    private static int getLastVersionOctet(String version) {
+        version.split('\\.').last().toInteger()
+    }
+
+    private static GetAssetsQuery.Asset pickVersion(String appVersion,
+                                                    List<GetAssetsQuery.Asset> assets) {
+        def lastAppVersionOctet = getLastVersionOctet(appVersion)
+        def result = assets.reverse().find { asset ->
+            def lastAssetVersionOctet = getLastVersionOctet(asset.version)
+            return lastAssetVersionOctet <= lastAppVersionOctet
+        }
+        if (!result) {
+            def availableVersions = assets.collect { a -> a.version }
+            throw new Exception("Expected to find an asset version <= our app version of ${appVersion} but did not! Asset versions found in Exchange were ${availableVersions}")
+        }
+        return result
     }
 }

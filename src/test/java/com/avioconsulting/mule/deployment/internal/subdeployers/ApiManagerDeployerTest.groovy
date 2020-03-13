@@ -465,7 +465,7 @@ class ApiManagerDeployerTest extends BaseTest {
 
         // act
         deployer.resolveAssetVersion(desiredApiDefinition,
-                                     '1.2.3')
+                                     '1.0.201910213')
 
         // assert
         assertThat url,
@@ -700,6 +700,6 @@ class ApiManagerDeployerTest extends BaseTest {
 
         // assert
         assertThat exception.message,
-                   is(containsString('Expected to find an asset version <= our app version of 1.0.202010213 but did not! Asset versions found in Exchange were %s"'))
+                   is(containsString('Expected to find an asset version <= our app version of 1.0.202010213 but did not! Asset versions found in Exchange were [1.0.202510193, 1.0.202510203, 1.0.202511213]'))
     }
 }
