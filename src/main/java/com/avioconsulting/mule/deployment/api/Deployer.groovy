@@ -3,6 +3,7 @@ package com.avioconsulting.mule.deployment.api
 import com.avioconsulting.mule.deployment.api.models.*
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
+import com.avioconsulting.mule.deployment.internal.models.ApiSpec
 import com.avioconsulting.mule.deployment.internal.subdeployers.*
 
 /***
@@ -130,8 +131,9 @@ class Deployer {
         } else {
             logger.println("${prefix} - EXECUTING")
             try {
-                stuff()
+                def result = stuff()
                 logger.println("${prefix} - DONE")
+                return result
             }
             catch (e) {
                 logger.println("${prefix} - FAILED due to ${e}")
@@ -155,7 +157,7 @@ class Deployer {
             getFeatureSkipReason(enabledFeatures,
                                  feature)
         }
-        String skipReason = null
+        String skipReason
         if (!apiSpecification) {
             skipReason = "no API spec was provided"
         } else if (!this.environmentsToDoDesignCenterDeploymentOn.contains(environment)) {
@@ -168,6 +170,21 @@ class Deployer {
             designCenterDeployer.synchronizeDesignCenterFromApp(apiSpecification,
                                                                 appDeploymentRequest,
                                                                 appVersion)
+        }
+        if (!apiSpecification) {
+            skipReason = "no API spec was provided"
+        } else {
+            skipReason = isFeatureDisabled(Features.ApiManagerDefinitions)
+        }
+        executeStep('API Manager Definition',
+                    skipReason) {
+            def internalSpec = new ApiSpec(apiSpecification.exchangeAssetId,
+                                           apiSpecification.endpoint,
+                                           environment,
+                                           false)
+            def existingApiManagerDefinition = apiManagerDeployer.synchronizeApiDefinition(internalSpec,
+                                                                                           appVersion)
+            appDeploymentRequest.autoDiscoveryId = existingApiManagerDefinition.id
         }
     }
 }
