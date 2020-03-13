@@ -255,4 +255,10 @@ class OnPremDeployer extends BaseDeployer implements IOnPremDeployer {
         def response = clientWrapper.execute(request)
         response.statusLine.statusCode
     }
+
+    @Override
+    boolean isMule4Request(OnPremDeploymentRequest deploymentRequest) {
+        // TODO: Is using this (which leans on JAR vs. ZIP) ok?
+        deploymentRequest.isMule4Request()
+    }
 }

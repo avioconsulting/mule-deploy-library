@@ -11,6 +11,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
 import io.vertx.core.http.HttpServerRequest
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -2298,5 +2299,55 @@ class CloudHubDeployerTest extends BaseTest {
         // assert
         assertThat status,
                    is(equalTo(AppStatus.Deleted))
+    }
+
+    @Test
+    void isMule4Request_no() {
+        // arrange
+        def file = new File('src/test/resources/some_file.txt')
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
+
+        // act
+        def result = deployer.isMule4Request(request)
+
+        // assert
+        assertThat result,
+                   is(equalTo(false))
+    }
+
+    @Test
+    void isMule4Request_yes() {
+        // arrange
+        def file = new File('src/test/resources/some_file.jar')
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('4.2.2',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
+
+        // act
+        def result = deployer.isMule4Request(request)
+
+        // assert
+        assertThat result,
+                   is(equalTo(true))
     }
 }

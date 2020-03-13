@@ -234,4 +234,10 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
             response.close()
         }
     }
+
+    @Override
+    boolean isMule4Request(CloudhubDeploymentRequest deploymentRequest) {
+        // TODO: Is using this (which leans on JAR vs. ZIP) ok?
+        deploymentRequest.isMule4Request()
+    }
 }

@@ -1683,4 +1683,38 @@ class OnPremDeployerTest extends BaseTest {
         assertThat exception.message,
                    is(equalTo('Deployment failed on 1 or more nodes. Please see logs and messages as to why app did not start'))
     }
+
+    @Test
+    void isMule4Request_no() {
+        // arrange
+        def file = new File('src/test/resources/some_file.zip')
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'new-app',
+                                                  'clustera',
+                                                  file)
+
+        // act
+        def result = deployer.isMule4Request(request)
+
+        // assert
+        assertThat result,
+                   is(equalTo(false))
+    }
+
+    @Test
+    void isMule4Request_yes() {
+        // arrange
+        def file = new File('src/test/resources/some_file.jar')
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'new-app',
+                                                  'clustera',
+                                                  file)
+
+        // act
+        def result = deployer.isMule4Request(request)
+
+        // assert
+        assertThat result,
+                   is(equalTo(true))
+    }
 }

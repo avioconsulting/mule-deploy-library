@@ -87,7 +87,8 @@ class Deployer {
                                      appVersion,
                                      appDeploymentRequest,
                                      appDeploymentRequest.environment,
-                                     enabledFeatures)
+                                     enabledFeatures,
+                                     cloudHubDeployer)
         def skipReason = getFeatureSkipReason(enabledFeatures,
                                               Features.AppDeployment)
         executeStep('CloudHub app deployment',
@@ -112,7 +113,8 @@ class Deployer {
                                      appVersion,
                                      appDeploymentRequest,
                                      appDeploymentRequest.environment,
-                                     enabledFeatures)
+                                     enabledFeatures,
+                                     onPremDeployer)
         def skipReason = getFeatureSkipReason(enabledFeatures,
                                               Features.AppDeployment)
         executeStep('On-prem app deployment',
@@ -152,7 +154,8 @@ class Deployer {
                                              String appVersion,
                                              FileBasedAppDeploymentRequest appDeploymentRequest,
                                              String environment,
-                                             List<Features> enabledFeatures) {
+                                             List<Features> enabledFeatures,
+                                             IDeployer deployer) {
         def isFeatureDisabled = { Features feature ->
             getFeatureSkipReason(enabledFeatures,
                                  feature)
@@ -178,10 +181,11 @@ class Deployer {
         }
         executeStep('API Manager Definition',
                     skipReason) {
+            def isMule4 = deployer.isMule4Request(appDeploymentRequest)
             def internalSpec = new ApiSpec(apiSpecification.exchangeAssetId,
                                            apiSpecification.endpoint,
                                            environment,
-                                           false)
+                                           isMule4)
             def existingApiManagerDefinition = apiManagerDeployer.synchronizeApiDefinition(internalSpec,
                                                                                            appVersion)
             appDeploymentRequest.autoDiscoveryId = existingApiManagerDefinition.id

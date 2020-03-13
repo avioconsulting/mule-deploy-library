@@ -51,11 +51,17 @@ class DeployerTest {
                         throw new Exception('something did not work')
                     }
                     deployedChApps << request
+                },
+                isMule4Request: { CloudhubDeploymentRequest deploymentRequest ->
+                    deploymentRequest.appName.contains('mule4')
                 }
         ] as ICloudHubDeployer
         def mockOnPremDeployer = [
-                deploy: { OnPremDeploymentRequest request ->
+                deploy        : { OnPremDeploymentRequest request ->
                     deployedOnPremApps << request
+                },
+                isMule4Request: { OnPremDeploymentRequest deploymentRequest ->
+                    deploymentRequest.appName.contains('mule4')
                 }
         ] as IOnPremDeployer
         def mockDcDeployer = [
@@ -127,7 +133,7 @@ class DeployerTest {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
-                                                    'new-app',
+                                                    'new-app-mule3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -195,7 +201,7 @@ class DeployerTest {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
-                                                    'new-app',
+                                                    'new-app-mule4',
                                                     new CloudhubWorkerSpecRequest('4.2.2',
                                                                                   false,
                                                                                   1,
