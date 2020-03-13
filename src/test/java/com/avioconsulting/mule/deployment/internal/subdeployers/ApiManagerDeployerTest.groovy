@@ -309,27 +309,36 @@ class ApiManagerDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                Map responseMap = null
+                Map responseMap
                 if (request.uri() == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234' && request.method() == HttpMethod.GET) {
                     responseMap = [
-                            id           : 1234,
-                            endpoint     : [
+                            id            : 1234,
+                            endpoint      : [
                                     uri                : 'https://some.endpoint',
-                                    muleVersion4OrAbove: false
+                                    muleVersion4OrAbove: false,
+                                    unmapped_field_here: 'hello'
                             ],
-                            assetId      : 'the-asset-id',
-                            assetVersion : '1.2.3',
-                            instanceLabel: 'DEV - Automated'
+                            assetId       : 'the-asset-id',
+                            assetVersion  : '1.2.3',
+                            instanceLabel : 'DEV - Automated',
+                            // should not disrupt anything
+                            unmapped_field: 'hi'
                     ]
                 } else {
+                    // should not disrupt anything
+                    def queryResponse = new ObjectMapper().convertValue(new ApiQueryResponse('1234',
+                                                                                             'does not matter'),
+                                                                        Map)
+                    queryResponse['unmapped_field_2'] = 'hi'
                     responseMap = [
-                            total : 1,
-                            assets: [
+                            total           : 1,
+                            unmapped_field_3: 'hi',
+                            assets          : [
                                     [
-                                            apis: [
-                                                    new ApiQueryResponse('1234',
-                                                                         'does not matter')
-                                            ]
+                                            apis            : [
+                                                    queryResponse
+                                            ],
+                                            unmapped_field_4: 'hi'
                                     ]
                             ]
                     ]
