@@ -49,13 +49,25 @@ class ApiManagerDeployer {
      */
     ExistingApiSpec synchronizeApiDefinition(ApiSpec desiredApiManagerDefinition,
                                              String appVersion) {
-        def existing = getExistingApiDefinition(desiredApiManagerDefinition)
-        if (existing) {
-            logger.println 'API definition already exists and is already correct, no changes required'
-            return existing
-        }
         def resolvedApiSpec = resolveAssetVersion(desiredApiManagerDefinition,
                                                   appVersion)
+        def existing = getExistingApiDefinition(desiredApiManagerDefinition)
+        if (existing) {
+            if (existing.withoutId == resolvedApiSpec) {
+                logger.println 'API definition already exists and is already correct, no changes required'
+                return existing
+            } else {
+                logger.println 'API definition already exists but is out of date, updating'
+                def newDefinition = new ExistingApiSpec(existing.id,
+                                                        resolvedApiSpec.exchangeAssetId,
+                                                        resolvedApiSpec.exchangeAssetVersion,
+                                                        resolvedApiSpec.endpoint,
+                                                        resolvedApiSpec.environment,
+                                                        resolvedApiSpec.isMule4OrAbove)
+                updateApiDefinition(newDefinition)
+                return newDefinition
+            }
+        }
         logger.println 'API definition does not yet exist, will create'
         createApiDefinition(resolvedApiSpec)
     }

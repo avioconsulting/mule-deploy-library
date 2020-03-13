@@ -31,4 +31,10 @@ class ExistingApiSpec extends ResolvedApiSpec {
               getResponse.instanceLabel)
         this.id = getResponse.id
     }
+
+    // aid in comparing using @EqualsAndHashCode annotation above
+    ResolvedApiSpec getWithoutId() {
+        return new ResolvedApiSpec(this,
+                                   this.exchangeAssetVersion)
+    }
 }
