@@ -53,7 +53,7 @@ class ApiManagerDeployer {
         responses[0]
     }
 
-    ExistingApiManagerDefinition getExistingApiDefinition(ApiManagerDefinition desiredApiManagerDefinition) {
+    ExistingApiSpec getExistingApiDefinition(ApiSpec desiredApiManagerDefinition) {
         def assetId = desiredApiManagerDefinition.exchangeAssetId
         println "Checking for existing API Manager definition using Exchange asset ID '${assetId}'"
         def environment = desiredApiManagerDefinition.environment
@@ -84,11 +84,11 @@ class ApiManagerDeployer {
                 new ObjectMapper().convertValue(response,
                                                 ApiGetResponse)
         } as ApiGetResponse
-        return ExistingApiManagerDefinition.createFrom(environment,
-                                                       getResponse)
+        return new ExistingApiSpec(environment,
+                                   getResponse)
     }
 
-    ExistingApiManagerDefinition createApiDefinition(ApiManagerDefinition apiManagerDefinition) {
+    ExistingApiSpec createApiDefinition(ResolvedApiSpec apiManagerDefinition) {
         def groupId = clientWrapper.anypointOrganizationId
         def requestPayload = [
                 spec         : [
@@ -122,26 +122,25 @@ class ApiManagerDeployer {
                                                 ApiGetResponse)
         } as ApiGetResponse
         logger.println "Created API definition with ID ${createResponse.id}"
-        return ExistingApiManagerDefinition.createFrom(apiManagerDefinition.environment,
-                                                       createResponse)
+        return new ExistingApiSpec(apiManagerDefinition.environment,
+                                   createResponse)
     }
 
-    def updateApiDefinition(ExistingApiManagerDefinition apiManagerDefinition) {
-        def details = apiManagerDefinition.details
+    def updateApiDefinition(ExistingApiSpec apiManagerDefinition) {
         def requestPayload = [
-                assetVersion: details.exchangeAssetVersion,
-                instanceLabel: details.instanceLabel,
-                endpoint: [
-                        uri: details.endpoint,
+                assetVersion : apiManagerDefinition.exchangeAssetVersion,
+                instanceLabel: apiManagerDefinition.instanceLabel,
+                endpoint     : [
+                        uri                : apiManagerDefinition.endpoint,
                         proxyUri           : null,
-                        muleVersion4OrAbove: details.isMule4OrAbove,
+                        muleVersion4OrAbove: apiManagerDefinition.isMule4OrAbove,
                         isCloudHub         : null
                 ]
         ]
         def requestJson = JsonOutput.toJson(requestPayload)
         logger.println "Updating API definition using payload: ${JsonOutput.prettyPrint(requestJson)}"
         def request = createApiManagerRequest("/${apiManagerDefinition.id}",
-                                              details.environment) { url ->
+                                              apiManagerDefinition.environment) { url ->
             new HttpPatch(url).with {
                 setEntity(new StringEntity(requestJson,
                                            ContentType.APPLICATION_JSON))
@@ -151,5 +150,9 @@ class ApiManagerDeployer {
         clientWrapper.executeWithSuccessfulCloseableResponse(request,
                                                              'Updating API definition')
         logger.println('Successfully updated API definition')
+    }
+
+    def getDesiredAssetVersion(ApiSpec apiManagerDefinition) {
+
     }
 }

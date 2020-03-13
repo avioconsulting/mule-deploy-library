@@ -1,14 +1,16 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
-import com.avioconsulting.mule.deployment.internal.models.ApiManagerDefinition
 import com.avioconsulting.mule.deployment.internal.models.ApiQueryResponse
-import com.avioconsulting.mule.deployment.internal.models.ExistingApiManagerDefinition
+import com.avioconsulting.mule.deployment.internal.models.ApiSpec
+import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
+import com.avioconsulting.mule.deployment.internal.models.ResolvedApiSpec
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -62,18 +64,24 @@ class ApiManagerDeployerTest extends BaseTest {
                 ]))
             }
         }
-        def desiredApiDefinition = ApiManagerDefinition.createWithDefaultLabel('the-asset-id',
-                                                                               '1.2.3',
-                                                                               'https://some.endpoint',
-                                                                               'DEV',
-                                                                               true)
+        def desiredApiDefinition = new ResolvedApiSpec('the-asset-id',
+                                                       '1.2.3',
+                                                       'https://some.endpoint',
+                                                       'DEV',
+                                                       true)
 
         // act
         def result = deployer.createApiDefinition(desiredApiDefinition)
 
         // assert
-        assertThat result.details,
-                   is(equalTo(desiredApiDefinition))
+        def expected = new ExistingApiSpec('123',
+                                           'the-asset-id',
+                                           '1.2.3',
+                                           'https://some.endpoint',
+                                           'DEV',
+                                           true)
+        assertThat result,
+                   is(equalTo(expected))
         assertThat result.id,
                    is(equalTo('123'))
         assertThat url,
@@ -129,11 +137,11 @@ class ApiManagerDeployerTest extends BaseTest {
                 ]))
             }
         }
-        def desiredApiDefinition = ApiManagerDefinition.createWithDefaultLabel('the-asset-id',
-                                                                               '1.2.3',
-                                                                               'https://some.endpoint',
-                                                                               'DEV',
-                                                                               false)
+        def desiredApiDefinition = new ResolvedApiSpec('the-asset-id',
+                                                       '1.2.3',
+                                                       'https://some.endpoint',
+                                                       'DEV',
+                                                       false)
 
         // act
         deployer.createApiDefinition(desiredApiDefinition)
@@ -237,11 +245,10 @@ class ApiManagerDeployerTest extends BaseTest {
                 ]))
             }
         }
-        def desiredApiDefinition = ApiManagerDefinition.createWithDefaultLabel('the-asset-id',
-                                                                               '1.2.3',
-                                                                               'https://some.endpoint',
-                                                                               'DEV',
-                                                                               false)
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               false)
 
         // act
         deployer.getExistingApiDefinition(desiredApiDefinition)
@@ -275,11 +282,10 @@ class ApiManagerDeployerTest extends BaseTest {
                 ]))
             }
         }
-        def desiredApiDefinition = ApiManagerDefinition.createWithDefaultLabel('the-asset-id',
-                                                                               '1.2.3',
-                                                                               'https://some.endpoint',
-                                                                               'DEV',
-                                                                               false)
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               false)
 
         // act
         def response = deployer.getExistingApiDefinition(desiredApiDefinition)
@@ -331,25 +337,22 @@ class ApiManagerDeployerTest extends BaseTest {
                 end(new ObjectMapper().writeValueAsString(responseMap))
             }
         }
-        def desiredApiDefinition = ApiManagerDefinition.createWithDefaultLabel('the-asset-id',
-                                                                               '1.3.3',
-                                                                               'https://some.endpoint',
-                                                                               'DEV',
-                                                                               false)
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               false)
 
         // act
         def response = deployer.getExistingApiDefinition(desiredApiDefinition)
 
         // assert
-        assertThat response.id,
-                   is(equalTo('1234'))
-        assertThat response.details,
-                   is(equalTo(new ApiManagerDefinition('the-asset-id',
-                                                       '1.2.3',
-                                                       'https://some.endpoint',
-                                                       'DEV',
-                                                       'DEV - Automated',
-                                                       false)))
+        assertThat response,
+                   is(equalTo(new ExistingApiSpec('1234',
+                                                  'the-asset-id',
+                                                  '1.2.3',
+                                                  'https://some.endpoint',
+                                                  'DEV',
+                                                  false)))
     }
 
     @Test
@@ -379,16 +382,16 @@ class ApiManagerDeployerTest extends BaseTest {
                 end()
             }
         }
-        def desiredApiDefinition = ApiManagerDefinition.createWithDefaultLabel('the-asset-id',
-                                                                               '1.3.3',
-                                                                               'https://some.endpoint',
-                                                                               'DEV',
-                                                                               false)
+        def desiredApiDefinition = new ExistingApiSpec('1234',
+                                                       'the-asset-id',
+                                                       '1.3.3',
+                                                       'https://some.endpoint',
+                                                       'DEV',
+                                                       false)
 
 
         // act
-        deployer.updateApiDefinition(new ExistingApiManagerDefinition('1234',
-                                                                      desiredApiDefinition))
+        deployer.updateApiDefinition(desiredApiDefinition)
 
         // assert
         assertThat url,
@@ -408,5 +411,56 @@ class ApiManagerDeployerTest extends BaseTest {
                                    isCloudHub         : null
                            ]
                    ]))
+    }
+
+    @Test
+    void getDesiredAssetVersion_queries_properly() {
+        // arrange
+
+        // act
+        def result = deployer.getDesiredAssetVersion()
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void getDesiredAssetVersion_match_older_than_us() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void getDesiredAssetVersion_exact_match_our_app_version() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void getDesiredAssetVersion_newer_versions_than_us_exist() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void getDesiredAssetVersion_all_versions_are_newer() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
     }
 }
