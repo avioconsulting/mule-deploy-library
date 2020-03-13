@@ -437,14 +437,18 @@ class ApiManagerDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                end()
+                def response = [
+                        data: [
+                                assets: []
+                        ]
+                ]
+                end(JsonOutput.toJson(response))
             }
         }
-        def desiredApiDefinition = new ResolvedApiSpec('the-asset-id',
-                                                       '1.2.3',
-                                                       'https://some.endpoint',
-                                                       'DEV',
-                                                       true)
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               true)
 
         // act
         deployer.resolveAssetVersion(desiredApiDefinition)
@@ -466,11 +470,53 @@ class ApiManagerDeployerTest extends BaseTest {
     @Test
     void resolveAssetVersion_match_older_than_us() {
         // arrange
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def response = [
+                        data: [
+                                assets: [
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '1.0.201910193'
+
+                                        ],
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '1.0.201910213'
+
+                                        ]
+                                ]
+                        ]
+                ]
+                end(JsonOutput.toJson(response))
+            }
+        }
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               true)
 
         // act
+        def result = deployer.resolveAssetVersion(desiredApiDefinition)
 
         // assert
-        Assert.fail("write it")
+        assertThat result,
+                   is(equalTo(new ResolvedApiSpec('the-asset-id',
+                                                  '1.0.201910213',
+                                                  'https://some.endpoint',
+                                                  'DEV',
+                                                  true)))
     }
 
     @Test

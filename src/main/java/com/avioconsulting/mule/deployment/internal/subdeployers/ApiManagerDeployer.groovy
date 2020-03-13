@@ -1,12 +1,13 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
-import com.apollographql.apollo.api.OperationDataJsonSerializer
+
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.*
 import com.avioconsulting.mule.deployment.internal.models.graphql.GetAssetsQuery
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
+import okio.Okio
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPatch
 import org.apache.http.client.methods.HttpPost
@@ -159,7 +160,7 @@ class ApiManagerDeployer {
         def query = new GetAssetsQuery(assetId,
                                        clientWrapper.anypointOrganizationId)
         def requestPayload = [
-                query: query.queryDocument(),
+                query    : query.queryDocument(),
                 variables: query.variables().marshal()
         ]
         logger.println "Searching for assets for Exchange asset '${assetId}'"
@@ -168,8 +169,14 @@ class ApiManagerDeployer {
                                        ContentType.APPLICATION_JSON))
             it
         }
-        clientWrapper.executeWithSuccessfulCloseableResponse(request,
-                                                             'Exchange Asset GraphQL query')
+        def assets = clientWrapper.execute(request).withCloseable { response ->
+            clientWrapper.assertSuccessfulResponse(response,
+                                                   'GraphQL query')
+            def source = Okio.source(response.entity.content)
+            def bufferedSource = Okio.buffer(source)
+            query.parse(bufferedSource).data().get().assets
+        }
+        println "assets are ${assets[0]}"
         return null
     }
 }
