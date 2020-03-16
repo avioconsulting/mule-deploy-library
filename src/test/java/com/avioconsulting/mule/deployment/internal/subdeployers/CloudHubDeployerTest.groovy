@@ -53,6 +53,8 @@ class CloudHubDeployerTest extends BaseTest {
         String orgId = null
         MultiMap sentFormAttributes = null
         String rawBody = null
+        def statusCheckCount = 0
+        def deployRequested = false
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
             if (mockAuthenticationOk(request)) {
@@ -67,13 +69,34 @@ class CloudHubDeployerTest extends BaseTest {
                           'application/json')
                 def result = null
                 if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
-                    statusCode = 404
-                } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
-                    statusCode = 200
-                    // we test most of this in other methods
-                    result = getDeploymentStatusJson('STARTED',
-                                                     'STARTED')
+                    statusCheckCount++
+                    if (statusCheckCount == 1) {
+                        statusCode = 404
+                        result = 'not there'
+                    } else {
+                        statusCode = 200
+                        AppStatus status = {
+                            switch (statusCheckCount) {
+                                case 2:
+                                    if (!deployRequested) {
+                                        println '2nd status check w/o deploy, failing'
+                                        return AppStatus.Failed
+                                    }
+                                    println '2nd status check, the one after deploy, will return started'
+                                    return AppStatus.Started
+                                case 3:
+                                    println '3rd check, deploying'
+                                    return AppStatus.Deploying
+                                case 4:
+                                    println '4th check, started'
+                                    return AppStatus.Started
+                            }
+                        }()
+                        result = getAppResponsePayload('client-new-app-dev',
+                                                       status)
+                    }
                 } else {
+                    deployRequested = true
                     // deployment service returns this
                     statusCode = 200
                     result = getAppResponsePayload('new-app',
