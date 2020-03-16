@@ -133,10 +133,15 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
             if (status == AppStatus.Deploying) {
                 hasSeenDeploying = true
             }
-            if (hasSeenDeploying && status == AppStatus.Started) {
-                logger.println 'App started successfully!'
-                deployed = true
-                break
+            if (status == AppStatus.Started) {
+                if (hasSeenDeploying) {
+                    logger.println 'App started successfully!'
+                    deployed = true
+                    break
+                }
+                else {
+                    println 'We have not seen the app start deploying yet so will keep checking'
+                }
             }
             if (status == AppStatus.Failed) {
                 failed = true

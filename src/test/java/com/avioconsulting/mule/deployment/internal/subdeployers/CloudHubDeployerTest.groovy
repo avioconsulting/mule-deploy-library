@@ -6,7 +6,6 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.WorkerTypes
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
-
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
@@ -1145,7 +1144,8 @@ class CloudHubDeployerTest extends BaseTest {
         String orgId = null
         MultiMap sentFormAttributes = null
         String rawBody = null
-        def firstCheck = true
+        def statusCheckCount = 0
+        def deployRequested = false
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
             if (mockAuthenticationOk(request)) {
@@ -1160,22 +1160,31 @@ class CloudHubDeployerTest extends BaseTest {
                           'application/json')
                 def result = null
                 if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+                    statusCheckCount++
+                    AppStatus status = {
+                        switch (statusCheckCount) {
+                            case 1:
+                                println 'first check, we will say we have a good started app'
+                                return AppStatus.Started
+                            case 2:
+                                if (!deployRequested) {
+                                    println '2nd status check w/o deploy, failing'
+                                    return AppStatus.Failed
+                                }
+                                println '2nd status check, the one after deploy, will return started'
+                                return AppStatus.Started
+                            case 3:
+                                println '3rd check, deploying'
+                                return AppStatus.Deploying
+                            case 4:
+                                println '4th check, started'
+                                return AppStatus.Started
+                        }
+                    }()
                     result = getAppResponsePayload('client-new-app-dev',
-                                                   AppStatus.Started)
-                } else if (uri.endsWith('applications/client-new-app-dev/deployments?orderByDate=DESC') && request.method().name() == 'GET') {
-                    // existing app check + status is the same
-                    if (firstCheck) {
-                        statusCode = 200
-                        firstCheck = false
-                        result = getDeploymentStatusJson('STARTED',
-                                                         'STARTED')
-                    } else {
-                        statusCode = 200
-                        // we test most of this in other methods
-                        result = getDeploymentStatusJson('STARTED',
-                                                         'STARTED')
-                    }
+                                                   status)
                 } else {
+                    deployRequested = true
                     // deployment service returns this
                     statusCode = 200
                     result = getAppResponsePayload('client-new-app-dev',
