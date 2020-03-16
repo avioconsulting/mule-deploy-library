@@ -1,0 +1,10 @@
+query GetAssets ($asset_id: String!, $group_id: String!) {
+	assets(asset: {
+					groupId: $group_id,
+                    assetId: $asset_id
+                  }){
+        __typename
+        assetId
+        version
+    }
+}

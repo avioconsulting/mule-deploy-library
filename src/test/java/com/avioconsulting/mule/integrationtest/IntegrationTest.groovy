@@ -1,15 +1,14 @@
 package com.avioconsulting.mule.integrationtest
 
-import com.avioconsulting.mule.deployment.Deployer
-import com.avioconsulting.mule.deployment.MuleUtil
-import com.avioconsulting.mule.deployment.httpapi.EnvironmentLocator
-import com.avioconsulting.mule.deployment.httpapi.HttpClientWrapper
-import com.avioconsulting.mule.deployment.models.ApiSpecification
-import com.avioconsulting.mule.deployment.models.CloudhubDeploymentRequest
-import com.avioconsulting.mule.deployment.models.CloudhubWorkerSpecRequest
-import com.avioconsulting.mule.deployment.models.OnPremDeploymentRequest
-import com.avioconsulting.mule.deployment.subdeployers.CloudHubDeployer
-import com.avioconsulting.mule.deployment.subdeployers.OnPremDeployer
+import com.avioconsulting.mule.deployment.api.Deployer
+import com.avioconsulting.mule.deployment.api.models.ApiSpecification
+import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
+import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
+import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
+import com.avioconsulting.mule.deployment.internal.subdeployers.CloudHubDeployer
+import com.avioconsulting.mule.deployment.internal.subdeployers.OnPremDeployer
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.core.config.Configurator
 import org.apache.maven.shared.invoker.DefaultInvocationRequest
@@ -46,6 +45,18 @@ class IntegrationTest {
         new File(pomFileUrl.toURI())
     }
 
+    static String getFileName(String appName,
+                              String appVersion,
+                              String muleVersion) {
+        return muleVersion.startsWith("3") ?
+                String.format("%s-%s.zip",
+                              appName,
+                              appVersion) :
+                String.format("%s-%s-mule-application.jar",
+                              appName,
+                              appVersion)
+    }
+
     @BeforeClass
     static void setup() {
         // cut down on the unit test noise here
@@ -58,9 +69,9 @@ class IntegrationTest {
         def targetDir = new File(projectDirectory,
                                  'target')
         builtFile = new File(targetDir,
-                             MuleUtil.getFileName('mule4testapp',
-                                                  '1.0.0',
-                                                  '4.2.2'))
+                             getFileName('mule4testapp',
+                                         '1.0.0',
+                                         '4.2.2'))
         def mavenInvokeRequest = new DefaultInvocationRequest().with {
             setGoals(['clean', 'package'])
             setPomFile(pomFile)

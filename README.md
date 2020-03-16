@@ -12,10 +12,22 @@ Just include this dependency in your POM. See [AVIO Nexus](https://devops.avioco
 
 ## Create an Anypoint user with the right permissions
 
-* Apps - Cloudhub Admin (ENV) Role
-* Design Center/Exchange - Design Center Developer permission and Exchange Administrators role
+Roles:
+* Cloudhub Admin (DEV/TST/PRD) - to deploy the actual app
+* Exchange Administrators - to publish Exchange assets
 
-## Code
+Permissions:
+* Design Center Developer permission - to update Design Center
+* API Manager For each environment (DEV/TST/PRD):
+    * API Manager Environment Administrator
+    * Manage APIs Configuration
+    * Manage Contracts
+    * Manage Policies
+    * View APIs Configuration
+    * View Contracts
+    * View Policies
+
+## In your code
 
 You'll want to start by instantiating the `Deployer` class and then calling the appropriate methods.
 
@@ -25,6 +37,12 @@ NOTE: This library assumes that whatever logger mechanism you provide via The `P
 
 # Development/building/maintenance
 
+## Required development environment
+1. JDK - 1.8.0_191 works OK for running the tests as does JDK11. JDK ~> 1.8.0_232 seems to cause issues with the test web server and `CompleteableFuture` (`SocketClosed` exceptions). It's recommended to either use JDK 1.8 <= 191 or use >= 11 to run the unit tests.
+1. Maven
+
+## Maintenance
+
 This is largely just a standard Maven project. There are a couple ENUMs that should be kept up to date.
-1. `com.avioconsulting.mule.deployment.models.AwsRegions` - [Javadoc](https://devops.avioconsulting.com/jenkins/job/Mulesoft%20Deployment/job/mule-deploy-library/job/master/Maven_20site/groovydocs/com/avioconsulting/jenkins/mule/impl/AwsRegions.html)
-2. `com.avioconsulting.mule.deployment.models.WorkerTypes` - [Javadoc](https://devops.avioconsulting.com/jenkins/job/Mulesoft%20Deployment/job/mule-deploy-library/job/master/Maven_20site/groovydocs/com/avioconsulting/jenkins/mule/impl/WorkerTypes.html)
+1. `com.avioconsulting.mule.deployment.api.models.AwsRegions` - [Javadoc](https://devops.avioconsulting.com/jenkins/job/Mulesoft%20Deployment/job/mule-deploy-library/job/master/Maven_20site/groovydocs/com/avioconsulting/mule/deployment/api/models/AwsRegions.html)
+2. `com.avioconsulting.mule.deployment.api.models.WorkerTypes` - [Javadoc](https://devops.avioconsulting.com/jenkins/job/Mulesoft%20Deployment/job/mule-deploy-library/job/master/Maven_20site/groovydocs/com/avioconsulting/mule/deployment/api/models/WorkerTypes.html)
