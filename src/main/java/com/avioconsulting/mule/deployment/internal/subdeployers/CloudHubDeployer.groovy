@@ -15,7 +15,9 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
             STARTED      : AppStatus.Started,
             DEPLOY_FAILED: AppStatus.Failed,
             UNDEPLOYED   : AppStatus.Undeployed,
-            DELETED      : AppStatus.Deleted
+            DELETED      : AppStatus.Deleted,
+            UNDEPLOYING  : AppStatus.Undeploying,
+            DEPLOYING    : AppStatus.Deploying
     ]
 
     CloudHubDeployer(HttpClientWrapper clientWrapper,

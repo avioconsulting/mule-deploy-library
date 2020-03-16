@@ -2158,6 +2158,64 @@ class CloudHubDeployerTest extends BaseTest {
     }
 
     @Test
+    void getAppStatus_undeploying() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                end(JsonOutput.toJson([
+                        status: 'UNDEPLOYING'
+                ]))
+            }
+        }
+
+        // act
+        def status = deployer.getAppStatus('DEV',
+                                           'the-app')
+
+        // assert
+        assertThat status,
+                   is(equalTo(AppStatus.Undeploying))
+    }
+
+    @Test
+    void getAppStatus_deploying() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                end(JsonOutput.toJson([
+                        status: 'DEPLOYING'
+                ]))
+            }
+        }
+
+        // act
+        def status = deployer.getAppStatus('DEV',
+                                           'the-app')
+
+        // assert
+        assertThat status,
+                   is(equalTo(AppStatus.Deploying))
+    }
+
+    @Test
     void getAppStatus_failed() {
         // arrange
         withHttpServer { HttpServerRequest request ->
