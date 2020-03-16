@@ -7,6 +7,7 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
+import com.avioconsulting.mule.deployment.internal.models.AppStatus
 import com.avioconsulting.mule.deployment.internal.subdeployers.CloudHubDeployer
 import com.avioconsulting.mule.deployment.internal.subdeployers.OnPremDeployer
 import org.apache.logging.log4j.Level
@@ -105,6 +106,35 @@ class IntegrationTest {
                                      existingAppId)
         }
     }
+
+    def waitForAppDeletion(String environment,
+                           String appName) {
+        def tries = 0
+        def deleted = false
+        def failed = false
+        logger.println 'Now checking to see if app has been deleted'
+        while (!deleted && tries < this.maxTries) {
+            tries++
+            logger.println "*** Try ${tries} ***"
+            AppStatus status = getAppStatus(environment,
+                                            appName)
+            logger.println "Received status of ${status}"
+            if (status == AppStatus.NotFound) {
+                logger.println 'App removed successfully!'
+                deleted = true
+                break
+            }
+            logger.println "Sleeping for ${this.retryIntervalInMs / 1000} seconds and will recheck..."
+            Thread.sleep(this.retryIntervalInMs)
+        }
+        if (!deleted && failed) {
+            throw new Exception('Deletion failed on 1 or more nodes. Please see logs and messages as to why app did not start')
+        }
+        if (!deleted) {
+            throw new Exception("Deletion has not completed after ${tries} tries!")
+        }
+    }
+
 
     @Before
     void cleanup() {

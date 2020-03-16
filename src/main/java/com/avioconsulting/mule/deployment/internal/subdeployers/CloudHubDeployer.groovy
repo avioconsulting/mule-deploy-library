@@ -4,7 +4,6 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
-import com.avioconsulting.mule.deployment.internal.models.DeploymentStatus
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.*
 import org.apache.http.entity.ContentType
@@ -118,52 +117,28 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
         }
     }
 
-    def waitForAppDeletion(String environment,
-                           String appName) {
-        def tries = 0
-        def deleted = false
-        def failed = false
-        logger.println 'Now checking to see if app has been deleted'
-        while (!deleted && tries < this.maxTries) {
-            tries++
-            logger.println "*** Try ${tries} ***"
-            AppStatus status = getAppStatus(environment,
-                                            appName)
-            logger.println "Received status of ${status}"
-            if (status == AppStatus.NotFound) {
-                logger.println 'App removed successfully!'
-                deleted = true
-                break
-            }
-            logger.println "Sleeping for ${this.retryIntervalInMs / 1000} seconds and will recheck..."
-            Thread.sleep(this.retryIntervalInMs)
-        }
-        if (!deleted && failed) {
-            throw new Exception('Deletion failed on 1 or more nodes. Please see logs and messages as to why app did not start')
-        }
-        if (!deleted) {
-            throw new Exception("Deletion has not completed after ${tries} tries!")
-        }
-    }
-
     def waitForAppToStart(String environment,
                           String appName) {
         logger.println 'Now will wait for application to start...'
         def tries = 0
         def deployed = false
         def failed = false
+        def hasSeenDeploying = false
         while (!deployed && tries < this.maxTries) {
             tries++
             logger.println "*** Try ${tries} ***"
-            Set<DeploymentStatus> status = getDeploymentStatus(environment,
-                                                               appName)
-            logger.println "Received statuses of ${status}"
-            if (status.toList() == [DeploymentStatus.STARTED]) {
+            def status = getAppStatus(environment,
+                                      appName)
+            logger.println "Received status of ${status}"
+            if (status == AppStatus.Deploying) {
+                hasSeenDeploying = true
+            }
+            if (hasSeenDeploying && status == AppStatus.Started) {
                 logger.println 'App started successfully!'
                 deployed = true
                 break
             }
-            if (status.contains(DeploymentStatus.FAILED)) {
+            if (status == AppStatus.Failed) {
                 failed = true
                 logger.println 'Deployment FAILED on 1 more nodes!'
                 break
@@ -199,40 +174,6 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
                 throw new Exception("Unknown status value of ${input} detected from CloudHub!")
             }
             return mappedStatus
-        }
-        finally {
-            response.close()
-        }
-    }
-
-    Set<DeploymentStatus> getDeploymentStatus(String environment,
-                                              String appName) {
-        def request = new HttpGet("${clientWrapper.baseUrl}/cloudhub/api/v2/applications/${appName}/deployments?orderByDate=DESC").with {
-            addStandardStuff(it,
-                             environment)
-            it
-        } as HttpGet
-        def response = clientWrapper.execute(request)
-        try {
-            def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
-                                                                             'deployment status')
-            def data = result.data
-            // we used order by desc date
-            def lastChronologicalDeployment = data[0]
-            def uniqueStatuses = lastChronologicalDeployment.instances.status.unique()
-            def mapStatus = { String input ->
-                switch (input) {
-                    case 'STARTED':
-                        return DeploymentStatus.STARTED
-                    case 'TERMINATED':
-                        return DeploymentStatus.FAILED
-                    case 'DEPLOYING':
-                        return DeploymentStatus.STARTING
-                    default:
-                        return DeploymentStatus.UNKNOWN
-                }
-            }
-            return uniqueStatuses.collect { str -> mapStatus(str) }
         }
         finally {
             response.close()
