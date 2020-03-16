@@ -11,7 +11,6 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
 import io.vertx.core.http.HttpServerRequest
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -2349,5 +2348,60 @@ class CloudHubDeployerTest extends BaseTest {
         // assert
         assertThat result,
                    is(equalTo(true))
+    }
+
+    @Test
+    void startApplication() {
+        // arrange
+        String url = null
+        String method = null
+        String authToken = null
+        String envId = null
+        String orgId = null
+        String rawBody = null
+        withHttpServer { HttpServerRequest request ->
+            def uri = request.uri()
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                // deployment service returns this
+                statusCode = 200
+                url = uri
+                method = request.method()
+                (authToken, orgId, envId) = capturedStandardHeaders(request)
+                request.bodyHandler { buffer ->
+                    rawBody = buffer.toString()
+                }
+                end()
+            }
+        }
+
+        // act
+        deployer.startApplication('DEV',
+                                  'the-app')
+
+        // assert
+        assertThat url,
+                   is(equalTo('/cloudhub/api/applications/the-app/status'))
+        assertThat method,
+                   is(equalTo('POST'))
+        assertThat authToken,
+                   is(equalTo('Bearer the token'))
+        assertThat envId,
+                   is(equalTo('def456'))
+        assertThat orgId,
+                   is(equalTo('the-org-id'))
+        def map = new JsonSlurper().parseText(rawBody)
+        assertThat map,
+                   is(equalTo([
+                           status: 'start'
+                   ]))
     }
 }

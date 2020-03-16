@@ -240,4 +240,9 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
         // TODO: Is using this (which leans on JAR vs. ZIP) ok?
         deploymentRequest.isMule4Request()
     }
+
+    def startApplication(String environment,
+                         String appName) {
+
+    }
 }
