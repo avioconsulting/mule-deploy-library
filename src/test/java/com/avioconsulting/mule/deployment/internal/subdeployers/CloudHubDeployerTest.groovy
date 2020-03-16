@@ -2396,8 +2396,6 @@ class CloudHubDeployerTest extends BaseTest {
                    is(equalTo('Bearer the token'))
         assertThat envId,
                    is(equalTo('def456'))
-        assertThat orgId,
-                   is(equalTo('the-org-id'))
         def map = new JsonSlurper().parseText(rawBody)
         assertThat map,
                    is(equalTo([

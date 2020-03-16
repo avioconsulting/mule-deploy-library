@@ -1,12 +1,14 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
+import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
-import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.models.DeploymentStatus
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.*
+import org.apache.http.entity.ContentType
+import org.apache.http.entity.StringEntity
 
 class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
     static final Map<String, AppStatus> AppStatusMappings = [
@@ -243,6 +245,17 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
 
     def startApplication(String environment,
                          String appName) {
-
+        def request = new HttpPost("${clientWrapper.baseUrl}/cloudhub/api/applications/${appName}/status").with {
+            def payload = [
+                    status: 'start'
+            ]
+            setHeader('X-ANYPNT-ENV-ID',
+                      environmentLocator.getEnvironmentId(environment))
+            setEntity(new StringEntity(JsonOutput.toJson(payload),
+                                       ContentType.APPLICATION_JSON))
+            it
+        }
+        clientWrapper.executeWithSuccessfulCloseableResponse(request,
+                                                             'Start application')
     }
 }
