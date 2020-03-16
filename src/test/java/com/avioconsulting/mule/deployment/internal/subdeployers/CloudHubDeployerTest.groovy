@@ -10,8 +10,10 @@ import com.avioconsulting.mule.deployment.internal.models.DeploymentStatus
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
+import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -1626,9 +1628,9 @@ class CloudHubDeployerTest extends BaseTest {
     void perform_deployment_existing_stopped_app() {
         // arrange
         def firstCheck = true
-        def appDeleteRequested = false
-        def appDeleteComplete = false
-        def firstCheckAfterDeleteComplete = false
+        def appStartRequested = false
+        def appStartComplete = false
+        def firstCheckAfterStartComplete = false
         def deployed = false
         withHttpServer { HttpServerRequest request ->
             def uri = request.absoluteURI()
@@ -1649,15 +1651,15 @@ class CloudHubDeployerTest extends BaseTest {
                         firstCheck = false
                         result = getAppResponsePayload('client-new-app-dev',
                                                        AppStatus.Undeployed)
-                    } else if (appDeleteRequested && !firstCheckAfterDeleteComplete) {
-                        // the deletion operation takes a second, simulate that
-                        firstCheckAfterDeleteComplete = true
+                    } else if (appStartRequested && !firstCheckAfterStartComplete) {
+                        // the start operation takes a second, simulate that
+                        firstCheckAfterStartComplete = true
                         statusCode = 200
                         result = getAppResponsePayload('client-new-app-dev',
-                                                       AppStatus.Undeployed)
-                    } else if (appDeleteRequested && firstCheckAfterDeleteComplete) {
-                        // now our app is deleted
-                        appDeleteComplete = true
+                                                       AppStatus.Deploying)
+                    } else if (appStartRequested && firstCheckAfterStartComplete) {
+                        // now our app is started
+                        appStartComplete = true
                         statusCode = 404
                     } else {
                         statusCode = 500
@@ -1671,16 +1673,16 @@ class CloudHubDeployerTest extends BaseTest {
                     // we test most of this in other methods
                     result = getDeploymentStatusJson('STARTED',
                                                      'STARTED')
-                } else if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'DELETE') {
-                    appDeleteRequested = true
+                } else if (uri.endsWith('applications/client-new-app-dev/status') && request.method() == HttpMethod.POST) {
+                    appStartRequested = true
                     statusCode = 200
                 } else if (uri.endsWith('applications') && request.method().name() == 'POST') {
                     // deployment service returns this
-                    if (!appDeleteComplete) {
-                        println 'App was not deleted first! Returning 500'
+                    if (!appStartComplete) {
+                        println 'App was not started first! Returning 500'
                         statusCode = 500
                         result = [
-                                message: 'You did not delete the app first!'
+                                message: 'You did not start the app first!'
                         ]
                     } else {
                         statusCode = 200
