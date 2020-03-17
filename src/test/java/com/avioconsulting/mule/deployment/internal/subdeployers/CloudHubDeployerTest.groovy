@@ -1379,7 +1379,7 @@ class CloudHubDeployerTest extends BaseTest {
     }
 
     @Test
-    void perform_deployment_existing_failed_app_never_successful() {
+    void perform_deployment_existing_failed_app_never_successful_but_this_one_is() {
         // arrange
         def appStartRequested = false
         def deployed = false
@@ -1453,6 +1453,7 @@ class CloudHubDeployerTest extends BaseTest {
         }
         if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
             statusCheckCount++
+            println "mock status invocation ${statusCheckCount}/${appStatuses.size()}"
             if (statusCheckCount <= appStatuses.length) {
                 request.response().with {
                     statusCode = 200
@@ -1579,7 +1580,7 @@ class CloudHubDeployerTest extends BaseTest {
     @Test
     void perform_deployment_times_out() {
         // arrange
-        def appStatusesWeWillReturn = [AppStatus.NotFound] + (0..(maxTries + 1)).collect { AppStatus.Deploying }
+        def appStatusesWeWillReturn = [AppStatus.NotFound] + (1..maxTries).collect { AppStatus.Deploying }
         def appStatusPackagesWeWillReturn = appStatusesWeWillReturn.collect { status ->
             new AppStatusPackage(status,
                                  null)
@@ -1620,7 +1621,7 @@ class CloudHubDeployerTest extends BaseTest {
 
         // assert
         assertThat statusCheckCount,
-                   is(equalTo(10))
+                   is(equalTo(appStatusesWeWillReturn.size()))
         assertThat exception.message,
                    is(equalTo('Deployment has not failed but app has not started after 10 tries!'))
     }
@@ -1673,7 +1674,7 @@ class CloudHubDeployerTest extends BaseTest {
 
         // assert
         assertThat statusCheckCount,
-                   is(equalTo(4))
+                   is(equalTo(5))
         assertThat exception.message,
                    is(equalTo('Deployment failed on 1 or more workers. Please see logs and messages as to why app did not start'))
     }

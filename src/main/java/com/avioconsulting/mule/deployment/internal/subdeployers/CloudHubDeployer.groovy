@@ -5,6 +5,7 @@ import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
 import com.avioconsulting.mule.deployment.internal.models.AppStatusPackage
+import com.avioconsulting.mule.deployment.internal.models.DeploymentUpdateStatus
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.*
 import org.apache.http.entity.ContentType
@@ -41,7 +42,7 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
                                                deploymentRequest)
         doDeployment(request,
                      deploymentRequest)
-        if ([AppStatus.Undeployed, AppStatus.Failed].contains(existingAppStatus)) {
+        if ([AppStatus.Undeployed, AppStatus.Failed].contains(existingAppStatus.appStatus)) {
             logger.println "Since existing app was in '${existingAppStatus}' status before the deployment we just did, we will now try and start the app manually"
             startApplication(deploymentRequest.environment,
                              deploymentRequest.normalizedAppName)
@@ -130,12 +131,12 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
             } else if (status != baselineStatus && !hasBaselineStatusChanged) {
                 hasBaselineStatusChanged = true
             }
-            if (status.appStatus == AppStatus.Started) {
+            if (status.appStatus == AppStatus.Started && status.deploymentUpdateStatus == null) {
                 logger.println 'App started successfully!'
                 deployed = true
                 break
             }
-            if (status.appStatus == AppStatus.Failed) {
+            if (status.appStatus == AppStatus.Failed || status.deploymentUpdateStatus == DeploymentUpdateStatus.Failed) {
                 failed = true
                 logger.println 'Deployment FAILED on 1 more nodes!'
                 break
