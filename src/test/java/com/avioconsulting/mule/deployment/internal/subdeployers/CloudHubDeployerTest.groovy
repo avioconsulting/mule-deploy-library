@@ -7,6 +7,7 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.WorkerTypes
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
 import com.avioconsulting.mule.deployment.internal.models.AppStatusPackage
+import com.avioconsulting.mule.deployment.internal.models.DeploymentUpdateStatus
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
@@ -39,18 +40,15 @@ class CloudHubDeployerTest extends BaseTest {
         k, v ->
             [v, k]
     }
+    static final Map<DeploymentUpdateStatus, String> ReverseDeployUpdateStatusMappings = AppStatusMapper.DeployUpdateStatusMappings.collectEntries {
+        k, v ->
+            [v, k]
+    }
 
-    static def getAppResponsePayload(String appName,
-                                     AppStatus appStatus = null) {
-        def map = [
+    static def getAppDeployResponsePayload(String appName) {
+        [
                 domain: appName
         ]
-        // reason for this is we're sharing this method between app status GETs and app deployment POST/PUTs
-        // but we don't really check or care about the status response from the POST/PUT
-        if (appStatus) {
-            map['status'] = ReverseAppStatusMappings[appStatus]
-        }
-        return map
     }
 
     @Test
@@ -84,7 +82,7 @@ class CloudHubDeployerTest extends BaseTest {
                 def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppResponsePayload('new-app')
+                result = getAppDeployResponsePayload('new-app')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -186,7 +184,7 @@ class CloudHubDeployerTest extends BaseTest {
                 def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppResponsePayload('new-app')
+                result = getAppDeployResponsePayload('new-app')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -285,7 +283,7 @@ class CloudHubDeployerTest extends BaseTest {
                 def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppResponsePayload('new-app')
+                result = getAppDeployResponsePayload('new-app')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -393,7 +391,7 @@ class CloudHubDeployerTest extends BaseTest {
                 def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppResponsePayload('new-app')
+                result = getAppDeployResponsePayload('new-app')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -529,7 +527,7 @@ class CloudHubDeployerTest extends BaseTest {
                 def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppResponsePayload('client-new-app-dev')
+                result = getAppDeployResponsePayload('client-new-app-dev')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -631,7 +629,7 @@ class CloudHubDeployerTest extends BaseTest {
                 def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppResponsePayload('client-new-app-dev')
+                result = getAppDeployResponsePayload('client-new-app-dev')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -741,7 +739,7 @@ class CloudHubDeployerTest extends BaseTest {
                 def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppResponsePayload('client-new-app-dev')
+                result = getAppDeployResponsePayload('client-new-app-dev')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -847,7 +845,7 @@ class CloudHubDeployerTest extends BaseTest {
                 def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppResponsePayload('client-new-app-dev')
+                result = getAppDeployResponsePayload('client-new-app-dev')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -960,7 +958,7 @@ class CloudHubDeployerTest extends BaseTest {
                 def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppResponsePayload('client-new-app-dev')
+                result = getAppDeployResponsePayload('client-new-app-dev')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1142,7 +1140,7 @@ class CloudHubDeployerTest extends BaseTest {
                 def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppResponsePayload('client-new-app-dev')
+                result = getAppDeployResponsePayload('client-new-app-dev')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1247,7 +1245,7 @@ class CloudHubDeployerTest extends BaseTest {
                 def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppResponsePayload('client-new-app-dev')
+                result = getAppDeployResponsePayload('client-new-app-dev')
                 // apps that have had at least 1 successful deploy will show this
                 url = uri
                 method = request.method()
@@ -1353,7 +1351,7 @@ class CloudHubDeployerTest extends BaseTest {
                     // deployment service returns this
                     statusCode = 200
                     deployed = true
-                    result = getAppResponsePayload('client-new-app-dev')
+                    result = getAppDeployResponsePayload('client-new-app-dev')
                 } else {
                     statusCode = 500
                     result = [
@@ -1419,7 +1417,7 @@ class CloudHubDeployerTest extends BaseTest {
                     // deployment service returns this
                     statusCode = 200
                     deployed = true
-                    result = getAppResponsePayload('client-new-app-dev')
+                    result = getAppDeployResponsePayload('client-new-app-dev')
                 } else {
                     statusCode = 500
                     result = [
@@ -1451,7 +1449,7 @@ class CloudHubDeployerTest extends BaseTest {
     }
 
     def mockDeploymentAndXStatusChecks(HttpServerRequest request,
-                                       AppStatus... appStatuses) {
+                                       AppStatusPackage... appStatuses) {
         def uri = request.absoluteURI()
         if (mockAuthenticationOk(request)) {
             return true
@@ -1468,13 +1466,16 @@ class CloudHubDeployerTest extends BaseTest {
                               'application/json')
                     def result = null
                     def status = appStatuses[statusCheckCount - 1]
-                    if (status == AppStatus.NotFound) {
+                    if (status.appStatus == AppStatus.NotFound) {
                         statusCode = 404
                     } else {
                         // deployment service returns this
                         statusCode = 200
-                        result = getAppResponsePayload('client-new-app-dev',
-                                                       status)
+                        result = [
+                                domain                : 'client-new-app-dev',
+                                status                : ReverseAppStatusMappings[status.appStatus],
+                                deploymentUpdateStatus: ReverseDeployUpdateStatusMappings[status.deploymentUpdateStatus]
+                        ]
                     }
                     end(JsonOutput.toJson(result))
                 }
@@ -1507,7 +1508,7 @@ class CloudHubDeployerTest extends BaseTest {
                           'application/json')
                 // deployment service returns this
                 statusCode = 200
-                def result = getAppResponsePayload('new-app')
+                def result = getAppDeployResponsePayload('new-app')
                 request.expectMultipart = true
                 end(JsonOutput.toJson(result))
             }
@@ -1559,7 +1560,7 @@ class CloudHubDeployerTest extends BaseTest {
                           'application/json')
                 // deployment service returns this
                 statusCode = 200
-                def result = getAppResponsePayload('new-app')
+                def result = getAppDeployResponsePayload('new-app')
                 request.expectMultipart = true
                 end(JsonOutput.toJson(result))
             }
@@ -1609,7 +1610,7 @@ class CloudHubDeployerTest extends BaseTest {
                           'application/json')
                 // deployment service returns this
                 statusCode = 200
-                def result = getAppResponsePayload('new-app')
+                def result = getAppDeployResponsePayload('new-app')
                 request.expectMultipart = true
                 end(JsonOutput.toJson(result))
             }
@@ -1666,7 +1667,7 @@ class CloudHubDeployerTest extends BaseTest {
                           'application/json')
                 // deployment service returns this
                 statusCode = 200
-                def result = getAppResponsePayload('new-app')
+                def result = getAppDeployResponsePayload('new-app')
                 request.expectMultipart = true
                 end(JsonOutput.toJson(result))
             }
