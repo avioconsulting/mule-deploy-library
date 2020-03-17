@@ -19,7 +19,7 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
              environmentLocator,
              // for CloudHub, the deploy cycle is longer so we wait longer
              10000,
-             30,
+             50,
              logger)
     }
 
