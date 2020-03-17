@@ -8,6 +8,7 @@ import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
+import com.avioconsulting.mule.deployment.internal.models.AppStatusPackage
 import com.avioconsulting.mule.deployment.internal.subdeployers.CloudHubDeployer
 import com.avioconsulting.mule.deployment.internal.subdeployers.OnPremDeployer
 import org.apache.logging.log4j.Level
@@ -116,10 +117,10 @@ class IntegrationTest {
         while (!deleted && tries < 10) {
             tries++
             println "*** Try ${tries} ***"
-            AppStatus status = cloudHubDeployer.getAppStatus(environment,
-                                                             appName)
+            AppStatusPackage status = cloudHubDeployer.getAppStatus(environment,
+                                                                    appName)
             println "Received status of ${status}"
-            if (status == AppStatus.NotFound) {
+            if (status.appStatus == AppStatus.NotFound) {
                 println 'App removed successfully!'
                 deleted = true
                 break
