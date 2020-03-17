@@ -49,6 +49,11 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
                                                deploymentRequest)
         doDeployment(request,
                      deploymentRequest)
+        if ([AppStatus.Undeployed, AppStatus.Failed].contains(existingAppStatus)) {
+            logger.println "Since existing app was in '${existingAppStatus}' status before the deployment we just did, we will now try and start the app manually"
+            startApplication(deploymentRequest.environment,
+                             deploymentRequest.normalizedAppName)
+        }
         waitForAppToStart(deploymentRequest.environment,
                           deploymentRequest.normalizedAppName)
     }
@@ -60,16 +65,6 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
         HttpEntityEnclosingRequestBase request
         if (existingAppStatus == AppStatus.NotFound) {
             logger.println "Deploying '${appName}', ${fileName} as a NEW application"
-            request = new HttpPost("${clientWrapper.baseUrl}/cloudhub/api/v2/applications")
-        } else if ([AppStatus.Undeployed, AppStatus.Failed].contains(existingAppStatus)) {
-            // If you try and PUT a new version of an app over an existing failed deployment, CloudHub will reject it
-            // so we delete first to clear out the failed deployment
-            logger.println "Existing deployment of '${appName}' is in status '${existingAppStatus}' and is not currently running. Will remove first and then deploy a new copy"
-            deleteApp(deploymentRequest.environment,
-                      appName)
-            waitForAppDeletion(deploymentRequest.environment,
-                               appName)
-            logger.println "App deleted, now deploying '${appName}', ${fileName} as a NEW application"
             request = new HttpPost("${clientWrapper.baseUrl}/cloudhub/api/v2/applications")
         } else {
             logger.println "Deploying '${appName}', ${fileName} as an UPDATED application"
@@ -138,8 +133,7 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
                     logger.println 'App started successfully!'
                     deployed = true
                     break
-                }
-                else {
+                } else {
                     println 'We have not seen the app start deploying yet so will keep checking'
                 }
             }

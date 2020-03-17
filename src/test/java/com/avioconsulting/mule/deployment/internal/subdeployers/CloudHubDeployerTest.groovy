@@ -1329,7 +1329,7 @@ class CloudHubDeployerTest extends BaseTest {
         def deployed = false
         def appStartRequested = false
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
+            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
                 return
             }
@@ -1340,7 +1340,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                // before we deploy
                                                AppStatus.Undeployed,
                                                // after we deploy but before it starts
-                                               AppStatus.Started,
+                                               AppStatus.Undeployed,
                                                AppStatus.Deploying,
                                                AppStatus.Started)) {
                 return
@@ -1353,7 +1353,7 @@ class CloudHubDeployerTest extends BaseTest {
                 if (uri.endsWith('applications/client-new-app-dev/status') && request.method() == HttpMethod.POST && deployed) {
                     appStartRequested = true
                     statusCode = 200
-                } else if (uri.endsWith('applications') && request.method().name() == 'POST') {
+                } else if (uri == '/cloudhub/api/v2/applications/client-new-app-dev' && request.method() == HttpMethod.PUT) {
                     // deployment service returns this
                     statusCode = 200
                     deployed = true
