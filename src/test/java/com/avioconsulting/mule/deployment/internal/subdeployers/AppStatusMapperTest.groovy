@@ -49,6 +49,18 @@ class AppStatusMapperTest {
                         'DELETED',
                         AppStatus.Deleted,
                         null
+                ],
+                [
+                        'DeploymentUpdateStatus - Deploying',
+                        'DEPLOYING',
+                        null,
+                        DeploymentUpdateStatus.Deploying
+                ],
+                [
+                        'DeploymentUpdateStatus - Failed',
+                        'DEPLOY_FAILED',
+                        null,
+                        DeploymentUpdateStatus.Failed
                 ]
         ].collect { listOfArgs ->
             listOfArgs.toArray()
