@@ -1190,7 +1190,6 @@ class CloudHubDeployerTest extends BaseTest {
                                                                     DeploymentUpdateStatus.Deploying),
                                                new AppStatusPackage(AppStatus.Started,
                                                                     null))) {
-                deployAndStatusCount++
                 return
             }
             request.response().with {
@@ -1221,11 +1220,8 @@ class CloudHubDeployerTest extends BaseTest {
         deployer.deploy(request)
 
         // assert
-        assertThat '1 deployment request, 3 status checks',
-                   deployAndStatusCount,
-                   is(equalTo(4))
-        assertThat deployAndStatusCount,
-                   is(equalTo(99))
+        assertThat statusCheckCount,
+                   is(equalTo(3))
     }
 
     @Test
@@ -1286,7 +1282,6 @@ class CloudHubDeployerTest extends BaseTest {
                                                                     DeploymentUpdateStatus.Deploying),
                                                new AppStatusPackage(AppStatus.Started,
                                                                     null))) {
-                deployStatusCount++
                 return
             }
             request.response().with {
@@ -1317,8 +1312,8 @@ class CloudHubDeployerTest extends BaseTest {
         deployer.deploy(request)
 
         // assert
-        assertThat deployStatusCount,
-                   is(equalTo(99))
+        assertThat statusCheckCount,
+                   is(equalTo(3))
     }
 
     @Test
@@ -1471,8 +1466,8 @@ class CloudHubDeployerTest extends BaseTest {
                         // deployment service returns this
                         statusCode = 200
                         result = [
-                                domain                : 'client-new-app-dev',
-                                status                : ReverseAppStatusMappings[status.appStatus]
+                                domain: 'client-new-app-dev',
+                                status: ReverseAppStatusMappings[status.appStatus]
                         ]
                         def deploymentUpdateStatusString = ReverseDeployUpdateStatusMappings[status.deploymentUpdateStatus]
                         if (deploymentUpdateStatusString) {
@@ -1500,7 +1495,6 @@ class CloudHubDeployerTest extends BaseTest {
                                                                     null),
                                                new AppStatusPackage(AppStatus.Started,
                                                                     null))) {
-                deployAndStatusCount++
                 return
             }
             request.response().with {
@@ -1531,9 +1525,8 @@ class CloudHubDeployerTest extends BaseTest {
         deployer.deploy(request)
 
         // assert
-        assertThat '1 deployment request, 2 status checks',
-                   deployAndStatusCount,
-                   is(equalTo(3))
+        assertThat statusCheckCount,
+                   is(equalTo(4))
     }
 
     @Test
@@ -1549,7 +1542,6 @@ class CloudHubDeployerTest extends BaseTest {
                                                                     null),
                                                new AppStatusPackage(AppStatus.Started,
                                                                     null))) {
-                deployAndStatusCount++
                 return
             }
             request.response().with {
@@ -1580,8 +1572,7 @@ class CloudHubDeployerTest extends BaseTest {
         deployer.deploy(request)
 
         // assert
-        assertThat '1 deployment request, 3 status checks',
-                   deployAndStatusCount,
+        assertThat statusCheckCount,
                    is(equalTo(4))
     }
 
@@ -1596,7 +1587,6 @@ class CloudHubDeployerTest extends BaseTest {
         withHttpServer { HttpServerRequest request ->
             if (mockDeploymentAndXStatusChecks(request,
                                                appStatusPackagesWeWillReturn.toArray(new AppStatusPackage[0]) as AppStatusPackage[])) {
-                deployAndStatusCount++
                 return
             }
             request.response().with {
@@ -1629,9 +1619,8 @@ class CloudHubDeployerTest extends BaseTest {
         }
 
         // assert
-        assertThat '1 deployment request, 10 status checks',
-                   deployAndStatusCount,
-                   is(equalTo(11))
+        assertThat statusCheckCount,
+                   is(equalTo(10))
         assertThat exception.message,
                    is(equalTo('Deployment has not failed but app has not started after 10 tries!'))
     }
@@ -1651,7 +1640,6 @@ class CloudHubDeployerTest extends BaseTest {
                                                                     null),
                                                new AppStatusPackage(AppStatus.Failed,
                                                                     null))) {
-                deployAndStatusCount++
                 return
             }
             request.response().with {
@@ -1684,9 +1672,8 @@ class CloudHubDeployerTest extends BaseTest {
         }
 
         // assert
-        assertThat '1 deployment request, 4 status checks',
-                   deployAndStatusCount,
-                   is(equalTo(5))
+        assertThat statusCheckCount,
+                   is(equalTo(4))
         assertThat exception.message,
                    is(equalTo('Deployment failed on 1 or more workers. Please see logs and messages as to why app did not start'))
     }
