@@ -37,7 +37,7 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
     def deploy(CloudhubDeploymentRequest deploymentRequest) {
         def existingAppStatus = getAppStatus(deploymentRequest.environment,
                                              deploymentRequest.normalizedAppName)
-        def request = getDeploymentHttpRequest(existingAppStatus,
+        def request = getDeploymentHttpRequest(existingAppStatus.getAppStatus(),
                                                deploymentRequest)
         doDeployment(request,
                      deploymentRequest)
@@ -107,7 +107,7 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
 
     def waitForAppToStart(String environment,
                           String appName,
-                          AppStatus baselineStatus) {
+                          AppStatusPackage baselineStatus) {
         logger.println 'Now will wait for application to start...'
         def tries = 0
         def deployed = false
@@ -130,12 +130,12 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
             } else if (status != baselineStatus && !hasBaselineStatusChanged) {
                 hasBaselineStatusChanged = true
             }
-            if (status == AppStatus.Started) {
+            if (status.appStatus == AppStatus.Started) {
                 logger.println 'App started successfully!'
                 deployed = true
                 break
             }
-            if (status == AppStatus.Failed) {
+            if (status.appStatus == AppStatus.Failed) {
                 failed = true
                 logger.println 'Deployment FAILED on 1 more nodes!'
                 break
