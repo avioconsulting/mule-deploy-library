@@ -20,8 +20,16 @@ class AppStatusMapper {
     ]
 
     AppStatusPackage parseAppStatus(Map muleStatusResponse) {
-        def parsedAppStatus = AppStatusMappings[muleStatusResponse.status]
-        def parsedDeployUpdateStatus = DeployUpdateStatusMappings[muleStatusResponse.deploymentUpdateStatus]
+        def input = muleStatusResponse.status
+        def parsedAppStatus = AppStatusMappings[input]
+        if (parsedAppStatus == null) {
+            throw new Exception("Unknown status value of ${input} detected from CloudHub!")
+        }
+        input = muleStatusResponse.deploymentUpdateStatus
+        def parsedDeployUpdateStatus = DeployUpdateStatusMappings[input]
+        if (input != null && parsedDeployUpdateStatus == null) {
+            throw new Exception("Unknown parsedDeployUpdateStatus value of ${input} detected from CloudHub!")
+        }
         new AppStatusPackage(parsedAppStatus,
                              parsedDeployUpdateStatus)
     }
