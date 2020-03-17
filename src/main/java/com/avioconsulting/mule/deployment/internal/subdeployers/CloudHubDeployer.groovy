@@ -24,8 +24,8 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
                      PrintStream logger) {
         this(clientWrapper,
              environmentLocator,
-             60000,
              // for CloudHub, the deploy cycle is longer so we wait longer
+             10000,
              30,
              logger)
     }
@@ -55,7 +55,8 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
                              deploymentRequest.normalizedAppName)
         }
         waitForAppToStart(deploymentRequest.environment,
-                          deploymentRequest.normalizedAppName)
+                          deploymentRequest.normalizedAppName,
+                          existingAppStatus)
     }
 
     private HttpEntityEnclosingRequestBase getDeploymentHttpRequest(AppStatus existingAppStatus,
@@ -113,37 +114,42 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
     }
 
     def waitForAppToStart(String environment,
-                          String appName) {
+                          String appName,
+                          AppStatus baselineStatus) {
         logger.println 'Now will wait for application to start...'
         def tries = 0
         def deployed = false
         def failed = false
-        def hasSeenDeploying = false
+        def hasBaselineStatusChanged = false
+        def sleep = {
+            logger.println "Sleeping for ${this.retryIntervalInMs / 1000} seconds and will recheck..."
+            Thread.sleep(this.retryIntervalInMs)
+        }
         while (!deployed && tries < this.maxTries) {
             tries++
             logger.println "*** Try ${tries} ***"
             def status = getAppStatus(environment,
                                       appName)
-            logger.println "Received status of ${status}"
-            if (status == AppStatus.Deploying) {
-                hasSeenDeploying = true
+            logger.println "Current status is '${status}'"
+            if (status == baselineStatus && !hasBaselineStatusChanged) {
+                logger.println "We have not seen the baseline status change from '${baselineStatus}' so will keep checking"
+                sleep()
+                continue
+            } else if (status != baselineStatus && !hasBaselineStatusChanged) {
+                hasBaselineStatusChanged = true
             }
             if (status == AppStatus.Started) {
-                if (hasSeenDeploying) {
-                    logger.println 'App started successfully!'
-                    deployed = true
-                    break
-                } else {
-                    println 'We have not seen the app start deploying yet so will keep checking'
-                }
+                logger.println 'App started successfully!'
+                deployed = true
+                break
             }
             if (status == AppStatus.Failed) {
                 failed = true
                 logger.println 'Deployment FAILED on 1 more nodes!'
                 break
             }
-            logger.println "Sleeping for ${this.retryIntervalInMs / 1000} seconds and will recheck..."
-            Thread.sleep(this.retryIntervalInMs)
+            logger.println 'Have not seen Started state yet'
+            sleep()
         }
         if (!deployed && failed) {
             throw new Exception('Deployment failed on 1 or more workers. Please see logs and messages as to why app did not start')
