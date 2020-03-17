@@ -1268,7 +1268,7 @@ class CloudHubDeployerTest extends BaseTest {
 
         // assert
         assertThat exception.message,
-                   is(containsString('fff'))
+                   is(containsString('Deployment failed on 1 or more workers. Please see logs and messages as to why app did not start'))
     }
 
     @Test
