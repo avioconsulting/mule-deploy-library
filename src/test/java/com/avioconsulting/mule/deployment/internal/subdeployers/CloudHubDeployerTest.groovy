@@ -84,10 +84,8 @@ class CloudHubDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppDeployResponsePayload('new-app')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -96,6 +94,7 @@ class CloudHubDeployerTest extends BaseTest {
                 request.bodyHandler { buffer ->
                     rawBody = buffer.toString()
                 }
+                def result = getAppDeployResponsePayload('new-app')
                 end(JsonOutput.toJson(result))
             }
         }
@@ -191,10 +190,8 @@ class CloudHubDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppDeployResponsePayload('new-app')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -203,6 +200,7 @@ class CloudHubDeployerTest extends BaseTest {
                 request.bodyHandler { buffer ->
                     rawBody = buffer.toString()
                 }
+                def result = getAppDeployResponsePayload('new-app')
                 end(JsonOutput.toJson(result))
             }
         }
@@ -295,10 +293,8 @@ class CloudHubDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppDeployResponsePayload('new-app')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -307,6 +303,7 @@ class CloudHubDeployerTest extends BaseTest {
                 request.bodyHandler { buffer ->
                     rawBody = buffer.toString()
                 }
+                def result = getAppDeployResponsePayload('new-app')
                 end(JsonOutput.toJson(result))
             }
         }
@@ -408,10 +405,8 @@ class CloudHubDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppDeployResponsePayload('new-app')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -421,6 +416,7 @@ class CloudHubDeployerTest extends BaseTest {
                     println "got ZIP file " + upload.filename()
                     upload.streamToFileSystem(newZipFile.absolutePath)
                 }
+                def result = getAppDeployResponsePayload('new-app')
                 end(JsonOutput.toJson(result))
             }
         }
@@ -549,10 +545,8 @@ class CloudHubDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppDeployResponsePayload('client-new-app-dev')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -561,6 +555,7 @@ class CloudHubDeployerTest extends BaseTest {
                 request.bodyHandler { buffer ->
                     rawBody = buffer.toString()
                 }
+                def result = getAppDeployResponsePayload('client-new-app-dev')
                 end(JsonOutput.toJson(result))
             }
         }
@@ -656,10 +651,8 @@ class CloudHubDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppDeployResponsePayload('client-new-app-dev')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -668,6 +661,7 @@ class CloudHubDeployerTest extends BaseTest {
                 request.bodyHandler { buffer ->
                     rawBody = buffer.toString()
                 }
+                def result = getAppDeployResponsePayload('client-new-app-dev')
                 end(JsonOutput.toJson(result))
             }
         }
@@ -771,10 +765,8 @@ class CloudHubDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppDeployResponsePayload('client-new-app-dev')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -783,6 +775,7 @@ class CloudHubDeployerTest extends BaseTest {
                 request.bodyHandler { buffer ->
                     rawBody = buffer.toString()
                 }
+                def result = getAppDeployResponsePayload('client-new-app-dev')
                 end(JsonOutput.toJson(result))
             }
         }
@@ -882,10 +875,8 @@ class CloudHubDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppDeployResponsePayload('client-new-app-dev')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -894,6 +885,7 @@ class CloudHubDeployerTest extends BaseTest {
                 request.bodyHandler { buffer ->
                     rawBody = buffer.toString()
                 }
+                def result = getAppDeployResponsePayload('client-new-app-dev')
                 end(JsonOutput.toJson(result))
             }
         }
@@ -968,7 +960,7 @@ class CloudHubDeployerTest extends BaseTest {
     }
 
     @Test
-    void perform_deployment_upper_case() {
+    void perform_deployment_correct_request_upper_case() {
         // arrange
         String url = null
         String method = null
@@ -1000,10 +992,8 @@ class CloudHubDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppDeployResponsePayload('client-new-app-dev')
                 url = uri
                 method = request.method()
                 (authToken, orgId, envId) = capturedStandardHeaders(request)
@@ -1012,6 +1002,7 @@ class CloudHubDeployerTest extends BaseTest {
                 request.bodyHandler { buffer ->
                     rawBody = buffer.toString()
                 }
+                def result = getAppDeployResponsePayload('client-new-app-dev')
                 end(JsonOutput.toJson(result))
             }
         }
@@ -1037,6 +1028,110 @@ class CloudHubDeployerTest extends BaseTest {
                    is(equalTo('/cloudhub/api/v2/applications'))
         assertThat method,
                    is(equalTo('POST'))
+        assertThat authToken,
+                   is(equalTo('Bearer the token'))
+        assertThat envId,
+                   is(equalTo('def456'))
+        assertThat orgId,
+                   is(equalTo('the-org-id'))
+        assertThat sentFormAttributes.names().toList().sort(),
+                   is(equalTo(['appInfoJson', 'autoStart']))
+        assertThat sentFormAttributes.get('autoStart'),
+                   is(equalTo('true'))
+        def map = new JsonSlurper().parseText(sentFormAttributes.get('appInfoJson'))
+        assertThat map,
+                   is(equalTo([
+                           domain               : 'client-new-app-dev',
+                           muleVersion          : [
+                                   version: '3.9.1'
+                           ],
+                           region               : 'us-east-1',
+                           monitoringAutoRestart: true,
+                           workers              : [
+                                   type  : [
+                                           name: 'Micro'
+                                   ],
+                                   amount: 1
+                           ],
+                           persistentQueues     : false,
+                           properties           : [
+                                   env                              : 'dev',
+                                   'crypto.key'                     : 'theKey',
+                                   'anypoint.platform.client_id'    : 'theClientId',
+                                   'anypoint.platform.client_secret': 'theSecret'
+                           ]
+                   ]))
+        assertThat rawBody,
+                   is(containsString('Content-Disposition: form-data; name="file"; filename="some_file.txt"'))
+    }
+
+    @Test
+    void perform_deployment_correct_request_existing_app() {
+        // arrange
+        String url = null
+        String method = null
+        String authToken = null
+        String envId = null
+        String orgId = null
+        MultiMap sentFormAttributes = null
+        String rawBody = null
+        withHttpServer { HttpServerRequest request ->
+            def uri = request.uri()
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            if (mockDeploymentAndXStatusChecks(request,
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    DeploymentUpdateStatus.Deploying),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                // deployment service returns this
+                statusCode = 200
+                url = uri
+                method = request.method()
+                (authToken, orgId, envId) = capturedStandardHeaders(request)
+                request.expectMultipart = true
+                sentFormAttributes = request.formAttributes()
+                request.bodyHandler { buffer ->
+                    rawBody = buffer.toString()
+                }
+                def result = getAppDeployResponsePayload('client-new-app-dev')
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def file = new File('src/test/resources/some_file.txt')
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
+
+        // act
+        deployer.deploy(request)
+
+        // assert
+        assertThat url,
+                   is(equalTo('/cloudhub/api/v2/applications/client-new-app-dev'))
+        assertThat method,
+                   is(equalTo('PUT'))
         assertThat authToken,
                    is(equalTo('Bearer the token'))
         assertThat envId,
@@ -1103,7 +1198,6 @@ class CloudHubDeployerTest extends BaseTest {
     void perform_deployment_fails_immediately() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            def uri = request.absoluteURI()
             if (mockAuthenticationOk(request)) {
                 return
             }
@@ -1119,10 +1213,9 @@ class CloudHubDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
                 // deployment service returns this
                 statusCode = 500
-                result = [
+                def result = [
                         message: 'some message from CH'
                 ]
                 end(JsonOutput.toJson(result))
@@ -1153,17 +1246,10 @@ class CloudHubDeployerTest extends BaseTest {
     }
 
     @Test
-    void perform_deployment_existing_app() {
+    void perform_deployment_existing_app_succeeds() {
         // arrange
-        String url = null
-        String method = null
-        String authToken = null
-        String envId = null
-        String orgId = null
-        MultiMap sentFormAttributes = null
-        String rawBody = null
+        def deployAndStatusCount = 0
         withHttpServer { HttpServerRequest request ->
-            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
                 return
             }
@@ -1177,24 +1263,16 @@ class CloudHubDeployerTest extends BaseTest {
                                                                     DeploymentUpdateStatus.Deploying),
                                                new AppStatusPackage(AppStatus.Started,
                                                                     null))) {
+                deployAndStatusCount++
                 return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppDeployResponsePayload('client-new-app-dev')
-                url = uri
-                method = request.method()
-                (authToken, orgId, envId) = capturedStandardHeaders(request)
-                request.expectMultipart = true
-                sentFormAttributes = request.formAttributes()
-                request.bodyHandler { buffer ->
-                    rawBody = buffer.toString()
-                }
+                def result = getAppDeployResponsePayload('client-new-app-dev')
                 end(JsonOutput.toJson(result))
             }
         }
@@ -1216,59 +1294,68 @@ class CloudHubDeployerTest extends BaseTest {
         deployer.deploy(request)
 
         // assert
-        assertThat url,
-                   is(equalTo('/cloudhub/api/v2/applications/client-new-app-dev'))
-        assertThat method,
-                   is(equalTo('PUT'))
-        assertThat authToken,
-                   is(equalTo('Bearer the token'))
-        assertThat envId,
-                   is(equalTo('def456'))
-        assertThat orgId,
-                   is(equalTo('the-org-id'))
-        assertThat sentFormAttributes.names().toList().sort(),
-                   is(equalTo(['appInfoJson', 'autoStart']))
-        assertThat sentFormAttributes.get('autoStart'),
-                   is(equalTo('true'))
-        def map = new JsonSlurper().parseText(sentFormAttributes.get('appInfoJson'))
-        assertThat map,
-                   is(equalTo([
-                           domain               : 'client-new-app-dev',
-                           muleVersion          : [
-                                   version: '3.9.1'
-                           ],
-                           region               : 'us-east-1',
-                           monitoringAutoRestart: true,
-                           workers              : [
-                                   type  : [
-                                           name: 'Micro'
-                                   ],
-                                   amount: 1
-                           ],
-                           persistentQueues     : false,
-                           properties           : [
-                                   env                              : 'dev',
-                                   'crypto.key'                     : 'theKey',
-                                   'anypoint.platform.client_id'    : 'theClientId',
-                                   'anypoint.platform.client_secret': 'theSecret'
-                           ]
-                   ]))
-        assertThat rawBody,
-                   is(containsString('Content-Disposition: form-data; name="file"; filename="some_file.txt"'))
+        assertThat deployAndStatusCount,
+                   is(equalTo(99))
+    }
+
+    @Test
+    void perform_deployment_existing_app_fails() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            if (mockDeploymentAndXStatusChecks(request,
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    DeploymentUpdateStatus.Deploying),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    DeploymentUpdateStatus.Failed))) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                // deployment service returns this
+                statusCode = 200
+                def result = getAppDeployResponsePayload('client-new-app-dev')
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def file = new File('src/test/resources/some_file.txt')
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
+
+        // act
+        def exception = shouldFail {
+            deployer.deploy(request)
+        }
+
+        // assert
+        assertThat exception.message,
+                   is(containsString('fff'))
     }
 
     @Test
     void perform_deployment_existing_app_failed_last_but_has_started_ok_once() {
         // arrange
-        String url = null
-        String method = null
-        String authToken = null
-        String envId = null
-        String orgId = null
-        MultiMap sentFormAttributes = null
-        String rawBody = null
+        def deployStatusCount = 0
         withHttpServer { HttpServerRequest request ->
-            def uri = request.uri()
             if (mockAuthenticationOk(request)) {
                 return
             }
@@ -1282,25 +1369,16 @@ class CloudHubDeployerTest extends BaseTest {
                                                                     DeploymentUpdateStatus.Deploying),
                                                new AppStatusPackage(AppStatus.Started,
                                                                     null))) {
+                deployStatusCount++
                 return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
                 // deployment service returns this
                 statusCode = 200
-                result = getAppDeployResponsePayload('client-new-app-dev')
-                // apps that have had at least 1 successful deploy will show this
-                url = uri
-                method = request.method()
-                (authToken, orgId, envId) = capturedStandardHeaders(request)
-                request.expectMultipart = true
-                sentFormAttributes = request.formAttributes()
-                request.bodyHandler { buffer ->
-                    rawBody = buffer.toString()
-                }
+                def result = getAppDeployResponsePayload('client-new-app-dev')
                 end(JsonOutput.toJson(result))
             }
         }
@@ -1322,45 +1400,8 @@ class CloudHubDeployerTest extends BaseTest {
         deployer.deploy(request)
 
         // assert
-        assertThat url,
-                   is(equalTo('/cloudhub/api/v2/applications/client-new-app-dev'))
-        assertThat method,
-                   is(equalTo('PUT'))
-        assertThat authToken,
-                   is(equalTo('Bearer the token'))
-        assertThat envId,
-                   is(equalTo('def456'))
-        assertThat orgId,
-                   is(equalTo('the-org-id'))
-        assertThat sentFormAttributes.names().toList().sort(),
-                   is(equalTo(['appInfoJson', 'autoStart']))
-        assertThat sentFormAttributes.get('autoStart'),
-                   is(equalTo('true'))
-        def map = new JsonSlurper().parseText(sentFormAttributes.get('appInfoJson'))
-        assertThat map,
-                   is(equalTo([
-                           domain               : 'client-new-app-dev',
-                           muleVersion          : [
-                                   version: '3.9.1'
-                           ],
-                           region               : 'us-east-1',
-                           monitoringAutoRestart: true,
-                           workers              : [
-                                   type  : [
-                                           name: 'Micro'
-                                   ],
-                                   amount: 1
-                           ],
-                           persistentQueues     : false,
-                           properties           : [
-                                   env                              : 'dev',
-                                   'crypto.key'                     : 'theKey',
-                                   'anypoint.platform.client_id'    : 'theClientId',
-                                   'anypoint.platform.client_secret': 'theSecret'
-                           ]
-                   ]))
-        assertThat rawBody,
-                   is(containsString('Content-Disposition: form-data; name="file"; filename="some_file.txt"'))
+        assertThat deployStatusCount,
+                   is(equalTo(99))
     }
 
     @Test
@@ -1495,7 +1536,10 @@ class CloudHubDeployerTest extends BaseTest {
         deployer.deploy(request)
 
         // assert
-        // our mock assertions should do the work here
+        assertThat appStartRequested,
+                   is(equalTo(true))
+        assertThat deployed,
+                   is(equalTo(true))
     }
 
     def mockDeploymentAndXStatusChecks(HttpServerRequest request,
