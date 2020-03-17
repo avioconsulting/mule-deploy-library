@@ -70,9 +70,14 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
-                                               AppStatus.NotFound,
-                                               AppStatus.Deploying,
-                                               AppStatus.Started)) {
+                                               new AppStatusPackage(AppStatus.NotFound,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Undeployed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
                 return
             }
             request.response().with {
@@ -172,9 +177,14 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
-                                               AppStatus.NotFound,
-                                               AppStatus.Deploying,
-                                               AppStatus.Started)) {
+                                               new AppStatusPackage(AppStatus.NotFound,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Undeployed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
                 return
             }
             request.response().with {
@@ -271,9 +281,14 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
-                                               AppStatus.NotFound,
-                                               AppStatus.Deploying,
-                                               AppStatus.Started)) {
+                                               new AppStatusPackage(AppStatus.NotFound,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Undeployed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
                 return
             }
             request.response().with {
@@ -379,9 +394,14 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
-                                               AppStatus.NotFound,
-                                               AppStatus.Deploying,
-                                               AppStatus.Started)) {
+                                               new AppStatusPackage(AppStatus.NotFound,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Undeployed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
                 return
             }
             request.response().with {
@@ -515,9 +535,14 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
-                                               AppStatus.NotFound,
-                                               AppStatus.Deploying,
-                                               AppStatus.Started)) {
+                                               new AppStatusPackage(AppStatus.NotFound,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Undeployed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
                 return
             }
             request.response().with {
@@ -617,9 +642,14 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
-                                               AppStatus.NotFound,
-                                               AppStatus.Deploying,
-                                               AppStatus.Started)) {
+                                               new AppStatusPackage(AppStatus.NotFound,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Undeployed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
                 return
             }
             request.response().with {
@@ -727,9 +757,14 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
-                                               AppStatus.NotFound,
-                                               AppStatus.Deploying,
-                                               AppStatus.Started)) {
+                                               new AppStatusPackage(AppStatus.NotFound,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Undeployed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
                 return
             }
             request.response().with {
@@ -833,9 +868,14 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
-                                               AppStatus.NotFound,
-                                               AppStatus.Deploying,
-                                               AppStatus.Started)) {
+                                               new AppStatusPackage(AppStatus.NotFound,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Undeployed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
                 return
             }
             request.response().with {
@@ -946,9 +986,14 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
-                                               AppStatus.NotFound,
-                                               AppStatus.Deploying,
-                                               AppStatus.Started)) {
+                                               new AppStatusPackage(AppStatus.NotFound,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Undeployed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
                 return
             }
             request.response().with {
@@ -1066,7 +1111,8 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
-                                               AppStatus.NotFound)) {
+                                               new AppStatusPackage(AppStatus.NotFound,
+                                                                    null))) {
                 return
             }
             request.response().with {
@@ -1125,12 +1171,12 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
-                                               // before we deploy
-                                               AppStatus.Started,
-                                               // after we deploy but before it starts
-                                               AppStatus.Started,
-                                               AppStatus.Deploying,
-                                               AppStatus.Started)) {
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    DeploymentUpdateStatus.Deploying),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
                 return
             }
             request.response().with {
@@ -1230,12 +1276,12 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
-                                               // before we deploy
-                                               AppStatus.Started,
-                                               // after we deploy but before it starts
-                                               AppStatus.Started,
-                                               AppStatus.Deploying,
-                                               AppStatus.Started)) {
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    DeploymentUpdateStatus.Failed),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    DeploymentUpdateStatus.Deploying),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
                 return
             }
             request.response().with {
@@ -1331,12 +1377,14 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
-                                               // before we deploy
-                                               AppStatus.Undeployed,
-                                               // after we deploy but before it starts
-                                               AppStatus.Undeployed,
-                                               AppStatus.Deploying,
-                                               AppStatus.Started)) {
+                                               new AppStatusPackage(AppStatus.Undeployed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Undeployed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
                 return
             }
             request.response().with {
@@ -1383,8 +1431,10 @@ class CloudHubDeployerTest extends BaseTest {
                    is(equalTo(true))
     }
 
+    fix from here on out
     @Test
     void perform_deployment_existing_failed_app() {
+
         // arrange
         def appStartRequested = false
         def deployed = false
@@ -1394,6 +1444,17 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockEnvironments(request)) {
+                return
+            }
+            if (mockDeploymentAndXStatusChecks(request,
+                                               new AppStatusPackage(AppStatus.NotFound,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Undeployed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
@@ -1497,6 +1558,17 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
+                                               new AppStatusPackage(AppStatus.NotFound,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Undeployed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
+                return
+            }
+            if (mockDeploymentAndXStatusChecks(request,
                                                AppStatus.NotFound,
                                                AppStatus.Deploying,
                                                AppStatus.Started)) {
@@ -1545,6 +1617,17 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockEnvironments(request)) {
+                return
+            }
+            if (mockDeploymentAndXStatusChecks(request,
+                                               new AppStatusPackage(AppStatus.NotFound,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Undeployed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
@@ -1601,6 +1684,17 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
+                                               new AppStatusPackage(AppStatus.NotFound,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Undeployed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
+                return
+            }
+            if (mockDeploymentAndXStatusChecks(request,
                                                statusesWeWillReturn.toArray(new AppStatus[0]) as AppStatus[])) {
                 deployAndStatusCount++
                 return
@@ -1651,6 +1745,17 @@ class CloudHubDeployerTest extends BaseTest {
                 return
             }
             if (mockEnvironments(request)) {
+                return
+            }
+            if (mockDeploymentAndXStatusChecks(request,
+                                               new AppStatusPackage(AppStatus.NotFound,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Undeployed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
                 return
             }
             if (mockDeploymentAndXStatusChecks(request,
