@@ -6,4 +6,9 @@ import groovy.transform.Immutable
 class AppStatusPackage {
     AppStatus appStatus
     DeploymentUpdateStatus deploymentUpdateStatus
+
+    @Override
+    String toString() {
+        "ApplicationStatus(MainStatus=${appStatus}, DeploymentUpdateStatus=${deploymentUpdateStatus})"
+    }
 }

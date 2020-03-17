@@ -1567,9 +1567,12 @@ class CloudHubDeployerTest extends BaseTest {
                         statusCode = 200
                         result = [
                                 domain                : 'client-new-app-dev',
-                                status                : ReverseAppStatusMappings[status.appStatus],
-                                deploymentUpdateStatus: ReverseDeployUpdateStatusMappings[status.deploymentUpdateStatus]
+                                status                : ReverseAppStatusMappings[status.appStatus]
                         ]
+                        def deploymentUpdateStatusString = ReverseDeployUpdateStatusMappings[status.deploymentUpdateStatus]
+                        if (deploymentUpdateStatusString) {
+                            result['deploymentUpdateStatus'] = deploymentUpdateStatusString
+                        }
                     }
                     end(JsonOutput.toJson(result))
                 }
