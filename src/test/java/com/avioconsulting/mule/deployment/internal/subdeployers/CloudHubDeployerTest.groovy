@@ -6,6 +6,7 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.WorkerTypes
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
+import com.avioconsulting.mule.deployment.internal.models.AppStatusPackage
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
@@ -34,7 +35,7 @@ class CloudHubDeployerTest extends BaseTest {
                                         System.out)
     }
 
-    static final Map<AppStatus, String> ReverseAppStatusMappings = CloudHubDeployer.AppStatusMappings.collectEntries {
+    static final Map<AppStatus, String> ReverseAppStatusMappings = AppStatusMapper.AppStatusMappings.collectEntries {
         k, v ->
             [v, k]
     }
@@ -1764,38 +1765,8 @@ class CloudHubDeployerTest extends BaseTest {
 
         // assert
         assertThat status,
-                   is(equalTo(AppStatus.NotFound))
-    }
-
-    @Test
-    void getAppStatus_unknown() {
-        // arrange
-        withHttpServer { HttpServerRequest request ->
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
-            request.response().with {
-                statusCode = 200
-                putHeader('Content-Type',
-                          'application/json')
-                end(JsonOutput.toJson([
-                        status: 'FOOBAR'
-                ]))
-            }
-        }
-
-        // act
-        def exception = shouldFail {
-            deployer.getAppStatus('DEV',
-                                  'the-app')
-        }
-
-        // assert
-        assertThat exception.message,
-                   is(containsString('Unknown status value of FOOBAR detected from CloudHub!'))
+                   is(equalTo(new AppStatusPackage(AppStatus.NotFound,
+                                                   null)))
     }
 
     @Test

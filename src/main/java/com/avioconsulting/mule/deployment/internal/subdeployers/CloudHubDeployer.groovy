@@ -161,16 +161,13 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
         def response = clientWrapper.execute(request)
         try {
             if (response.statusLine.statusCode == 404) {
-                return AppStatus.NotFound
+                return new AppStatusPackage(AppStatus.NotFound,
+                                            null)
             }
             def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
                                                                              'app status')
-            def input = result.status
-            def mappedStatus = AppStatusMappings[input]
-            if (!mappedStatus) {
-                throw new Exception("Unknown status value of ${input} detected from CloudHub!")
-            }
-            return mappedStatus
+            def mapper = new AppStatusMapper()
+            return mapper.parseAppStatus(result)
         }
         finally {
             response.close()
