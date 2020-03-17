@@ -94,8 +94,8 @@ class IntegrationTest {
                                    request.normalizedAppName,
                                    'integration test app cleanup')
         println 'Waiting for app deletion to finish'
-        cloudHubDeployer.waitForAppDeletion(request.environment,
-                                            appName)
+        waitForAppDeletion(request.environment,
+                           appName)
     }
 
     def deleteOnPremApp(OnPremDeploymentRequest request) {
@@ -112,20 +112,21 @@ class IntegrationTest {
         def tries = 0
         def deleted = false
         def failed = false
-        logger.println 'Now checking to see if app has been deleted'
-        while (!deleted && tries < this.maxTries) {
+        println 'Now checking to see if app has been deleted'
+        while (!deleted && tries < 10) {
             tries++
-            logger.println "*** Try ${tries} ***"
-            AppStatus status = getAppStatus(environment,
-                                            appName)
-            logger.println "Received status of ${status}"
+            println "*** Try ${tries} ***"
+            AppStatus status = cloudHubDeployer.getAppStatus(environment,
+                                                             appName)
+            println "Received status of ${status}"
             if (status == AppStatus.NotFound) {
-                logger.println 'App removed successfully!'
+                println 'App removed successfully!'
                 deleted = true
                 break
             }
-            logger.println "Sleeping for ${this.retryIntervalInMs / 1000} seconds and will recheck..."
-            Thread.sleep(this.retryIntervalInMs)
+            def retryIntervalInMs = 10000
+            println "Sleeping for ${retryIntervalInMs / 1000} seconds and will recheck..."
+            Thread.sleep(retryIntervalInMs)
         }
         if (!deleted && failed) {
             throw new Exception('Deletion failed on 1 or more nodes. Please see logs and messages as to why app did not start')
@@ -134,7 +135,6 @@ class IntegrationTest {
             throw new Exception("Deletion has not completed after ${tries} tries!")
         }
     }
-
 
     @Before
     void cleanup() {
