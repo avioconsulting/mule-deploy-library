@@ -4,21 +4,13 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
+import com.avioconsulting.mule.deployment.internal.models.AppStatusPackage
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.*
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 
 class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
-    static final Map<String, AppStatus> AppStatusMappings = [
-            STARTED      : AppStatus.Started,
-            DEPLOY_FAILED: AppStatus.Failed,
-            UNDEPLOYED   : AppStatus.Undeployed,
-            DELETED      : AppStatus.Deleted,
-            UNDEPLOYING  : AppStatus.Undeploying,
-            DEPLOYING    : AppStatus.Deploying
-    ]
-
     CloudHubDeployer(HttpClientWrapper clientWrapper,
                      EnvironmentLocator environmentLocator,
                      PrintStream logger) {
@@ -159,8 +151,8 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
         }
     }
 
-    AppStatus getAppStatus(String environmentName,
-                           String appName) {
+    AppStatusPackage getAppStatus(String environmentName,
+                                  String appName) {
         def request = new HttpGet("${clientWrapper.baseUrl}/cloudhub/api/v2/applications/${appName}").with {
             addStandardStuff(it,
                              environmentName)
