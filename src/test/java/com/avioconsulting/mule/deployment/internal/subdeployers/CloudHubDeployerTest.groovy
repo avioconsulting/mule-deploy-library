@@ -63,12 +63,6 @@ class CloudHubDeployerTest extends BaseTest {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null),
@@ -169,12 +163,6 @@ class CloudHubDeployerTest extends BaseTest {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null),
@@ -272,12 +260,6 @@ class CloudHubDeployerTest extends BaseTest {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null),
@@ -384,12 +366,6 @@ class CloudHubDeployerTest extends BaseTest {
         }
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null),
@@ -524,12 +500,6 @@ class CloudHubDeployerTest extends BaseTest {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null),
@@ -630,12 +600,6 @@ class CloudHubDeployerTest extends BaseTest {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null),
@@ -744,12 +708,6 @@ class CloudHubDeployerTest extends BaseTest {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null),
@@ -854,12 +812,6 @@ class CloudHubDeployerTest extends BaseTest {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null),
@@ -971,12 +923,6 @@ class CloudHubDeployerTest extends BaseTest {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null),
@@ -1077,12 +1023,6 @@ class CloudHubDeployerTest extends BaseTest {
         String rawBody = null
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.Started,
                                                                     null),
@@ -1198,12 +1138,6 @@ class CloudHubDeployerTest extends BaseTest {
     void perform_deployment_fails_immediately() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null))) {
@@ -1248,14 +1182,7 @@ class CloudHubDeployerTest extends BaseTest {
     @Test
     void perform_deployment_existing_app_succeeds() {
         // arrange
-        def deployAndStatusCount = 0
         withHttpServer { HttpServerRequest request ->
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.Started,
                                                                     null),
@@ -1294,6 +1221,9 @@ class CloudHubDeployerTest extends BaseTest {
         deployer.deploy(request)
 
         // assert
+        assertThat '1 deployment request, 3 status checks',
+                   deployAndStatusCount,
+                   is(equalTo(4))
         assertThat deployAndStatusCount,
                    is(equalTo(99))
     }
@@ -1302,12 +1232,6 @@ class CloudHubDeployerTest extends BaseTest {
     void perform_deployment_existing_app_fails() {
         // arrange
         withHttpServer { HttpServerRequest request ->
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.Started,
                                                                     null),
@@ -1354,14 +1278,7 @@ class CloudHubDeployerTest extends BaseTest {
     @Test
     void perform_deployment_existing_app_failed_last_but_has_started_ok_once() {
         // arrange
-        def deployStatusCount = 0
         withHttpServer { HttpServerRequest request ->
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.Started,
                                                                     DeploymentUpdateStatus.Failed),
@@ -1411,12 +1328,6 @@ class CloudHubDeployerTest extends BaseTest {
         def appStartRequested = false
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.Undeployed,
                                                                     null),
@@ -1479,12 +1390,6 @@ class CloudHubDeployerTest extends BaseTest {
         def deployed = false
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.Failed,
                                                                     null),
@@ -1585,14 +1490,7 @@ class CloudHubDeployerTest extends BaseTest {
     @Test
     void perform_deployment_succeeds_after_1_try() {
         // arrange
-        def deployAndStatusCount = 0
         withHttpServer { HttpServerRequest request ->
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null),
@@ -1641,14 +1539,7 @@ class CloudHubDeployerTest extends BaseTest {
     @Test
     void perform_deployment_succeeds_after_2_tries() {
         // arrange
-        def deployAndStatusCount = 0
         withHttpServer { HttpServerRequest request ->
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null),
@@ -1697,19 +1588,12 @@ class CloudHubDeployerTest extends BaseTest {
     @Test
     void perform_deployment_times_out() {
         // arrange
-        def deployAndStatusCount = 0
         def appStatusesWeWillReturn = [AppStatus.NotFound] + (0..(maxTries + 1)).collect { AppStatus.Deploying }
         def appStatusPackagesWeWillReturn = appStatusesWeWillReturn.collect { status ->
             new AppStatusPackage(status,
                                  null)
         }
         withHttpServer { HttpServerRequest request ->
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                appStatusPackagesWeWillReturn.toArray(new AppStatusPackage[0]) as AppStatusPackage[])) {
                 deployAndStatusCount++
@@ -1755,14 +1639,7 @@ class CloudHubDeployerTest extends BaseTest {
     @Test
     void perform_deployment_eventually_fails() {
         // arrange
-        def deployAndStatusCount = 0
         withHttpServer { HttpServerRequest request ->
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
             if (mockDeploymentAndXStatusChecks(request,
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null),
