@@ -8,6 +8,7 @@ import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ExistingPolicy
 import groovy.json.JsonOutput
+import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.ContentType
@@ -25,6 +26,15 @@ class PolicyDeployer implements ApiManagerFunctionality {
         this.logger = logger
         this.environmentLocator = environmentLocator
         this.clientWrapper = clientWrapper
+    }
+
+    private def deletePolicy(ExistingApiSpec apiSpec,
+                             ExistingPolicy policy) {
+        logger.println("For API ${apiSpec.id}, deleting policy ${policy}")
+        def request = new HttpDelete(getApiManagerUrl("/${apiSpec.id}/policies/${policy.id}",
+                                                      apiSpec.environment))
+        clientWrapper.executeWithSuccessfulCloseableResponse(request,
+                                                             'Deleting policy')
     }
 
     private def createPolicy(ExistingApiSpec apiSpec,
@@ -58,6 +68,7 @@ class PolicyDeployer implements ApiManagerFunctionality {
     private List<ExistingPolicy> getExistingPolicies(ExistingApiSpec apiSpec) {
         def request = new HttpGet(getApiManagerUrl("/${apiSpec.id}/policies",
                                                    apiSpec.environment))
+        logger.println("For API ${apiSpec.id}, getting existing policies")
         clientWrapper.executeWithSuccessfulCloseableResponse(request,
                                                              'fetch policies') { response ->
             response.policies.sort { Map policyMap ->

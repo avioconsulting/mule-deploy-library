@@ -9,6 +9,7 @@ import com.avioconsulting.mule.deployment.internal.models.ExistingPolicy
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpServerRequest
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -329,5 +330,50 @@ class PolicyDeployerTest extends BaseTest {
                            assetId          : 'openidconnect-access-token-enforcement',
                            assetVersion     : '1.2.0'
                    ]))
+    }
+
+    @Test
+    void deletePolicy() {
+        // arrange
+        String url = null
+        String method = null
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            url = request.uri()
+            method = request.method().name()
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def result = 'did it'
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def apiSpec = new ExistingApiSpec('1234',
+                                          'the-asset-id',
+                                          '1.2.3',
+                                          'https://foo',
+                                          'DEV',
+                                          true)
+        def policy = new ExistingPolicy(Policy.mulesoftGroupId,
+                                        'openidconnect-access-token-enforcement',
+                                        '1.2.0',
+                                        [exposeHeaders: false],
+                                        [],
+                                        '654159')
+        // act
+        policyDeployer.deletePolicy(apiSpec,
+                                    policy)
+
+        // assert
+        assertThat url,
+                   is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies/654159'))
+        assertThat method,
+                   is(equalTo('DELETE'))
     }
 }
