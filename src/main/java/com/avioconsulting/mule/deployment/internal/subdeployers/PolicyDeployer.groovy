@@ -42,6 +42,7 @@ class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
             deletePolicy(apiSpec,
                          policy)
         }
+        logger.println("Creating ${desiredPolicies.size()} policies")
         desiredPolicies.withIndex().each { Policy policy, int index ->
             createPolicy(apiSpec,
                          policy,

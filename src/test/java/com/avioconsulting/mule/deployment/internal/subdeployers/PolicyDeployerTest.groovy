@@ -432,8 +432,8 @@ class PolicyDeployerTest extends BaseTest {
                    is(equalTo('DELETE'))
     }
 
-    def mockPolicyGet(HttpServerRequest request,
-                      List<ExistingPolicy> policies) {
+    static def mockPolicyGet(HttpServerRequest request,
+                             List<ExistingPolicy> policies) {
         if (request.uri() != '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies' || request.method() != io.vertx.core.http.HttpMethod.GET) {
             return false
         }
