@@ -45,14 +45,15 @@ class PolicyDeployer implements ApiManagerFunctionality {
     private def createPolicy(ExistingApiSpec apiSpec,
                              Policy policy,
                              int order) {
-        def requestPayloadMap = [
-                configurationData: policy.policyConfiguration,
-                pointcutData     : policy.policyPathApplications.collect { policyPath ->
+        def pointcutData = policy.policyPathApplications.collect { policyPath ->
                     [
                             methodRegex     : policyPath.httpMethods.collect { m -> m.toString() }.join('|'),
                             uriTemplateRegex: policyPath.regex
                     ]
-                },
+        }
+        def requestPayloadMap = [
+                configurationData: policy.policyConfiguration,
+                pointcutData     : pointcutData.any() ? pointcutData : null,
                 order            : order,
                 groupId          : policy.groupId,
                 assetId          : policy.assetId,
