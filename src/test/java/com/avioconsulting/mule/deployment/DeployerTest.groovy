@@ -2,12 +2,10 @@ package com.avioconsulting.mule.deployment
 
 import com.avioconsulting.mule.deployment.api.Deployer
 import com.avioconsulting.mule.deployment.api.models.*
+import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.internal.models.ApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
-import com.avioconsulting.mule.deployment.internal.subdeployers.IApiManagerDeployer
-import com.avioconsulting.mule.deployment.internal.subdeployers.ICloudHubDeployer
-import com.avioconsulting.mule.deployment.internal.subdeployers.IDesignCenterDeployer
-import com.avioconsulting.mule.deployment.internal.subdeployers.IOnPremDeployer
+import com.avioconsulting.mule.deployment.internal.subdeployers.*
 import groovy.transform.Canonical
 import org.junit.Assert
 import org.junit.Before
@@ -23,6 +21,7 @@ class DeployerTest {
     private List<OnPremDeploymentRequest> deployedOnPremApps
     private List<DesignCenterSync> designCenterSyncs
     private List<ApiSyncCalls> apiSyncs
+    private List<PolicySyncCalls> policySyncCalls
     private boolean failDeployment
 
     @Canonical
@@ -38,15 +37,22 @@ class DeployerTest {
         String appVersion
     }
 
+    @Canonical
+    class PolicySyncCalls {
+        ExistingApiSpec apiSpec
+        List<Policy> desiredPolicies
+    }
+
     @Before
     void setupDeployer() {
         deployedChApps = []
         deployedOnPremApps = []
         designCenterSyncs = []
         apiSyncs = []
+        policySyncCalls = []
         failDeployment = false
         def mockCloudHubDeployer = [
-                deploy: { CloudhubDeploymentRequest request ->
+                deploy        : { CloudhubDeploymentRequest request ->
                     if (failDeployment) {
                         throw new Exception('something did not work')
                     }
@@ -86,6 +92,13 @@ class DeployerTest {
                                                true)
                 }
         ] as IApiManagerDeployer
+        def mockPolicyDeployer = [
+                synchronizePolicies: { ExistingApiSpec apiSpec,
+                                       List<Policy> desiredPolicies ->
+                    policySyncCalls << new PolicySyncCalls(apiSpec,
+                                                           desiredPolicies)
+                }
+        ] as IPolicyDeployer
         deployer = new Deployer(null,
                                 System.out,
                                 ['DEV'],
@@ -94,7 +107,8 @@ class DeployerTest {
                                 mockCloudHubDeployer,
                                 mockOnPremDeployer,
                                 mockDcDeployer,
-                                mockApiDeployer)
+                                mockApiDeployer,
+                                mockPolicyDeployer)
     }
 
     @Test
@@ -153,7 +167,13 @@ class DeployerTest {
         // act
         deployer.deployApplication(request,
                                    '1.2.3',
-                                   apiSpec)
+                                   apiSpec,
+                                   [
+                                           new Policy(Policy.mulesoftGroupId,
+                                                      'openidconnect-access-token-enforcement',
+                                                      '1.2.0',
+                                                      [exposeHeaders: false])
+                                   ])
 
         // assert
         assertThat deployedChApps.size(),
@@ -194,6 +214,23 @@ class DeployerTest {
                    is(equalTo(apiSpec))
         assertThat sync.appFileInfo.file,
                    is(equalTo(file))
+        assertThat policySyncCalls.size(),
+                   is(equalTo(1))
+        def policySync = policySyncCalls[0]
+        assertThat policySync.apiSpec.id,
+                   is(equalTo('api1234'))
+        assertThat policySync.desiredPolicies.size(),
+                   is(equalTo(1))
+    }
+
+    @Test
+    void deployApplication_no_policies() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
     }
 
     @Test
@@ -380,6 +417,7 @@ class DeployerTest {
         deployer.deployApplication(request,
                                    '1.2.3',
                                    apiSpec,
+                                   null,
                                    [Features.DesignCenterSync])
 
         // assert
@@ -415,6 +453,7 @@ class DeployerTest {
         deployer.deployApplication(request,
                                    '1.2.3',
                                    apiSpec,
+                                   null,
                                    [Features.AppDeployment])
 
         // assert

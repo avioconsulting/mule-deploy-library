@@ -14,7 +14,7 @@ import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 
-class PolicyDeployer implements ApiManagerFunctionality {
+class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
     final HttpClientWrapper clientWrapper
     final EnvironmentLocator environmentLocator
     final PrintStream logger

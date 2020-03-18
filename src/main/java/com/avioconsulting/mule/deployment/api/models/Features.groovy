@@ -4,5 +4,6 @@ enum Features {
     All,
     AppDeployment,
     DesignCenterSync,
-    ApiManagerDefinitions
+    ApiManagerDefinitions,
+    PolicySync
 }
