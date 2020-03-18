@@ -12,6 +12,10 @@ class Policy {
     final Map<String, String> policyConfiguration
     final List<PolicyPathApplication> policyPathApplications
 
+    static String getMulesoftGroupId() {
+        '68ef9520-24e9-4cf2-b2f5-620025690913'
+    }
+
     Policy(String groupId,
            String assetId,
            String version,

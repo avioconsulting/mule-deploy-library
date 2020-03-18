@@ -2,6 +2,7 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.api.models.HttpMethod
+import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.api.models.policies.PolicyPathApplication
 import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ExistingPolicy
@@ -105,7 +106,8 @@ class PolicyDeployerTest extends BaseTest {
                    is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'))
         assertThat results,
                    is(equalTo([
-                           new ExistingPolicy('openidconnect-access-token-enforcement',
+                           new ExistingPolicy(Policy.mulesoftGroupId,
+                                              'openidconnect-access-token-enforcement',
                                               '1.3.0',
                                               [exposeHeaders: false],
                                               [
@@ -113,7 +115,8 @@ class PolicyDeployerTest extends BaseTest {
                                                                                 '.*foo')
                                               ],
                                               '654160'),
-                           new ExistingPolicy('openidconnect-access-token-enforcement',
+                           new ExistingPolicy(Policy.mulesoftGroupId,
+                                              'openidconnect-access-token-enforcement',
                                               '1.2.0',
                                               [exposeHeaders: false],
                                               [
@@ -178,7 +181,8 @@ class PolicyDeployerTest extends BaseTest {
                    is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'))
         assertThat results,
                    is(equalTo([
-                           new ExistingPolicy('openidconnect-access-token-enforcement',
+                           new ExistingPolicy(Policy.mulesoftGroupId,
+                                              'openidconnect-access-token-enforcement',
                                               '1.2.0',
                                               [exposeHeaders: false],
                                               [],
@@ -243,7 +247,8 @@ class PolicyDeployerTest extends BaseTest {
                    is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'))
         assertThat results,
                    is(equalTo([
-                           new ExistingPolicy('openidconnect-access-token-enforcement',
+                           new ExistingPolicy(Policy.mulesoftGroupId,
+                                              'openidconnect-access-token-enforcement',
                                               '1.2.0',
                                               [exposeHeaders: false],
                                               [

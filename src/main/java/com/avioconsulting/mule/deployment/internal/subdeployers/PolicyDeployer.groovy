@@ -38,7 +38,8 @@ class PolicyDeployer implements ApiManagerFunctionality {
                     new PolicyPathApplication(methods,
                                               pointCutMap.uriTemplateRegex as String)
                 }
-                new ExistingPolicy(template.assetId as String,
+                new ExistingPolicy(template.groupId as String,
+                                   template.assetId as String,
                                    template.assetVersion as String,
                                    policyMap.configuration as Map<String, Object>,
                                    paths,

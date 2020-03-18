@@ -10,12 +10,14 @@ import groovy.transform.ToString
 class ExistingPolicy extends Policy {
     final String id
 
-    ExistingPolicy(String assetId,
+    ExistingPolicy(String groupId,
+                   String assetId,
                    String version,
                    Map<String, Object> policyConfiguration,
                    List<PolicyPathApplication> policyPathApplications,
                    String id) {
-        super(assetId,
+        super(groupId,
+              assetId,
               version,
               policyConfiguration,
               policyPathApplications)
