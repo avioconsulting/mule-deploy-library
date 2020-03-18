@@ -224,16 +224,6 @@ class DeployerTest {
     }
 
     @Test
-    void deployApplication_no_policies() {
-        // arrange
-
-        // act
-
-        // assert
-        Assert.fail("write it")
-    }
-
-    @Test
     void deployApplication_cloudhub_mule_4() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
