@@ -7,6 +7,8 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
+import com.avioconsulting.mule.deployment.internal.models.AppStatus
+import com.avioconsulting.mule.deployment.internal.models.AppStatusPackage
 import com.avioconsulting.mule.deployment.internal.subdeployers.CloudHubDeployer
 import com.avioconsulting.mule.deployment.internal.subdeployers.OnPremDeployer
 import org.apache.logging.log4j.Level
@@ -93,8 +95,8 @@ class IntegrationTest {
                                    request.normalizedAppName,
                                    'integration test app cleanup')
         println 'Waiting for app deletion to finish'
-        cloudHubDeployer.waitForAppDeletion(request.environment,
-                                            appName)
+        waitForAppDeletion(request.environment,
+                           appName)
     }
 
     def deleteOnPremApp(OnPremDeploymentRequest request) {
@@ -103,6 +105,35 @@ class IntegrationTest {
         if (existingAppId) {
             onPremDeployer.deleteApp(request.environment,
                                      existingAppId)
+        }
+    }
+
+    def waitForAppDeletion(String environment,
+                           String appName) {
+        def tries = 0
+        def deleted = false
+        def failed = false
+        println 'Now checking to see if app has been deleted'
+        while (!deleted && tries < 10) {
+            tries++
+            println "*** Try ${tries} ***"
+            AppStatusPackage status = cloudHubDeployer.getAppStatus(environment,
+                                                                    appName)
+            println "Received status of ${status}"
+            if (status.appStatus == AppStatus.NotFound) {
+                println 'App removed successfully!'
+                deleted = true
+                break
+            }
+            def retryIntervalInMs = 10000
+            println "Sleeping for ${retryIntervalInMs / 1000} seconds and will recheck..."
+            Thread.sleep(retryIntervalInMs)
+        }
+        if (!deleted && failed) {
+            throw new Exception('Deletion failed on 1 or more nodes. Please see logs and messages as to why app did not start')
+        }
+        if (!deleted) {
+            throw new Exception("Deletion has not completed after ${tries} tries!")
         }
     }
 
