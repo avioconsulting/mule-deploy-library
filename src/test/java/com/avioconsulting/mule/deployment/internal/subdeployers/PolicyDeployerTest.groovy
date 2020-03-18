@@ -7,7 +7,9 @@ import com.avioconsulting.mule.deployment.api.models.policies.PolicyPathApplicat
 import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ExistingPolicy
 import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpServerRequest
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -260,5 +262,57 @@ class PolicyDeployerTest extends BaseTest {
                                               ],
                                               '654159')
                    ]))
+    }
+
+    @Test
+    void createPolicy() {
+        // arrange
+        String url = null
+        Map sentPayload = null
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            url = request.uri()
+            request.bodyHandler { body ->
+                sentPayload = new JsonSlurper().parseText(body.toString()) as Map
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def result = 'did it'
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def apiSpec = new ExistingApiSpec('1234',
+                                          'the-asset-id',
+                                          '1.2.3',
+                                          'https://foo',
+                                          'DEV',
+                                          true)
+        def policy = new Policy(Policy.mulesoftGroupId,
+                                'openidconnect-access-token-enforcement',
+                                '1.2.0',
+                                [exposeHeaders: false],
+                                [
+                                        new PolicyPathApplication([
+                                                                          HttpMethod.GET,
+                                                                          HttpMethod.POST
+                                                                  ],
+                                                                  '.*foo')
+                                ])
+
+        // act
+        policyDeployer.createPolicy(apiSpec,
+                                    policy)
+
+        // assert
+        assertThat url,
+                   is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'))
+        Assert.fail("write it")
     }
 }
