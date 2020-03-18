@@ -14,6 +14,7 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
+@SuppressWarnings("GroovyAccessibility")
 class PolicyDeployerTest extends BaseTest {
     private PolicyDeployer policyDeployer
 
@@ -121,6 +122,66 @@ class PolicyDeployerTest extends BaseTest {
                                                       new PolicyPathApplication([HttpMethod.GET],
                                                                                 '.*bar')
                                               ],
+                                              '654159')
+                   ]))
+    }
+
+    @Test
+    void getExistingPolicies_no_paths() {
+        // arrange
+        String url = null
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            url = request.uri()
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def result = [
+                        policies: [
+                                [
+                                        policyTemplateId: '269608',
+                                        order           : 2,
+                                        pointcutData    : null,
+                                        policyId        : 654159,
+                                        configuration   : [
+                                                exposeHeaders: false
+                                        ],
+                                        template        : [
+                                                groupId     : '68ef9520-24e9-4cf2-b2f5-620025690913',
+                                                assetId     : 'openidconnect-access-token-enforcement',
+                                                assetVersion: '1.2.0'
+                                        ]
+                                ]
+                        ]
+                ]
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def apiSpec = new ExistingApiSpec('1234',
+                                          'the-asset-id',
+                                          '1.2.3',
+                                          'https://foo',
+                                          'DEV',
+                                          true)
+
+        // act
+        def results = policyDeployer.getExistingPolicies(apiSpec)
+
+        // assert
+        assertThat url,
+                   is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'))
+        assertThat results,
+                   is(equalTo([
+                           new ExistingPolicy('openidconnect-access-token-enforcement',
+                                              '1.2.0',
+                                              [exposeHeaders: false],
+                                              [],
                                               '654159')
                    ]))
     }
