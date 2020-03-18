@@ -393,6 +393,9 @@ class DeployerTest {
         assertThat 'null apispec supplied',
                    apiSyncs.size(),
                    is(equalTo(0))
+        assertThat 'No API spec, cannot do policies',
+                   policySyncCalls.size(),
+                   is(equalTo(0))
     }
 
     @Test
