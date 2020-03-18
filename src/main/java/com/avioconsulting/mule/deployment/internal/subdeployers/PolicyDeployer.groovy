@@ -28,8 +28,22 @@ class PolicyDeployer implements ApiManagerFunctionality {
     }
 
     private def createPolicy(ExistingApiSpec apiSpec,
-                             Policy policy) {
-        String requestPayload = '{}'
+                             Policy policy,
+                             int order) {
+        def requestPayloadMap = [
+                configurationData: policy.policyConfiguration,
+                pointcutData     : policy.policyPathApplications.collect { policyPath ->
+                    [
+                            methodRegex     : policyPath.httpMethods.collect { m -> m.toString() }.join('|'),
+                            uriTemplateRegex: policyPath.regex
+                    ]
+                },
+                order            : order,
+                groupId          : policy.groupId,
+                assetId          : policy.assetId,
+                assetVersion     : policy.version
+        ]
+        String requestPayload = JsonOutput.toJson(requestPayloadMap)
         logger.println("For API ${apiSpec.id}, creating policy ${JsonOutput.prettyPrint(requestPayload)}")
         def request = new HttpPost(getApiManagerUrl("/${apiSpec.id}/policies",
                                                     apiSpec.environment)).with {

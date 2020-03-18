@@ -307,7 +307,8 @@ class PolicyDeployerTest extends BaseTest {
 
         // act
         policyDeployer.createPolicy(apiSpec,
-                                    policy)
+                                    policy,
+                                    22)
 
         // assert
         assertThat url,
@@ -323,7 +324,7 @@ class PolicyDeployerTest extends BaseTest {
                                            uriTemplateRegex: '.*foo'
                                    ]
                            ],
-                           order            : 1,
+                           order            : 22,
                            groupId          : Policy.mulesoftGroupId,
                            assetId          : 'openidconnect-access-token-enforcement',
                            assetVersion     : '1.2.0'
