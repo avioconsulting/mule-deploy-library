@@ -377,14 +377,84 @@ class PolicyDeployerTest extends BaseTest {
                    is(equalTo('DELETE'))
     }
 
+    def mockPolicyGet(HttpServerRequest request,
+                      List<ExistingPolicy> policies) {
+        request.response().with {
+            statusCode = 200
+            putHeader('Content-Type',
+                      'application/json')
+            def result = [
+                    policies: policies.withIndex().collect { ExistingPolicy policy, index ->
+                        [
+                                policyTemplateId: '269608',
+                                order           : index,
+                                pointcutData    : policy.policyPathApplications.collect { ppa ->
+                                    [
+                                            methodRegex     : ppa.httpMethods.collect { r -> r.toString() }.join('|'),
+                                            uriTemplateRegex: ppa.regex
+                                    ]
+                                },
+                                policyId        : policy.id,
+                                configuration   : policy.policyConfiguration,
+                                template        : [
+                                        groupId     : policy.groupId,
+                                        assetId     : policy.assetId,
+                                        assetVersion: policy.version
+                                ]
+                        ]
+                    }
+            ]
+            end(JsonOutput.toJson(result))
+        }
+    }
+
     @Test
     void synchronizePolicies_no_existing() {
         // arrange
+        def requests = []
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            requests << "${request.method().name()} ${request.uri()}".toString()
+            if (mockPolicyGet(request,
+                              [])) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def result = 'did it'
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def apiSpec = new ExistingApiSpec('1234',
+                                          'the-asset-id',
+                                          '1.2.3',
+                                          'https://foo',
+                                          'DEV',
+                                          true)
+        def policies = [
+                new Policy(Policy.mulesoftGroupId,
+                           'openidconnect-access-token-enforcement',
+                           '1.2.0',
+                           [exposeHeaders: false])
+        ]
 
         // act
+        policyDeployer.synchronizePolicies(apiSpec,
+                                           policies)
 
         // assert
-        Assert.fail("write it")
+        assertThat requests,
+                   is(equalTo([
+                           'GET /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies',
+                           'POST /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'
+                   ]))
     }
 
     @Test

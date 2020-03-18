@@ -20,7 +20,7 @@ class Policy {
            String assetId,
            String version,
            Map<String, String> policyConfiguration,
-           List<PolicyPathApplication> policyPathApplications) {
+           List<PolicyPathApplication> policyPathApplications = null) {
         this.groupId = groupId
         this.assetId = assetId
         this.version = version
