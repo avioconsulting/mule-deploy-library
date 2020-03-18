@@ -32,8 +32,10 @@ class PolicyDeployer implements ApiManagerFunctionality {
             }.collect { Map policyMap ->
                 def template = policyMap.template as Map
                 def paths = policyMap.pointcutData.collect { Map pointCutMap ->
-                    def parsedMethod = HttpMethod.valueOf(pointCutMap.methodRegex)
-                    new PolicyPathApplication([parsedMethod],
+                    def methods = (pointCutMap.methodRegex as String).split('\\|').collect { method ->
+                        HttpMethod.valueOf(method)
+                    }
+                    new PolicyPathApplication(methods,
                                               pointCutMap.uriTemplateRegex as String)
                 }
                 new ExistingPolicy(template.assetId as String,
