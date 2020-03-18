@@ -215,28 +215,46 @@ class IntegrationTest {
             println 'test: app deployed OK, now trying to hit its HTTP listener'
 
             // assert
+            hitEndpoint('john',
+                        'doe',
+                        "http://${cloudhubDeploymentRequest.normalizedAppName}.us-w2.cloudhub.io/")
+        }
+        finally {
+            println 'test has finished one way or the other, now cleaning up our mess'
+            // don't be dirty!
+            try {
+                deleteCloudHubApp(cloudhubDeploymentRequest)
+            } catch (e) {
+                println "Unable to cleanup ${e}"
+            }
+        }
+    }
+
+    def hitEndpoint(String username,
+                    String password,
+                    String url) {
+        def credsProvider = new BasicCredentialsProvider().with {
+            setCredentials(AuthScope.ANY,
+                           new UsernamePasswordCredentials(username,
+                                                           password))
+            it
+        }
+        HttpClientBuilder.create()
+                .setDefaultCredentialsProvider(credsProvider)
+                .build().withCloseable { client ->
             Throwable exception = null
             10.times {
                 try {
-                    def credsProvider = new BasicCredentialsProvider().with {
-                        setCredentials(AuthScope.ANY,
-                                       new UsernamePasswordCredentials('john',
-                                                                       'doe'))
-                        it
+                    def request = new HttpGet(url)
+                    println "Hitting app @ ${request}"
+                    client.execute(request).withCloseable { response ->
+                        assertThat response.statusLine.statusCode,
+                                   is(equalTo(200))
+                        assertThat response.entity.content.text,
+                                   is(equalTo('hello there'))
+                        exception = null
                     }
-                    HttpClientBuilder.create()
-                            .setDefaultCredentialsProvider(credsProvider)
-                            .build().withCloseable { client ->
-                        def request = new HttpGet("http://${cloudhubDeploymentRequest.normalizedAppName}.us-w2.cloudhub.io/")
-                        println "Hitting app @ ${request}"
-                        client.execute(request).withCloseable { response ->
-                            assertThat response.statusLine.statusCode,
-                                       is(equalTo(200))
-                            assertThat response.entity.content.text,
-                                       is(equalTo('hello there'))
-                            exception = null
-                        }
-                    }
+
                 }
                 catch (AssertionError e) {
                     println 'Test failed, waiting 500 ms and trying again'
@@ -248,15 +266,6 @@ class IntegrationTest {
                 throw exception
             } else {
                 println 'test passed'
-            }
-        }
-        finally {
-            println 'test has finished one way or the other, now cleaning up our mess'
-            // don't be dirty!
-            try {
-                deleteCloudHubApp(cloudhubDeploymentRequest)
-            } catch (e) {
-                println "Unable to cleanup ${e}"
             }
         }
     }
@@ -276,16 +285,23 @@ class IntegrationTest {
         // act
         overallDeployer.deployApplication(onPremDeploymentRequest,
                                           '1.2.3',
-                                          apiSpec)
+                                          apiSpec,
+                                          [
+                                                  new Policy(Policy.mulesoftGroupId,
+                                                             'http-basic-authentication',
+                                                             '1.2.1',
+                                                             [
+                                                                     username: 'john',
+                                                                     password: 'doe'
+                                                             ])
+                                          ])
         println 'test: app deployed OK, now trying to hit its HTTP listener'
 
         // assert
         try {
-            def url = "http://localhost:8081/".toURL()
-            println "Hitting app @ ${url}"
-            assertThat url.text,
-                       is(equalTo('hello there'))
-            println 'test passed'
+            hitEndpoint('john',
+                        'doe',
+                        'http://localhost:8081/')
         }
         finally {
             println 'test has finished one way or the other, now cleaning up our mess'
