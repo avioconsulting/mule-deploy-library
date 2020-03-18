@@ -5,12 +5,18 @@ import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
 import com.avioconsulting.mule.deployment.internal.models.AppStatusPackage
 import com.avioconsulting.mule.deployment.internal.subdeployers.CloudHubDeployer
 import com.avioconsulting.mule.deployment.internal.subdeployers.OnPremDeployer
+import org.apache.http.auth.AuthScope
+import org.apache.http.auth.UsernamePasswordCredentials
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.impl.client.BasicCredentialsProvider
+import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.core.config.Configurator
 import org.apache.maven.shared.invoker.DefaultInvocationRequest
@@ -28,6 +34,8 @@ class IntegrationTest {
     private static final String AVIO_ORG_ID = 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee'
     private static final String ANYPOINT_USERNAME = System.getProperty('anypoint.username')
     private static final String ANYPOINT_PASSWORD = System.getProperty('anypoint.password')
+    private static final String ANYPOINT_CLIENT_ID = System.getProperty('anypoint.client.id')
+    private static final String ANYPOINT_CLIENT_SECRET = System.getProperty('anypoint.client.secret')
     private static final String ON_PREM_SERVER_NAME = System.getProperty('mule4.onprem.server.name')
     private static final String CLOUDHUB_APP_PREFIX = 'avio'
     private static final String CLOUDHUB_APP_NAME = 'mule-deploy-lib-v4-test-app-ch'
@@ -66,6 +74,8 @@ class IntegrationTest {
                               Level.INFO)
         assert ANYPOINT_USERNAME: 'Did you forget -Danypoint.username?'
         assert ANYPOINT_PASSWORD: 'Did you forget -Danypoint.password?'
+        assert ANYPOINT_CLIENT_ID: 'Did you forget -Danypoint.client.id?'
+        assert ANYPOINT_CLIENT_SECRET: 'Did you forget -Danypoint.client.secret?'
         def pomFile = getProjectDir('mule4_project')
         projectDirectory = pomFile.parentFile
         def targetDir = new File(projectDirectory,
@@ -149,8 +159,8 @@ class IntegrationTest {
                                                                   new CloudhubWorkerSpecRequest('4.2.2'),
                                                                   builtFile,
                                                                   'abcdefg',
-                                                                  'someid',
-                                                                  'somesecret',
+                                                                  ANYPOINT_CLIENT_ID,
+                                                                  ANYPOINT_CLIENT_SECRET,
                                                                   CLOUDHUB_APP_PREFIX)
         clientWrapper = new HttpClientWrapper('https://anypoint.mulesoft.com',
                                               ANYPOINT_USERNAME,
@@ -192,20 +202,43 @@ class IntegrationTest {
         try {
             overallDeployer.deployApplication(cloudhubDeploymentRequest,
                                               '1.2.3',
-                                              apiSpec)
+                                              apiSpec,
+                                              [
+                                                      new Policy(Policy.mulesoftGroupId,
+                                                                 'http-basic-authentication',
+                                                                 '1.2.1',
+                                                                 [
+                                                                         username: 'john',
+                                                                         password: 'doe'
+                                                                 ])
+                                              ])
             println 'test: app deployed OK, now trying to hit its HTTP listener'
 
             // assert
-            def exception = null
+            Throwable exception = null
             10.times {
                 try {
-                    def url = "http://${cloudhubDeploymentRequest.normalizedAppName}.us-w2.cloudhub.io/".toURL()
-                    println "Hitting app @ ${url}"
-                    assertThat url.text,
-                               is(equalTo('hello there'))
-                    exception = null
+                    def credsProvider = new BasicCredentialsProvider().with {
+                        setCredentials(AuthScope.ANY,
+                                       new UsernamePasswordCredentials('john',
+                                                                       'doe'))
+                        it
+                    }
+                    HttpClientBuilder.create()
+                            .setDefaultCredentialsProvider(credsProvider)
+                            .build().withCloseable { client ->
+                        def request = new HttpGet("http://${cloudhubDeploymentRequest.normalizedAppName}.us-w2.cloudhub.io/")
+                        println "Hitting app @ ${request}"
+                        client.execute(request).withCloseable { response ->
+                            assertThat response.statusLine.statusCode,
+                                       is(equalTo(200))
+                            assertThat response.entity.content.text,
+                                       is(equalTo('hello there'))
+                            exception = null
+                        }
+                    }
                 }
-                catch (e) {
+                catch (AssertionError e) {
                     println 'Test failed, waiting 500 ms and trying again'
                     exception = e
                     Thread.sleep(500)

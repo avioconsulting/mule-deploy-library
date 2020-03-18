@@ -38,6 +38,7 @@ pipeline {
         stage('Integration test') {
             environment {
                 ANYPOINT_CREDS = credentials('anypoint-jenkins')
+                ANYPOINT_CLIENT_CREDS = credentials('anypoint-client-creds-dev')
             }
 
             steps {
@@ -46,7 +47,7 @@ pipeline {
                           mavenSettingsConfig: env.standard_avio_mvn_settings,
                           // only want to capture artifact if we're deploying (see below)
                           options: [artifactsPublisher(disabled: true)]) {
-                    quietMaven "clean test-compile surefire:test@integration-test -Danypoint.username=${env.ANYPOINT_CREDS_USR} -Danypoint.password=${env.ANYPOINT_CREDS_PSW}"
+                    quietMaven "clean test-compile surefire:test@integration-test -Danypoint.username=${env.ANYPOINT_CREDS_USR} -Danypoint.password=${env.ANYPOINT_CREDS_PSW} -Danypoint.client.id=${env.ANYPOINT_CLIENT_CREDS_USR} -Danypoint.client.secret=${env.ANYPOINT_CLIENT_CREDS_PSW}"
                 }
             }
 
