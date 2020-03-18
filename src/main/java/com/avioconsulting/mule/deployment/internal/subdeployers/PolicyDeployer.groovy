@@ -31,6 +31,11 @@ class PolicyDeployer implements ApiManagerFunctionality {
     def synchronizePolicies(ExistingApiSpec apiSpec,
                             List<Policy> desiredPolicies) {
         def existing = getExistingPolicies(apiSpec)
+        def existingForComparison = existing.collect { policy -> policy.withoutId }
+        if (existingForComparison == desiredPolicies) {
+            logger.println('Existing policies are correct, no updates required')
+            return
+        }
         desiredPolicies.withIndex().each { Policy policy, int index ->
             createPolicy(apiSpec,
                          policy,
@@ -98,7 +103,7 @@ class PolicyDeployer implements ApiManagerFunctionality {
                                    template.assetId as String,
                                    template.assetVersion as String,
                                    policyMap.configuration as Map<String, Object>,
-                                   paths,
+                                   paths.any() ? paths : null,
                                    policyMap.policyId as String)
             }
         } as List<ExistingPolicy>

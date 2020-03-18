@@ -187,7 +187,7 @@ class PolicyDeployerTest extends BaseTest {
                                               'openidconnect-access-token-enforcement',
                                               '1.2.0',
                                               [exposeHeaders: false],
-                                              [],
+                                              null,
                                               '654159')
                    ]))
     }
@@ -452,6 +452,8 @@ class PolicyDeployerTest extends BaseTest {
                                             methodRegex     : ppa.httpMethods.collect { r -> r.toString() }.join('|'),
                                             uriTemplateRegex: ppa.regex
                                     ]
+                                }.with {
+                                    it.any() ? it : null
                                 },
                                 policyId        : policy.id,
                                 configuration   : policy.policyConfiguration,

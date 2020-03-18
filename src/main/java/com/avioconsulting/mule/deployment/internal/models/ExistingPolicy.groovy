@@ -23,4 +23,12 @@ class ExistingPolicy extends Policy {
               policyPathApplications)
         this.id = id
     }
+
+    Policy getWithoutId() {
+        new Policy(groupId,
+                   assetId,
+                   version,
+                   policyConfiguration,
+                   policyPathApplications)
+    }
 }
