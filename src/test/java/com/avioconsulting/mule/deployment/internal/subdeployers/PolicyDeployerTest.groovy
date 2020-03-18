@@ -692,14 +692,4 @@ class PolicyDeployerTest extends BaseTest {
                            'POST /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'
                    ]))
     }
-
-    @Test
-    void synchronizePolicies_existing_wrong_replace_and_add_new() {
-        // arrange
-
-        // act
-
-        // assert
-        Assert.fail("write it")
-    }
 }
