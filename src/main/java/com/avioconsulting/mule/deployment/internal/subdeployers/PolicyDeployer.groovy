@@ -2,6 +2,7 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
+import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ExistingPolicy
 
 class PolicyDeployer {
@@ -18,7 +19,7 @@ class PolicyDeployer {
         this.clientWrapper = clientWrapper
     }
 
-    private List<ExistingPolicy> getExistingPolicies() {
+    private List<ExistingPolicy> getExistingPolicies(ExistingApiSpec apiSpec) {
         []
     }
 }

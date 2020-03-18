@@ -10,7 +10,7 @@ class ExistingPolicy extends Policy {
 
     ExistingPolicy(String assetId,
                    String version,
-                   Map<String, String> policyConfiguration,
+                   Map<String, Object> policyConfiguration,
                    List<PolicyPathApplication> policyPathApplications,
                    String id) {
         super(assetId,
