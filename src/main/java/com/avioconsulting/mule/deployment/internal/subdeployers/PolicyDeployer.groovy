@@ -30,7 +30,13 @@ class PolicyDeployer implements ApiManagerFunctionality {
 
     def synchronizePolicies(ExistingApiSpec apiSpec,
                             List<Policy> desiredPolicies) {
-
+        def existing = getExistingPolicies(apiSpec)
+        desiredPolicies.withIndex().each { Policy policy, int index ->
+            createPolicy(apiSpec,
+                         policy,
+                         // 1 based index
+                         index + 1)
+        }
     }
 
     private def deletePolicy(ExistingApiSpec apiSpec,
@@ -46,10 +52,10 @@ class PolicyDeployer implements ApiManagerFunctionality {
                              Policy policy,
                              int order) {
         def pointcutData = policy.policyPathApplications.collect { policyPath ->
-                    [
-                            methodRegex     : policyPath.httpMethods.collect { m -> m.toString() }.join('|'),
-                            uriTemplateRegex: policyPath.regex
-                    ]
+            [
+                    methodRegex     : policyPath.httpMethods.collect { m -> m.toString() }.join('|'),
+                    uriTemplateRegex: policyPath.regex
+            ]
         }
         def requestPayloadMap = [
                 configurationData: policy.policyConfiguration,

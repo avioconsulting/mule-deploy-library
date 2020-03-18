@@ -435,6 +435,9 @@ class PolicyDeployerTest extends BaseTest {
 
     def mockPolicyGet(HttpServerRequest request,
                       List<ExistingPolicy> policies) {
+        if (request.uri() != '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies' || request.method() != io.vertx.core.http.HttpMethod.GET) {
+            return false
+        }
         request.response().with {
             statusCode = 200
             putHeader('Content-Type',
@@ -462,6 +465,7 @@ class PolicyDeployerTest extends BaseTest {
             ]
             end(JsonOutput.toJson(result))
         }
+        return true
     }
 
     @Test
