@@ -376,4 +376,54 @@ class PolicyDeployerTest extends BaseTest {
         assertThat method,
                    is(equalTo('DELETE'))
     }
+
+    @Test
+    void synchronizePolicies_no_existing() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void synchronizePolicies_existing_already_match() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void synchronizePolicies_existing_add_new_ones() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void synchronizePolicies_existing_wrong_replace_same_number() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void synchronizePolicies_existing_wrong_replace_and_add_new() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
 }

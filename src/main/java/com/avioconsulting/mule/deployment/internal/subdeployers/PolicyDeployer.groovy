@@ -28,6 +28,11 @@ class PolicyDeployer implements ApiManagerFunctionality {
         this.clientWrapper = clientWrapper
     }
 
+    def synchronizePolicies(ExistingApiSpec apiSpec,
+                            List<Policy> desiredPolicies) {
+
+    }
+
     private def deletePolicy(ExistingApiSpec apiSpec,
                              ExistingPolicy policy) {
         logger.println("For API ${apiSpec.id}, deleting policy ${policy}")
