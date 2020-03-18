@@ -1,5 +1,8 @@
 package com.avioconsulting.mule.deployment.api.models.policies
 
+/**
+ * Equivalent to "HTTP Basic Auth Header" in the GUI
+ */
 class ClientEnforcementPolicyBasicAuth extends BaseClientEnforcementPolicy {
     /**
      * Build a new client enforcement policy using "basic auth"
