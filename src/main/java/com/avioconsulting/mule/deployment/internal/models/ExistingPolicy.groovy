@@ -1,7 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.models
 
-import com.avioconsulting.mule.deployment.api.models.Policy
-import com.avioconsulting.mule.deployment.api.models.PolicyPathApplication
+import com.avioconsulting.mule.deployment.api.models.policies.Policy
+import com.avioconsulting.mule.deployment.api.models.policies.PolicyPathApplication
 import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 

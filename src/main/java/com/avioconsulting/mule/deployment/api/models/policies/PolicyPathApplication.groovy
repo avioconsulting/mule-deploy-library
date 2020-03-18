@@ -1,5 +1,6 @@
-package com.avioconsulting.mule.deployment.api.models
+package com.avioconsulting.mule.deployment.api.models.policies
 
+import com.avioconsulting.mule.deployment.api.models.HttpMethod
 import groovy.transform.Immutable
 
 @Immutable

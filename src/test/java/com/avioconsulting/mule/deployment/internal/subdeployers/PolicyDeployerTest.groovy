@@ -2,7 +2,7 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.api.models.HttpMethod
-import com.avioconsulting.mule.deployment.api.models.PolicyPathApplication
+import com.avioconsulting.mule.deployment.api.models.policies.PolicyPathApplication
 import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ExistingPolicy
 import groovy.json.JsonOutput

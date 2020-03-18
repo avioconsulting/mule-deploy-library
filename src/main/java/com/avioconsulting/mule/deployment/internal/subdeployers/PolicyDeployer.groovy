@@ -1,7 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.api.models.HttpMethod
-import com.avioconsulting.mule.deployment.api.models.PolicyPathApplication
+import com.avioconsulting.mule.deployment.api.models.policies.PolicyPathApplication
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
