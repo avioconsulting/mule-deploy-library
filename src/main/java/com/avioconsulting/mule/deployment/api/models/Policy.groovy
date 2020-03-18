@@ -1,8 +1,10 @@
 package com.avioconsulting.mule.deployment.api.models
 
 import groovy.transform.EqualsAndHashCode
+import groovy.transform.ToString
 
 @EqualsAndHashCode
+@ToString
 class Policy {
     final String assetId
     final String version

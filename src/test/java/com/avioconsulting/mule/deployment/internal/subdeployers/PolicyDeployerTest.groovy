@@ -7,7 +7,6 @@ import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ExistingPolicy
 import groovy.json.JsonOutput
 import io.vertx.core.http.HttpServerRequest
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -50,6 +49,10 @@ class PolicyDeployerTest extends BaseTest {
                                                 [
                                                         methodRegex     : 'POST',
                                                         uriTemplateRegex: '.*foo'
+                                                ],
+                                                [
+                                                        methodRegex     : 'GET',
+                                                        uriTemplateRegex: '.*bar'
                                                 ]
                                         ],
                                         policyId        : 654159,
@@ -114,7 +117,9 @@ class PolicyDeployerTest extends BaseTest {
                                               [exposeHeaders: false],
                                               [
                                                       new PolicyPathApplication([HttpMethod.POST],
-                                                                                '.*foo')
+                                                                                '.*foo'),
+                                                      new PolicyPathApplication([HttpMethod.GET],
+                                                                                '.*bar')
                                               ],
                                               '654159')
                    ]))

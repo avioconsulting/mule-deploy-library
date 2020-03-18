@@ -13,24 +13,17 @@ import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 
-class ApiManagerDeployer implements IApiManagerDeployer {
-    private final HttpClientWrapper clientWrapper
-    private final PrintStream logger
-    private final EnvironmentLocator environmentLocator
+class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality {
+    final HttpClientWrapper clientWrapper
+    final PrintStream logger
+    final EnvironmentLocator environmentLocator
 
     ApiManagerDeployer(HttpClientWrapper clientWrapper,
                        EnvironmentLocator environmentLocator,
                        PrintStream logger) {
-
         this.environmentLocator = environmentLocator
         this.logger = logger
         this.clientWrapper = clientWrapper
-    }
-
-    private String getApiManagerUrl(String restOfUrl,
-                                    String environment) {
-        def environmentId = environmentLocator.getEnvironmentId(environment)
-        "${clientWrapper.baseUrl}/apimanager/api/v1/organizations/${clientWrapper.anypointOrganizationId}/environments/${environmentId}/apis${restOfUrl}"
     }
 
     /**
