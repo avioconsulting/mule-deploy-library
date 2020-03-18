@@ -9,7 +9,6 @@ import com.avioconsulting.mule.deployment.internal.models.ExistingPolicy
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpServerRequest
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -313,6 +312,21 @@ class PolicyDeployerTest extends BaseTest {
         // assert
         assertThat url,
                    is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'))
-        Assert.fail("write it")
+        assertThat sentPayload,
+                   is(equalTo([
+                           configurationData: [
+                                   exposeHeaders: false
+                           ],
+                           pointcutData     : [
+                                   [
+                                           methodRegex     : 'GET|POST',
+                                           uriTemplateRegex: '.*foo'
+                                   ]
+                           ],
+                           order            : 1,
+                           groupId          : Policy.mulesoftGroupId,
+                           assetId          : 'openidconnect-access-token-enforcement',
+                           assetVersion     : '1.2.0'
+                   ]))
     }
 }
