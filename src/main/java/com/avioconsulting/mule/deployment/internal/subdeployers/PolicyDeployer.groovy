@@ -36,8 +36,13 @@ class PolicyDeployer implements ApiManagerFunctionality {
             logger.println('Existing policies are correct, no updates required')
             return
         }
-        def policiesToCreate = desiredPolicies - existingForComparison
-        policiesToCreate.withIndex().each { Policy policy, int index ->
+        // much simpler to just clean out everything to ensure we get the right order
+        logger.println("Removing ${existing.size()} existing policies")
+        existing.each { policy ->
+            deletePolicy(apiSpec,
+                         policy)
+        }
+        desiredPolicies.withIndex().each { Policy policy, int index ->
             createPolicy(apiSpec,
                          policy,
                          // 1 based index

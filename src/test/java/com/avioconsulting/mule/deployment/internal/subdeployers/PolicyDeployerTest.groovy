@@ -593,7 +593,7 @@ class PolicyDeployerTest extends BaseTest {
                                                          '1.2.0',
                                                          [exposeHeaders: false],
                                                          null,
-                                                         '1234')
+                                                         '987')
                               ])) {
                 return
             }
@@ -630,6 +630,8 @@ class PolicyDeployerTest extends BaseTest {
         assertThat requests,
                    is(equalTo([
                            'GET /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies',
+                           'DELETE /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies/987',
+                           'POST /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies',
                            'POST /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'
                    ]))
     }
@@ -637,11 +639,58 @@ class PolicyDeployerTest extends BaseTest {
     @Test
     void synchronizePolicies_existing_wrong_replace_same_number() {
         // arrange
+        def requests = []
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            requests << "${request.method().name()} ${request.uri()}".toString()
+            if (mockPolicyGet(request,
+                              [
+                                      new ExistingPolicy(Policy.mulesoftGroupId,
+                                                         'openidconnect-access-token-enforcement',
+                                                         '1.1.0',
+                                                         [exposeHeaders: false],
+                                                         null,
+                                                         '987')
+                              ])) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def result = 'did it'
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def apiSpec = new ExistingApiSpec('1234',
+                                          'the-asset-id',
+                                          '1.2.3',
+                                          'https://foo',
+                                          'DEV',
+                                          true)
+        def policies = [
+                new Policy(Policy.mulesoftGroupId,
+                           'openidconnect-access-token-enforcement',
+                           '1.2.0',
+                           [exposeHeaders: false])
+        ]
 
         // act
+        policyDeployer.synchronizePolicies(apiSpec,
+                                           policies)
 
         // assert
-        Assert.fail("write it")
+        assertThat requests,
+                   is(equalTo([
+                           'GET /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies',
+                           'DELETE /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies/987',
+                           'POST /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'
+                   ]))
     }
 
     @Test
