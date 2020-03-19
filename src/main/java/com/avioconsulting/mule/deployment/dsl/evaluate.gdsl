@@ -45,15 +45,10 @@ contributor([closureScopeContext]) {
                params: [
                        cryptoKey: String.name
                ]
-        method name: 'anypointClientId',
+        method name: 'autodiscovery',
                type: 'void',
                params: [
-                       anypointClientId: String.name
-               ]
-        method name: 'anypointClientSecret',
-               type: 'void',
-               params: [
-                       anypointClientSecret: String.name
+                       closure: Closure.name
                ]
         method name: 'cloudHubAppPrefix',
                type: 'void',
@@ -92,6 +87,19 @@ contributor([closureScopeContext]) {
                type: 'void',
                params: [
                        region: String.name
+               ]
+    }
+    call = enclosingCall('autodiscovery')
+    if (call) {
+        method name: 'clientId',
+               type: 'void',
+               params: [
+                       clientId: String.name
+               ]
+        method name: 'clientSecret',
+               type: 'void',
+               params: [
+                       clientSecret: String.name
                ]
     }
 }
