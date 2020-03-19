@@ -12,7 +12,10 @@ contributor([ctx2]) {
     def call = enclosingCall('muleDeploy')
     if (call) {
         method name: 'cloudHubApplication',
-               type: 'void'
+               type: 'void',
+               params: [
+                       closure: Closure.name
+               ]
     }
     call = enclosingCall('cloudHubApplication')
     if (call) {
