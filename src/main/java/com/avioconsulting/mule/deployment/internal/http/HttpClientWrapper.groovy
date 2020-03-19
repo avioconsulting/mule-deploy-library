@@ -22,14 +22,15 @@ class HttpClientWrapper implements HttpRequestInterceptor {
     private final PrintStream logger
     final String baseUrl
     private final CloseableHttpClient httpClient
-    final String anypointOrganizationId
+    private final String anypointOrganizationName
+    private String anypointOrganizationId
 
     HttpClientWrapper(String baseUrl,
                       String username,
                       String password,
-                      String anypointOrganizationId,
-                      PrintStream logger) {
-        this.anypointOrganizationId = anypointOrganizationId
+                      PrintStream logger,
+                      String anypointOrganizationName = null) {
+        this.anypointOrganizationName = anypointOrganizationName
         this.password = password
         this.username = username
         this.logger = logger
@@ -40,12 +41,10 @@ class HttpClientWrapper implements HttpRequestInterceptor {
                 .build()
     }
 
-    /**
-     *
-     * @param username
-     * @param password
-     * @return - an auth token
-     */
+    String getAnypointOrganizationId() {
+        return anypointOrganizationId
+    }
+
     private def authenticate() {
         fetchAccessToken()
         fetchUserInfo()
@@ -56,7 +55,11 @@ class HttpClientWrapper implements HttpRequestInterceptor {
         def request = new HttpGet("${baseUrl}/accounts/api/me")
         executeWithSuccessfulCloseableResponse(request,
                                                'fetch user info') { result ->
-            this.ownerGuid = result.user.id
+            def user = result.user
+            this.ownerGuid = user.id
+            this.anypointOrganizationId = user.memberOfOrganizations.find { org ->
+                org.name == this.anypointOrganizationName
+            }.id
         }
     }
 

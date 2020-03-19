@@ -5,6 +5,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpServerRequest
 import org.apache.http.client.methods.HttpGet
+import org.junit.Assert
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -187,5 +188,96 @@ class HttpClientWrapperTest extends BaseTest {
         // assert
         assertThat cookieValue,
                    is(nullValue())
+    }
+
+    @Test
+    void getAnypointOrganizationId_default_org() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void getAnypointOrganizationId_specified_org_does_not_exist() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                Map jsonPayload
+                if (request.uri() == '/accounts/api/me') {
+                    jsonPayload = [
+                            user: [
+                                    id                   : 'the_id',
+                                    username             : 'the_username',
+                                    memberOfOrganizations: [
+                                            [
+                                                    name: 'the-other-org-name',
+                                                    id  : 'the-org-id'
+                                            ]
+                                    ]
+                            ]
+                    ]
+                } else {
+                    jsonPayload = [
+                            access_token: 'the token'
+                    ]
+                }
+                end(JsonOutput.toJson(jsonPayload))
+            }
+        }
+
+        // act
+        def exception = shouldFail {
+            clientWrapper.authenticate()
+        }
+
+        // assert
+        assertThat exception.message,
+                   is(containsString("You specified Anypoint organization 'the-org-name' but that organization was not found. Options are [the-other-org-name]"))
+    }
+
+    @Test
+    void getAnypointOrganizationId_specified_org_does_exist() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                Map jsonPayload
+                if (request.uri() == '/accounts/api/me') {
+                    jsonPayload = [
+                            user: [
+                                    id                   : 'the_id',
+                                    username             : 'the_username',
+                                    memberOfOrganizations: [
+                                            [
+                                                    name: 'the-org-name',
+                                                    id  : 'the-org-id'
+                                            ]
+                                    ]
+                            ]
+                    ]
+                } else {
+                    jsonPayload = [
+                            access_token: 'the token'
+                    ]
+                }
+                end(JsonOutput.toJson(jsonPayload))
+            }
+        }
+        clientWrapper.authenticate()
+
+        // act
+        def result = clientWrapper.anypointOrganizationId
+
+        // assert
+        assertThat result,
+                   is(equalTo('the-org-id'))
     }
 }
