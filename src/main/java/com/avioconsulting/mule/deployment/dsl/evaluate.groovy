@@ -3,6 +3,13 @@ package com.avioconsulting.mule.deployment.dsl
 class Context {
     def muleDeploy(Closure closure) {
         println 'we got called'
+        new MuleDeployContext()
+    }
+}
+
+class MuleDeployContext {
+    def cloudHubApplication(Closure closure) {
+
     }
 }
 

@@ -1,0 +1,15 @@
+package com.avioconsulting.mule.deployment.dsl
+
+def ctx = context(scriptScope: 'deploySpec.groovy')
+contributor([ctx]) {
+    method name: 'muleDeploy',
+           params: [
+                   closure: Closure.name
+           ],
+           type: 'com.avioconsulting.mule.deployment.dsl.MuleDeployContext'
+}
+def ctx2 = context(scriptScope: 'deploySpec.groovy',
+                   ctype: 'com.avioconsulting.mule.deployment.dsl.MuleDeployContext')
+contributor([ctx2]) {
+    method name: 'cloudHubApplication'
+}
