@@ -1,7 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
-import com.avioconsulting.mule.deployment.internal.http.LazyHeader
+
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.models.RamlFile

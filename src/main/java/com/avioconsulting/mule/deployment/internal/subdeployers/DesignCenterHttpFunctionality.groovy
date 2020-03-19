@@ -1,7 +1,6 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
-import com.avioconsulting.mule.deployment.internal.http.LazyHeader
 import org.apache.http.client.methods.HttpUriRequest
 
 trait DesignCenterHttpFunctionality {
@@ -14,11 +13,8 @@ trait DesignCenterHttpFunctionality {
                       clientWrapper.anypointOrganizationId)
             setHeader('cache-control',
                       'no-cache')
-            // At the time we run this, we might not yet have the ownerGuid value since that happens during authentication
-            setHeader(new LazyHeader('X-OWNER-ID',
-                                     {
-                                         clientWrapper.ownerGuid
-                                     }))
+            setHeader('X-OWNER-ID',
+                      clientWrapper.ownerGuid)
         }
         return clientWrapper.executeWithSuccessfulCloseableResponse(request,
                                                                     failureContext,

@@ -42,12 +42,16 @@ class HttpClientWrapper implements HttpRequestInterceptor {
     }
 
     String getAnypointOrganizationId() {
+        // might need to auth to get this
+        authenticate()
         return anypointOrganizationId
     }
 
     private def authenticate() {
-        fetchAccessToken()
-        fetchUserInfo()
+        if (!this.accessToken) {
+            fetchAccessToken()
+            fetchUserInfo()
+        }
     }
 
     private def fetchUserInfo() {
@@ -143,6 +147,8 @@ class HttpClientWrapper implements HttpRequestInterceptor {
     }
 
     String getOwnerGuid() {
+        // need to auth to get this
+        authenticate()
         this.ownerGuid
     }
 
