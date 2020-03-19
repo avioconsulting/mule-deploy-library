@@ -3,6 +3,7 @@ package com.avioconsulting.mule.deployment.dsl
 import org.junit.Assert
 import org.junit.Test
 
+import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
@@ -68,10 +69,27 @@ class CloudhubContextTest {
     @Test
     void missing_required() {
         // arrange
+        def context = new CloudhubContext()
+        def closure = {
+            workerSpecs {
+            }
+            autodiscovery {
+                clientId 'the_client_id'
+            }
+        }
+        closure.delegate = context
+        closure.call()
 
         // act
+        def exception = shouldFail {
+            context.deploymentRequest
+        }
 
         // assert
+        assertThat exception.message,
+                   is(equalTo("""Your deployment request is not complete. The following errors exist:
+- environmentName
+""".trim()))
         Assert.fail("write it")
     }
 

@@ -13,6 +13,16 @@ class CloudhubContext {
     private String prefix
 
     CloudhubDeploymentRequest getDeploymentRequest() {
+        def errors = []
+        if (!this.environmentName) {
+            errors << 'environmentName'
+        }
+        if (errors.any()) {
+            def errorList = errors.collect { error ->
+                "- ${error}"
+            }.join('\n')
+            throw new Exception("Your deployment request is not complete. The following errors exist:\n${errorList}")
+        }
         new CloudhubDeploymentRequest(this.environmentName,
                                       this.appName,
                                       this.appVersion,
