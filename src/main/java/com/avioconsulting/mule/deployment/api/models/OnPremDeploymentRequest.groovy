@@ -28,11 +28,9 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     final Map<String, String> appProperties
     /**
-     * THe original filename, before any propert
+     * The original filename
      */
     final String originalFileName
-
-    private boolean modifiedPropertiesViaZip
 
     /**
      * Standard deployment request. See properties for parameter info.
@@ -42,24 +40,6 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
                             String targetServerOrClusterName,
                             File file,
                             Map<String, String> appProperties = [:]) {
-        this(environment,
-             appName,
-             targetServerOrClusterName,
-             file,
-             appProperties,
-             null)
-    }
-
-    /**
-     * Construct a request designed to override properties in a file. This is a niche case. See properties for parameter info.
-     * @param overrideByChangingFileInZip VERY rare. If you have a weird situation where you need to be able to say that you "froze" an app ZIP/JAR for config management purposes and you want to change the properties inside a ZIP file, set this to the filename you want to drop new properties in inside the ZIP (e.g. api.dev.properties)
-     */
-    OnPremDeploymentRequest(String environment,
-                            String appName,
-                            String targetServerOrClusterName,
-                            File file,
-                            Map<String, String> appProperties,
-                            String overrideByChangingFileInZip) {
         if (appName.contains(' ')) {
             throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
         }
@@ -67,18 +47,14 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
         this.appName = appName
         this.targetServerOrClusterName = targetServerOrClusterName
         this.appProperties = appProperties
-        this.file = overrideByChangingFileInZip ? modifyFileProps(overrideByChangingFileInZip,
-                                                                  appProperties,
-                                                                  file) : file
-        this.modifiedPropertiesViaZip = overrideByChangingFileInZip != null
+        this.file = file
     }
 
     private String getConfigJson() {
         def map = [
                 'mule.agent.application.properties.service': [
                         applicationName: appName,
-                        // don't want to use ARM props if we took care of this in a file
-                        properties     : modifiedPropertiesViaZip ? [:] : appProperties
+                        properties     : appProperties
                 ]
         ]
         JsonOutput.toJson(map)

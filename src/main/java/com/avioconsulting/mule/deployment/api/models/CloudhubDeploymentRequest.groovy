@@ -54,7 +54,6 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     final String normalizedAppName
 
-    private boolean modifiedPropertiesViaZip
     private CloudhubAppProperties cloudhubAppProperties
 
     /**
@@ -69,34 +68,6 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                               String anypointClientSecret,
                               String cloudHubAppPrefix,
                               Map<String, String> appProperties = [:],
-                              Map<String, String> otherCloudHubProperties = [:]) {
-        this(environment,
-             appName,
-             workerSpecRequest,
-             file,
-             cryptoKey,
-             anypointClientId,
-             anypointClientSecret,
-             cloudHubAppPrefix,
-             appProperties,
-             null,
-             otherCloudHubProperties)
-    }
-
-    /**
-     * Construct a request designed to override properties in a file. This is a niche case. See properties for parameter info.
-     * @param overrideByChangingFileInZip VERY rare. If you have a weird situation where you need to be able to say that you "froze" an app ZIP/JAR for config management purposes and you want to change the properties inside a ZIP file, set this to the filename you want to drop new properties in inside the ZIP (e.g. api.dev.properties)
-     */
-    CloudhubDeploymentRequest(String environment,
-                              String appName,
-                              CloudhubWorkerSpecRequest workerSpecRequest,
-                              File file,
-                              String cryptoKey,
-                              String anypointClientId,
-                              String anypointClientSecret,
-                              String cloudHubAppPrefix,
-                              Map<String, String> appProperties,
-                              String overrideByChangingFileInZip,
                               Map<String, String> otherCloudHubProperties = [:]) {
         this.environment = environment
         this.appName = appName
@@ -116,10 +87,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
             newAppName = appNameLowerCase
         }
         normalizedAppName = newAppName
-        this.file = overrideByChangingFileInZip ? modifyFileProps(overrideByChangingFileInZip,
-                                                                  appProperties,
-                                                                  file) : file
-        this.modifiedPropertiesViaZip = overrideByChangingFileInZip != null
+        this.file = file
         this.cloudhubAppProperties = new CloudhubAppProperties(environment.toLowerCase(),
                                                                cryptoKey,
                                                                anypointClientId,
@@ -170,9 +138,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
             otherCloudHubProperties.properties = props + otherCloudHubProperties.properties
         }
         def appInfo = result + otherCloudHubProperties
-        if (!modifiedPropertiesViaZip) {
-            appInfo.properties = appInfo.properties + appProperties
-        }
+        appInfo.properties = appInfo.properties + appProperties
         appInfo
     }
 
