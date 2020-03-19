@@ -43,7 +43,16 @@ class CloudhubContextTest {
         def workerSpecs = request.workerSpecRequest
         assertThat workerSpecs.muleVersion,
                    is(equalTo('4.2.2'))
-        Assert.fail("write it")
+        assertThat request.file,
+                   is(equalTo(new File('path/to/file.jar')))
+        assertThat request.cryptoKey,
+                   is(equalTo('theKey'))
+        assertThat request.anypointClientId,
+                   is(equalTo('the_client_id'))
+        assertThat request.anypointClientSecret,
+                   is(equalTo('the_client_secret'))
+        assertThat request.cloudHubAppPrefix,
+                   is(equalTo('AVI'))
     }
 
     @Test

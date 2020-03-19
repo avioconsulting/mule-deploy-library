@@ -1,24 +1,27 @@
 package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
-import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 
 class CloudhubContext {
     private String environmentName
     private String appName
     private String appVersion
     private WorkerSpecContext workerSpecContext = new WorkerSpecContext()
+    private AutodiscoveryContext autodiscoveryContext = new AutodiscoveryContext()
+    private File file
+    private String key
+    private String prefix
 
     CloudhubDeploymentRequest getDeploymentRequest() {
         new CloudhubDeploymentRequest(this.environmentName,
                                       this.appName,
                                       this.appVersion,
                                       workerSpecContext.request,
-                                      null,
-                                      null,
-                                      null,
-                                      null,
-                                      null)
+                                      this.file,
+                                      this.key,
+                                      this.autodiscoveryContext.clientId,
+                                      this.autodiscoveryContext.clientSecret,
+                                      this.prefix)
     }
 
     def environment(String environmentName) {
@@ -38,7 +41,20 @@ class CloudhubContext {
         closure.call()
     }
 
-    def methodMissing(String name, def args) {
-        println "got call ${name}"
+    def autodiscovery(Closure closure) {
+        closure.delegate = autodiscoveryContext
+        closure.call()
+    }
+
+    def file(String file) {
+        this.file = new File(file)
+    }
+
+    def cryptoKey(String key) {
+        this.key = key
+    }
+
+    def cloudHubAppPrefix(String prefix) {
+        this.prefix = prefix
     }
 }
