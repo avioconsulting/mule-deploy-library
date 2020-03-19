@@ -27,22 +27,22 @@ class Deployer {
      *
      * @param username anypoint creds to deploy with
      * @param password anypoint creds to deploy with
-     * @param anypointOrganizationId GUID/org ID. Right now this tool doesn't differentiate between biz groups and root orgs
      * @param logger all messages will be logged like this. This is Jenkins plugins friendly (or you can supply System.out)
+     * @param anypointOrganizationName Optional parameter. If null, the default organization/biz group for the user will be used. Otherwise supply name (NOT GUID) of the biz group or organization you want to use
      * @param baseUrl Base URL, optional
      * @param environmentsToDoDesignCenterDeploymentOn Normally workflow wise you'd only want to do this on DEV
      */
     Deployer(String username,
              String password,
-             String anypointOrganizationId,
              PrintStream logger,
+             String anypointOrganizationName = null,
              String baseUrl = 'https://anypoint.mulesoft.com',
              List<String> environmentsToDoDesignCenterDeploymentOn = ['DEV']) {
         this(new HttpClientWrapper(baseUrl,
                                    username,
                                    password,
-                                   anypointOrganizationId,
-                                   logger),
+                                   logger,
+                                   anypointOrganizationName),
              logger,
              environmentsToDoDesignCenterDeploymentOn)
     }
