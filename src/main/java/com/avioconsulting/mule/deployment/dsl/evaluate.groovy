@@ -20,6 +20,10 @@ class CloudhubContext {
     def environment(String environmentName) {
 
     }
+
+    def methodMissing(String name, def args) {
+        println "got call ${name}"
+    }
 }
 
 def shell = new GroovyShell()
