@@ -1,4 +1,10 @@
 muleDeploy {
+    settings {
+        username 'the_username'
+        password 'the_password'
+        org_id ''
+    }
+
     cloudHubApplication {
         environment 'DEV'
         applicationName 'the-app'
