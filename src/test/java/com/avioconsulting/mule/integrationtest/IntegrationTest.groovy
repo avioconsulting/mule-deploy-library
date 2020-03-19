@@ -31,7 +31,7 @@ import static org.hamcrest.Matchers.is
 import static org.junit.Assume.assumeTrue
 
 class IntegrationTest {
-    private static final String AVIO_ORG_ID = 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee'
+    private static final String AVIO_SANDBOX_BIZ_GROUP_NAME = 'AVIO Sandbox'
     private static final String ANYPOINT_USERNAME = System.getProperty('anypoint.username')
     private static final String ANYPOINT_PASSWORD = System.getProperty('anypoint.password')
     private static final String ANYPOINT_CLIENT_ID = System.getProperty('anypoint.client.id')
@@ -165,8 +165,8 @@ class IntegrationTest {
         clientWrapper = new HttpClientWrapper('https://anypoint.mulesoft.com',
                                               ANYPOINT_USERNAME,
                                               ANYPOINT_PASSWORD,
-                                              AVIO_ORG_ID,
-                                              System.out)
+                                              System.out,
+                                              AVIO_SANDBOX_BIZ_GROUP_NAME)
         def environmentLocator = new EnvironmentLocator(this.clientWrapper,
                                                         System.out)
         cloudHubDeployer = new CloudHubDeployer(this.clientWrapper,
