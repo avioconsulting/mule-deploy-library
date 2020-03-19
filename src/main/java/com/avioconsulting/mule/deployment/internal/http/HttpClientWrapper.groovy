@@ -59,7 +59,11 @@ class HttpClientWrapper implements HttpRequestInterceptor {
             this.ownerGuid = user.id
             this.anypointOrganizationId = user.memberOfOrganizations.find { org ->
                 org.name == this.anypointOrganizationName
-            }.id
+            }?.id
+            if (!this.anypointOrganizationId) {
+                def options = user.memberOfOrganizations.collect { org -> org.name }
+                throw new Exception("You specified Anypoint organization '${this.anypointOrganizationName}' but that organization was not found. Options are ${options}")
+            }
         }
     }
 
