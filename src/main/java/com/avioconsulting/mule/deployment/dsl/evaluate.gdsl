@@ -17,6 +17,29 @@ contributor([closureScopeContext]) {
                params: [
                        closure: Closure.name
                ]
+        method name: 'settings',
+               type: 'void',
+               params: [
+                       closure: Closure.name
+               ]
+    }
+    call = enclosingCall('settings')
+    if (call) {
+        method name: 'username',
+               type: 'void',
+               params: [
+                       username: String.name
+               ]
+        method name: 'password',
+               type: 'void',
+               params: [
+                       password: String.name
+               ]
+        method name: 'organizationName',
+               type: 'void',
+               params: [
+                       organizationName: String.name
+               ]
     }
     call = enclosingCall('cloudHubApplication')
     if (call) {
@@ -56,6 +79,11 @@ contributor([closureScopeContext]) {
                        prefix: String.name
                ]
         method name: 'appProperties',
+               type: 'void',
+               params: [
+                       props: Map.name
+               ]
+        method name: 'otherCloudHubProperties',
                type: 'void',
                params: [
                        props: Map.name
