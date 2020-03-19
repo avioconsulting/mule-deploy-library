@@ -130,8 +130,14 @@ class BaseTest {
                                'application/json')
             response.end(JsonOutput.toJson([
                     user: [
-                            id      : 'the_id',
-                            username: 'the_username'
+                            id                   : 'the_id',
+                            username             : 'the_username',
+                            memberOfOrganizations: [
+                                    [
+                                            name: 'the-org-name',
+                                            id  : 'the-org-id'
+                                    ]
+                            ]
                     ]
             ]))
             mocked = true

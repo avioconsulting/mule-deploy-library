@@ -5,7 +5,6 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpServerRequest
 import org.apache.http.client.methods.HttpGet
-import org.junit.Assert
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -37,8 +36,14 @@ class HttpClientWrapperTest extends BaseTest {
             } else if (request.uri() == '/accounts/api/me') {
                 payload = [
                         user: [
-                                id      : 'the_id',
-                                username: 'the_username'
+                                id                   : 'the_id',
+                                username             : 'the_username',
+                                memberOfOrganizations: [
+                                        [
+                                                name: 'the-org-name',
+                                                id  : 'the-org-id'
+                                        ]
+                                ]
                         ]
                 ]
             }
@@ -86,8 +91,14 @@ class HttpClientWrapperTest extends BaseTest {
                 if (request.uri() == '/accounts/api/me') {
                     jsonPayload = [
                             user: [
-                                    id      : 'the_id',
-                                    username: 'the_username'
+                                    id                   : 'the_id',
+                                    username             : 'the_username',
+                                    memberOfOrganizations: [
+                                            [
+                                                    name: 'the-org-name',
+                                                    id  : 'the-org-id'
+                                            ]
+                                    ]
                             ]
                     ]
                 } else {
@@ -193,11 +204,50 @@ class HttpClientWrapperTest extends BaseTest {
     @Test
     void getAnypointOrganizationId_default_org() {
         // arrange
+        clientWrapper = new HttpClientWrapper("http://localhost:${httpServer.actualPort()}",
+                                              'the user',
+                                              'the password',
+                                              System.out)
+        withHttpServer { HttpServerRequest request ->
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                Map jsonPayload
+                if (request.uri() == '/accounts/api/me') {
+                    jsonPayload = [
+                            user: [
+                                    id                     : 'the_id',
+                                    username               : 'the_username',
+                                    organizationPreferences: [
+                                            'the-org-id-2': [
+                                                    defaultEnvironment: 'the_id'
+                                            ]
+                                    ],
+                                    memberOfOrganizations  : [
+                                            [
+                                                    name: 'the-org-name-2',
+                                                    id  : 'the-org-id-2'
+                                            ]
+                                    ]
+                            ]
+                    ]
+                } else {
+                    jsonPayload = [
+                            access_token: 'the token'
+                    ]
+                }
+                end(JsonOutput.toJson(jsonPayload))
+            }
+        }
+        clientWrapper.authenticate()
 
         // act
+        def result = clientWrapper.anypointOrganizationId
 
         // assert
-        Assert.fail("write it")
+        assertThat result,
+                   is(equalTo('the-org-id-2'))
     }
 
     @Test

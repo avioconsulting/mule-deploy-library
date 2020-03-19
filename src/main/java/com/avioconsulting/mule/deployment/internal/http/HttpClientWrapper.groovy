@@ -57,12 +57,25 @@ class HttpClientWrapper implements HttpRequestInterceptor {
                                                'fetch user info') { result ->
             def user = result.user
             this.ownerGuid = user.id
-            this.anypointOrganizationId = user.memberOfOrganizations.find { org ->
-                org.name == this.anypointOrganizationName
-            }?.id
-            if (!this.anypointOrganizationId) {
-                def options = user.memberOfOrganizations.collect { org -> org.name }
-                throw new Exception("You specified Anypoint organization '${this.anypointOrganizationName}' but that organization was not found. Options are ${options}")
+            def memberOrgs = user.memberOfOrganizations
+            if (!this.anypointOrganizationName) {
+                this.anypointOrganizationId = user.organizationPreferences.keySet().first()
+                def name = memberOrgs.find { org ->
+                    org.id == this.anypointOrganizationId
+                }?.name
+                if (name) {
+                    logger.println("Using default organization for ${username} of '${name}'")
+                } else {
+                    throw new Exception('No Anypoint org was specified and was unable to find a default one! This should not happen!')
+                }
+            } else {
+                this.anypointOrganizationId = memberOrgs.find { org ->
+                    org.name == this.anypointOrganizationName
+                }?.id
+                if (!this.anypointOrganizationId) {
+                    def options = memberOrgs.collect { org -> org.name }
+                    throw new Exception("You specified Anypoint organization '${this.anypointOrganizationName}' but that organization was not found. Options are ${options}")
+                }
             }
         }
     }
