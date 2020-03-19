@@ -83,18 +83,15 @@ class Deployer {
      * @param appDeploymentRequest Details about how to deploy your app
      * @param apiSpecification How API specification details work. This can be optional. Doing so will automatically remove Design Center sync and policy sync from enabled features
      * @param desiredPolicies Which policies to apply. The default value is empty, which means apply no policies and remove any policies already there
-     * @param appVersion Version of the app you are deploying (e.g. <version> from the POM)
      * @param enabledFeatures Which features of this tool to turn on. All by default.
      */
     def deployApplication(CloudhubDeploymentRequest appDeploymentRequest,
-                          String appVersion,
                           ApiSpecification apiSpecification = null,
                           List<Policy> desiredPolicies = [],
                           List<Features> enabledFeatures = [Features.All]) {
         stepNumber = 0
         performCommonDeploymentTasks(apiSpecification,
                                      desiredPolicies,
-                                     appVersion,
                                      appDeploymentRequest,
                                      appDeploymentRequest.environment,
                                      enabledFeatures,
@@ -112,18 +109,15 @@ class Deployer {
      * @param appDeploymentRequest Details about how to deploy your app
      * @param apiSpecification How API specification details work. This can be optional. Doing so will automatically remove Design Center sync and policy sync from enabled features
      * @param desiredPolicies Which policies to apply. The default value is empty, which means apply no policies and remove any policies already there
-     * @param appVersion Version of the app you are deploying (e.g. <version> from the POM)
      * @param enabledFeatures Which features of this tool to turn on. All by default.
      */
     def deployApplication(OnPremDeploymentRequest appDeploymentRequest,
-                          String appVersion,
                           ApiSpecification apiSpecification = null,
                           List<Policy> desiredPolicies = [],
                           List<Features> enabledFeatures = [Features.All]) {
         stepNumber = 0
         performCommonDeploymentTasks(apiSpecification,
                                      desiredPolicies,
-                                     appVersion,
                                      appDeploymentRequest,
                                      appDeploymentRequest.environment,
                                      enabledFeatures,
@@ -165,7 +159,6 @@ class Deployer {
 
     private def performCommonDeploymentTasks(ApiSpecification apiSpecification,
                                              List<Policy> desiredPolicies,
-                                             String appVersion,
                                              FileBasedAppDeploymentRequest appDeploymentRequest,
                                              String environment,
                                              List<Features> enabledFeatures,
@@ -185,8 +178,7 @@ class Deployer {
         executeStep('Design Center Deployment',
                     skipReason) {
             designCenterDeployer.synchronizeDesignCenterFromApp(apiSpecification,
-                                                                appDeploymentRequest,
-                                                                appVersion)
+                                                                appDeploymentRequest)
         }
         if (!apiSpecification) {
             skipReason = "no API spec was provided"
@@ -201,7 +193,7 @@ class Deployer {
                                            environment,
                                            isMule4)
             apiManagerDeployer.synchronizeApiDefinition(internalSpec,
-                                                        appVersion)
+                                                        appDeploymentRequest.appVersion)
         } as ExistingApiSpec
         if (existingApiManagerDefinition) {
             appDeploymentRequest.autoDiscoveryId = existingApiManagerDefinition.id

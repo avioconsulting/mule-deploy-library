@@ -179,12 +179,11 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
     }
 
     def synchronizeDesignCenterFromApp(ApiSpecification apiSpec,
-                                       FileBasedAppDeploymentRequest appFileInfo,
-                                       String appVersion) {
+                                       FileBasedAppDeploymentRequest appFileInfo) {
         def ramlFiles = getRamlFilesFromApp(appFileInfo)
         synchronizeDesignCenter(apiSpec,
                                 ramlFiles,
-                                appVersion)
+                                appFileInfo.appVersion)
     }
 
     def synchronizeDesignCenter(ApiSpecification apiSpec,

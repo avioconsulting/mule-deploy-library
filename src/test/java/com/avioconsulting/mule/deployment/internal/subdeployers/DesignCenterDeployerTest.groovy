@@ -87,6 +87,11 @@ class DesignCenterDeployerTest extends BaseTest {
             def setAutoDiscoveryId(String autoDiscoveryId) {
                 return null
             }
+
+            @Override
+            String getAppVersion() {
+                '1.2.3'
+            }
         }
     }
 
@@ -209,7 +214,7 @@ class DesignCenterDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def jsonResult = null
+                def jsonResult
                 if (request.absoluteURI().endsWith('files')) {
                     jsonResult = [
                             [
@@ -327,7 +332,7 @@ class DesignCenterDeployerTest extends BaseTest {
             method = request.method().toString()
             ownerGuid = request.getHeader('X-OWNER-ID')
             request.bodyHandler { body ->
-                sentPayload = new JsonSlurper().parseText(body.toString())
+                sentPayload = new JsonSlurper().parseText(body.toString()) as List<Map>
             }
             request.response().with {
                 statusCode = 204
@@ -385,7 +390,7 @@ class DesignCenterDeployerTest extends BaseTest {
             method = request.method().toString()
             ownerGuid = request.getHeader('X-OWNER-ID')
             request.bodyHandler { body ->
-                sentPayload = new JsonSlurper().parseText(body.toString())
+                sentPayload = new JsonSlurper().parseText(body.toString()) as Map
             }
             request.response().with {
                 statusCode = 204
@@ -447,7 +452,7 @@ class DesignCenterDeployerTest extends BaseTest {
             method = request.method().toString()
             ownerGuid = request.getHeader('X-OWNER-ID')
             request.bodyHandler { body ->
-                sentPayload = new JsonSlurper().parseText(body.toString())
+                sentPayload = new JsonSlurper().parseText(body.toString()) as Map
             }
             request.response().with {
                 statusCode = 204
@@ -1027,8 +1032,7 @@ class DesignCenterDeployerTest extends BaseTest {
 
         // act
         deployer.synchronizeDesignCenterFromApp(apiSpec,
-                                                appInfo,
-                                                '1.2.3')
+                                                appInfo)
 
         // assert
         assertThat filesUploaded,

@@ -151,11 +151,13 @@ class IntegrationTest {
     void cleanup() {
         onPremDeploymentRequest = new OnPremDeploymentRequest(AVIO_ENVIRONMENT_DEV,
                                                               ONPREM_APP_NAME,
+                                                              '1.2.3',
                                                               ON_PREM_SERVER_NAME,
                                                               builtFile,
                                                               [env: AVIO_ENVIRONMENT_DEV])
         cloudhubDeploymentRequest = new CloudhubDeploymentRequest(AVIO_ENVIRONMENT_DEV,
                                                                   CLOUDHUB_APP_NAME,
+                                                                  '1.2.3',
                                                                   new CloudhubWorkerSpecRequest('4.2.2'),
                                                                   builtFile,
                                                                   'abcdefg',
@@ -201,7 +203,6 @@ class IntegrationTest {
         // act
         try {
             overallDeployer.deployApplication(cloudhubDeploymentRequest,
-                                              '1.2.3',
                                               apiSpec,
                                               [
                                                       new Policy(Policy.mulesoftGroupId,
@@ -230,9 +231,9 @@ class IntegrationTest {
         }
     }
 
-    def hitEndpoint(String username,
-                    String password,
-                    String url) {
+    static def hitEndpoint(String username,
+                           String password,
+                           String url) {
         def credsProvider = new BasicCredentialsProvider().with {
             setCredentials(AuthScope.ANY,
                            new UsernamePasswordCredentials(username,
@@ -284,7 +285,6 @@ class IntegrationTest {
 
         // act
         overallDeployer.deployApplication(onPremDeploymentRequest,
-                                          '1.2.3',
                                           apiSpec,
                                           [
                                                   new Policy(Policy.mulesoftGroupId,
