@@ -1,9 +1,11 @@
 package com.avioconsulting.mule.deployment.api
 
 import com.avioconsulting.mule.deployment.api.models.*
+import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.ApiSpec
+import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
 import com.avioconsulting.mule.deployment.internal.subdeployers.*
 
 /***
@@ -17,6 +19,7 @@ class Deployer {
     private final IOnPremDeployer onPremDeployer
     private final IDesignCenterDeployer designCenterDeployer
     private final IApiManagerDeployer apiManagerDeployer
+    private final IPolicyDeployer policyDeployer
     private final List<String> environmentsToDoDesignCenterDeploymentOn
     private int stepNumber
 
@@ -52,7 +55,8 @@ class Deployer {
                      ICloudHubDeployer cloudHubDeployer = null,
                      IOnPremDeployer onPremDeployer = null,
                      IDesignCenterDeployer designCenterDeployer = null,
-                     IApiManagerDeployer apiManagerDeployer = null) {
+                     IApiManagerDeployer apiManagerDeployer = null,
+                     IPolicyDeployer policyDeployer = null) {
         this.logger = logger
         this.environmentsToDoDesignCenterDeploymentOn = environmentsToDoDesignCenterDeploymentOn
         this.clientWrapper = httpClientWrapper
@@ -69,21 +73,27 @@ class Deployer {
         this.apiManagerDeployer = apiManagerDeployer ?: new ApiManagerDeployer(this.clientWrapper,
                                                                                this.environmentLocator,
                                                                                logger)
+        this.policyDeployer = policyDeployer ?: new PolicyDeployer(this.clientWrapper,
+                                                                   this.environmentLocator,
+                                                                   this.logger)
     }
 
     /**
      * Deploys a CloudHub application, end to end
      * @param appDeploymentRequest Details about how to deploy your app
-     * @param apiSpecification How API specification details work. This can be optional. Doing so will automatically remove Design Center sync from enabled features
+     * @param apiSpecification How API specification details work. This can be optional. Doing so will automatically remove Design Center sync and policy sync from enabled features
+     * @param desiredPolicies Which policies to apply. The default value is empty, which means apply no policies and remove any policies already there
      * @param appVersion Version of the app you are deploying (e.g. <version> from the POM)
      * @param enabledFeatures Which features of this tool to turn on. All by default.
      */
     def deployApplication(CloudhubDeploymentRequest appDeploymentRequest,
                           String appVersion,
                           ApiSpecification apiSpecification = null,
+                          List<Policy> desiredPolicies = [],
                           List<Features> enabledFeatures = [Features.All]) {
         stepNumber = 0
         performCommonDeploymentTasks(apiSpecification,
+                                     desiredPolicies,
                                      appVersion,
                                      appDeploymentRequest,
                                      appDeploymentRequest.environment,
@@ -100,16 +110,19 @@ class Deployer {
     /**
      * Deploys an on-prem application, end to end
      * @param appDeploymentRequest Details about how to deploy your app
-     * @param apiSpecification How API specification details work. This can be optional. Doing so will automatically remove Design Center sync from enabled features
+     * @param apiSpecification How API specification details work. This can be optional. Doing so will automatically remove Design Center sync and policy sync from enabled features
+     * @param desiredPolicies Which policies to apply. The default value is empty, which means apply no policies and remove any policies already there
      * @param appVersion Version of the app you are deploying (e.g. <version> from the POM)
      * @param enabledFeatures Which features of this tool to turn on. All by default.
      */
     def deployApplication(OnPremDeploymentRequest appDeploymentRequest,
                           String appVersion,
                           ApiSpecification apiSpecification = null,
+                          List<Policy> desiredPolicies = [],
                           List<Features> enabledFeatures = [Features.All]) {
         stepNumber = 0
         performCommonDeploymentTasks(apiSpecification,
+                                     desiredPolicies,
                                      appVersion,
                                      appDeploymentRequest,
                                      appDeploymentRequest.environment,
@@ -151,6 +164,7 @@ class Deployer {
     }
 
     private def performCommonDeploymentTasks(ApiSpecification apiSpecification,
+                                             List<Policy> desiredPolicies,
                                              String appVersion,
                                              FileBasedAppDeploymentRequest appDeploymentRequest,
                                              String environment,
@@ -179,16 +193,26 @@ class Deployer {
         } else {
             skipReason = isFeatureDisabled(Features.ApiManagerDefinitions)
         }
-        executeStep('API Manager Definition',
-                    skipReason) {
+        ExistingApiSpec existingApiManagerDefinition = executeStep('API Manager Definition',
+                                                                   skipReason) {
             def isMule4 = deployer.isMule4Request(appDeploymentRequest)
             def internalSpec = new ApiSpec(apiSpecification.exchangeAssetId,
                                            apiSpecification.endpoint,
                                            environment,
                                            isMule4)
-            def existingApiManagerDefinition = apiManagerDeployer.synchronizeApiDefinition(internalSpec,
-                                                                                           appVersion)
+            apiManagerDeployer.synchronizeApiDefinition(internalSpec,
+                                                        appVersion)
+        } as ExistingApiSpec
+        if (existingApiManagerDefinition) {
             appDeploymentRequest.autoDiscoveryId = existingApiManagerDefinition.id
+            skipReason = isFeatureDisabled(Features.PolicySync)
+        } else {
+            skipReason = 'API Sync was disabled so policy is too'
+        }
+        executeStep('Policy Sync',
+                    skipReason) {
+            policyDeployer.synchronizePolicies(existingApiManagerDefinition,
+                                               desiredPolicies)
         }
     }
 }

@@ -454,6 +454,101 @@ class OnPremDeployerTest extends BaseTest {
     }
 
     @Test
+    void perform_deployment_correct_request_auto_discovery() {
+        // arrange
+        MultiMap sentFormAttributes = null
+        withHttpServer { HttpServerRequest request ->
+            def uri = request.uri()
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def result = null
+                if (uri.endsWith('servers')) {
+                    result = [
+                            data: [
+                                    [
+                                            id  : 'abc123',
+                                            name: 'serverb'
+                                    ],
+                                    [
+                                            id         : 'def456',
+                                            name       : 'servera',
+                                            clusterId  : 'cluster1',
+                                            clusterName: 'clustera'
+                                    ]
+                            ]
+                    ]
+                } else if (uri.endsWith('applications') && request.method().name() == 'GET') {
+                    result = [
+                            data: [
+                                    [
+                                            id  : 'abc123',
+                                            name: 'app1'
+                                    ],
+                                    [
+                                            id  : 'def456',
+                                            name: 'the-app'
+                                    ]
+                            ]
+                    ]
+                } else if (uri.endsWith('applications/1234') && request.method().name() == 'GET') {
+                    statusCode = 200
+                    // we test most of this in other methods
+                    result = getAppStatusJson('STARTED',
+                                              'STARTED',
+                                              'STARTED',
+                                              'some_file.txt')
+                } else {
+                    // deployment service returns this
+                    statusCode = 202
+                    result = [
+                            data: [
+                                    id             : 1234,
+                                    serverArtifacts: [
+                                            [
+                                                    id           : 'artid1',
+                                                    desiredStatus: 'UPDATED'
+                                            ]
+                                    ]
+                            ]
+                    ]
+                    request.expectMultipart = true
+                    sentFormAttributes = request.formAttributes()
+                }
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def file = new File('src/test/resources/some_file.txt')
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'new-app',
+                                                  'clustera',
+                                                  file)
+        request.setAutoDiscoveryId('1234')
+
+        // act
+        deployer.deploy(request)
+
+        // assert
+        def configMap = new JsonSlurper().parseText(sentFormAttributes.get('configuration'))
+        assertThat configMap,
+                   is(equalTo([
+                           'mule.agent.application.properties.service': [
+                                   applicationName: 'new-app',
+                                   properties     : [
+                                           'auto-discovery.api-id': '1234'
+                                   ]
+                           ]
+                   ]))
+    }
+
+    @Test
     void perform_deployment_correct_request_new_app_property_overrides_via_runtime_manager() {
         // arrange
         String url = null

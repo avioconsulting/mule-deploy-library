@@ -1,6 +1,5 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
-
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.*
@@ -11,34 +10,20 @@ import okio.Okio
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPatch
 import org.apache.http.client.methods.HttpPost
-import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 
-class ApiManagerDeployer implements IApiManagerDeployer {
-    private final HttpClientWrapper clientWrapper
-    private final PrintStream logger
-    private final EnvironmentLocator environmentLocator
+class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality {
+    final HttpClientWrapper clientWrapper
+    final PrintStream logger
+    final EnvironmentLocator environmentLocator
 
     ApiManagerDeployer(HttpClientWrapper clientWrapper,
                        EnvironmentLocator environmentLocator,
                        PrintStream logger) {
-
         this.environmentLocator = environmentLocator
         this.logger = logger
         this.clientWrapper = clientWrapper
-    }
-
-    private HttpUriRequest createApiManagerRequest(String restOfUrl,
-                                                   String environment,
-                                                   Closure<HttpUriRequest> requestCreator) {
-        def environmentId = environmentLocator.getEnvironmentId(environment)
-        def url = "${clientWrapper.baseUrl}/apimanager/api/v1/organizations/${clientWrapper.anypointOrganizationId}/environments/${environmentId}/apis${restOfUrl}"
-        requestCreator(url).with {
-            setHeader('X-ANYPNT-ENV-ID',
-                      environmentId)
-            it
-        }
     }
 
     /**
@@ -91,10 +76,8 @@ class ApiManagerDeployer implements IApiManagerDeployer {
         def assetId = desiredApiManagerDefinition.exchangeAssetId
         println "Checking for existing API Manager definition using Exchange asset ID '${assetId}'"
         def environment = desiredApiManagerDefinition.environment
-        def request = createApiManagerRequest("?assetId=${assetId}",
-                                              environment) { url ->
-            new HttpGet(url)
-        }
+        def request = new HttpGet(getApiManagerUrl("?assetId=${assetId}",
+                                                   environment))
         def queryResponses = clientWrapper.executeWithSuccessfulCloseableResponse(request,
                                                                                   'Querying API Definitions') {
             Map response ->
@@ -108,11 +91,9 @@ class ApiManagerDeployer implements IApiManagerDeployer {
         def correctQueryResponse = chooseApiDefinition(desiredApiManagerDefinition.instanceLabel,
                                                        allApis)
         println "Identified API ID ${correctQueryResponse.id}, now retrieving details"
-        def getRequest = createApiManagerRequest("/${correctQueryResponse.id}",
-                                                 environment) { url ->
-            new HttpGet(url)
-        }
-        def getResponse = clientWrapper.executeWithSuccessfulCloseableResponse(getRequest,
+        request = new HttpGet(getApiManagerUrl("/${correctQueryResponse.id}",
+                                               environment))
+        def getResponse = clientWrapper.executeWithSuccessfulCloseableResponse(request,
                                                                                'Fetching API definition') {
             Map response ->
                 new ObjectMapper().convertValue(response,
@@ -140,14 +121,12 @@ class ApiManagerDeployer implements IApiManagerDeployer {
         ]
         def requestJson = JsonOutput.toJson(requestPayload)
         logger.println "Creating API definition using payload: ${JsonOutput.prettyPrint(requestJson)}"
-        def request = createApiManagerRequest('',
-                                              // POSTING to root
-                                              apiManagerDefinition.environment) { url ->
-            new HttpPost(url).with {
-                setEntity(new StringEntity(requestJson,
-                                           ContentType.APPLICATION_JSON))
-                it
-            }
+        // POSTING to root
+        def request = new HttpPost(getApiManagerUrl('',
+                                                    apiManagerDefinition.environment)).with {
+            setEntity(new StringEntity(requestJson,
+                                       ContentType.APPLICATION_JSON))
+            it
         }
         def createResponse = clientWrapper.executeWithSuccessfulCloseableResponse(request,
                                                                                   'Creating API Definition') {
@@ -173,13 +152,11 @@ class ApiManagerDeployer implements IApiManagerDeployer {
         ]
         def requestJson = JsonOutput.toJson(requestPayload)
         logger.println "Updating API definition using payload: ${JsonOutput.prettyPrint(requestJson)}"
-        def request = createApiManagerRequest("/${apiManagerDefinition.id}",
-                                              apiManagerDefinition.environment) { url ->
-            new HttpPatch(url).with {
-                setEntity(new StringEntity(requestJson,
-                                           ContentType.APPLICATION_JSON))
-                it
-            }
+        def request = new HttpPatch(getApiManagerUrl("/${apiManagerDefinition.id}",
+                                                     apiManagerDefinition.environment)).with {
+            setEntity(new StringEntity(requestJson,
+                                       ContentType.APPLICATION_JSON))
+            it
         }
         clientWrapper.executeWithSuccessfulCloseableResponse(request,
                                                              'Updating API definition')

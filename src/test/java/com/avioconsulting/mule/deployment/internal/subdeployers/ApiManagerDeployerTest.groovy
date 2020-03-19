@@ -45,7 +45,7 @@ class ApiManagerDeployerTest extends BaseTest {
             url = request.uri()
             method = request.method()
             request.bodyHandler { body ->
-                sentPayload = new JsonSlurper().parseText(body.toString())
+                sentPayload = new JsonSlurper().parseText(body.toString()) as Map
             }
             (auth, org, envHeader) = capturedStandardHeaders(request)
             request.response().with {
@@ -88,8 +88,6 @@ class ApiManagerDeployerTest extends BaseTest {
                    is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis'))
         assertThat method,
                    is(equalTo(HttpMethod.POST))
-        assertThat envHeader,
-                   is(equalTo('def456'))
         assertThat sentPayload,
                    is(equalTo([
                            spec         : [
@@ -119,7 +117,7 @@ class ApiManagerDeployerTest extends BaseTest {
                 return
             }
             request.bodyHandler { body ->
-                sentPayload = new JsonSlurper().parseText(body.toString())
+                sentPayload = new JsonSlurper().parseText(body.toString()) as Map
             }
             request.response().with {
                 statusCode = 200
@@ -258,8 +256,6 @@ class ApiManagerDeployerTest extends BaseTest {
                    is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis?assetId=the-asset-id'))
         assertThat method,
                    is(equalTo(HttpMethod.GET))
-        assertThat envHeader,
-                   is(equalTo('def456'))
     }
 
     @Test
@@ -381,7 +377,7 @@ class ApiManagerDeployerTest extends BaseTest {
             url = request.uri()
             method = request.method()
             request.bodyHandler { body ->
-                sentPayload = new JsonSlurper().parseText(body.toString())
+                sentPayload = new JsonSlurper().parseText(body.toString()) as Map
             }
             (auth, org, envHeader) = capturedStandardHeaders(request)
             request.response().with {
@@ -407,8 +403,6 @@ class ApiManagerDeployerTest extends BaseTest {
                    is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234'))
         assertThat method,
                    is(equalTo(HttpMethod.PATCH))
-        assertThat envHeader,
-                   is(equalTo('def456'))
         assertThat sentPayload,
                    is(equalTo([
                            assetVersion : '1.3.3',
@@ -439,7 +433,7 @@ class ApiManagerDeployerTest extends BaseTest {
             url = request.uri()
             method = request.method()
             request.bodyHandler { body ->
-                sentPayload = new JsonSlurper().parseText(body.toString())
+                sentPayload = new JsonSlurper().parseText(body.toString()) as Map
             }
             (auth, org, envHeader) = capturedStandardHeaders(request)
             request.response().with {
@@ -805,7 +799,7 @@ class ApiManagerDeployerTest extends BaseTest {
             request.response().with {
                 putHeader('Content-Type',
                           'application/json')
-                Map response = null
+                Map response
                 def uri = request.uri()
                 if (uri.contains('graphql')) {
                     statusCode = 200
@@ -911,7 +905,7 @@ class ApiManagerDeployerTest extends BaseTest {
             request.response().with {
                 putHeader('Content-Type',
                           'application/json')
-                Map response = null
+                def response
                 def uri = request.uri()
                 if (uri.contains('graphql')) {
                     statusCode = 200
@@ -1017,7 +1011,7 @@ class ApiManagerDeployerTest extends BaseTest {
             request.response().with {
                 putHeader('Content-Type',
                           'application/json')
-                Map response = null
+                def response
                 def uri = request.uri()
                 if (uri.contains('graphql')) {
                     statusCode = 200
