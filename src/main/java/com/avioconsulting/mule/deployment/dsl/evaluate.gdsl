@@ -7,8 +7,9 @@ contributor([ctx]) {
                    closure: Closure.name
            ]
 }
-def ctx2 = context(scope: closureScope())
-contributor([ctx2]) {
+
+def closureScopeContext = context(scope: closureScope())
+contributor([closureScopeContext]) {
     def call = enclosingCall('muleDeploy')
     if (call) {
         method name: 'cloudHubApplication',
@@ -23,6 +24,74 @@ contributor([ctx2]) {
                type: 'void',
                params: [
                        environmentName: String.name
+               ]
+        method name: 'applicationName',
+               type: 'void',
+               params: [
+                       appName: String.name
+               ]
+        method name: 'workerSpecs',
+               type: 'void',
+               params: [
+                       closure: Closure.name
+               ]
+        method name: 'file',
+               type: 'void',
+               params: [
+                       fileName: String.name
+               ]
+        method name: 'cryptoKey',
+               type: 'void',
+               params: [
+                       cryptoKey: String.name
+               ]
+        method name: 'anypointClientId',
+               type: 'void',
+               params: [
+                       anypointClientId: String.name
+               ]
+        method name: 'anypointClientSecret',
+               type: 'void',
+               params: [
+                       anypointClientSecret: String.name
+               ]
+        method name: 'cloudHubAppPrefix',
+               type: 'void',
+               params: [
+                       prefix: String.name
+               ]
+        method name: 'appProperties',
+               type: 'void',
+               params: [
+                       props: Map.name
+               ]
+    }
+    call = enclosingCall('workerSpecs')
+    if (call) {
+        method name: 'muleVersion',
+               type: 'void',
+               params: [
+                       version: String.name
+               ]
+        method name: 'usePersistentQueues',
+               type: 'void',
+               params: [
+                       enabled: Boolean.name
+               ]
+        method name: 'workerType',
+               type: 'void',
+               params: [
+                       workerType: String.name
+               ]
+        method name: 'workerCount',
+               type: 'void',
+               params: [
+                       count: Integer.name
+               ]
+        method name: 'awsRegion',
+               type: 'void',
+               params: [
+                       region: String.name
                ]
     }
 }
