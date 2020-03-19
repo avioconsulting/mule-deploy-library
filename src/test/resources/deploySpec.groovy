@@ -17,8 +17,8 @@ muleDeploy {
         anypointClientId 'the_client_id'
         anypointClientSecret 'the_client_secret'
         cloudHubAppPrefix 'AVI'
-        appProperties [
+        appProperties([
                 someProp: 'someValue'
-        ]
+        ])
     }
 }
