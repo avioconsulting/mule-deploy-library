@@ -1,0 +1,5 @@
+muleDeploy {
+    cloudHubApplication {
+        environment 'DEV'
+    }
+}
