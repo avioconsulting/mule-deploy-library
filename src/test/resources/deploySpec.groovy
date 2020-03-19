@@ -1,9 +1,6 @@
-import com.avioconsulting.mule.deployment.api.models.AwsRegions
-import com.avioconsulting.mule.deployment.api.models.WorkerTypes
-
 muleDeploy {
     cloudHubApplication {
-        environment'DEV'
+        environment 'DEV'
         applicationName 'the-app'
         workerSpecs {
             muleVersion '4.2.2'
