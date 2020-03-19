@@ -3,11 +3,13 @@ package com.avioconsulting.mule.deployment.api.models
 import com.avioconsulting.mule.deployment.internal.models.CloudhubAppProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
+import groovy.transform.ToString
 import org.apache.http.HttpEntity
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
 
+@ToString
 class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
     /**
      * environment name (e.g. DEV, not GUID)
