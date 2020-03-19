@@ -5,11 +5,21 @@ contributor([ctx]) {
     method name: 'muleDeploy',
            params: [
                    closure: Closure.name
-           ],
-           type: 'com.avioconsulting.mule.deployment.dsl.MuleDeployContext'
+           ]
 }
-def ctx2 = context(scriptScope: 'deploySpec.groovy',
-                   ctype: 'com.avioconsulting.mule.deployment.dsl.MuleDeployContext')
+def ctx2 = context(scope: closureScope())
 contributor([ctx2]) {
-    method name: 'cloudHubApplication'
+    def call = enclosingCall('muleDeploy')
+    if (call) {
+        method name: 'cloudHubApplication',
+               type: 'void'
+    }
+    call = enclosingCall('cloudHubApplication')
+    if (call) {
+        method name: 'environment',
+               type: 'void',
+               params: [
+                       environmentName: String.name
+               ]
+    }
 }
