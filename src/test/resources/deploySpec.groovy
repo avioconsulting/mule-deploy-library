@@ -55,9 +55,9 @@ muleDeploy {
     }
 
     cloudHubApplication {
-        appVersion '1.2.3'
         environment 'DEV'
         applicationName 'the-app'
+        appVersion '1.2.3'
         workerSpecs {
             // only muleVersion is required
             muleVersion '4.2.2'

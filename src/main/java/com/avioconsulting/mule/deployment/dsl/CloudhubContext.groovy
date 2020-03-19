@@ -5,11 +5,15 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 
 class CloudhubContext {
     private String environmentName
+    private String appName
+    private String appVersion
+    private WorkerSpecContext workerSpecContext = new WorkerSpecContext()
 
     CloudhubDeploymentRequest getDeploymentRequest() {
         new CloudhubDeploymentRequest(this.environmentName,
-                                      'foo',
-                                      new CloudhubWorkerSpecRequest('4.2.2'),
+                                      this.appName,
+                                      this.appVersion,
+                                      workerSpecContext.request,
                                       null,
                                       null,
                                       null,
@@ -19,6 +23,19 @@ class CloudhubContext {
 
     def environment(String environmentName) {
         this.environmentName = environmentName
+    }
+
+    def applicationName(String appName) {
+        this.appName = appName
+    }
+
+    def appVersion(String appVersion) {
+        this.appVersion = appVersion
+    }
+
+    def workerSpecs(Closure closure) {
+        closure.delegate = workerSpecContext
+        closure.call()
     }
 
     def methodMissing(String name, def args) {
