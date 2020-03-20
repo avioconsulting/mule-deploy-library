@@ -6,9 +6,9 @@ import com.avioconsulting.mule.deployment.api.models.policies.PolicyPathApplicat
 import org.junit.Assert
 import org.junit.Test
 
+import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.Matchers.equalTo
-import static org.hamcrest.Matchers.is
+import static org.hamcrest.Matchers.*
 
 class PolicyContextTest {
     @Test
@@ -79,13 +79,26 @@ class PolicyContextTest {
     }
 
     @Test
-    void no_paths() {
+    void empty_paths() {
         // arrange
+        def context = new PolicyContext()
+        def closure = {
+            assetId 'the-asset-id'
+            version '1.2.1'
+            config hello: 'there'
+            paths {}
+        }
+        closure.delegate = context
+        closure.call()
 
         // act
+        def exception = shouldFail {
+            context.createPolicyModel()
+        }
 
         // assert
-        Assert.fail("write it")
+        assertThat exception.message,
+                   is(containsString("You specified 'paths' but did not supply any 'path' declarations inside it. Either remove the paths declaration (policy applies to all resources) or declare one."))
     }
 
     @Test
