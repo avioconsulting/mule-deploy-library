@@ -158,11 +158,26 @@ class PolicyContextTest {
     @Test
     void default_policy_not_enough() {
         // arrange
+        def context = new PolicyContext()
+        def closure = {
+            //assetId 'the-asset-id'
+            //version '1.2.1'
+            //config hello: 'there'
+        }
+        closure.delegate = context
+        closure.call()
 
         // act
+        def exception = shouldFail {
+            context.createPolicyModel()
+        }
 
         // assert
-        Assert.fail("write it")
+        assertThat exception.message,
+                   is(containsString("""Your policy spec is not complete. The following errors exist:
+- policies.policy.assetId missing
+- policies.policy.config missing
+- policies.policy.version missing"""))
     }
 
     @Test

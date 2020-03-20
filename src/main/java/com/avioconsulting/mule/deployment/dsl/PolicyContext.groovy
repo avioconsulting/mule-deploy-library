@@ -64,6 +64,11 @@ class PolicyContext extends BaseContext {
         if (pathsCalled && !pathListing.any()) {
             throw new Exception("You specified 'paths' but did not supply any 'path' declarations inside it. Either remove the paths declaration (policy applies to all resources) or declare one.")
         }
+        def errors = findErrors('policies.policy')
+        if (errors.any()) {
+            def errorList = errors.join('\n')
+            throw new Exception("Your policy spec is not complete. The following errors exist:\n${errorList}")
+        }
         new Policy(this.groupId ?: Policy.mulesoftGroupId,
                    this.assetId,
                    this.version,
@@ -81,6 +86,7 @@ class PolicyContext extends BaseContext {
 
     @Override
     List<String> findOptionalProperties() {
-        return null
+        // groupId will be Mulesoft's if not supplied
+        ['groupId']
     }
 }
