@@ -11,6 +11,7 @@ class CloudhubContext {
     String cloudHubAppPrefix
     private WorkerSpecContext workerSpecs = new WorkerSpecContext()
     private AutodiscoveryContext autodiscovery = new AutodiscoveryContext()
+    private List<String> fieldsThatHaveBeenSet = []
 
     CloudhubDeploymentRequest createDeploymentRequest() {
         def errors = this.getProperties().findAll { k, v ->
@@ -36,6 +37,10 @@ class CloudhubContext {
     }
 
     def methodMissing(String name, def args) {
+        if (fieldsThatHaveBeenSet.contains(name)) {
+            throw new Exception("Field '${name}' has already been set!")
+        }
+        fieldsThatHaveBeenSet << name
         def argument = args[0]
         if (argument instanceof Closure) {
             argument.delegate = this[name]

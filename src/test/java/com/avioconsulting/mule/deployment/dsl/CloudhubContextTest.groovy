@@ -98,7 +98,7 @@ class CloudhubContextTest {
     }
 
     @Test
-    void repeat_section() {
+    void repeat_field() {
         // arrange
         def context = new CloudhubContext()
         def closure = {
@@ -126,6 +126,40 @@ class CloudhubContextTest {
 
         // assert
         assertThat exception.message,
-                   is(equalTo("'environment' was repeated twice"))
+                   is(equalTo("Field 'environment' has already been set!"))
+    }
+
+    @Test
+    void repeat_closure() {
+        // arrange
+        def context = new CloudhubContext()
+        def closure = {
+            environment 'DEV'
+            applicationName 'the-app'
+            appVersion '1.2.3'
+            workerSpecs {
+                muleVersion '4.2.2'
+            }
+            workerSpecs {
+                muleVersion '3.9.1'
+            }
+            file 'path/to/file.jar'
+            cryptoKey 'theKey'
+            autodiscovery {
+                clientId 'the_client_id'
+                clientSecret 'the_client_secret'
+            }
+            cloudHubAppPrefix 'AVI'
+        }
+        closure.delegate = context
+
+        // act
+        def exception = shouldFail {
+            closure.call()
+        }
+
+        // assert
+        assertThat exception.message,
+                   is(equalTo("Field 'workerSpecs' has already been set!"))
     }
 }
