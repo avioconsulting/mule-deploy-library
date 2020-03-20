@@ -6,11 +6,11 @@ class CloudhubContext {
     String environment
     String applicationName
     String appVersion
-    File file
+    String file
     String cryptoKey
     String cloudHubAppPrefix
-    private WorkerSpecContext workerSpecContext = new WorkerSpecContext()
-    private AutodiscoveryContext autodiscoveryContext = new AutodiscoveryContext()
+    private WorkerSpecContext workerSpecs = new WorkerSpecContext()
+    private AutodiscoveryContext autodiscovery = new AutodiscoveryContext()
 
     CloudhubDeploymentRequest createDeploymentRequest() {
         def errors = this.getProperties().findAll { k, v ->
@@ -20,52 +20,28 @@ class CloudhubContext {
         }.sort()
         if (errors.any()) {
             def errorList = errors.collect { error ->
-                "- ${error}"
+                "- ${error} missing"
             }.join('\n')
             throw new Exception("Your deployment request is not complete. The following errors exist:\n${errorList}")
         }
         new CloudhubDeploymentRequest(this.environment,
                                       this.applicationName,
                                       this.appVersion,
-                                      workerSpecContext.request,
-                                      this.file,
+                                      workerSpecs.request,
+                                      new File(this.file),
                                       this.cryptoKey,
-                                      this.autodiscoveryContext.clientId,
-                                      this.autodiscoveryContext.clientSecret,
+                                      this.autodiscovery.clientId,
+                                      this.autodiscovery.clientSecret,
                                       this.cloudHubAppPrefix)
     }
 
-    def environment(String environment) {
-        this.environment = environment
-    }
-
-    def applicationName(String applicationName) {
-        this.applicationName = applicationName
-    }
-
-    def appVersion(String appVersion) {
-        this.appVersion = appVersion
-    }
-
-    def workerSpecs(Closure closure) {
-        closure.delegate = workerSpecContext
-        closure.call()
-    }
-
-    def autodiscovery(Closure closure) {
-        closure.delegate = autodiscoveryContext
-        closure.call()
-    }
-
-    def file(String file) {
-        this.file = new File(file)
-    }
-
-    def cryptoKey(String cryptoKey) {
-        this.cryptoKey = cryptoKey
-    }
-
-    def cloudHubAppPrefix(String cloudHubAppPrefix) {
-        this.cloudHubAppPrefix = cloudHubAppPrefix
+    def methodMissing(String name, def args) {
+        def argument = args[0]
+        if (argument instanceof Closure) {
+            argument.delegate = this[name]
+            argument.call()
+        } else {
+            this[name] = argument
+        }
     }
 }

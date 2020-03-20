@@ -88,22 +88,44 @@ class CloudhubContextTest {
         // assert
         assertThat exception.message,
                    is(equalTo("""Your deployment request is not complete. The following errors exist:
-- appVersion
-- applicationName
-- cloudHubAppPrefix
-- cryptoKey
-- environment
-- file
+- appVersion missing
+- applicationName missing
+- cloudHubAppPrefix missing
+- cryptoKey missing
+- environment missing
+- file missing
 """.trim()))
     }
 
     @Test
     void repeat_section() {
         // arrange
+        def context = new CloudhubContext()
+        def closure = {
+            environment 'DEV'
+            environment 'DEV'
+            applicationName 'the-app'
+            appVersion '1.2.3'
+            workerSpecs {
+                muleVersion '4.2.2'
+            }
+            file 'path/to/file.jar'
+            cryptoKey 'theKey'
+            autodiscovery {
+                clientId 'the_client_id'
+                clientSecret 'the_client_secret'
+            }
+            cloudHubAppPrefix 'AVI'
+        }
+        closure.delegate = context
 
         // act
+        def exception = shouldFail {
+            closure.call()
+        }
 
         // assert
-        Assert.fail("write it")
+        assertThat exception.message,
+                   is(equalTo("'environment' was repeated twice"))
     }
 }
