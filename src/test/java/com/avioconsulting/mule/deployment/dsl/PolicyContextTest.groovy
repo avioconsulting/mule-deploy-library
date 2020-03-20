@@ -1,9 +1,9 @@
 package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.deployment.api.models.HttpMethod
+import com.avioconsulting.mule.deployment.api.models.policies.ClientEnforcementPolicyBasicAuth
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.api.models.policies.PolicyPathApplication
-import org.junit.Assert
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -181,22 +181,47 @@ class PolicyContextTest {
     }
 
     @Test
-    void client_enforcement_policy_without_version() {
+    void client_enforcement_policy_minimum() {
         // arrange
+        def context = new ClientEnforcementPolicyBasicContext()
+        def closure = {
+        }
+        closure.delegate = context
+        closure.call()
 
         // act
+        def request = context.createPolicyModel()
 
         // assert
-        Assert.fail("write it")
+        assertThat request,
+                   is(equalTo(new ClientEnforcementPolicyBasicAuth()))
     }
 
     @Test
-    void client_enforcement_policy_with_version() {
+    void client_enforcement_policy_full() {
         // arrange
+        def context = new ClientEnforcementPolicyBasicContext()
+        def closure = {
+            version '1.4.1'
+            paths {
+                path {
+                    method PUT
+                    regex '.*bar'
+                }
+            }
+        }
+        closure.delegate = context
+        closure.call()
 
         // act
+        def request = context.createPolicyModel()
 
         // assert
-        Assert.fail("write it")
+        assertThat request,
+                   is(equalTo(new ClientEnforcementPolicyBasicAuth([
+                                                                           new PolicyPathApplication([HttpMethod.PUT],
+                                                                                                     '.*bar')
+                                                                   ],
+                                                                   '1.4.1')))
     }
 }
