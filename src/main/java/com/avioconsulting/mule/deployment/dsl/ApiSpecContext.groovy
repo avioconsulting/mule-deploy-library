@@ -6,6 +6,11 @@ class ApiSpecContext extends BaseContext {
     String name, exchangeAssetId, apiMajorVersion, mainRamlFile, endpoint
 
     ApiSpecification createRequest() {
+        def errors = findErrors()
+        if (errors.any()) {
+            def errorList = errors.join('\n')
+            throw new Exception("Your API spec is not complete. The following errors exist:\n${errorList}")
+        }
         new ApiSpecification(this.name,
                              this.apiMajorVersion,
                              this.mainRamlFile,
@@ -15,6 +20,6 @@ class ApiSpecContext extends BaseContext {
 
     @Override
     List<String> findOptionalProperties() {
-        []
+        ['exchangeAssetId', 'apiMajorVersion', 'mainRamlFile', 'endpoint']
     }
 }

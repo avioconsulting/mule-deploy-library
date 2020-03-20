@@ -3,6 +3,7 @@ package com.avioconsulting.mule.deployment.dsl
 import org.junit.Assert
 import org.junit.Test
 
+import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
@@ -70,10 +71,20 @@ class ApiSpecContextTest {
     @Test
     void missing_required() {
         // arrange
+        def context = new ApiSpecContext()
+        def closure = {
+        }
+        closure.delegate = context
+        closure.call()
 
         // act
+        def exception = shouldFail {
+            context.createRequest()
+        }
 
         // assert
-        Assert.fail("write it")
+        assertThat exception.message,
+                   is(containsString("""Your API spec is not complete. The following errors exist:
+- name missing"""))
     }
 }
