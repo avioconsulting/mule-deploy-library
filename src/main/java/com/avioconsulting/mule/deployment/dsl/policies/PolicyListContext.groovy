@@ -1,5 +1,9 @@
 package com.avioconsulting.mule.deployment.dsl.policies
 
-class PolicyListContext {
+import com.avioconsulting.mule.deployment.api.models.policies.Policy
 
+class PolicyListContext {
+    List<Policy> createPolicyList() {
+        []
+    }
 }
