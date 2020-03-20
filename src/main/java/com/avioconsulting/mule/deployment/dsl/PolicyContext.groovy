@@ -1,4 +1,20 @@
 package com.avioconsulting.mule.deployment.dsl
 
-class PolicyContext {
+import com.avioconsulting.mule.deployment.api.models.policies.Policy
+
+class PolicyContext extends BaseContext {
+    String groupId, assetId, version
+    Map<String, String> config
+
+    Policy createPolicyModel() {
+        new Policy(this.groupId,
+                   this.assetId,
+                   this.version,
+                   this.config)
+    }
+
+    @Override
+    List<String> findOptionalProperties() {
+        return null
+    }
 }
