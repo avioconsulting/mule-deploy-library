@@ -1,6 +1,8 @@
 package com.avioconsulting.mule.deployment.dsl
 
+import com.avioconsulting.mule.deployment.api.models.HttpMethod
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
+import com.avioconsulting.mule.deployment.api.models.policies.PolicyPathApplication
 import org.junit.Assert
 import org.junit.Test
 
@@ -41,6 +43,17 @@ class PolicyContextTest {
             assetId 'the-asset-id'
             version '1.2.1'
             config hello: 'there'
+            paths {
+                path {
+                    method GET
+                    method PUT
+                    regex '.*foo'
+                }
+                path {
+                    method PUT
+                    regex '.*bar'
+                }
+            }
         }
         closure.delegate = context
         closure.call()
@@ -53,7 +66,45 @@ class PolicyContextTest {
                    is(equalTo(new Policy('the-group-id',
                                          'the-asset-id',
                                          '1.2.1',
-                                         [hello: 'there'])))
+                                         [
+                                                 hello: 'there'
+                                         ],
+                                         [
+                                                 new PolicyPathApplication([HttpMethod.GET,
+                                                                            HttpMethod.PUT],
+                                                                           '.*foo'),
+                                                 new PolicyPathApplication([HttpMethod.PUT],
+                                                                           '.*bar')
+                                         ])))
+    }
+
+    @Test
+    void no_paths() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void path_without_methods() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void path_without_regex() {
+        // arrange
+
+        // act
+
+        // assert
         Assert.fail("write it")
     }
 
