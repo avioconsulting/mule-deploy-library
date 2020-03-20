@@ -3,12 +3,7 @@ package com.avioconsulting.mule.deployment.dsl
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 
 class CloudhubContext extends BaseContext {
-    String environment
-    String applicationName
-    String appVersion
-    String file
-    String cryptoKey
-    String cloudHubAppPrefix
+    String environment, applicationName, appVersion, file, cryptoKey, cloudHubAppPrefix
     private WorkerSpecContext workerSpecs = new WorkerSpecContext()
     private AutodiscoveryContext autoDiscovery = new AutodiscoveryContext()
     Map<String, String> appProperties = [:]

@@ -38,11 +38,33 @@ class ApiSpecContextTest {
     @Test
     void includes_optional() {
         // arrange
+        def context = new ApiSpecContext()
+        def closure = {
+            name 'Foo Bar'
+            exchangeAssetId 'the-asset-id'
+            apiMajorVersion 'v2'
+            mainRamlFile 'foo.raml'
+            endpoint 'https://foo'
+        }
+        closure.delegate = context
+        closure.call()
 
         // act
+        def request = context.createRequest()
 
         // assert
-        Assert.fail("write it")
+        request.with {
+            assertThat it.name,
+                       is(equalTo('Foo Bar'))
+            assertThat it.apiMajorVersion,
+                       is(equalTo('v2'))
+            assertThat it.mainRamlFile,
+                       is(equalTo('foo.raml'))
+            assertThat it.exchangeAssetId,
+                       is(equalTo('the-asset-id'))
+            assertThat it.endpoint,
+                       is(equalTo('https://foo'))
+        }
     }
 
     @Test
