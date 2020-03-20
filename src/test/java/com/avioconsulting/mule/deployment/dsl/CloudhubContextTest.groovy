@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.dsl
 
-import org.junit.Assert
+import com.avioconsulting.mule.deployment.api.models.AwsRegions
+import com.avioconsulting.mule.deployment.api.models.WorkerTypes
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -8,6 +9,7 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
+@SuppressWarnings("GroovyAssignabilityCheck")
 class CloudhubContextTest {
     @Test
     void required_only() {
@@ -35,35 +37,104 @@ class CloudhubContextTest {
         def request = context.createDeploymentRequest()
 
         // assert
-        assertThat request.environment,
-                   is(equalTo('DEV'))
-        assertThat request.appName,
-                   is(equalTo('the-app'))
-        assertThat request.appVersion,
-                   is(equalTo('1.2.3'))
-        def workerSpecs = request.workerSpecRequest
-        assertThat workerSpecs.muleVersion,
-                   is(equalTo('4.2.2'))
-        assertThat request.file,
-                   is(equalTo(new File('path/to/file.jar')))
-        assertThat request.cryptoKey,
-                   is(equalTo('theKey'))
-        assertThat request.anypointClientId,
-                   is(equalTo('the_client_id'))
-        assertThat request.anypointClientSecret,
-                   is(equalTo('the_client_secret'))
-        assertThat request.cloudHubAppPrefix,
-                   is(equalTo('AVI'))
+        request.with {
+            assertThat environment,
+                       is(equalTo('DEV'))
+            assertThat request.appName,
+                       is(equalTo('the-app'))
+            assertThat appVersion,
+                       is(equalTo('1.2.3'))
+            assertThat workerSpecRequest.muleVersion,
+                       is(equalTo('4.2.2'))
+            assertThat file,
+                       is(equalTo(new File('path/to/file.jar')))
+            assertThat cryptoKey,
+                       is(equalTo('theKey'))
+            assertThat anypointClientId,
+                       is(equalTo('the_client_id'))
+            assertThat anypointClientSecret,
+                       is(equalTo('the_client_secret'))
+            assertThat cloudHubAppPrefix,
+                       is(equalTo('AVI'))
+        }
     }
 
     @Test
     void include_optional() {
         // arrange
+        def context = new CloudhubContext()
+        def closure = {
+            environment 'DEV'
+            applicationName 'the-app'
+            appVersion '1.2.3'
+            workerSpecs {
+                // only muleVersion is required
+                muleVersion '4.2.2'
+                usePersistentQueues true
+                workerType 'Micro'
+                workerCount 1
+                awsRegion 'us-east-1'
+            }
+            file 'path/to/file.jar'
+            cryptoKey 'theKey'
+            autodiscovery {
+                clientId 'the_client_id'
+                clientSecret 'the_client_secret'
+            }
+            cloudHubAppPrefix 'AVI'
+            // optional from here on out
+            appProperties([
+                    someProp: 'someValue'
+            ])
+            otherCloudHubProperties([
+                    some_ch_value_we_havent_covered_yet: true
+            ])
+        }
+        closure.delegate = context
 
         // act
+        closure.call()
+        def request = context.createDeploymentRequest()
 
         // assert
-        Assert.fail("write it")
+        request.with {
+            assertThat environment,
+                       is(equalTo('DEV'))
+            assertThat appName,
+                       is(equalTo('the-app'))
+            assertThat appVersion,
+                       is(equalTo('1.2.3'))
+            workerSpecRequest.with {
+                assertThat muleVersion,
+                           is(equalTo('4.2.2'))
+                assertThat usePersistentQueues,
+                           is(equalTo(true))
+                assertThat workerType,
+                           is(equalTo(WorkerTypes.Micro))
+                assertThat workerCount,
+                           is(equalTo(1))
+                assertThat awsRegion,
+                           is(equalTo(AwsRegions.UsEast1))
+            }
+            assertThat file,
+                       is(equalTo(new File('path/to/file.jar')))
+            assertThat cryptoKey,
+                       is(equalTo('theKey'))
+            assertThat anypointClientId,
+                       is(equalTo('the_client_id'))
+            assertThat anypointClientSecret,
+                       is(equalTo('the_client_secret'))
+            assertThat cloudHubAppPrefix,
+                       is(equalTo('AVI'))
+            assertThat appProperties,
+                       is(equalTo([
+                               someProp: 'someValue'
+                       ]))
+            assertThat otherCloudHubProperties,
+                       is(equalTo([
+                               some_ch_value_we_havent_covered_yet: true
+                       ]))
+        }
     }
 
     @Test
