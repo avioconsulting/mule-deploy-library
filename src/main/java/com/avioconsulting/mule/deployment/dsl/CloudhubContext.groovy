@@ -32,7 +32,9 @@ class CloudhubContext extends BaseContext {
                                       this.cryptoKey,
                                       autoDiscovery.clientId,
                                       autoDiscovery.clientSecret,
-                                      this.cloudHubAppPrefix)
+                                      this.cloudHubAppPrefix,
+                                      this.appProperties,
+                                      this.otherCloudHubProperties)
     }
 
     @Override
