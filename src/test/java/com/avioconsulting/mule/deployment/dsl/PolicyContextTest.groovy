@@ -14,6 +14,29 @@ class PolicyContextTest {
         // arrange
         def context = new PolicyContext()
         def closure = {
+            assetId 'the-asset-id'
+            version '1.2.1'
+            config hello: 'there'
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createPolicyModel()
+
+        // assert
+        assertThat request,
+                   is(equalTo(new Policy(Policy.mulesoftGroupId,
+                                         'the-asset-id',
+                                         '1.2.1',
+                                         [hello: 'there'])))
+    }
+
+    @Test
+    void default_mule_policy_full() {
+        // arrange
+        def context = new PolicyContext()
+        def closure = {
             groupId 'the-group-id'
             assetId 'the-asset-id'
             version '1.2.1'
@@ -31,15 +54,6 @@ class PolicyContextTest {
                                          'the-asset-id',
                                          '1.2.1',
                                          [hello: 'there'])))
-    }
-
-    @Test
-    void default_mule_policy_full() {
-        // arrange
-
-        // act
-
-        // assert
         Assert.fail("write it")
     }
 

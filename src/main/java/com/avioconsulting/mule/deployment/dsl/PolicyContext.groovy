@@ -7,7 +7,7 @@ class PolicyContext extends BaseContext {
     Map<String, String> config
 
     Policy createPolicyModel() {
-        new Policy(this.groupId,
+        new Policy(this.groupId ?: Policy.mulesoftGroupId,
                    this.assetId,
                    this.version,
                    this.config)
