@@ -3,6 +3,7 @@ package com.avioconsulting.mule.deployment.dsl
 import org.junit.Assert
 import org.junit.Test
 
+import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.Matchers.*
 import static org.hamcrest.MatcherAssert.assertThat
 
@@ -78,10 +79,30 @@ class OnPremContextTest {
     @Test
     void missing_required() {
         // arrange
+        def context = new OnPremContext()
+        def closure = {
+//            environment 'DEV'
+//            applicationName 'the-app'
+//            appVersion '1.2.3'
+//            file 'path/to/file.jar'
+//            targetServerOrClusterName 'server1'
+        }
+        closure.delegate = context
+        closure.call()
 
         // act
+        def exception = shouldFail {
+            context.createDeploymentRequest()
+        }
 
         // assert
-        Assert.fail("write it")
+        assertThat exception.message,
+                   is(equalTo("""Your deployment request is not complete. The following errors exist:
+- appVersion missing
+- applicationName missing
+- environment missing
+- file missing
+- targetServerOrClusterName missing
+""".trim()))
     }
 }
