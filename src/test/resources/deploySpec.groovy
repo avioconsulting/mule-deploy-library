@@ -1,4 +1,7 @@
 muleDeploy {
+    // version of the tool
+    version '1.0'
+
     settings {
         username 'the_username'
         password 'the_password'
@@ -62,9 +65,9 @@ muleDeploy {
             // only muleVersion is required
             muleVersion '4.2.2'
             usePersistentQueues true
-            workerType 'Micro'
+            workerType WorkerTypes.Micro
             workerCount 1
-            awsRegion 'us-east-1'
+            awsRegion AwsRegions.UsWest1
         }
         file 'path/to/file.jar'
         cryptoKey 'theKey'
