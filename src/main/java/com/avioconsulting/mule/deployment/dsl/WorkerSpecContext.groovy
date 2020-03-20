@@ -30,9 +30,13 @@ class WorkerSpecContext extends BaseContext {
      * @return
      */
     def propertyMissing(String name) {
-        if (name == AwsRegions.simpleName) {
-            return AwsRegions
+        switch (name) {
+            case AwsRegions.simpleName:
+                return AwsRegions
+            case WorkerTypes.simpleName:
+                return WorkerTypes
+            default:
+                return null
         }
-        return null
     }
 }

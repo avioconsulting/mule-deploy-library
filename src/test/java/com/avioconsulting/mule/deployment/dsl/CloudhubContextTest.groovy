@@ -1,14 +1,13 @@
 package com.avioconsulting.mule.deployment.dsl
 
-import com.avioconsulting.mule.deployment.api.models.AwsRegions
-import com.avioconsulting.mule.deployment.api.models.WorkerTypes
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-@SuppressWarnings("GroovyAssignabilityCheck")
+// optimizing refs would prevent us from testing DSL resolution
+@SuppressWarnings(["UnnecessaryQualifiedReference", "GroovyAssignabilityCheck"])
 class CloudhubContextTest {
     @Test
     void required_only() {
@@ -53,7 +52,7 @@ class CloudhubContextTest {
                 assertThat workerCount,
                            is(equalTo(1))
                 assertThat workerType,
-                           is(equalTo(WorkerTypes.Micro))
+                           is(equalTo(com.avioconsulting.mule.deployment.api.models.WorkerTypes.Micro))
             }
             assertThat file,
                        is(equalTo(new File('path/to/file.jar')))
@@ -80,9 +79,10 @@ class CloudhubContextTest {
                 // only muleVersion is required
                 muleVersion '4.2.2'
                 usePersistentQueues true
-                workerType 'Micro'
+                workerType WorkerTypes.xLarge
                 workerCount 22
-                awsRegion AwsRegions.UsEast1
+                // DO NOT Optimize!!!!
+                awsRegion com.avioconsulting.mule.deployment.api.models.AwsRegions.UsEast1
             }
             file 'path/to/file.jar'
             cryptoKey 'theKey'
@@ -119,11 +119,11 @@ class CloudhubContextTest {
                 assertThat usePersistentQueues,
                            is(equalTo(true))
                 assertThat workerType,
-                           is(equalTo(WorkerTypes.Micro))
+                           is(equalTo(com.avioconsulting.mule.deployment.api.models.WorkerTypes.xLarge))
                 assertThat workerCount,
                            is(equalTo(22))
                 assertThat awsRegion,
-                           is(equalTo(AwsRegions.UsEast1))
+                           is(equalTo(com.avioconsulting.mule.deployment.api.models.AwsRegions.UsEast1))
             }
             assertThat file,
                        is(equalTo(new File('path/to/file.jar')))
