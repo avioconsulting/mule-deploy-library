@@ -3,43 +3,44 @@ package com.avioconsulting.mule.deployment.dsl
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 
 class CloudhubContext {
-    private String environmentName
-    private String appName
-    private String appVersion
+    String environment
+    String applicationName
+    String appVersion
+    File file
+    String cryptoKey
+    String cloudHubAppPrefix
     private WorkerSpecContext workerSpecContext = new WorkerSpecContext()
     private AutodiscoveryContext autodiscoveryContext = new AutodiscoveryContext()
-    private File file
-    private String key
-    private String prefix
 
-    CloudhubDeploymentRequest getDeploymentRequest() {
-        def errors = []
-        if (!this.environmentName) {
-            errors << 'environmentName'
-        }
+    CloudhubDeploymentRequest createDeploymentRequest() {
+        def errors = this.getProperties().findAll { k, v ->
+            k != 'class' && v == null
+        }.collect { k, v ->
+            k
+        }.sort()
         if (errors.any()) {
             def errorList = errors.collect { error ->
                 "- ${error}"
             }.join('\n')
             throw new Exception("Your deployment request is not complete. The following errors exist:\n${errorList}")
         }
-        new CloudhubDeploymentRequest(this.environmentName,
-                                      this.appName,
+        new CloudhubDeploymentRequest(this.environment,
+                                      this.applicationName,
                                       this.appVersion,
                                       workerSpecContext.request,
                                       this.file,
-                                      this.key,
+                                      this.cryptoKey,
                                       this.autodiscoveryContext.clientId,
                                       this.autodiscoveryContext.clientSecret,
-                                      this.prefix)
+                                      this.cloudHubAppPrefix)
     }
 
-    def environment(String environmentName) {
-        this.environmentName = environmentName
+    def environment(String environment) {
+        this.environment = environment
     }
 
-    def applicationName(String appName) {
-        this.appName = appName
+    def applicationName(String applicationName) {
+        this.applicationName = applicationName
     }
 
     def appVersion(String appVersion) {
@@ -60,11 +61,11 @@ class CloudhubContext {
         this.file = new File(file)
     }
 
-    def cryptoKey(String key) {
-        this.key = key
+    def cryptoKey(String cryptoKey) {
+        this.cryptoKey = cryptoKey
     }
 
-    def cloudHubAppPrefix(String prefix) {
-        this.prefix = prefix
+    def cloudHubAppPrefix(String cloudHubAppPrefix) {
+        this.cloudHubAppPrefix = cloudHubAppPrefix
     }
 }

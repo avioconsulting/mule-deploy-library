@@ -32,7 +32,7 @@ class CloudhubContextTest {
 
         // act
         closure.call()
-        def request = context.deploymentRequest
+        def request = context.createDeploymentRequest()
 
         // assert
         assertThat request.environment,
@@ -82,15 +82,19 @@ class CloudhubContextTest {
 
         // act
         def exception = shouldFail {
-            context.deploymentRequest
+            context.createDeploymentRequest()
         }
 
         // assert
         assertThat exception.message,
                    is(equalTo("""Your deployment request is not complete. The following errors exist:
-- environmentName
+- appVersion
+- applicationName
+- cloudHubAppPrefix
+- cryptoKey
+- environment
+- file
 """.trim()))
-        Assert.fail("write it")
     }
 
     @Test
