@@ -28,6 +28,9 @@ class PathContext {
     private List<HttpMethod> methods = []
 
     PolicyPathApplication createModel() {
+        if (methods.empty) {
+            throw new Exception("'path' is missing a 'method' declaration")
+        }
         new PolicyPathApplication(methods,
                                   regex)
     }

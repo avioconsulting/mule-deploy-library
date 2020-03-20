@@ -104,11 +104,28 @@ class PolicyContextTest {
     @Test
     void path_without_methods() {
         // arrange
+        def context = new PolicyContext()
+        def closure = {
+            assetId 'the-asset-id'
+            version '1.2.1'
+            config hello: 'there'
+            paths {
+                path {
+                    //method PUT
+                    regex '.*bar'
+                }
+            }
+        }
+        closure.delegate = context
 
         // act
+        def exception = shouldFail {
+            closure.call()
+        }
 
         // assert
-        Assert.fail("write it")
+        assertThat exception.message,
+                   is(containsString("'path' is missing a 'method' declaration"))
     }
 
     @Test
