@@ -6,8 +6,7 @@ import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.Matchers.equalTo
-import static org.hamcrest.Matchers.is
+import static org.hamcrest.Matchers.*
 
 @SuppressWarnings("GroovyAssignabilityCheck")
 class CloudhubContextTest {
@@ -44,8 +43,18 @@ class CloudhubContextTest {
                        is(equalTo('the-app'))
             assertThat appVersion,
                        is(equalTo('1.2.3'))
-            assertThat workerSpecRequest.muleVersion,
-                       is(equalTo('4.2.2'))
+            workerSpecRequest.with {
+                assertThat muleVersion,
+                           is(equalTo('4.2.2'))
+                assertThat usePersistentQueues,
+                           is(equalTo(false))
+                assertThat awsRegion,
+                           is(nullValue())
+                assertThat workerCount,
+                           is(equalTo(1))
+                assertThat workerType,
+                           is(equalTo(WorkerTypes.Micro))
+            }
             assertThat file,
                        is(equalTo(new File('path/to/file.jar')))
             assertThat cryptoKey,
@@ -72,8 +81,8 @@ class CloudhubContextTest {
                 muleVersion '4.2.2'
                 usePersistentQueues true
                 workerType 'Micro'
-                workerCount 1
-                awsRegion 'us-east-1'
+                workerCount 22
+                awsRegion AwsRegions.UsEast1
             }
             file 'path/to/file.jar'
             cryptoKey 'theKey'
@@ -112,7 +121,7 @@ class CloudhubContextTest {
                 assertThat workerType,
                            is(equalTo(WorkerTypes.Micro))
                 assertThat workerCount,
-                           is(equalTo(1))
+                           is(equalTo(22))
                 assertThat awsRegion,
                            is(equalTo(AwsRegions.UsEast1))
             }

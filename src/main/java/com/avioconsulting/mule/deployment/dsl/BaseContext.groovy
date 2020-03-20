@@ -3,9 +3,16 @@ package com.avioconsulting.mule.deployment.dsl
 abstract class BaseContext {
     private List<String> fieldsThatHaveBeenSet = []
 
+    /**
+     * Define which properties might be null and are not required.
+     * @return
+     */
+    abstract List<String> findOptionalProperties()
+
     def findErrors(String prefix = null) {
+        def optional = findOptionalProperties()
         this.getProperties().findAll { k, v ->
-            k != 'class' && v == null
+            k != 'class' && v == null && !optional.contains(k)
         }.collect { k, v ->
             prefix ? "${prefix}.${k}" : k
         }.sort().collect { error -> "- ${error} missing" }

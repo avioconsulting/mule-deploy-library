@@ -11,6 +11,8 @@ class CloudhubContext extends BaseContext {
     String cloudHubAppPrefix
     private WorkerSpecContext workerSpecs = new WorkerSpecContext()
     private AutodiscoveryContext autoDiscovery = new AutodiscoveryContext()
+    Map<String, String> appProperties = [:]
+    Map<String, String> otherCloudHubProperties = [:]
 
     CloudhubDeploymentRequest createDeploymentRequest() {
         def errors = findErrors()
@@ -31,5 +33,10 @@ class CloudhubContext extends BaseContext {
                                       autoDiscovery.clientId,
                                       autoDiscovery.clientSecret,
                                       this.cloudHubAppPrefix)
+    }
+
+    @Override
+    List<String> findOptionalProperties() {
+        []
     }
 }
