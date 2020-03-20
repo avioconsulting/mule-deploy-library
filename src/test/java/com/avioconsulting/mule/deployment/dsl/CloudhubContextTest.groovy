@@ -24,7 +24,7 @@ class CloudhubContextTest {
             }
             file 'path/to/file.jar'
             cryptoKey 'theKey'
-            autodiscovery {
+            autoDiscovery {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
@@ -77,7 +77,7 @@ class CloudhubContextTest {
             }
             file 'path/to/file.jar'
             cryptoKey 'theKey'
-            autodiscovery {
+            autoDiscovery {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
@@ -144,7 +144,7 @@ class CloudhubContextTest {
         def closure = {
             workerSpecs {
             }
-            autodiscovery {
+            autoDiscovery {
                 clientId 'the_client_id'
             }
         }
@@ -165,6 +165,7 @@ class CloudhubContextTest {
 - cryptoKey missing
 - environment missing
 - file missing
+- autoDiscovery.clientSecret missing
 """.trim()))
     }
 
@@ -182,7 +183,7 @@ class CloudhubContextTest {
             }
             file 'path/to/file.jar'
             cryptoKey 'theKey'
-            autodiscovery {
+            autoDiscovery {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
@@ -216,7 +217,7 @@ class CloudhubContextTest {
             }
             file 'path/to/file.jar'
             cryptoKey 'theKey'
-            autodiscovery {
+            autoDiscovery {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }

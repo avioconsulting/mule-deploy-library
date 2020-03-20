@@ -5,7 +5,7 @@ class MuleDeployContext {
         def context = new CloudhubContext()
         closure.delegate = context
         closure.call()
-        def request = context.deploymentRequest
+        def request = context.createDeploymentRequest()
         println "got request ${request}"
     }
 }

@@ -68,7 +68,7 @@ muleDeploy {
         }
         file 'path/to/file.jar'
         cryptoKey 'theKey'
-        autodiscovery {
+        autoDiscovery {
             clientId 'the_client_id'
             clientSecret 'the_client_secret'
         }
