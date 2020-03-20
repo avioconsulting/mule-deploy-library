@@ -181,16 +181,6 @@ class PolicyContextTest {
     }
 
     @Test
-    void our_own_policy() {
-        // arrange
-
-        // act
-
-        // assert
-        Assert.fail("write it")
-    }
-
-    @Test
     void client_enforcement_policy_without_version() {
         // arrange
 
