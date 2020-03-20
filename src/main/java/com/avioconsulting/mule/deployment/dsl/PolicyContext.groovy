@@ -31,6 +31,9 @@ class PathContext {
         if (methods.empty) {
             throw new Exception("'path' is missing a 'method' declaration")
         }
+        if (!regex) {
+            throw new Exception("'path' is missing a 'regex' declaration")
+        }
         new PolicyPathApplication(methods,
                                   regex)
     }
