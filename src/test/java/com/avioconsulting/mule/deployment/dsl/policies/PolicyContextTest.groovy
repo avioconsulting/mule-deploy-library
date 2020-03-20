@@ -1,4 +1,4 @@
-package com.avioconsulting.mule.deployment.dsl
+package com.avioconsulting.mule.deployment.dsl.policies
 
 import com.avioconsulting.mule.deployment.api.models.HttpMethod
 import com.avioconsulting.mule.deployment.api.models.policies.ClientEnforcementPolicyBasicAuth
