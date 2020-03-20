@@ -18,7 +18,7 @@ class PolicyListContextTest {
                 version '1.2.1'
                 config hello: 'there'
             }
-            clientEnforcementPolicyBasic
+            clientEnforcementPolicyBasic()
         }
         closure.delegate = context
         closure.call()
@@ -31,7 +31,7 @@ class PolicyListContextTest {
                    is(equalTo(2))
         assertThat result[0],
                    is(instanceOf(Policy))
-        assertThat result[0],
+        assertThat result[1],
                    is(instanceOf(ClientEnforcementPolicyBasicAuth))
     }
 
@@ -58,7 +58,7 @@ class PolicyListContextTest {
                    is(equalTo(2))
         assertThat result[0],
                    is(instanceOf(Policy))
-        assertThat result[0],
+        assertThat result[1],
                    is(instanceOf(ClientEnforcementPolicyBasicAuth))
     }
 }
