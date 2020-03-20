@@ -51,7 +51,7 @@ muleDeploy {
 
     // this entire section is optional. if you omit it
     enabledFeatures {
-        all
+        All
         // or you can do this and specify a list of what you want enabled
         DesignCenterSync
         ApiManagerDefinitions
