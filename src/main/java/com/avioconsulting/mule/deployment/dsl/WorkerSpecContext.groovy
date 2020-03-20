@@ -2,14 +2,10 @@ package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 
-class WorkerSpecContext {
-    private String muleVersion
+class WorkerSpecContext extends BaseContext {
+    String muleVersion
 
-    CloudhubWorkerSpecRequest getRequest() {
+    CloudhubWorkerSpecRequest createRequest() {
         new CloudhubWorkerSpecRequest(this.muleVersion)
-    }
-
-    def muleVersion(String muleVersion) {
-        this.muleVersion = muleVersion
     }
 }

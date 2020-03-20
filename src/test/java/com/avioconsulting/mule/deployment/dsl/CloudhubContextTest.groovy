@@ -165,6 +165,7 @@ class CloudhubContextTest {
 - cryptoKey missing
 - environment missing
 - file missing
+- workerSpecs.muleVersion missing
 - autoDiscovery.clientSecret missing
 """.trim()))
     }

@@ -14,6 +14,8 @@ class CloudhubContext extends BaseContext {
 
     CloudhubDeploymentRequest createDeploymentRequest() {
         def errors = findErrors()
+        def specs = workerSpecs
+        errors += specs.findErrors('workerSpecs')
         def autoDiscovery = this.autoDiscovery
         errors += autoDiscovery.findErrors('autoDiscovery')
         if (errors.any()) {
@@ -23,7 +25,7 @@ class CloudhubContext extends BaseContext {
         new CloudhubDeploymentRequest(this.environment,
                                       this.applicationName,
                                       this.appVersion,
-                                      workerSpecs.request,
+                                      specs.createRequest(),
                                       new File(this.file),
                                       this.cryptoKey,
                                       autoDiscovery.clientId,
