@@ -409,5 +409,45 @@ class MuleDeployContextTest {
                    ]))
     }
 
+    @Test
+    void empty_policies() {
+        // arrange
+        def closure = {
+            version '1.0'
+
+            settings {
+                username 'the_username'
+                password 'the_password'
+            }
+
+            apiSpecification {
+                name 'Design Center Project Name'
+            }
+
+            policies {}
+
+            onPremApplication {
+                environment 'DEV'
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                file 'path/to/file.jar'
+                targetServerOrClusterName 'theServer'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        context.performDeployment()
+
+        // assert
+        assertThat desiredPolicies,
+                   is(equalTo([]))
+        assertThat enabledFeatures,
+                   is(equalTo([
+                           Features.All
+                   ]))
+    }
+
     // TODO: Perhaps these tests should call Deployer's deploy methods? Should we add a dry run all the way in there so when we do a "syntax check" with the DSL, they can actually see what steps would run?
 }

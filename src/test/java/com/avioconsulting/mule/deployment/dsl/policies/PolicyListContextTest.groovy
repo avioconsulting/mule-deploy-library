@@ -2,7 +2,6 @@ package com.avioconsulting.mule.deployment.dsl.policies
 
 import com.avioconsulting.mule.deployment.api.models.policies.ClientEnforcementPolicyBasicAuth
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
-import org.junit.Assert
 import org.junit.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
@@ -66,10 +65,17 @@ class PolicyListContextTest {
     @Test
     void no_policies_on_purpose() {
         // arrange
+        def context = new PolicyListContext()
+        def closure = {
+        }
+        closure.delegate = context
+        closure.call()
 
         // act
+        def result = context.createPolicyList()
 
         // assert
-        Assert.fail("write it")
+        assertThat result,
+                   is(equalTo([]))
     }
 }
