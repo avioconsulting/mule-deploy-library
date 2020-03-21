@@ -211,6 +211,62 @@ class MuleDeployContextTest {
     @Test
     void attempt_to_do_ch_and_on_prem() {
         // arrange
+        def closure = {
+            version '1.0'
+
+            settings {
+                username 'the_username'
+                password 'the_password'
+            }
+
+            apiSpecification {
+                name 'Design Center Project Name'
+            }
+
+            policies {
+                clientEnforcementPolicyBasic()
+            }
+
+            onPremApplication {
+                environment 'DEV'
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                file 'path/to/file.jar'
+                targetServerOrClusterName 'theServer'
+            }
+
+            cloudHubApplication {
+                environment 'DEV'
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                workerSpecs {
+                    muleVersion '4.2.2'
+                }
+                file 'path/to/file.jar'
+                cryptoKey 'theKey'
+                autoDiscovery {
+                    clientId 'the_client_id'
+                    clientSecret 'the_client_secret'
+                }
+                cloudHubAppPrefix 'AVI'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def exception = shouldFail {
+            context.performDeployment()
+        }
+
+        // assert
+        assertThat exception.message,
+                   is(containsString('You cannot deploy both a CloudHub and on-prem application!'))
+    }
+
+    @Test
+    void missing_stuff() {
+        // arrange
 
         // act
 

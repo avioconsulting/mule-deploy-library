@@ -17,7 +17,11 @@ class MuleDeployContext extends BaseContext {
 
     def performDeployment() {
         def deployer = settings.buildDeployer(System.out)
-        def appRequest = hasFieldBeenSet('cloudHubApplication') ?
+        def cloudHubSet = hasFieldBeenSet('cloudHubApplication')
+        if (hasFieldBeenSet('onPremApplication') && cloudHubSet) {
+            throw new Exception('You cannot deploy both a CloudHub and on-prem application!')
+        }
+        def appRequest = cloudHubSet ?
                 cloudHubApplication.createDeploymentRequest() :
                 onPremApplication.createDeploymentRequest()
         deployer.deployApplication(appRequest,
