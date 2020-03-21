@@ -1,17 +1,106 @@
 package com.avioconsulting.mule.deployment.dsl
 
+import com.avioconsulting.mule.deployment.api.IDeployer
+import com.avioconsulting.mule.deployment.api.models.ApiSpecification
+import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.Features
+import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
 
+import static org.hamcrest.MatcherAssert.assertThat
+import static org.hamcrest.Matchers.*
+
+// optimizing refs would prevent us from testing DSL resolution
 class MuleDeployContextTest {
+    private MuleDeployContext context
+    private CloudhubDeploymentRequest chDeployment
+    private OnPremDeploymentRequest onPremDeployment
+    private ApiSpecification apiSpec
+    private List<Policy> desiredPolicies
+    private List<Features> enabledFeatures
+
+    @Before
+    void setup() {
+        chDeployment = null
+        onPremDeployment = null
+        apiSpec = null
+        desiredPolicies = []
+        enabledFeatures = []
+        def mockDeployer = [
+                deployApplication: { appDeploymentRequest,
+                                     ApiSpecification apiSpecification,
+                                     List<Policy> policies,
+                                     List<Features> features ->
+                    if (appDeploymentRequest instanceof CloudhubDeploymentRequest) {
+                        chDeployment = appDeploymentRequest
+                    } else {
+                        onPremDeployment = appDeploymentRequest
+                    }
+                    apiSpec = apiSpecification
+                    desiredPolicies = policies
+                    enabledFeatures = features
+                }
+        ] as IDeployer
+        context = new MuleDeployContext(mockDeployer)
+    }
+
     @Test
     void cloudhub() {
         // arrange
+        def closure = {
+            version '1.0'
+
+            settings {
+                username 'the_username'
+                password 'the_password'
+            }
+
+            apiSpecification {
+                name 'Design Center Project Name'
+            }
+
+            policies {
+                clientEnforcementPolicyBasic()
+            }
+
+            cloudHubApplication {
+                environment 'DEV'
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                workerSpecs {
+                    muleVersion '4.2.2'
+                }
+                file 'path/to/file.jar'
+                cryptoKey 'theKey'
+                autoDiscovery {
+                    clientId 'the_client_id'
+                    clientSecret 'the_client_secret'
+                }
+                cloudHubAppPrefix 'AVI'
+            }
+        }
+        closure.delegate = context
+        closure.call()
 
         // act
+        context.performDeployment()
 
         // assert
-        Assert.fail("write it")
+        assertThat chDeployment,
+                   is(notNullValue())
+        assertThat onPremDeployment,
+                   is(nullValue())
+        assertThat apiSpec,
+                   is(notNullValue())
+        assertThat desiredPolicies.size(),
+                   is(equalTo(1))
+        assertThat enabledFeatures,
+                   is(equalTo([
+                           Features.All
+                   ]))
     }
 
     @Test

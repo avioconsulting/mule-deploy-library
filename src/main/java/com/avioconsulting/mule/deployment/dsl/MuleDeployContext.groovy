@@ -1,11 +1,15 @@
 package com.avioconsulting.mule.deployment.dsl
 
+import com.avioconsulting.mule.deployment.api.IDeployer
+
 class MuleDeployContext {
-    def cloudHubApplication(Closure closure) {
-        def context = new CloudhubContext()
-        closure.delegate = context
-        closure.call()
-        def request = context.createDeploymentRequest()
-        println "got request ${request}"
+    private final IDeployer deployer
+
+    MuleDeployContext(IDeployer deployer) {
+        this.deployer = deployer
+    }
+
+    def performDeployment() {
+
     }
 }
