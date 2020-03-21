@@ -283,7 +283,6 @@ class MuleDeployContextTest {
                    is(equalTo("""Your file is not complete. The following errors exist:
 - version missing
 - settings missing
-- apiSpecification missing
 - Either onPremApplication or cloudHubApplication should be supplied
 """.trim()))
     }

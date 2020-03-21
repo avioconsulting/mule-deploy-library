@@ -15,10 +15,33 @@ class MuleDeployContext extends BaseContext {
         this.settings = new DeployerContext(deployerFactory ?: new DefaultDeployerFactory())
     }
 
+    def findErrors() {
+        List<String> errors = super.findErrors()
+        if (!hasFieldBeenSet('settings')) {
+            errors << '- settings missing'
+        }
+        if (!cloudHubSet && !onPremSet) {
+            errors << '- Either onPremApplication or cloudHubApplication should be supplied'
+        }
+        return errors
+    }
+
+    private boolean isCloudHubSet() {
+        hasFieldBeenSet('cloudHubApplication')
+    }
+
+    private boolean isOnPremSet() {
+        hasFieldBeenSet('onPremApplication')
+    }
+
     def performDeployment() {
+        def errors = findErrors()
+        if (errors.any()) {
+            def errorList = errors.join('\n')
+            throw new Exception("Your file is not complete. The following errors exist:\n${errorList}")
+        }
         def deployer = settings.buildDeployer(System.out)
-        def cloudHubSet = hasFieldBeenSet('cloudHubApplication')
-        if (hasFieldBeenSet('onPremApplication') && cloudHubSet) {
+        if (onPremSet && cloudHubSet) {
             throw new Exception('You cannot deploy both a CloudHub and on-prem application!')
         }
         def appRequest = cloudHubSet ?
