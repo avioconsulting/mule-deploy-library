@@ -6,7 +6,6 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -290,11 +289,75 @@ class MuleDeployContextTest {
     @Test
     void omit_features_if_section_gone() {
         // arrange
+        def closure = {
+            version '1.0'
+
+            settings {
+                username 'the_username'
+                password 'the_password'
+            }
+
+            onPremApplication {
+                environment 'DEV'
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                file 'path/to/file.jar'
+                targetServerOrClusterName 'theServer'
+            }
+        }
+        closure.delegate = context
+        closure.call()
 
         // act
+        context.performDeployment()
 
         // assert
-        Assert.fail("write it")
+        assertThat enabledFeatures,
+                   is(equalTo([
+                           Features.AppDeployment
+                   ]))
+    }
+
+    @Test
+    void specify_features() {
+        // arrange
+        def closure = {
+            version '1.0'
+
+            settings {
+                username 'the_username'
+                password 'the_password'
+            }
+
+            apiSpecification {
+                name 'Design Center Project Name'
+            }
+
+            enabledFeatures {
+                ApiManagerDefinitions
+                AppDeployment
+            }
+
+            onPremApplication {
+                environment 'DEV'
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                file 'path/to/file.jar'
+                targetServerOrClusterName 'theServer'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        context.performDeployment()
+
+        // assert
+        assertThat enabledFeatures,
+                   is(equalTo([
+                           Features.ApiManagerDefinitions,
+                           Features.AppDeployment
+                   ]))
     }
 
     // TODO: Perhaps these tests should call Deployer's deploy methods? Should we add a dry run all the way in there so when we do a "syntax check" with the DSL, they can actually see what steps would run?
