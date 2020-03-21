@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.*
 // optimizing refs would prevent us from testing DSL resolution
 class MuleDeployContextTest {
     private MuleDeployContext context
+    private String username
     private CloudhubDeploymentRequest chDeployment
     private OnPremDeploymentRequest onPremDeployment
     private ApiSpecification apiSpec
@@ -29,6 +30,7 @@ class MuleDeployContextTest {
         apiSpec = null
         desiredPolicies = []
         enabledFeatures = []
+        username = null
         def mockDeployer = [
                 deployApplication: { appDeploymentRequest,
                                      ApiSpecification apiSpecification,
@@ -44,7 +46,16 @@ class MuleDeployContextTest {
                     enabledFeatures = features
                 }
         ] as IDeployer
-        context = new MuleDeployContext(mockDeployer)
+        def mockDeployerFactory = [
+                create: { String user,
+                          String password,
+                          PrintStream logger,
+                          String anypointOrganizationName ->
+                    username = user
+                    return mockDeployer
+                }
+        ] as IDeployerFactory
+        context = new MuleDeployContext(mockDeployerFactory)
     }
 
     @Test
@@ -89,6 +100,9 @@ class MuleDeployContextTest {
         context.performDeployment()
 
         // assert
+        assertThat 'At least ensure the settings context ran',
+                   username,
+                   is(equalTo('the_username'))
         assertThat chDeployment,
                    is(notNullValue())
         assertThat onPremDeployment,

@@ -1,5 +1,6 @@
 package com.avioconsulting.mule.deployment.dsl
 
+import org.junit.Before
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -9,10 +10,33 @@ import static org.hamcrest.Matchers.is
 
 @SuppressWarnings(["UnnecessaryQualifiedReference", "GroovyAssignabilityCheck", "GroovyAccessibility"])
 class DeployerContextTest {
+    private DeployerContext context
+    String username, password, org
+    PrintStream logger
+
+    @Before
+    void setup() {
+        username = password = org = null
+        logger = null
+        def mockFactory = [
+                create: { String user,
+                          String pass,
+                          PrintStream log,
+                          String anypointOrganizationName ->
+                    username = user
+                    password = pass
+                    logger = log
+                    org = anypointOrganizationName
+                    // we don't care about the result, just the call
+                    return null
+                }
+        ] as IDeployerFactory
+        context = new DeployerContext(mockFactory)
+    }
+
     @Test
     void required_only() {
         // arrange
-        def context = new DeployerContext()
         def closure = {
             username 'the_username'
             password 'the_password'
@@ -21,21 +45,20 @@ class DeployerContextTest {
         closure.call()
 
         // act
-        def deployer = context.buildDeployer(System.out)
+        context.buildDeployer(System.out)
 
         // assert
-        deployer.clientWrapper.with {
-            assertThat username,
-                       is(equalTo('the_username'))
-            assertThat password,
-                       is(equalTo('the_password'))
-        }
+        assertThat username,
+                   is(equalTo('the_username'))
+        assertThat password,
+                   is(equalTo('the_password'))
+        assertThat logger,
+                   is(equalTo(System.out))
     }
 
     @Test
     void with_optional() {
         // arrange
-        def context = new DeployerContext()
         def closure = {
             username 'the_username'
             password 'the_password'
@@ -45,23 +68,20 @@ class DeployerContextTest {
         closure.call()
 
         // act
-        def deployer = context.buildDeployer(System.out)
+        context.buildDeployer(System.out)
 
         // assert
-        deployer.clientWrapper.with {
-            assertThat username,
-                       is(equalTo('the_username'))
-            assertThat password,
-                       is(equalTo('the_password'))
-            assertThat anypointOrganizationName,
-                       is(equalTo('the_org'))
-        }
+        assertThat username,
+                   is(equalTo('the_username'))
+        assertThat password,
+                   is(equalTo('the_password'))
+        assertThat org,
+                   is(equalTo('the_org'))
     }
 
     @Test
     void missing_required() {
         // arrange
-        def context = new DeployerContext()
         def closure = {
 //            username 'the_username'
 //            password 'the_password'
