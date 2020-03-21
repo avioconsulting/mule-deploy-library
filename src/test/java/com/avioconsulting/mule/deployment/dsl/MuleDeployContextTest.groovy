@@ -10,6 +10,7 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
+import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
@@ -171,11 +172,40 @@ class MuleDeployContextTest {
     @Test
     void unsupported_version() {
         // arrange
+        def closure = {
+            version '0.5'
+
+            settings {
+                username 'the_username'
+                password 'the_password'
+            }
+
+            apiSpecification {
+                name 'Design Center Project Name'
+            }
+
+            policies {
+                clientEnforcementPolicyBasic()
+            }
+
+            onPremApplication {
+                environment 'DEV'
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                file 'path/to/file.jar'
+                targetServerOrClusterName 'theServer'
+            }
+        }
+        closure.delegate = context
 
         // act
+        def exception = shouldFail {
+            closure.call()
+        }
 
         // assert
-        Assert.fail("write it")
+        assertThat exception.message,
+                   is(containsString('Only version 1.0 of the DSL is supported and you are using 0.5'))
     }
 
     @Test

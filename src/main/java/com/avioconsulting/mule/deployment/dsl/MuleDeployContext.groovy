@@ -26,6 +26,14 @@ class MuleDeployContext extends BaseContext {
                                    [Features.All])
     }
 
+    def version(String version) {
+        if (version != '1.0') {
+            throw new Exception("Only version 1.0 of the DSL is supported and you are using ${version}")
+        }
+        super.methodMissing('version',
+                            version)
+    }
+
     @Override
     List<String> findOptionalProperties() {
         []
