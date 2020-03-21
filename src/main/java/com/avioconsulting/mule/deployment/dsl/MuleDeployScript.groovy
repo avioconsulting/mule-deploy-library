@@ -5,5 +5,6 @@ abstract class MuleDeployScript extends Script {
         def context = new MuleDeployContext()
         closure.delegate = context
         closure.call()
+        context.performDeployment()
     }
 }
