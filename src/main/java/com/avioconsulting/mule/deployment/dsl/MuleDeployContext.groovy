@@ -1,5 +1,6 @@
 package com.avioconsulting.mule.deployment.dsl
 
+import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.dsl.policies.PolicyListContext
 
@@ -34,6 +35,10 @@ class MuleDeployContext extends BaseContext {
         hasFieldBeenSet('onPremApplication')
     }
 
+    private ApiSpecification createApiSpec() {
+        hasFieldBeenSet('apiSpecification') ? apiSpecification.createRequest() : null
+    }
+
     def performDeployment() {
         def errors = findErrors()
         if (errors.any()) {
@@ -44,18 +49,18 @@ class MuleDeployContext extends BaseContext {
         if (onPremSet && cloudHubSet) {
             throw new Exception('You cannot deploy both a CloudHub and on-prem application!')
         }
-        def apiSpecification = apiSpecification.createRequest()
         def policyList = policies.createPolicyList()
+        List<Features> features = [Features.All]
         if (cloudHubSet) {
             deployer.deployApplication(cloudHubApplication.createDeploymentRequest(),
-                                       apiSpecification,
+                                       createApiSpec(),
                                        policyList,
-                                       [Features.All])
+                                       features)
         } else {
             deployer.deployApplication(onPremApplication.createDeploymentRequest(),
-                                       apiSpecification,
+                                       createApiSpec(),
                                        policyList,
-                                       [Features.All])
+                                       features)
         }
     }
 

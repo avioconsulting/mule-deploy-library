@@ -287,7 +287,7 @@ class MuleDeployContextTest {
     }
 
     @Test
-    void omit_features_if_section_gone() {
+    void optional_stuff() {
         // arrange
         def closure = {
             version '1.0'
@@ -312,10 +312,8 @@ class MuleDeployContextTest {
         context.performDeployment()
 
         // assert
-        assertThat enabledFeatures,
-                   is(equalTo([
-                           Features.AppDeployment
-                   ]))
+        assertThat apiSpec,
+                   is(nullValue())
     }
 
     @Test
