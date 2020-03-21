@@ -267,11 +267,25 @@ class MuleDeployContextTest {
     @Test
     void missing_stuff() {
         // arrange
+        def closure = {
+
+        }
+        closure.delegate = context
+        closure.call()
 
         // act
+        def exception = shouldFail {
+            context.performDeployment()
+        }
 
         // assert
-        Assert.fail("write it")
+        assertThat exception.message,
+                   is(equalTo("""Your file is not complete. The following errors exist:
+- version missing
+- settings missing
+- apiSpecification missing
+- Either onPremApplication or cloudHubApplication should be supplied
+""".trim()))
     }
 
     @Test
