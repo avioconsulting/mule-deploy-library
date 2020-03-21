@@ -120,11 +120,52 @@ class MuleDeployContextTest {
     @Test
     void on_prem() {
         // arrange
+        def closure = {
+            version '1.0'
+
+            settings {
+                username 'the_username'
+                password 'the_password'
+            }
+
+            apiSpecification {
+                name 'Design Center Project Name'
+            }
+
+            policies {
+                clientEnforcementPolicyBasic()
+            }
+
+            onPremApplication {
+                environment 'DEV'
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                file 'path/to/file.jar'
+                targetServerOrClusterName 'theServer'
+            }
+        }
+        closure.delegate = context
+        closure.call()
 
         // act
+        context.performDeployment()
 
         // assert
-        Assert.fail("write it")
+        assertThat 'At least ensure the settings context ran',
+                   username,
+                   is(equalTo('the_username'))
+        assertThat chDeployment,
+                   is(nullValue())
+        assertThat onPremDeployment,
+                   is(notNullValue())
+        assertThat apiSpec,
+                   is(notNullValue())
+        assertThat desiredPolicies.size(),
+                   is(equalTo(1))
+        assertThat enabledFeatures,
+                   is(equalTo([
+                           Features.All
+                   ]))
     }
 
     @Test

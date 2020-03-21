@@ -9,6 +9,7 @@ class MuleDeployContext extends BaseContext {
     private ApiSpecContext apiSpecification = new ApiSpecContext()
     private PolicyListContext policies = new PolicyListContext()
     private CloudhubContext cloudHubApplication = new CloudhubContext()
+    private OnPremContext onPremApplication = new OnPremContext()
 
     MuleDeployContext(IDeployerFactory deployerFactory = null) {
         this.settings = new DeployerContext(deployerFactory ?: new DefaultDeployerFactory())
@@ -16,7 +17,10 @@ class MuleDeployContext extends BaseContext {
 
     def performDeployment() {
         def deployer = settings.buildDeployer(System.out)
-        deployer.deployApplication(cloudHubApplication.createDeploymentRequest(),
+        def appRequest = hasFieldBeenSet('cloudHubApplication') ?
+                cloudHubApplication.createDeploymentRequest() :
+                onPremApplication.createDeploymentRequest()
+        deployer.deployApplication(appRequest,
                                    apiSpecification.createRequest(),
                                    policies.createPolicyList(),
                                    [Features.All])

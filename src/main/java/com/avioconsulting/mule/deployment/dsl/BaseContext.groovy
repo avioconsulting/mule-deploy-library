@@ -9,6 +9,10 @@ abstract class BaseContext {
      */
     abstract List<String> findOptionalProperties()
 
+    boolean hasFieldBeenSet(String field) {
+        fieldsThatHaveBeenSet.contains(field)
+    }
+
     def findErrors(String prefix = null) {
         def optional = findOptionalProperties()
         this.getProperties().findAll { k, v ->
