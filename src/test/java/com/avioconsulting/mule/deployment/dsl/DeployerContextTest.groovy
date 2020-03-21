@@ -7,23 +7,24 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
-@SuppressWarnings(["UnnecessaryQualifiedReference", "GroovyAssignabilityCheck"])
-class SettingsContextTest {
+@SuppressWarnings(["UnnecessaryQualifiedReference", "GroovyAssignabilityCheck", "GroovyAccessibility"])
+class DeployerContextTest {
     @Test
     void required_only() {
         // arrange
-        def context = new SettingsContext()
+        def context = new DeployerContext()
         def closure = {
             username 'the_username'
             password 'the_password'
         }
         closure.delegate = context
-
-        // act
         closure.call()
 
+        // act
+        def deployer = context.buildDeployer(System.out)
+
         // assert
-        context.with {
+        deployer.clientWrapper.with {
             assertThat username,
                        is(equalTo('the_username'))
             assertThat password,
@@ -34,24 +35,25 @@ class SettingsContextTest {
     @Test
     void with_optional() {
         // arrange
-        def context = new SettingsContext()
+        def context = new DeployerContext()
         def closure = {
             username 'the_username'
             password 'the_password'
             organizationName 'the_org'
         }
         closure.delegate = context
-
-        // act
         closure.call()
 
+        // act
+        def deployer = context.buildDeployer(System.out)
+
         // assert
-        context.with {
+        deployer.clientWrapper.with {
             assertThat username,
                        is(equalTo('the_username'))
             assertThat password,
                        is(equalTo('the_password'))
-            assertThat organizationName,
+            assertThat anypointOrganizationName,
                        is(equalTo('the_org'))
         }
     }
@@ -59,7 +61,7 @@ class SettingsContextTest {
     @Test
     void missing_required() {
         // arrange
-        def context = new SettingsContext()
+        def context = new DeployerContext()
         def closure = {
 //            username 'the_username'
 //            password 'the_password'
@@ -69,26 +71,15 @@ class SettingsContextTest {
         closure.call()
 
         // act
-        List<Exception> exceptions = []
-        exceptions << shouldFail {
-            context.username
-        }
-        exceptions << shouldFail {
-            context.password
-        }
-        exceptions << shouldFail {
-            context.organizationName
+        def exception = shouldFail {
+            context.buildDeployer(System.out)
         }
 
         // assert
-        def exceptionMessages = exceptions.collect { e -> e.message }.unique()
-        assertThat exceptionMessages.size(),
-                   is(equalTo(1))
-        def exceptionMessage = exceptionMessages[0]
-        assertThat exceptionMessage,
-                   is(equalTo("""Your deployment request is not complete. The following errors exist:
-- username missing
-- password missing
+        assertThat exception.message,
+                   is(equalTo("""Your settings are not complete. The following errors exist:
+- settings.password missing
+- settings.username missing
 """.trim()))
     }
 }
