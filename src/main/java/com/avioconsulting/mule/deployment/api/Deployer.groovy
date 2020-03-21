@@ -162,7 +162,7 @@ class Deployer {
                                              FileBasedAppDeploymentRequest appDeploymentRequest,
                                              String environment,
                                              List<Features> enabledFeatures,
-                                             IDeployer deployer) {
+                                             ISubDeployer deployer) {
         def isFeatureDisabled = { Features feature ->
             getFeatureSkipReason(enabledFeatures,
                                  feature)
