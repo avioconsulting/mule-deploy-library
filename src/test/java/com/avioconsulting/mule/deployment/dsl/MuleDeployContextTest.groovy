@@ -314,6 +314,13 @@ class MuleDeployContextTest {
         // assert
         assertThat apiSpec,
                    is(nullValue())
+        assertThat 'Lack of policy section should remove policy sync from features',
+                   enabledFeatures,
+                   is(equalTo([
+                           Features.AppDeployment,
+                           Features.DesignCenterSync,
+                           Features.ApiManagerDefinitions
+                   ]))
     }
 
     @Test
@@ -352,6 +359,50 @@ class MuleDeployContextTest {
 
         // assert
         assertThat enabledFeatures,
+                   is(equalTo([
+                           Features.ApiManagerDefinitions,
+                           Features.AppDeployment
+                   ]))
+    }
+
+    @Test
+    void specify_features_with_policy_section_omitted() {
+        // arrange
+        def closure = {
+            version '1.0'
+
+            settings {
+                username 'the_username'
+                password 'the_password'
+            }
+
+            apiSpecification {
+                name 'Design Center Project Name'
+            }
+
+            enabledFeatures {
+                ApiManagerDefinitions
+                AppDeployment
+                PolicySync
+            }
+
+            onPremApplication {
+                environment 'DEV'
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                file 'path/to/file.jar'
+                targetServerOrClusterName 'theServer'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        context.performDeployment()
+
+        // assert
+        assertThat 'No policies section so will not sync',
+                   enabledFeatures,
                    is(equalTo([
                            Features.ApiManagerDefinitions,
                            Features.AppDeployment

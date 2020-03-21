@@ -44,6 +44,14 @@ class MuleDeployContext extends BaseContext {
         hasFieldBeenSet('enabledFeatures') ? enabledFeatures.createFeatureList() : [Features.All]
     }
 
+    def removeFeature(Features feature,
+                      List<Features> currentFeatures) {
+        if (currentFeatures == [Features.All]) {
+            currentFeatures = Features.values() - [Features.All]
+        }
+        currentFeatures - [feature]
+    }
+
     def performDeployment() {
         def errors = findErrors()
         if (errors.any()) {
@@ -55,16 +63,22 @@ class MuleDeployContext extends BaseContext {
             throw new Exception('You cannot deploy both a CloudHub and on-prem application!')
         }
         def policyList = policies.createPolicyList()
+        def features = obtainFeatures()
+        if (!hasFieldBeenSet('policies')) {
+            // don't want to even touch policies if this is the case
+            features = removeFeature(Features.PolicySync,
+                                     features)
+        }
         if (cloudHubSet) {
             deployer.deployApplication(cloudHubApplication.createDeploymentRequest(),
                                        createApiSpec(),
                                        policyList,
-                                       obtainFeatures())
+                                       features)
         } else {
             deployer.deployApplication(onPremApplication.createDeploymentRequest(),
                                        createApiSpec(),
                                        policyList,
-                                       obtainFeatures())
+                                       features)
         }
     }
 
