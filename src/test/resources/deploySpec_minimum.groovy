@@ -1,0 +1,44 @@
+muleDeploy {
+    // version of the tool
+    version '1.0'
+
+    settings {
+        username 'the_username'
+        password 'the_password'
+    }
+
+    apiSpecification {
+        name 'Design Center Project Name'
+        // everything else in this closure is optional
+        exchangeAssetId 'the-asset-id'
+        apiMajorVersion 'v1'
+        mainRamlFile 'stuff.raml'
+        endpoint 'https://foobar'
+    }
+
+    policies {
+        clientEnforcementPolicyBasic {
+            // version is optional (will use version in this library by default)
+            version '1.2.1'
+            // can supply paths just like above if necessary
+        }
+    }
+
+    cloudHubApplication {
+        environment 'DEV'
+        applicationName 'the-app'
+        appVersion '1.2.3'
+        workerSpecs {
+            // only muleVersion is required
+            muleVersion '4.2.2'
+            workerType WorkerTypes.Micro
+        }
+        file 'path/to/file.jar'
+        cryptoKey 'theKey'
+        autoDiscovery {
+            clientId 'the_client_id'
+            clientSecret 'the_client_secret'
+        }
+        cloudHubAppPrefix 'AVI'
+    }
+}
