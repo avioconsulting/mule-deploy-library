@@ -2,6 +2,7 @@ package com.avioconsulting.mule.deployment.dsl.policies
 
 import com.avioconsulting.mule.deployment.api.models.policies.ClientEnforcementPolicyBasicAuth
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
+import org.junit.Assert
 import org.junit.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
@@ -60,5 +61,15 @@ class PolicyListContextTest {
                    is(instanceOf(Policy))
         assertThat result[1],
                    is(instanceOf(ClientEnforcementPolicyBasicAuth))
+    }
+
+    @Test
+    void no_policies_on_purpose() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
     }
 }
