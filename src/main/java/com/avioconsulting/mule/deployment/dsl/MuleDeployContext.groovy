@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.dsl
 
-
+import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.dsl.policies.PolicyListContext
 
 class MuleDeployContext extends BaseContext {
@@ -15,7 +15,11 @@ class MuleDeployContext extends BaseContext {
     }
 
     def performDeployment() {
-
+        def deployer = settings.buildDeployer(System.out)
+        deployer.deployApplication(cloudHubApplication.createDeploymentRequest(),
+                                   apiSpecification.createRequest(),
+                                   policies.createPolicyList(),
+                                   [Features.All])
     }
 
     @Override
