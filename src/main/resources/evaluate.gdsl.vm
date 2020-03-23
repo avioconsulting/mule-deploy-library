@@ -67,6 +67,7 @@ contributor([closureScopeContext]) {
     if (call) {
         #stringParam('version')
         #closureParam('cloudHubApplication')
+        #closureParam('onPremApplication')
         #closureParam('apiSpecification')
         #closureParam('policies')
         #closureParam('enabledFeatures')
@@ -81,11 +82,22 @@ contributor([closureScopeContext]) {
     if (call) {
         #stringParam('environment')
         #stringParam('applicationName')
+        #stringParam('appVersion')
         #closureParam('workerSpecs')
         #stringParam('file')
         #stringParam('cryptoKey')
         #closureParam('autoDiscovery')
         #stringParam('cloudHubAppPrefix')
+        #mapParam('appProperties')
+        #mapParam('otherCloudHubProperties')
+    }
+    call = enclosingCall('onPremApplication')
+    if (call) {
+        #stringParam('environment')
+        #stringParam('applicationName')
+        #stringParam('appVersion')
+        #stringParam('file')
+        #stringParam('targetServerOrClusterName')
         #mapParam('appProperties')
         #mapParam('otherCloudHubProperties')
     }
