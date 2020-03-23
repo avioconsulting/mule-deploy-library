@@ -13,7 +13,7 @@ class FeaturesContextTest {
         // arrange
         def context = new FeaturesContext()
         def closure = {
-            All
+            all
         }
         closure.delegate = context
 
@@ -33,8 +33,8 @@ class FeaturesContextTest {
         // arrange
         def context = new FeaturesContext()
         def closure = {
-            DesignCenterSync
-            ApiManagerDefinitions
+            designCenterSync
+            apiManagerDefinitions
         }
         closure.delegate = context
 
@@ -55,9 +55,9 @@ class FeaturesContextTest {
         // arrange
         def context = new FeaturesContext()
         def closure = {
-            All
-            DesignCenterSync
-            ApiManagerDefinitions
+            all
+            designCenterSync
+            apiManagerDefinitions
         }
         closure.delegate = context
 

@@ -44,10 +44,10 @@ muleDeploy {
 
     // this entire section is optional. if you omit it
     enabledFeatures {
-        All
+        all
         // or you can do this and specify a list of what you want enabled
-        DesignCenterSync
-        ApiManagerDefinitions
+        designCenterSync
+        apiManagerDefinitions
     }
 
     onPremApplication {

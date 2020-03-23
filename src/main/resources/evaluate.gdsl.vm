@@ -1,7 +1,7 @@
 #macro(methodParam $param $type)
 method name: '$param',
        params: [
-                   $param: $type
+           $param: $type
        ]
 #end
 #macro(stringParam $param)
@@ -18,8 +18,12 @@ method name: '$param',
 #end
 #macro(enumParam $paramName $enumType)
     #methodParam($paramName "'com.avioconsulting.mule.deployment.api.models.$enumType'")
-    method name: '$enumType',
-           type: 'com.avioconsulting.mule.deployment.api.models.$enumType'
+method name: '$enumType',
+       type: 'com.avioconsulting.mule.deployment.api.models.$enumType'
+#end
+#macro(prop $propName)
+property name: '$propName',
+         type: String.name
 #end
 
 def ctx = context(scriptScope: 'deploySpec.groovy')
@@ -65,6 +69,13 @@ contributor([closureScopeContext]) {
         #closureParam('cloudHubApplication')
         #closureParam('apiSpecification')
         #closureParam('policies')
+        #closureParam('enabledFeatures')
+    }
+    call = enclosingCall('enabledFeatures')
+    if (call) {
+        #foreach ($feat in $features)
+            #prop($feat)
+        #end
     }
     call = enclosingCall('cloudHubApplication')
     if (call) {

@@ -16,6 +16,10 @@ class FeaturesContext {
     }
 
     def propertyMissing(String name) {
-        features << Features.valueOf(name)
+        def matching = Features.values().find { f ->
+            f.name().uncapitalize() == name
+        }
+        assert matching : "Expected to match ${name} to uncapitalized version of ${Features.values()}"
+        features << matching
     }
 }
