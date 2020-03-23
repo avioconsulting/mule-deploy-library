@@ -1,3 +1,22 @@
+#macro(methodParam $param $type)
+method name: '$param',
+       params: [
+                   $param: $type
+       ]
+#end
+#macro(stringParam $param)
+    #methodParam($param 'String.name')
+#end
+#macro(mapParam $param)
+    #methodParam($param 'Map.name')
+#end
+#macro(closureParam $param)
+method name: '$param',
+       params: [
+               closure: Closure.name
+       ]
+#end
+
 def ctx = context(scriptScope: 'deploySpec.groovy')
 contributor([ctx]) {
     method name: 'muleDeploy',
@@ -29,87 +48,27 @@ contributor([closureScopeContext]) {
     def call = enclosingCall('muleDeploy')
 
     if (call) {
-        method name: 'cloudHubApplication',
-               type: 'void',
-               params: [
-                       closure: Closure.name
-               ]
+        #closureParam('cloudHubApplication')
     }
     call = enclosingCall('cloudHubApplication')
     if (call) {
-        method name: 'environment',
-               type: 'void',
-               params: [
-                       environmentName: String.name
-               ]
-        method name: 'applicationName',
-               type: 'void',
-               params: [
-                       appName: String.name
-               ]
-        method name: 'workerSpecs',
-               type: 'void',
-               params: [
-                       closure: Closure.name
-               ]
-        method name: 'file',
-               type: 'void',
-               params: [
-                       fileName: String.name
-               ]
-        method name: 'cryptoKey',
-               type: 'void',
-               params: [
-                       cryptoKey: String.name
-               ]
-        method name: 'autoDiscovery',
-               type: 'void',
-               params: [
-                       closure: Closure.name
-               ]
-        method name: 'cloudHubAppPrefix',
-               type: 'void',
-               params: [
-                       prefix: String.name
-               ]
-        method name: 'appProperties',
-               type: 'void',
-               params: [
-                       props: Map.name
-               ]
-        method name: 'otherCloudHubProperties',
-               type: 'void',
-               params: [
-                       props: Map.name
-               ]
+        #stringParam('environment')
+        #stringParam('applicationName')
+        #closureParam('workerSpecs')
+        #stringParam('file')
+        #stringParam('cryptoKey')
+        #closureParam('autoDiscovery')
+        #stringParam('cloudHubAppPrefix')
+        #mapParam('appProperties')
+        #mapParam('otherCloudHubProperties')
     }
     call = enclosingCall('workerSpecs')
     if (call) {
-        method name: 'muleVersion',
-               type: 'void',
-               params: [
-                       version: String.name
-               ]
-        method name: 'usePersistentQueues',
-               type: 'void',
-               params: [
-                       enabled: Boolean.name
-               ]
-        method name: 'workerType',
-               type: 'void',
-               params: [
-                       workerType: 'com.avioconsulting.mule.deployment.api.models.WorkerTypes'
-               ]
-        method name: 'workerCount',
-               type: 'void',
-               params: [
-                       count: Integer.name
-               ]
-        method name: 'awsRegion',
-               type: 'void',
-               params: [
-                       region: 'com.avioconsulting.mule.deployment.api.models.AwsRegions'
-               ]
+        #stringParam('muleVersion')
+        #methodParam('usePersistentQueues' 'Boolean.name')
+        #methodParam('workerType' "'com.avioconsulting.mule.deployment.api.models.WorkerTypes'")
+        #methodParam('workerCount' 'Integer.name')
+        #methodParam('awsRegion' "'com.avioconsulting.mule.deployment.api.models.AwsRegions'")
         // see above for where we "create ENUMs"
         method name: 'WorkerTypes',
                type: 'com.avioconsulting.mule.deployment.api.models.WorkerTypes'
@@ -118,15 +77,7 @@ contributor([closureScopeContext]) {
     }
     call = enclosingCall('autoDiscovery')
     if (call) {
-        method name: 'clientId',
-               type: 'void',
-               params: [
-                       clientId: String.name
-               ]
-        method name: 'clientSecret',
-               type: 'void',
-               params: [
-                       clientSecret: String.name
-               ]
+        #stringParam('clientId')
+        #stringParam('clientSecret')
     }
 }

@@ -50,6 +50,14 @@ muleDeploy {
         ApiManagerDefinitions
     }
 
+    onPremApplication {
+        environment 'DEV'
+        applicationName 'the-app'
+        appVersion '1.2.3'
+        file 'path/to/file.jar'
+        targetServerOrClusterName 'theServer'
+    }
+
     cloudHubApplication {
         environment 'DEV'
         applicationName 'the-app'

@@ -21,6 +21,7 @@
         <groovy.compiler.version>2.4.15</groovy.compiler.version>
         <apache.http.version>4.5.10</apache.http.version>
         <log4j2.version>2.13.0</log4j2.version>
+        <generate.file.for.testing>false</generate.file.for.testing>
     </properties>
 
     <distributionManagement>
@@ -149,10 +150,12 @@
                         <configuration>
                             <properties>
                                 <output.dir>${project.build.outputDirectory}</output.dir>
+                                <generate.file.for.testing>${generate.file.for.testing}</generate.file.for.testing>
                             </properties>
                             <classpathScope>runtime</classpathScope>
                             <source>import com.avioconsulting.mule.deployment.api.models.AwsRegions
                             import com.avioconsulting.mule.deployment.api.models.WorkerTypes
+                            import org.apache.commons.io.FileUtils
 
                             def engine = new org.apache.velocity.app.VelocityEngine()
                             engine.setProperty(org.apache.velocity.runtime.RuntimeConstants.FILE_RESOURCE_LOADER_PATH,
@@ -173,6 +176,10 @@
                             writer.close()
                             new File(properties['output.dir'],
                                      templateFileName).delete()
+                            if (properties['generate.file.for.testing'] == 'true') {
+                                println 'making a copy for testing'
+                                FileUtils.copyFileToDirectory(file, new File('src/main/resources'))
+                            }
                             </source>
                         </configuration>
                     </execution>
