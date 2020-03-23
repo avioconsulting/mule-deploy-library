@@ -2,6 +2,7 @@ package com.avioconsulting.mule.deployment.dsl.policies
 
 import com.avioconsulting.mule.deployment.api.models.HttpMethod
 import com.avioconsulting.mule.deployment.api.models.policies.PolicyPathApplication
+import com.avioconsulting.mule.deployment.dsl.LowerCaseEnumWrapper
 
 class PathContext {
     private String regex
@@ -26,9 +27,12 @@ class PathContext {
         methods << httpMethod
     }
 
-    def propertyMissing(String name) {
-        HttpMethod.values().find { method ->
-            method.name() == name
+    def methodMissing(String name, def args) {
+        switch (name) {
+            case HttpMethod.simpleName:
+                return new LowerCaseEnumWrapper(HttpMethod)
+            default:
+                return null
         }
     }
 }

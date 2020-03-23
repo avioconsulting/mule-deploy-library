@@ -45,12 +45,12 @@ class PolicyContextTest {
             config hello: 'there'
             paths {
                 path {
-                    method GET
-                    method PUT
+                    method HttpMethod().get
+                    method HttpMethod().put
                     regex '.*foo'
                 }
                 path {
-                    method PUT
+                    method HttpMethod().put
                     regex '.*bar'
                 }
             }
@@ -138,7 +138,7 @@ class PolicyContextTest {
             config hello: 'there'
             paths {
                 path {
-                    method PUT
+                    method HttpMethod().put
                     //regex '.*bar'
                 }
             }
@@ -205,7 +205,7 @@ class PolicyContextTest {
             version '1.4.1'
             paths {
                 path {
-                    method PUT
+                    method HttpMethod().put
                     regex '.*bar'
                 }
             }

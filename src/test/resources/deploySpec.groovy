@@ -21,12 +21,12 @@ muleDeploy {
             // paths is optional, will apply to entire API definition if omitted
             paths {
                 path {
-                    method GET
-                    method PUT
+                    method HttpMethod().get
+                    method HttpMethod().put
                     regex '.*foo'
                 }
                 path {
-                    method PUT
+                    method HttpMethod().put
                     regex '.*bar'
                 }
             }
@@ -66,7 +66,7 @@ muleDeploy {
             // only muleVersion is required
             muleVersion '4.2.2'
             usePersistentQueues true
-            workerType WorkerTypes().micro
+            workerType WorkerTypes().small
             workerCount 1
             awsRegion AwsRegions().uswest1
         }

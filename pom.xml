@@ -154,6 +154,7 @@
                             </properties>
                             <classpathScope>runtime</classpathScope>
                             <source>import com.avioconsulting.mule.deployment.api.models.AwsRegions
+                            import com.avioconsulting.mule.deployment.api.models.HttpMethod
                             import com.avioconsulting.mule.deployment.api.models.WorkerTypes
                             import org.apache.commons.io.FileUtils
 
@@ -168,6 +169,8 @@
                                         WorkerTypes.values().collect { v -> v.name().toLowerCase() })
                             context.put('awsRegions',
                                         AwsRegions.values().collect { v -> v.name().toLowerCase() })
+                            context.put('httpMethods',
+                                        HttpMethod.values().collect { v -> v.name().toLowerCase() })
                             def file = new File(properties['output.dir'],
                                                 'evaluate.gdsl')
                             def writer = new OutputStreamWriter(new FileOutputStream(file))
@@ -178,7 +181,8 @@
                                      templateFileName).delete()
                             if (properties['generate.file.for.testing'] == 'true') {
                                 println 'making a copy for testing'
-                                FileUtils.copyFileToDirectory(file, new File('src/main/resources'))
+                                FileUtils.copyFileToDirectory(file,
+                                                              new File('src/main/resources'))
                             }
                             </source>
                         </configuration>

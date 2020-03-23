@@ -16,6 +16,11 @@ method name: '$param',
                closure: Closure.name
        ]
 #end
+#macro(enumParam $paramName $enumType)
+    #methodParam($paramName "'com.avioconsulting.mule.deployment.api.models.$enumType'")
+    method name: '$enumType',
+           type: 'com.avioconsulting.mule.deployment.api.models.$enumType'
+#end
 
 def ctx = context(scriptScope: 'deploySpec.groovy')
 contributor([ctx]) {
@@ -40,6 +45,15 @@ contributor([awsRegionContext]) {
     #foreach($enumValue in $awsRegions)
         property name: '$enumValue',
                  type: 'com.avioconsulting.mule.deployment.api.models.AwsRegions'
+    #end
+}
+
+def httpMethodContext = context(ctype: 'com.avioconsulting.mule.deployment.api.models.HttpMethod')
+contributor([httpMethodContext]) {
+    // Properties can't be upper cased so we make them lower case and then the DSL code makes ENUMs case insensitive
+    #foreach($enumValue in $httpMethods)
+        property name: '$enumValue',
+                 type: 'com.avioconsulting.mule.deployment.api.models.HttpMethod'
     #end
 }
 
@@ -95,21 +109,16 @@ contributor([closureScopeContext]) {
     }
     call = enclosingCall('path')
     if (call) {
-        #stringParam('method')
+        #enumParam('method' 'HttpMethod')
         #stringParam('regex')
     }
     call = enclosingCall('workerSpecs')
     if (call) {
         #stringParam('muleVersion')
         #methodParam('usePersistentQueues' 'Boolean.name')
-        #methodParam('workerType' "'com.avioconsulting.mule.deployment.api.models.WorkerTypes'")
+        #enumParam('workerType' 'WorkerTypes')
         #methodParam('workerCount' 'Integer.name')
-        #methodParam('awsRegion' "'com.avioconsulting.mule.deployment.api.models.AwsRegions'")
-        // see above for where we "create ENUMs"
-        method name: 'WorkerTypes',
-               type: 'com.avioconsulting.mule.deployment.api.models.WorkerTypes'
-        method name: 'AwsRegions',
-               type: 'com.avioconsulting.mule.deployment.api.models.AwsRegions'
+        #enumParam('awsRegion' 'AwsRegions')
     }
     call = enclosingCall('autoDiscovery')
     if (call) {
