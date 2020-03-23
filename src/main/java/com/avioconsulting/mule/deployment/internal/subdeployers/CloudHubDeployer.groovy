@@ -1,5 +1,6 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
@@ -14,25 +15,29 @@ import org.apache.http.entity.StringEntity
 class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
     CloudHubDeployer(HttpClientWrapper clientWrapper,
                      EnvironmentLocator environmentLocator,
-                     PrintStream logger) {
+                     PrintStream logger,
+                     DryRunMode dryRunMode) {
         this(clientWrapper,
              environmentLocator,
              // for CloudHub, the deploy cycle is longer so we wait longer
              10000,
              50,
-             logger)
+             logger,
+             dryRunMode)
     }
 
     CloudHubDeployer(HttpClientWrapper clientWrapper,
                      EnvironmentLocator environmentLocator,
                      int retryIntervalInMs,
                      int maxTries,
-                     PrintStream logger) {
+                     PrintStream logger,
+                     DryRunMode dryRunMode) {
         super(retryIntervalInMs,
               maxTries,
               logger,
               clientWrapper,
-              environmentLocator)
+              environmentLocator,
+              dryRunMode)
     }
 
     def deploy(CloudhubDeploymentRequest deploymentRequest) {

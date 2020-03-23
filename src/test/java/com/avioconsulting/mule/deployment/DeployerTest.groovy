@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment
 
 import com.avioconsulting.mule.deployment.api.Deployer
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.*
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.internal.models.ApiSpec
@@ -14,7 +15,7 @@ import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-@SuppressWarnings("GroovyAssignabilityCheck")
+@SuppressWarnings('GroovyAssignabilityCheck')
 class DeployerTest {
     private Deployer deployer
     private List<CloudhubDeploymentRequest> deployedChApps
@@ -43,13 +44,19 @@ class DeployerTest {
     }
 
     @Before
-    void setupDeployer() {
+    void cleanup() {
         deployedChApps = []
         deployedOnPremApps = []
         designCenterSyncs = []
         apiSyncs = []
         policySyncCalls = []
         failDeployment = false
+        deployer = null
+        // "default"
+        setupDeployer(DryRunMode.Run)
+    }
+
+    def setupDeployer(DryRunMode dryRunMode) {
         def mockCloudHubDeployer = [
                 deploy        : { CloudhubDeploymentRequest request ->
                     if (failDeployment) {
@@ -97,6 +104,7 @@ class DeployerTest {
                 }
         ] as IPolicyDeployer
         deployer = new Deployer(null,
+                                dryRunMode,
                                 System.out,
                                 ['DEV'],
                                 null,

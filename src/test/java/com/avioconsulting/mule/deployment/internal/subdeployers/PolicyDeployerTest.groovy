@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.HttpMethod
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.api.models.policies.PolicyPathApplication
@@ -9,6 +10,7 @@ import com.avioconsulting.mule.deployment.internal.models.ExistingPolicy
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpServerRequest
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -16,15 +18,20 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
-@SuppressWarnings("GroovyAccessibility")
+@SuppressWarnings('GroovyAccessibility')
 class PolicyDeployerTest extends BaseTest {
     private PolicyDeployer policyDeployer
 
     @Before
-    void setupDeployer() {
+    void clean() {
+        setupDeployer(DryRunMode.Run)
+    }
+
+    def setupDeployer(DryRunMode dryRunMode) {
         policyDeployer = new PolicyDeployer(this.clientWrapper,
                                             this.environmentLocator,
-                                            System.out)
+                                            System.out,
+                                            dryRunMode)
     }
 
     @Test
@@ -690,5 +697,15 @@ class PolicyDeployerTest extends BaseTest {
                            'DELETE /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies/987',
                            'POST /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'
                    ]))
+    }
+
+    @Test
+    void synchronizePolicies_online_validate() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
     }
 }

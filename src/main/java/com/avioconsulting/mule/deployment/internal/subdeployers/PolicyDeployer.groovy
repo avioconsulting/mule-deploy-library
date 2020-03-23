@@ -1,5 +1,6 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.HttpMethod
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.api.models.policies.PolicyPathApplication
@@ -18,11 +19,14 @@ class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
     final HttpClientWrapper clientWrapper
     final EnvironmentLocator environmentLocator
     final PrintStream logger
+    private final DryRunMode dryRunMode
 
     PolicyDeployer(HttpClientWrapper clientWrapper,
                    EnvironmentLocator environmentLocator,
-                   PrintStream logger) {
+                   PrintStream logger,
+                   DryRunMode dryRunMode) {
 
+        this.dryRunMode = dryRunMode
         this.logger = logger
         this.environmentLocator = environmentLocator
         this.clientWrapper = clientWrapper

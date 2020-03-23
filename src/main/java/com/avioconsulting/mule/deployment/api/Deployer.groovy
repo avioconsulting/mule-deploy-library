@@ -22,12 +22,14 @@ class Deployer implements IDeployer {
     private final IPolicyDeployer policyDeployer
     private final List<String> environmentsToDoDesignCenterDeploymentOn
     private int stepNumber
+    private final DryRunMode dryRunMode
 
     /**
      *
      * @param username anypoint creds to deploy with
      * @param password anypoint creds to deploy with
      * @param logger all messages will be logged like this. This is Jenkins plugins friendly (or you can supply System.out)
+     * @param dryRunMode Should we do a real run?
      * @param anypointOrganizationName Optional parameter. If null, the default organization/biz group for the user will be used. Otherwise supply name (NOT GUID) of the biz group or organization you want to use
      * @param baseUrl Base URL, optional
      * @param environmentsToDoDesignCenterDeploymentOn Normally workflow wise you'd only want to do this on DEV
@@ -35,6 +37,7 @@ class Deployer implements IDeployer {
     Deployer(String username,
              String password,
              PrintStream logger,
+             DryRunMode dryRunMode,
              String anypointOrganizationName = null,
              String baseUrl = 'https://anypoint.mulesoft.com',
              List<String> environmentsToDoDesignCenterDeploymentOn = ['DEV']) {
@@ -43,12 +46,14 @@ class Deployer implements IDeployer {
                                    password,
                                    logger,
                                    anypointOrganizationName),
+             dryRunMode,
              logger,
              environmentsToDoDesignCenterDeploymentOn)
     }
 
 
     private Deployer(HttpClientWrapper httpClientWrapper,
+                     DryRunMode dryRunMode,
                      PrintStream logger,
                      List<String> environmentsToDoDesignCenterDeploymentOn,
                      EnvironmentLocator environmentLocator = null,
@@ -57,6 +62,7 @@ class Deployer implements IDeployer {
                      IDesignCenterDeployer designCenterDeployer = null,
                      IApiManagerDeployer apiManagerDeployer = null,
                      IPolicyDeployer policyDeployer = null) {
+        this.dryRunMode = dryRunMode
         this.logger = logger
         this.environmentsToDoDesignCenterDeploymentOn = environmentsToDoDesignCenterDeploymentOn
         this.clientWrapper = httpClientWrapper
@@ -64,18 +70,23 @@ class Deployer implements IDeployer {
                                                                                logger)
         this.cloudHubDeployer = cloudHubDeployer ?: new CloudHubDeployer(this.clientWrapper,
                                                                          this.environmentLocator,
-                                                                         logger)
+                                                                         logger,
+                                                                         dryRunMode)
         this.onPremDeployer = onPremDeployer ?: new OnPremDeployer(this.clientWrapper,
                                                                    this.environmentLocator,
-                                                                   logger)
+                                                                   logger,
+                                                                   dryRunMode)
         this.designCenterDeployer = designCenterDeployer ?: new DesignCenterDeployer(this.clientWrapper,
-                                                                                     logger)
+                                                                                     logger,
+                                                                                     dryRunMode)
         this.apiManagerDeployer = apiManagerDeployer ?: new ApiManagerDeployer(this.clientWrapper,
                                                                                this.environmentLocator,
-                                                                               logger)
+                                                                               logger,
+                                                                               dryRunMode)
         this.policyDeployer = policyDeployer ?: new PolicyDeployer(this.clientWrapper,
                                                                    this.environmentLocator,
-                                                                   this.logger)
+                                                                   this.logger,
+                                                                   dryRunMode)
     }
 
     /**

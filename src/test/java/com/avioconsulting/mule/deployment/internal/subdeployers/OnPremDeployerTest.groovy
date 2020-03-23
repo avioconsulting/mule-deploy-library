@@ -1,12 +1,14 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.models.OnPremDeploymentStatus
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
 import io.vertx.core.http.HttpServerRequest
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -18,12 +20,17 @@ class OnPremDeployerTest extends BaseTest {
     private OnPremDeployer deployer
 
     @Before
-    void setupDeployer() {
+    void clean() {
+        setupDeployer(DryRunMode.Run)
+    }
+
+    def setupDeployer(DryRunMode dryRunMode) {
         deployer = new OnPremDeployer(this.clientWrapper,
                                       environmentLocator,
                                       500,
                                       10,
-                                      System.out)
+                                      System.out,
+                                      dryRunMode)
     }
 
     @Test
@@ -1508,5 +1515,15 @@ class OnPremDeployerTest extends BaseTest {
         // assert
         assertThat result,
                    is(equalTo(true))
+    }
+
+    @Test
+    void deploy_online_validate() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
     }
 }

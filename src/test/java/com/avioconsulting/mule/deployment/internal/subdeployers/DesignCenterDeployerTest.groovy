@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
@@ -9,6 +10,7 @@ import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
 import org.apache.commons.io.FileUtils
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -20,9 +22,14 @@ class DesignCenterDeployerTest extends BaseTest {
     private DesignCenterDeployer deployer
 
     @Before
-    void setupDeployer() {
+    void clean() {
+        setupDeployer(DryRunMode.Run)
+    }
+
+    def setupDeployer(DryRunMode dryRunMode) {
         deployer = new DesignCenterDeployer(clientWrapper,
-                                            System.out)
+                                            System.out,
+                                            dryRunMode)
     }
 
     @Test
@@ -1042,5 +1049,15 @@ class DesignCenterDeployerTest extends BaseTest {
         assertThat 'We should always unlock if we lock',
                    locked,
                    is(equalTo(false))
+    }
+
+    @Test
+    void synchronizeDesignCenter_online_validate() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
     }
 }

@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.AwsRegions
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
@@ -13,6 +14,7 @@ import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -27,14 +29,19 @@ class CloudHubDeployerTest extends BaseTest {
     private int maxTries
 
     @Before
-    void setupDeployer() {
+    void clean() {
         statusCheckCount = 0
         maxTries = 10
+        setupDeployer(DryRunMode.Run)
+    }
+
+    def setupDeployer(DryRunMode dryRunMode) {
         deployer = new CloudHubDeployer(this.clientWrapper,
                                         environmentLocator,
                                         500,
                                         maxTries,
-                                        System.out)
+                                        System.out,
+                                        dryRunMode)
     }
 
     static final Map<AppStatus, String> ReverseAppStatusMappings = AppStatusMapper.AppStatusMappings.collectEntries {
@@ -1737,5 +1744,15 @@ class CloudHubDeployerTest extends BaseTest {
                    is(equalTo([
                            status: 'start'
                    ]))
+    }
+
+    @Test
+    void deploy_online_validate() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
     }
 }
