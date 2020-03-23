@@ -6,12 +6,12 @@ abstract class BaseClientEnforcementPolicy extends Policy {
                                 String clientSecretExpression,
                                 List<PolicyPathApplication> policyPathApplications,
                                 String version) {
-        super(getMulesoftGroupId(),
-              'client-id-enforcement',
+        super('client-id-enforcement',
               version ?: '1.2.1',
               getConfig(credentialsOriginHasHttpBasicAuthenticationHeader,
                         clientIdExpression ?: "#[attributes.headers['client_id']]",
                         clientSecretExpression),
+              getMulesoftGroupId(),
               policyPathApplications)
     }
 

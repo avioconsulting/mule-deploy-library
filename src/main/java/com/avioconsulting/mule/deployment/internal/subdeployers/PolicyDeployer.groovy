@@ -34,6 +34,7 @@ class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
 
     def synchronizePolicies(ExistingApiSpec apiSpec,
                             List<Policy> desiredPolicies) {
+        desiredPolicies = normalizePolicies(desiredPolicies)
         def existing = getExistingPolicies(apiSpec)
         def existingForComparison = existing.collect { policy -> policy.withoutId }
         if (existingForComparison == desiredPolicies) {
@@ -52,6 +53,16 @@ class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
                          policy,
                          // 1 based index
                          index + 1)
+        }
+    }
+
+    private List<Policy> normalizePolicies(List<Policy> desiredPolicies) {
+        desiredPolicies.collect { policy ->
+            if (policy.groupId) {
+                return policy
+            }
+            // we don't know what our org ID is until we're in here
+            policy.withGroupId(clientWrapper.anypointOrganizationId)
         }
     }
 
@@ -118,10 +129,10 @@ class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
                     new PolicyPathApplication(methods,
                                               pointCutMap.uriTemplateRegex as String)
                 }
-                new ExistingPolicy(template.groupId as String,
-                                   template.assetId as String,
+                new ExistingPolicy(template.assetId as String,
                                    template.assetVersion as String,
                                    policyMap.configuration as Map<String, Object>,
+                                   template.groupId as String,
                                    paths.any() ? paths : null,
                                    policyMap.policyId as String)
             }

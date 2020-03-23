@@ -1,10 +1,7 @@
 package com.avioconsulting.mule.deployment.dsl.policies
 
-
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.dsl.BaseContext
-import com.avioconsulting.mule.deployment.dsl.policies.PathsContext
-
 
 class PolicyContext extends BaseContext {
     String groupId, assetId, version
