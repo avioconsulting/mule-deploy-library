@@ -1520,10 +1520,87 @@ class OnPremDeployerTest extends BaseTest {
     @Test
     void deploy_online_validate() {
         // arrange
-
+        setupDeployer(DryRunMode.OnlineValidate)
+        def deployed = false
+        withHttpServer { HttpServerRequest request ->
+            def uri = request.uri()
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def result
+                if (uri.endsWith('servers')) {
+                    result = [
+                            data: [
+                                    [
+                                            id  : 'abc123',
+                                            name: 'serverb'
+                                    ],
+                                    [
+                                            id         : 'def456',
+                                            name       : 'servera',
+                                            clusterId  : 'cluster1',
+                                            clusterName: 'clustera'
+                                    ]
+                            ]
+                    ]
+                } else if (uri.endsWith('applications') && request.method().name() == 'GET') {
+                    result = [
+                            data: [
+                                    [
+                                            id  : 'abc123',
+                                            name: 'app1'
+                                    ],
+                                    [
+                                            id  : 'def456',
+                                            name: 'the-app'
+                                    ]
+                            ]
+                    ]
+                } else if (uri.endsWith('applications/1234') && request.method().name() == 'GET') {
+                    statusCode = 200
+                    // we test most of this in other methods
+                    result = getAppStatusJson('STARTED',
+                                              'STARTED',
+                                              'STARTED',
+                                              'some_file.txt')
+                } else {
+                    // deployment service returns this
+                    deployed = true
+                    statusCode = 202
+                    result = [
+                            data: [
+                                    id             : 1234,
+                                    serverArtifacts: [
+                                            [
+                                                    id           : 'artid1',
+                                                    desiredStatus: 'UPDATED'
+                                            ]
+                                    ]
+                            ]
+                    ]
+                    request.expectMultipart = true
+                }
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def file = new File('src/test/resources/some_file.txt')
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'new-app',
+                                                  '1.2.3',
+                                                  'clustera',
+                                                  file)
         // act
+        deployer.deploy(request)
 
         // assert
-        Assert.fail("write it")
+        assertThat deployed,
+                   is(equalTo(false))
     }
 }
