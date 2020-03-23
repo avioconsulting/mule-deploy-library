@@ -6,9 +6,16 @@ contributor([ctx]) {
            ]
 }
 
+def ectx = context(ctype: 'com.avioconsulting.mule.deployment.api.models.WorkerTypes')
+contributor([ectx]) {
+    property name: 'Micro',
+             type: 'com.avioconsulting.mule.deployment.api.models.WorkerTypes'
+}
+
 def closureScopeContext = context(scope: closureScope())
 contributor([closureScopeContext]) {
     def call = enclosingCall('muleDeploy')
+
     if (call) {
         method name: 'cloudHubApplication',
                type: 'void',
@@ -79,7 +86,7 @@ contributor([closureScopeContext]) {
         method name: 'workerType',
                type: 'void',
                params: [
-                       workerType: String.name
+                       workerType: 'com.avioconsulting.mule.deployment.api.models.WorkerTypes'
                ]
         method name: 'workerCount',
                type: 'void',
@@ -91,6 +98,8 @@ contributor([closureScopeContext]) {
                params: [
                        region: String.name
                ]
+        method name: 'WorkerTypes',
+               type: 'com.avioconsulting.mule.deployment.api.models.WorkerTypes'
     }
     call = enclosingCall('autoDiscovery')
     if (call) {

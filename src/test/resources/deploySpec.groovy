@@ -58,7 +58,7 @@ muleDeploy {
             // only muleVersion is required
             muleVersion '4.2.2'
             usePersistentQueues true
-            workerType WorkerTypes.Micro
+            workerType WorkerTypes().micro
             workerCount 1
             awsRegion AwsRegions.UsWest1
         }
