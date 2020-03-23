@@ -1,5 +1,3 @@
-package com.avioconsulting.mule.deployment.dsl
-
 def ctx = context(scriptScope: 'deploySpec.groovy')
 contributor([ctx]) {
     method name: 'muleDeploy',
