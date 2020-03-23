@@ -147,6 +147,48 @@ class CloudhubContextTest {
     }
 
     @Test
+    void dsl_support() {
+        // arrange
+        def context = new CloudhubContext()
+        def closure = {
+            environment 'DEV'
+            applicationName 'the-app'
+            appVersion '1.2.3'
+            workerSpecs {
+                // only muleVersion is required
+                muleVersion '4.2.2'
+                usePersistentQueues true
+                workerType WorkerTypes().xlarge
+                workerCount 22
+                // DO NOT Optimize!!!!
+                awsRegion AwsRegions().useast1
+            }
+            file 'path/to/file.jar'
+            cryptoKey 'theKey'
+            autoDiscovery {
+                clientId 'the_client_id'
+                clientSecret 'the_client_secret'
+            }
+            cloudHubAppPrefix 'AVI'
+        }
+        closure.delegate = context
+
+        // act
+        closure.call()
+        def request = context.createDeploymentRequest()
+
+        // assert
+        request.with {
+            workerSpecRequest.with {
+                assertThat workerType,
+                           is(equalTo(com.avioconsulting.mule.deployment.api.models.WorkerTypes.xLarge))
+                assertThat awsRegion,
+                           is(equalTo(com.avioconsulting.mule.deployment.api.models.AwsRegions.UsEast1))
+            }
+        }
+    }
+
+    @Test
     void missing_required() {
         // arrange
         def context = new CloudhubContext()

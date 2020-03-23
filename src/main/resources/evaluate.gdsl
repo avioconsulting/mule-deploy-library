@@ -6,10 +6,18 @@ contributor([ctx]) {
            ]
 }
 
-def ectx = context(ctype: 'com.avioconsulting.mule.deployment.api.models.WorkerTypes')
-contributor([ectx]) {
-    property name: 'Micro',
+def workerTypeContext = context(ctype: 'com.avioconsulting.mule.deployment.api.models.WorkerTypes')
+contributor([workerTypeContext]) {
+    // Properties can't be upper cased so we make them lower case and then the DSL code makes ENUMs case insensitive
+    property name: 'micro',
              type: 'com.avioconsulting.mule.deployment.api.models.WorkerTypes'
+}
+
+def awsRegionContext = context(ctype: 'com.avioconsulting.mule.deployment.api.models.AwsRegions')
+contributor([awsRegionContext]) {
+    // Properties can't be upper cased so we make them lower case and then the DSL code makes ENUMs case insensitive
+    property name: 'uswest1',
+             type: 'com.avioconsulting.mule.deployment.api.models.AwsRegions'
 }
 
 def closureScopeContext = context(scope: closureScope())
@@ -96,10 +104,13 @@ contributor([closureScopeContext]) {
         method name: 'awsRegion',
                type: 'void',
                params: [
-                       region: String.name
+                       region: 'com.avioconsulting.mule.deployment.api.models.AwsRegions'
                ]
+        // see above for where we "create ENUMs"
         method name: 'WorkerTypes',
                type: 'com.avioconsulting.mule.deployment.api.models.WorkerTypes'
+        method name: 'AwsRegions',
+               type: 'com.avioconsulting.mule.deployment.api.models.AwsRegions'
     }
     call = enclosingCall('autoDiscovery')
     if (call) {

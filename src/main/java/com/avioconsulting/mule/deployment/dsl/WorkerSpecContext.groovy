@@ -39,4 +39,16 @@ class WorkerSpecContext extends BaseContext {
                 return null
         }
     }
+
+    def methodMissing(String name, def args) {
+        switch (name) {
+            case AwsRegions.simpleName:
+                return new LowerCaseEnumWrapper(AwsRegions)
+            case WorkerTypes.simpleName:
+                return new LowerCaseEnumWrapper(WorkerTypes)
+            default:
+                return super.methodMissing(name,
+                                           args)
+        }
+    }
 }

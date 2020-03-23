@@ -60,7 +60,7 @@ muleDeploy {
             usePersistentQueues true
             workerType WorkerTypes().micro
             workerCount 1
-            awsRegion AwsRegions.UsWest1
+            awsRegion AwsRegions().uswest1
         }
         file 'path/to/file.jar'
         cryptoKey 'theKey'
