@@ -2,13 +2,6 @@ muleDeploy {
     // version of the tool
     version '1.0'
 
-    settings {
-        username 'the_username'
-        password 'the_password'
-        // optional
-        organizationName 'ACME Brick'
-    }
-
     apiSpecification {
         name 'Design Center Project Name'
         // everything else in this closure is optional

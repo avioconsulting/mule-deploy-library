@@ -11,7 +11,7 @@ import com.avioconsulting.mule.deployment.internal.subdeployers.*
 /***
  * Top level deployer. This is what most of your interaction should be with
  */
-class Deployer implements IDeployer {
+class Deployer {
     private final PrintStream logger
     private final EnvironmentLocator environmentLocator
     private final HttpClientWrapper clientWrapper

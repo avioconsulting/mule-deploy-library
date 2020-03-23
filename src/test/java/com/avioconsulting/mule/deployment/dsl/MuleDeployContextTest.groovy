@@ -1,11 +1,8 @@
 package com.avioconsulting.mule.deployment.dsl
 
-import com.avioconsulting.mule.deployment.api.IDeployer
-import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
-import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import org.junit.Before
 import org.junit.Test
 
@@ -16,46 +13,10 @@ import static org.hamcrest.Matchers.*
 // optimizing refs would prevent us from testing DSL resolution
 class MuleDeployContextTest {
     private MuleDeployContext context
-    private String username
-    private CloudhubDeploymentRequest chDeployment
-    private OnPremDeploymentRequest onPremDeployment
-    private ApiSpecification apiSpec
-    private List<Policy> desiredPolicies
-    private List<Features> enabledFeatures
 
     @Before
     void setup() {
-        chDeployment = null
-        onPremDeployment = null
-        apiSpec = null
-        desiredPolicies = []
-        enabledFeatures = []
-        username = null
-        def mockDeployer = [
-                deployApplication: { appDeploymentRequest,
-                                     ApiSpecification apiSpecification,
-                                     List<Policy> policies,
-                                     List<Features> features ->
-                    if (appDeploymentRequest instanceof CloudhubDeploymentRequest) {
-                        chDeployment = appDeploymentRequest
-                    } else {
-                        onPremDeployment = appDeploymentRequest
-                    }
-                    apiSpec = apiSpecification
-                    desiredPolicies = policies
-                    enabledFeatures = features
-                }
-        ] as IDeployer
-        def mockDeployerFactory = [
-                create: { String user,
-                          String password,
-                          PrintStream logger,
-                          String anypointOrganizationName ->
-                    username = user
-                    return mockDeployer
-                }
-        ] as IDeployerFactory
-        context = new MuleDeployContext(mockDeployerFactory)
+        context = new MuleDeployContext()
     }
 
     @Test
@@ -63,11 +24,6 @@ class MuleDeployContextTest {
         // arrange
         def closure = {
             version '1.0'
-
-            settings {
-                username 'the_username'
-                password 'the_password'
-            }
 
             apiSpecification {
                 name 'Design Center Project Name'
@@ -97,21 +53,16 @@ class MuleDeployContextTest {
         closure.call()
 
         // act
-        context.performDeployment()
+        def deploymentPackage = context.createDeploymentPackage()
 
         // assert
-        assertThat 'At least ensure the settings context ran',
-                   username,
-                   is(equalTo('the_username'))
-        assertThat chDeployment,
+        assertThat deploymentPackage.deploymentRequest,
+                   is(instanceOf(CloudhubDeploymentRequest))
+        assertThat deploymentPackage.apiSpecification,
                    is(notNullValue())
-        assertThat onPremDeployment,
-                   is(nullValue())
-        assertThat apiSpec,
-                   is(notNullValue())
-        assertThat desiredPolicies.size(),
+        assertThat deploymentPackage.desiredPolicies.size(),
                    is(equalTo(1))
-        assertThat enabledFeatures,
+        assertThat deploymentPackage.enabledFeatures,
                    is(equalTo([
                            Features.All
                    ]))
@@ -122,11 +73,6 @@ class MuleDeployContextTest {
         // arrange
         def closure = {
             version '1.0'
-
-            settings {
-                username 'the_username'
-                password 'the_password'
-            }
 
             apiSpecification {
                 name 'Design Center Project Name'
@@ -148,21 +94,16 @@ class MuleDeployContextTest {
         closure.call()
 
         // act
-        context.performDeployment()
+        def deploymentPackage = context.createDeploymentPackage()
 
         // assert
-        assertThat 'At least ensure the settings context ran',
-                   username,
-                   is(equalTo('the_username'))
-        assertThat chDeployment,
-                   is(nullValue())
-        assertThat onPremDeployment,
+        assertThat deploymentPackage.deploymentRequest,
+                   is(instanceOf(OnPremDeploymentRequest))
+        assertThat deploymentPackage.apiSpecification,
                    is(notNullValue())
-        assertThat apiSpec,
-                   is(notNullValue())
-        assertThat desiredPolicies.size(),
+        assertThat deploymentPackage.desiredPolicies.size(),
                    is(equalTo(1))
-        assertThat enabledFeatures,
+        assertThat deploymentPackage.enabledFeatures,
                    is(equalTo([
                            Features.All
                    ]))
@@ -173,11 +114,6 @@ class MuleDeployContextTest {
         // arrange
         def closure = {
             version '0.5'
-
-            settings {
-                username 'the_username'
-                password 'the_password'
-            }
 
             apiSpecification {
                 name 'Design Center Project Name'
@@ -213,11 +149,6 @@ class MuleDeployContextTest {
         def closure = {
             version '1.0'
 
-            settings {
-                username 'the_username'
-                password 'the_password'
-            }
-
             apiSpecification {
                 name 'Design Center Project Name'
             }
@@ -255,7 +186,7 @@ class MuleDeployContextTest {
 
         // act
         def exception = shouldFail {
-            context.performDeployment()
+            context.createDeploymentPackage()
         }
 
         // assert
@@ -274,14 +205,13 @@ class MuleDeployContextTest {
 
         // act
         def exception = shouldFail {
-            context.performDeployment()
+            context.createDeploymentPackage()
         }
 
         // assert
         assertThat exception.message,
                    is(equalTo("""Your file is not complete. The following errors exist:
 - version missing
-- settings missing
 - Either onPremApplication or cloudHubApplication should be supplied
 """.trim()))
     }
@@ -291,11 +221,6 @@ class MuleDeployContextTest {
         // arrange
         def closure = {
             version '1.0'
-
-            settings {
-                username 'the_username'
-                password 'the_password'
-            }
 
             onPremApplication {
                 environment 'DEV'
@@ -309,13 +234,13 @@ class MuleDeployContextTest {
         closure.call()
 
         // act
-        context.performDeployment()
+        def deploymentPackage = context.createDeploymentPackage()
 
         // assert
-        assertThat apiSpec,
+        assertThat deploymentPackage.apiSpecification,
                    is(nullValue())
         assertThat 'Lack of policy section should remove policy sync from features',
-                   enabledFeatures,
+                   deploymentPackage.enabledFeatures,
                    is(equalTo([
                            Features.AppDeployment,
                            Features.DesignCenterSync,
@@ -328,11 +253,6 @@ class MuleDeployContextTest {
         // arrange
         def closure = {
             version '1.0'
-
-            settings {
-                username 'the_username'
-                password 'the_password'
-            }
 
             apiSpecification {
                 name 'Design Center Project Name'
@@ -355,10 +275,10 @@ class MuleDeployContextTest {
         closure.call()
 
         // act
-        context.performDeployment()
+        def deploymentPackage = context.createDeploymentPackage()
 
         // assert
-        assertThat enabledFeatures,
+        assertThat deploymentPackage.enabledFeatures,
                    is(equalTo([
                            Features.ApiManagerDefinitions,
                            Features.AppDeployment
@@ -370,11 +290,6 @@ class MuleDeployContextTest {
         // arrange
         def closure = {
             version '1.0'
-
-            settings {
-                username 'the_username'
-                password 'the_password'
-            }
 
             apiSpecification {
                 name 'Design Center Project Name'
@@ -398,11 +313,11 @@ class MuleDeployContextTest {
         closure.call()
 
         // act
-        context.performDeployment()
+        def deploymentPackage = context.createDeploymentPackage()
 
         // assert
         assertThat 'No policies section so will not sync',
-                   enabledFeatures,
+                   deploymentPackage.enabledFeatures,
                    is(equalTo([
                            Features.ApiManagerDefinitions,
                            Features.AppDeployment
@@ -414,11 +329,6 @@ class MuleDeployContextTest {
         // arrange
         def closure = {
             version '1.0'
-
-            settings {
-                username 'the_username'
-                password 'the_password'
-            }
 
             apiSpecification {
                 name 'Design Center Project Name'
@@ -438,16 +348,14 @@ class MuleDeployContextTest {
         closure.call()
 
         // act
-        context.performDeployment()
+        def deploymentPackage = context.createDeploymentPackage()
 
         // assert
-        assertThat desiredPolicies,
+        assertThat deploymentPackage.desiredPolicies,
                    is(equalTo([]))
-        assertThat enabledFeatures,
+        assertThat deploymentPackage.enabledFeatures,
                    is(equalTo([
                            Features.All
                    ]))
     }
-
-    // TODO: Perhaps these tests should call Deployer's deploy methods? Should we add a dry run all the way in there so when we do a "syntax check" with the DSL, they can actually see what steps would run?
 }
