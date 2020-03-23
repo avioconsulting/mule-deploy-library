@@ -20,7 +20,7 @@ muleDeploy {
     }
 
     cloudHubApplication {
-        environment 'DEV'
+        environment params.environment
         applicationName 'the-app'
         appVersion '1.2.3'
         workerSpecs {

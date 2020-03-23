@@ -1054,10 +1054,88 @@ class DesignCenterDeployerTest extends BaseTest {
     @Test
     void synchronizeDesignCenter_online_validate() {
         // arrange
+        setupDeployer(DryRunMode.OnlineValidate)
+        def filesUploaded = false
+        def exchangePushed = false
+        def locked = false
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockAcquireLock(request,
+                                'abcd')) {
+                locked = true
+                return
+            }
+            if (mockReleaseLock(request,
+                                'abcd')) {
+                locked = false
+                return
+            }
+            if (mockDesignCenterProjectId(request,
+                                          'Hello API',
+                                          'abcd')) {
+                return
+            }
+            if (locked && mockFileUpload(request,
+                                         'abcd')) {
+                filesUploaded = true
+                return
+            }
+            if (locked && mockExchangePush(request,
+                                           'abcd')) {
+                exchangePushed = true
+                return
+            }
+            if (locked && mockGetExistingFiles(request,
+                                               'abcd',
+                                               [:])) {
+                return
+            }
+            request.response().with {
+                statusCode = 404
+                end("Unexpected request ${request.absoluteURI()}")
+            }
+        }
+        def apiSpec = new ApiSpecification('Hello API')
+        def tempDir = new File('target/temp')
+        def tempAppDirectory = new File(tempDir,
+                                        'designcenterapp')
+        tempAppDirectory.deleteDir()
+        tempAppDirectory.mkdirs()
+        def apiDirectory = new File(tempAppDirectory,
+                                    'api')
+        def file = new File(apiDirectory,
+                            'stuff.yaml')
+        FileUtils.touch(file)
+        file.text = 'howdy2'
+        def folder = new File(apiDirectory,
+                              'folder')
+        file = new File(folder,
+                        'lib.yaml')
+        FileUtils.touch(file)
+        file.text = 'howdy1'
+        def exchangeModules = new File(apiDirectory,
+                                       'exchange_modules')
+        file = new File(exchangeModules,
+                        'junk')
+        FileUtils.touch(file)
+        FileUtils.touch(new File(apiDirectory,
+                                 'exchange.json'))
+        def appInfo = buildZip(tempDir,
+                               tempAppDirectory)
 
         // act
+        deployer.synchronizeDesignCenterFromApp(apiSpec,
+                                                appInfo)
 
         // assert
-        Assert.fail("write it")
+        assertThat filesUploaded,
+                   is(equalTo(false))
+        assertThat exchangePushed,
+                   is(equalTo(false))
+        assertThat 'We should always unlock if we lock',
+                   locked,
+                   is(equalTo(false))
     }
 }

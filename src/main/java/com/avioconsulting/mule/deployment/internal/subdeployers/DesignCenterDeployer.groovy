@@ -36,7 +36,6 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
     DesignCenterDeployer(HttpClientWrapper clientWrapper,
                          PrintStream logger,
                          DryRunMode dryRunMode) {
-
         this.dryRunMode = dryRunMode
         this.logger = logger
         this.clientWrapper = clientWrapper
@@ -211,6 +210,10 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
             if (changes.empty) {
                 logger.println('New RAML contents match the old contents, will not update Design Center')
             } else {
+                if (dryRunMode != DryRunMode.Run) {
+                    logger.println('RAML quantity/contents have changed, WOULD update Design Center but in dry-run mode')
+                    return
+                }
                 logger.println('RAML quantity/contents have changed, will update Design Center')
                 def noLongerExist = existingFiles.findAll { file ->
                     !ramlFiles.any { toBeFile -> file.fileName == toBeFile.fileName }
