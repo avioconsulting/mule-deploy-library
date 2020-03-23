@@ -134,6 +134,46 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>groovy-maven-plugin</artifactId>
+                <version>2.1</version>
+                <executions>
+                    <execution>
+                        <id>generate-gdsl</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <properties>
+                                <output.dir>${project.build.outputDirectory}</output.dir>
+                            </properties>
+                            <source>
+                                def engine = new org.apache.velocity.app.VelocityEngine()
+                                engine.setProperty(org.apache.velocity.runtime.RuntimeConstants.FILE_RESOURCE_LOADER_PATH,
+                                                   properties['output.dir'])
+                                engine.init()
+                                def template = engine.getTemplate('evaluate.gdsl')
+                                def context = new org.apache.velocity.VelocityContext()
+                                context.put('workerTypes', ['foo', 'bar'])
+                                context.put('awsRegions', ['foo1', 'bar1'])
+                                def file = new File(properties['output.dir'], 'evaluate.gdsl')
+                                def writer = new OutputStreamWriter(new FileOutputStream(file))
+                                template.merge(context, writer)
+                                writer.close()
+                            </source>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.velocity</groupId>
+                        <artifactId>velocity-engine-core</artifactId>
+                        <version>2.1</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
         </plugins>
     </build>
 

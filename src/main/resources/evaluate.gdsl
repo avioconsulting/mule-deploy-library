@@ -9,15 +9,19 @@ contributor([ctx]) {
 def workerTypeContext = context(ctype: 'com.avioconsulting.mule.deployment.api.models.WorkerTypes')
 contributor([workerTypeContext]) {
     // Properties can't be upper cased so we make them lower case and then the DSL code makes ENUMs case insensitive
-    property name: 'micro',
-             type: 'com.avioconsulting.mule.deployment.api.models.WorkerTypes'
+    #foreach($enumValue in $workerTypes)
+        property name: '$enumValue',
+                 type: 'com.avioconsulting.mule.deployment.api.models.WorkerTypes'
+    #end
 }
 
 def awsRegionContext = context(ctype: 'com.avioconsulting.mule.deployment.api.models.AwsRegions')
 contributor([awsRegionContext]) {
     // Properties can't be upper cased so we make them lower case and then the DSL code makes ENUMs case insensitive
-    property name: 'uswest1',
-             type: 'com.avioconsulting.mule.deployment.api.models.AwsRegions'
+    #foreach($enumValue in $awsRegions)
+        property name: '$enumValue',
+                 type: 'com.avioconsulting.mule.deployment.api.models.AwsRegions'
+    #end
 }
 
 def closureScopeContext = context(scope: closureScope())
