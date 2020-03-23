@@ -130,12 +130,12 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
 
     List<RamlFile> getRamlFilesFromApp(FileBasedAppDeploymentRequest deploymentRequest) {
         return FileSystems.newFileSystem(deploymentRequest.file.toPath(),
-                                  null).withCloseable { fs ->
+                                         null).withCloseable { fs ->
             def apiPath = fs.getPath('/api')
             if (!Files.exists(apiPath)) {
                 return []
             }
-            Files.walk(apiPath).findAll {p ->
+            Files.walk(apiPath).findAll { p ->
                 def relativeToApiDirectory = apiPath.relativize(p)
                 !Files.isDirectory(p) &&
                         !IGNORE_DC_FILES.contains(relativeToApiDirectory.toString()) &&

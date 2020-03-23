@@ -10,7 +10,6 @@ import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
 import org.apache.commons.io.FileUtils
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 

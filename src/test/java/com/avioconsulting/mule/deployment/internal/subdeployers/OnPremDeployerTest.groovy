@@ -8,7 +8,6 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
 import io.vertx.core.http.HttpServerRequest
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
