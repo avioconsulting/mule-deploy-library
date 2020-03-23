@@ -57,6 +57,10 @@ class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
 
     private def deletePolicy(ExistingApiSpec apiSpec,
                              ExistingPolicy policy) {
+        if (dryRunMode != DryRunMode.Run) {
+            logger.println("For API ${apiSpec.id}, WOULD delete policy ${policy} but in dry-run mode")
+            return
+        }
         logger.println("For API ${apiSpec.id}, deleting policy ${policy}")
         def request = new HttpDelete(getApiManagerUrl("/${apiSpec.id}/policies/${policy.id}",
                                                       apiSpec.environment))
@@ -82,6 +86,10 @@ class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
                 assetVersion     : policy.version
         ]
         String requestPayload = JsonOutput.toJson(requestPayloadMap)
+        if (dryRunMode != DryRunMode.Run) {
+            logger.println("For API ${apiSpec.id}, WOULD create policy ${JsonOutput.prettyPrint(requestPayload)} but in dry-run mode")
+            return
+        }
         logger.println("For API ${apiSpec.id}, creating policy ${JsonOutput.prettyPrint(requestPayload)}")
         def request = new HttpPost(getApiManagerUrl("/${apiSpec.id}/policies",
                                                     apiSpec.environment)).with {
