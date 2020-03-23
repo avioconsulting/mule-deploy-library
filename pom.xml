@@ -129,7 +129,8 @@
                         <configuration>
                             <generateIntrospectionFile>true</generateIntrospectionFile>
                             <schemaUrl>https://anypoint.mulesoft.com/graph/api/v1/graphql</schemaUrl>
-                            <rootPackageName>com.avioconsulting.mule.deployment.internal.models.graphql</rootPackageName>
+                            <rootPackageName>com.avioconsulting.mule.deployment.internal.models.graphql
+                            </rootPackageName>
                         </configuration>
                     </execution>
                 </executions>
@@ -157,7 +158,8 @@
                             engine.setProperty(org.apache.velocity.runtime.RuntimeConstants.FILE_RESOURCE_LOADER_PATH,
                                                properties['output.dir'])
                             engine.init()
-                            def template = engine.getTemplate('evaluate.gdsl')
+                            def templateFileName = 'evaluate.gdsl.vm'
+                            def template = engine.getTemplate(templateFileName)
                             def context = new org.apache.velocity.VelocityContext()
                             context.put('workerTypes',
                                         WorkerTypes.values().collect { v -> v.name().toLowerCase() })
@@ -169,6 +171,8 @@
                             template.merge(context,
                                            writer)
                             writer.close()
+                            new File(properties['output.dir'],
+                                     templateFileName).delete()
                             </source>
                         </configuration>
                     </execution>
