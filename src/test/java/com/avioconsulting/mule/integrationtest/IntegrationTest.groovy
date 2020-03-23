@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.integrationtest
 
 import com.avioconsulting.mule.deployment.api.Deployer
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
@@ -148,7 +149,7 @@ class IntegrationTest {
     }
 
     @Before
-    void cleanup() {
+    void cleanup_and_instantiate() {
         onPremDeploymentRequest = new OnPremDeploymentRequest(AVIO_ENVIRONMENT_DEV,
                                                               ONPREM_APP_NAME,
                                                               '1.2.3',
@@ -176,7 +177,8 @@ class IntegrationTest {
                                                 10000,
                                                 // faster testing
                                                 100,
-                                                System.out)
+                                                System.out,
+                                                DryRunMode.Run)
         try {
             deleteCloudHubApp(cloudhubDeploymentRequest)
         } catch (e) {
@@ -188,8 +190,10 @@ class IntegrationTest {
         }
         onPremDeployer = new OnPremDeployer(this.clientWrapper,
                                             environmentLocator,
-                                            System.out)
+                                            System.out,
+                                            DryRunMode.Run)
         overallDeployer = new Deployer(clientWrapper,
+                                       DryRunMode.Run,
                                        System.out,
                                        ['DEV'],
                                        environmentLocator)
