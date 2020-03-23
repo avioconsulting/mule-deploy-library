@@ -48,6 +48,10 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
         doDeployment(request,
                      deploymentRequest)
         if ([AppStatus.Undeployed, AppStatus.Failed].contains(existingAppStatus.appStatus)) {
+            if (dryRunMode != DryRunMode.Run) {
+                logger.println "Since existing app was in '${existingAppStatus}' status before the deployment we just did, we WOULD start the app manually but we're in dry run mode"
+                return
+            }
             logger.println "Since existing app was in '${existingAppStatus}' status before the deployment we just did, we will now try and start the app manually"
             startApplication(deploymentRequest.environment,
                              deploymentRequest.normalizedAppName)
@@ -74,7 +78,12 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
 
     private def doDeployment(HttpEntityEnclosingRequestBase request,
                              CloudhubDeploymentRequest deploymentRequest) {
-        logger.println "Deploying using settings: ${JsonOutput.prettyPrint(deploymentRequest.cloudhubAppInfoAsJson)}"
+        def prettyJson = JsonOutput.prettyPrint(deploymentRequest.cloudhubAppInfoAsJson)
+        if (dryRunMode != DryRunMode.Run) {
+            logger.println "WOULD deploy using settings but in dry-run mode: ${ prettyJson}"
+            return
+        }
+        logger.println "Deploying using settings: ${ prettyJson}"
         request = request.with {
             addStandardStuff(it,
                              deploymentRequest.environment)

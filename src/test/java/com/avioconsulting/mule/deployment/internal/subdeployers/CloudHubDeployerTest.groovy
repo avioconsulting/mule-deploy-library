@@ -14,7 +14,6 @@ import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -1329,6 +1328,72 @@ class CloudHubDeployerTest extends BaseTest {
                    is(equalTo(true))
     }
 
+    @Test
+    void perform_deployment_existing_failed_app_never_successful_but_this_one_is_dry_run_online_validate() {
+        // arrange
+        setupDeployer(DryRunMode.OnlineValidate)
+        def appStartRequested = false
+        def deployed = false
+        withHttpServer { HttpServerRequest request ->
+            def uri = request.uri()
+            if (mockDeploymentAndXStatusChecks(request,
+                                               new AppStatusPackage(AppStatus.Failed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Failed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def result = null
+                if (uri.endsWith('applications/client-new-app-dev/status') && request.method() == HttpMethod.POST && deployed) {
+                    appStartRequested = true
+                    statusCode = 200
+                } else if (uri == '/cloudhub/api/v2/applications/client-new-app-dev' && request.method() == HttpMethod.PUT) {
+                    // deployment service returns this
+                    statusCode = 200
+                    deployed = true
+                    result = getAppDeployResponsePayload('client-new-app-dev')
+                } else {
+                    statusCode = 500
+                    result = [
+                            message: "Not sure how we got in this state ${request.method()} ${request.uri()}"
+                    ]
+                }
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def file = new File('src/test/resources/some_file.txt')
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    '1.2.3',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
+
+        // act
+        deployer.deploy(request)
+
+        // assert
+        assertThat appStartRequested,
+                   is(equalTo(false))
+        assertThat deployed,
+                   is(equalTo(false))
+    }
+
     def mockDeploymentAndXStatusChecks(HttpServerRequest request,
                                        AppStatusPackage... appStatuses) {
         def uri = request.absoluteURI()
@@ -1571,6 +1636,54 @@ class CloudHubDeployerTest extends BaseTest {
     }
 
     @Test
+    void deploy_online_validate() {
+        // arrange
+        setupDeployer(DryRunMode.OnlineValidate)
+        def deployed = false
+        withHttpServer { HttpServerRequest request ->
+            if (mockDeploymentAndXStatusChecks(request,
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    DeploymentUpdateStatus.Deploying),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
+                return
+            }
+            request.response().with {
+                putHeader('Content-Type',
+                          'application/json')
+                // deployment service returns this
+                statusCode = 200
+                deployed = true
+                def result = getAppDeployResponsePayload('new-app')
+                request.expectMultipart = true
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def file = new File('src/test/resources/some_file.txt')
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    '1.2.3',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
+        // act
+        deployer.deploy(request)
+
+        // assert
+        assertThat deployed,
+                   is(equalTo(false))
+    }
+
+    @Test
     void getAppStatus_correct_request() {
         // arrange
         String url = null
@@ -1744,15 +1857,5 @@ class CloudHubDeployerTest extends BaseTest {
                    is(equalTo([
                            status: 'start'
                    ]))
-    }
-
-    @Test
-    void deploy_online_validate() {
-        // arrange
-
-        // act
-
-        // assert
-        Assert.fail("write it")
     }
 }
