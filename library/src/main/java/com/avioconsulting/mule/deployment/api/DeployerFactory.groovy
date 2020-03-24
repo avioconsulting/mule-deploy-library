@@ -1,12 +1,8 @@
-package com.avioconsulting.mule.maven
-
-import com.avioconsulting.mule.deployment.api.Deployer
-import com.avioconsulting.mule.deployment.api.DryRunMode
-import com.avioconsulting.mule.deployment.api.ILogger
+package com.avioconsulting.mule.deployment.api
 
 class DeployerFactory implements IDeployerFactory {
     @Override
-    Deployer create(String username,
+    IDeployer create(String username,
                     String password,
                     ILogger logger,
                     DryRunMode dryRunMode,

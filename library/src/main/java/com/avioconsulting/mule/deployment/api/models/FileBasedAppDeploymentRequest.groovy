@@ -14,4 +14,6 @@ abstract class FileBasedAppDeploymentRequest {
     abstract def setAutoDiscoveryId(String autoDiscoveryId)
 
     abstract String getAppVersion()
+
+    abstract String getEnvironment()
 }

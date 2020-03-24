@@ -99,6 +99,11 @@ class DesignCenterDeployerTest extends BaseTest {
             String getAppVersion() {
                 '1.2.3'
             }
+
+            @Override
+            String getEnvironment() {
+                'DEV'
+            }
         }
     }
 

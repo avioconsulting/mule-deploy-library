@@ -1,6 +1,10 @@
 package com.avioconsulting.mule.deployment.api
 
-import com.avioconsulting.mule.deployment.api.models.*
+
+import com.avioconsulting.mule.deployment.api.models.ApiSpecification
+import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.Features
+import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
@@ -11,7 +15,7 @@ import com.avioconsulting.mule.deployment.internal.subdeployers.*
 /***
  * Top level deployer. This is what most of your interaction should be with
  */
-class Deployer {
+class Deployer implements IDeployer {
     private final ILogger logger
     private final EnvironmentLocator environmentLocator
     private final HttpClientWrapper clientWrapper
@@ -90,54 +94,38 @@ class Deployer {
     }
 
     /**
-     * Deploys a CloudHub application, end to end
+     * Deploys a CloudHub or on-prem application, end to end
      * @param appDeploymentRequest Details about how to deploy your app
      * @param apiSpecification How API specification details work. This can be optional. Doing so will automatically remove Design Center sync and policy sync from enabled features
      * @param desiredPolicies Which policies to apply. The default value is empty, which means apply no policies and remove any policies already there
      * @param enabledFeatures Which features of this tool to turn on. All by default.
      */
-    def deployApplication(CloudhubDeploymentRequest appDeploymentRequest,
+    def deployApplication(FileBasedAppDeploymentRequest appDeploymentRequest,
                           ApiSpecification apiSpecification = null,
                           List<Policy> desiredPolicies = [],
                           List<Features> enabledFeatures = [Features.All]) {
         stepNumber = 0
-        performCommonDeploymentTasks(apiSpecification,
-                                     desiredPolicies,
-                                     appDeploymentRequest,
-                                     appDeploymentRequest.environment,
-                                     enabledFeatures,
-                                     cloudHubDeployer)
-        def skipReason = getFeatureSkipReason(enabledFeatures,
-                                              Features.AppDeployment)
-        executeStep('CloudHub app deployment',
-                    skipReason) {
-            cloudHubDeployer.deploy(appDeploymentRequest)
+        // TODO: dirty?
+        String description
+        def deployer
+        if (appDeploymentRequest instanceof CloudhubDeploymentRequest) {
+            deployer = cloudHubDeployer
+            description = 'CloudHub app deployment'
+        } else {
+            deployer = onPremDeployer
+            description = 'On-prem app deployment'
         }
-    }
-
-    /**
-     * Deploys an on-prem application, end to end
-     * @param appDeploymentRequest Details about how to deploy your app
-     * @param apiSpecification How API specification details work. This can be optional. Doing so will automatically remove Design Center sync and policy sync from enabled features
-     * @param desiredPolicies Which policies to apply. The default value is empty, which means apply no policies and remove any policies already there
-     * @param enabledFeatures Which features of this tool to turn on. All by default.
-     */
-    def deployApplication(OnPremDeploymentRequest appDeploymentRequest,
-                          ApiSpecification apiSpecification = null,
-                          List<Policy> desiredPolicies = [],
-                          List<Features> enabledFeatures = [Features.All]) {
-        stepNumber = 0
         performCommonDeploymentTasks(apiSpecification,
                                      desiredPolicies,
                                      appDeploymentRequest,
                                      appDeploymentRequest.environment,
                                      enabledFeatures,
-                                     onPremDeployer)
+                                     deployer)
         def skipReason = getFeatureSkipReason(enabledFeatures,
                                               Features.AppDeployment)
-        executeStep('On-prem app deployment',
+        executeStep(description,
                     skipReason) {
-            onPremDeployer.deploy(appDeploymentRequest)
+            deployer.deploy(appDeploymentRequest)
         }
     }
 
