@@ -72,7 +72,7 @@ class MuleDeployMojo extends AbstractMojo {
             // in case they specify additional runtime settings not in source control via -D maven command line args
             def binding = new Binding()
             binding.setVariable('params',
-                                System.getProperties())
+                                new ParamsWrapper())
             shell.context = binding
             // last line of MuleDeployScript.muleDeploy method returns this
             def context = shell.evaluate(groovyFile) as MuleDeployContext

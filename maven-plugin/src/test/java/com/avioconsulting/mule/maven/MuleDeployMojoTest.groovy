@@ -4,10 +4,7 @@ import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.IDeployer
 import com.avioconsulting.mule.deployment.api.IDeployerFactory
 import com.avioconsulting.mule.deployment.api.ILogger
-import com.avioconsulting.mule.deployment.api.models.ApiSpecification
-import com.avioconsulting.mule.deployment.api.models.Features
-import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
-import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.*
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import org.junit.Before
 import org.junit.Test
@@ -244,12 +241,20 @@ muleDeploy {
 muleDeploy {
     version '1.0'
     
-    onPremApplication {
+    cloudHubApplication {
         environment params.env
         applicationName 'the-app'
         appVersion '1.2.3'
+        workerSpecs {
+            muleVersion params.env == 'DEV' ? '4.2.2' : '4.1.5'
+        }
         file 'path/to/file.jar'
-        targetServerOrClusterName 'theServer'
+        cryptoKey 'theKey'
+        autoDiscovery {
+            clientId 'the_client_id'
+            clientSecret 'the_client_secret'
+        }
+        cloudHubAppPrefix 'AVI'
     }
 }
 """
@@ -260,7 +265,7 @@ muleDeploy {
         mojo.execute()
 
         // assert
-        assert actualApp instanceof OnPremDeploymentRequest
+        assert actualApp instanceof CloudhubDeploymentRequest
         assertThat actualApp.environment,
                    is(equalTo('foobar'))
     }
