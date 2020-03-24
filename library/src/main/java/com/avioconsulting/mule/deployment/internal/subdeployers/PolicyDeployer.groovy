@@ -36,7 +36,11 @@ class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
     def synchronizePolicies(ExistingApiSpec apiSpec,
                             List<Policy> desiredPolicies) {
         desiredPolicies = normalizePolicies(desiredPolicies)
-        def existing = getExistingPolicies(apiSpec)
+        def cannotFetch = dryRunMode == DryRunMode.OnlineValidate && apiSpec.id == ApiManagerDeployer.DRY_RUN_API_ID
+        if (cannotFetch) {
+            logger.println('In dry-run mode with new API definition so cannot fetch existing policies')
+        }
+        def existing = cannotFetch ? [] : getExistingPolicies(apiSpec)
         def existingForComparison = existing.collect { policy -> policy.withoutId }
         if (existingForComparison == desiredPolicies) {
             logger.println('Existing policies are correct, no updates required')

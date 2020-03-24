@@ -20,6 +20,7 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
     final ILogger logger
     final EnvironmentLocator environmentLocator
     private final DryRunMode dryRunMode
+    static final String DRY_RUN_API_ID = '******'
 
     ApiManagerDeployer(HttpClientWrapper clientWrapper,
                        EnvironmentLocator environmentLocator,
@@ -65,7 +66,7 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
         if (dryRunMode != DryRunMode.Run) {
             logger.println 'API definition does not yet exist, WOULD create but in dry-run mode'
             // fake
-            return new ExistingApiSpec('******',
+            return new ExistingApiSpec(DRY_RUN_API_ID,
                                        resolvedApiSpec.exchangeAssetId,
                                        resolvedApiSpec.exchangeAssetVersion,
                                        resolvedApiSpec.endpoint,

@@ -760,6 +760,60 @@ class PolicyDeployerTest extends BaseTest {
     }
 
     @Test
+    void synchronizePolicies_online_validate_api_definition_not_created_yet() {
+        // arrange
+        setupDeployer(DryRunMode.OnlineValidate)
+        def requests = []
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            requests << "${request.method().name()} ${request.uri()}".toString()
+            if (request.uri() == "/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/${ApiManagerDeployer.DRY_RUN_API_ID}/policies") {
+                request.response().with {
+                    statusCode = 404
+                    end()
+                }
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def result = 'did it'
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def apiSpec = new ExistingApiSpec(ApiManagerDeployer.DRY_RUN_API_ID,
+                                          'the-asset-id',
+                                          '1.2.3',
+                                          'https://foo',
+                                          'DEV',
+                                          true)
+        def policies = [
+                new Policy('openidconnect-access-token-enforcement',
+                           '1.2.0',
+                           [exposeHeaders: false],
+                           Policy.mulesoftGroupId),
+                new Policy('some-other-policy',
+                           '1.2.0',
+                           [exposeHeaders: false],
+                           Policy.mulesoftGroupId)
+        ]
+
+        // act
+        policyDeployer.synchronizePolicies(apiSpec,
+                                           policies)
+
+        // assert
+        assertThat requests,
+                   is(equalTo([]))
+    }
+
+    @Test
     void normalizePolicies() {
         // arrange
         withHttpServer { HttpServerRequest request ->
