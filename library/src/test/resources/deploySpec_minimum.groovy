@@ -1,3 +1,8 @@
+def muleVersionsForEnvironments = [
+        DEV: '4.2.2',
+        QA: '4.1.4'
+]
+
 muleDeploy {
     // version of the tool
     version '1.0'
@@ -20,8 +25,8 @@ muleDeploy {
         appVersion '1.2.3'
         workerSpecs {
             // only muleVersion is required
-            muleVersion '4.2.2'
-            workerType WorkerTypes.Micro
+            muleVersion muleVersionsForEnvironments[params.environment]
+            workerType WorkerTypes().micro
         }
         file params.jarPath
         cryptoKey 'theKey'
