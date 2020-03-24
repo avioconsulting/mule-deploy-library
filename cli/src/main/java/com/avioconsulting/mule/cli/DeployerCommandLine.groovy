@@ -36,7 +36,7 @@ class DeployerCommandLine implements Callable<Integer> {
     private List<String> environmentsToDoDesignCenterDeploymentOn
     @Option(names = ['-a', '--arg'],
             description = 'Other arguments to use for params in your DSL. e.g. -a env=DEV will set params.env in your DSL')
-    private Map<String, String> otherArguments
+    private Map<String, String> otherArguments = [:]
     private static IDeployerFactory deployerFactory = new DeployerFactory()
     private static ILogger logger = new SimpleLogger()
 

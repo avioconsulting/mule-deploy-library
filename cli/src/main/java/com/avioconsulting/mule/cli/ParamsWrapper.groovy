@@ -10,7 +10,7 @@ class ParamsWrapper {
     def propertyMissing(String name) {
         if (!props.containsKey(name)) {
             def options = props.keySet()
-            throw new Exception("Property ${name} was not found in your supplied params. Choices are ${options}")
+            throw new Exception("Property ${name} was not found in your supplied params. Add -a ${name}=someValue Current choices are ${options}")
         }
         props[name]
     }
