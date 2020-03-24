@@ -17,7 +17,8 @@ pipeline {
                           // only want to capture artifact if we're deploying (see below)
                           options: [artifactsPublisher(disabled: true)]) {
                     mavenSetVersion(env.version)
-                    quietMaven 'clean package'
+                    // would usually use package but we have a multi module interdependent project
+                    quietMaven 'clean install'
                 }
             }
         }
@@ -34,7 +35,10 @@ pipeline {
                           mavenSettingsConfig: env.standard_avio_mvn_settings,
                           // only want to capture artifact if we're deploying (see below)
                           options: [artifactsPublisher(disabled: true)]) {
-                    quietMaven "clean test-compile surefire:test@integration-test -Danypoint.username=${env.ANYPOINT_CREDS_USR} -Danypoint.password=${env.ANYPOINT_CREDS_PSW} -Danypoint.client.id=${env.ANYPOINT_CLIENT_CREDS_USR} -Danypoint.client.secret=${env.ANYPOINT_CLIENT_CREDS_PSW}"
+                    // don't need to run integration tests on other modules (and they are not defined)
+                    dir('library') {
+                        quietMaven "clean test-compile surefire:test@integration-test -Danypoint.username=${env.ANYPOINT_CREDS_USR} -Danypoint.password=${env.ANYPOINT_CREDS_PSW} -Danypoint.client.id=${env.ANYPOINT_CLIENT_CREDS_USR} -Danypoint.client.secret=${env.ANYPOINT_CLIENT_CREDS_PSW}"
+                    }
                 }
             }
 
