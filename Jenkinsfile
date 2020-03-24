@@ -23,6 +23,25 @@ pipeline {
             }
         }
 
+        stage('Mutation Test/Site Report') {
+            steps {
+                withMaven(jdk: env.jdk,
+                          maven: env.mvn,
+                          mavenSettingsConfig: env.standard_avio_mvn_settings) {
+                    dir('library') {
+                        // simple way to guarantee the mutation test has run before generating the site
+                        quietMaven 'clean test-compile org.pitest:pitest-maven:mutationCoverage groovydoc:generate site'
+                        publishHTML([allowMissing         : false,
+                                     alwaysLinkToLastBuild: true,
+                                     keepAll              : true,
+                                     reportDir            : 'target/site',
+                                     reportFiles          : 'index.html',
+                                     reportName           : 'Maven site'])
+                    }
+                }
+            }
+        }
+
         stage('Integration test') {
             environment {
                 ANYPOINT_CREDS = credentials('anypoint-jenkins')
@@ -45,25 +64,6 @@ pipeline {
             options {
                 // we manipulate apps in the same environment, etc.
                 lock('anypoint-integration-test')
-            }
-        }
-
-        stage('Mutation Test/Site Report') {
-            steps {
-                withMaven(jdk: env.jdk,
-                          maven: env.mvn,
-                          mavenSettingsConfig: env.standard_avio_mvn_settings) {
-                    dir('library') {
-                        // simple way to guarantee the mutation test has run before generating the site
-                        quietMaven 'clean test-compile org.pitest:pitest-maven:mutationCoverage groovydoc:generate site'
-                        publishHTML([allowMissing         : false,
-                                     alwaysLinkToLastBuild: true,
-                                     keepAll              : true,
-                                     reportDir            : 'target/site',
-                                     reportFiles          : 'index.html',
-                                     reportName           : 'Maven site'])
-                    }
-                }
             }
         }
 
