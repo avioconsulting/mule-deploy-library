@@ -206,11 +206,18 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
             def dataOptional = query.parse(bufferedSource).data()
             dataOptional.isPresent() ? dataOptional.get().assets : []
         }
-        def chosenAsset = pickVersion(appVersion,
-                                      assets)
-        logger.println("Identified asset version ${chosenAsset.version}")
+        String chosenAssetVersion
+        if (assets.empty && dryRunMode == DryRunMode.OnlineValidate) {
+            logger.println('In dry-run mode and Exchange push has not yet occurred (could not find asset) so using placeholder')
+            chosenAssetVersion = DRY_RUN_API_ID
+        } else {
+            def chosenAsset = pickVersion(appVersion,
+                                          assets)
+            chosenAssetVersion = chosenAsset.version
+        }
+        logger.println("Identified asset version ${chosenAssetVersion}")
         new ResolvedApiSpec(apiManagerDefinition,
-                            chosenAsset.version)
+                            chosenAssetVersion)
     }
 
     private static int getLastVersionOctet(String version) {

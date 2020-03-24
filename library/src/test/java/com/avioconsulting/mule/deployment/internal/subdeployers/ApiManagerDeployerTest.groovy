@@ -19,7 +19,7 @@ import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-@SuppressWarnings("GroovyAccessibility")
+@SuppressWarnings('GroovyAccessibility')
 class ApiManagerDeployerTest extends BaseTest {
     private ApiManagerDeployer deployer
 
@@ -525,6 +525,45 @@ class ApiManagerDeployerTest extends BaseTest {
         // assert
         assertThat exception.message,
                    is(containsString('Expected to find an asset version <= our app version of 1.0.202010213 but did not! Asset versions found in Exchange were []'))
+    }
+
+    @Test
+    void resolveAssetVersion_not_found_dry_run() {
+        // arrange
+        setupDeployer(DryRunMode.OnlineValidate)
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def response = [
+                        data: null
+                ]
+                end(JsonOutput.toJson(response))
+            }
+        }
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               true)
+
+        // act
+        def result = deployer.resolveAssetVersion(desiredApiDefinition,
+                                                  '1.0.202010213')
+
+        // assert
+        assertThat result,
+                   is(equalTo(new ResolvedApiSpec('the-asset-id',
+                                                  ApiManagerDeployer.DRY_RUN_API_ID,
+                                                  'https://some.endpoint',
+                                                  'DEV',
+                                                  true)))
     }
 
     @Test
