@@ -205,7 +205,7 @@
                 <artifactId>pitest-maven</artifactId>
                 <version>${pitest.version}</version>
                 <configuration>
-                    <coverageThreshold>95</coverageThreshold>
+                    <coverageThreshold>89</coverageThreshold>
                     <mutationThreshold>48</mutationThreshold>
                     <excludedClasses>
                         <!-- We did not write these, generated code -->
@@ -216,6 +216,9 @@
                         <excludedClass>com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec</excludedClass>
                         <excludedClass>com.avioconsulting.mule.deployment.internal.models.ResolvedApiSpec</excludedClass>
                     </excludedClasses>
+                    <excludedTestClasses>
+                        <excludedTestClass>com.avioconsulting.mule.integrationtest.IntegrationTest</excludedTestClass>
+                    </excludedTestClasses>
                 </configuration>
             </plugin>
         </plugins>
