@@ -12,6 +12,7 @@ import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import org.junit.Before
 import org.junit.Test
 
+import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
@@ -262,5 +263,56 @@ muleDeploy {
         assert actualApp instanceof OnPremDeploymentRequest
         assertThat actualApp.environment,
                    is(equalTo('foobar'))
+    }
+
+    @Test
+    void file_not_found() {
+        // arrange
+        def mockDeployer = [
+                deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
+                                     ApiSpecification apiSpecification,
+                                     List<Policy> desiredPolicies,
+                                     List<Features> enabledFeatures ->
+                }
+        ] as IDeployer
+        def mock = [
+                create: { String username,
+                          String password,
+                          ILogger logger,
+                          DryRunMode dryRunMode,
+                          String anypointOrganizationName,
+                          List<String> environmentsToDoDesignCenterDeploymentOn ->
+                    return mockDeployer
+                }
+        ] as IDeployerFactory
+        def dslText = """
+muleDeploy {
+    version '1.0'
+    
+    onPremApplication {
+        environment 'DEV'
+        applicationName 'the-app'
+        appVersion '1.2.3'
+        file 'path/to/file.jar'
+        targetServerOrClusterName 'theServer'
+    }
+}
+"""
+        def mojo = getMojo(mock,
+                           dslText)
+        mojo.groovyFile = new File('foobar')
+
+        // act
+        def exception = shouldFail {
+            mojo.execute()
+        }
+
+        // assert
+        assertThat exception.message,
+                   is(containsString('Unable to process DSL'))
+        assertThat logger.errors,
+                   is(equalTo([
+                           'Unable to process DSL because'
+                   ]))
     }
 }

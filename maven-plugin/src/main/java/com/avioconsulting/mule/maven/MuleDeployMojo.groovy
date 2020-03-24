@@ -53,20 +53,28 @@ class MuleDeployMojo extends AbstractMojo {
     }
 
     private DeploymentPackage processDsl() {
-        // allows us to use our 'MuleDeployScript'/MuleDeployContext class to interpret the user's DSL file
-        def compilerConfig = new CompilerConfiguration().with {
-            scriptBaseClass = MuleDeployScript.name
-            it
+        try {
+            // allows us to use our 'MuleDeployScript'/MuleDeployContext class to interpret the user's DSL file
+            def compilerConfig = new CompilerConfiguration().with {
+                scriptBaseClass = MuleDeployScript.name
+                it
+            }
+            def shell = new GroovyShell(this.class.classLoader,
+                                        compilerConfig)
+            // in case they specify additional runtime settings not in source control via -D maven command line args
+            def binding = new Binding()
+            binding.setVariable('params',
+                                System.getProperties())
+            shell.context = binding
+            // last line of MuleDeployScript.muleDeploy method returns this
+            def context = shell.evaluate(groovyFile) as MuleDeployContext
+            return context.createDeploymentPackage()
         }
-        def shell = new GroovyShell(this.class.classLoader,
-                                    compilerConfig)
-        // in case they specify additional runtime settings not in source control via -D maven command line args
-        def binding = new Binding()
-        binding.setVariable('params',
-                            System.getProperties())
-        shell.context = binding
-        // last line of MuleDeployScript.muleDeploy method returns this
-        def context = shell.evaluate(groovyFile) as MuleDeployContext
-        context.createDeploymentPackage()
+        catch (e) {
+            log.error('Unable to process DSL because',
+                      e)
+            throw new Exception('Unable to process DSL',
+                                e)
+        }
     }
 }

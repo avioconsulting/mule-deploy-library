@@ -12,6 +12,13 @@ class TestLogger extends SystemStreamLog {
     }
 
     @Override
+    void error(CharSequence content, Throwable error) {
+        super.error(content,
+                    error)
+        errors << content.toString()
+    }
+
+    @Override
     boolean isDebugEnabled() {
         true
     }
