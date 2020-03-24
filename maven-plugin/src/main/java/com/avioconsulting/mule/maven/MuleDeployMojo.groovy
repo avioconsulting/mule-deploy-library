@@ -3,11 +3,13 @@ package com.avioconsulting.mule.maven
 import com.avioconsulting.mule.deployment.api.DeployerFactory
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.IDeployerFactory
+import com.avioconsulting.mule.deployment.dsl.MuleDeployScript
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
+import org.codehaus.groovy.control.CompilerConfiguration
 
 @Mojo(name = 'muleDeploy', requiresProject = false)
 class MuleDeployMojo extends AbstractMojo {
@@ -28,6 +30,14 @@ class MuleDeployMojo extends AbstractMojo {
 
     @Override
     void execute() throws MojoExecutionException, MojoFailureException {
+        def compilerConfig = new CompilerConfiguration().with {
+            scriptBaseClass = MuleDeployScript.name
+            it
+        }
+        def shell = new GroovyShell(this.class.classLoader,
+                                    compilerConfig)
+        def stuff = shell.evaluate(groovyFile)
+        println "we got ${stuff}!"
         def logger = new MavenDeployerLogger(this.log)
         def deployer = deployerFactory.create(this.anypointUsername,
                                               this.anypointPassword,

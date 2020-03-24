@@ -174,11 +174,49 @@ muleDeploy {
     @Test
     void offline_validate() {
         // arrange
-
+        def deployed = false
+        def mockDeployer = [
+                deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
+                                     ApiSpecification apiSpecification,
+                                     List<Policy> desiredPolicies,
+                                     List<Features> enabledFeatures ->
+                    deployed = true
+                }
+        ] as IDeployer
+        def mock = [
+                create: { String username,
+                          String password,
+                          ILogger logger,
+                          DryRunMode dryRunMode,
+                          String anypointOrganizationName,
+                          List<String> environmentsToDoDesignCenterDeploymentOn ->
+                    return mockDeployer
+                }
+        ] as IDeployerFactory
+        def dslText = """
+muleDeploy {
+    version '1.0'
+    
+    onPremApplication {
+        environment 'DEV'
+        applicationName 'the-app'
+        appVersion '1.2.3'
+        file 'path/to/file.jar'
+        targetServerOrClusterName 'theServer'
+    }
+}
+"""
+        def mojo = getMojo(mock,
+                           dslText,
+                           'user',
+                           'pass',
+                           DryRunMode.OfflineValidate)
         // act
+        mojo.execute()
 
         // assert
-        Assert.fail("write it")
+        assertThat deployed,
+                   is(equalTo(false))
     }
 
     @Test
