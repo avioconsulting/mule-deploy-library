@@ -20,6 +20,7 @@ pipeline {
                     // would usually use package but we have a multi module interdependent project
                     quietMaven 'clean install'
                 }
+                archiveArtifacts 'cli/target/appassembler/**/*'
             }
         }
 

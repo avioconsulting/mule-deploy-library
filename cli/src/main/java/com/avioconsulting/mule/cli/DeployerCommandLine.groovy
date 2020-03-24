@@ -15,7 +15,9 @@ import picocli.CommandLine.Parameters
 
 import java.util.concurrent.Callable
 
-@Command(name = 'deploy', description = 'Will deploy')
+@Command(name = 'deploy',
+        description = 'Will deploy using your Mule DSL',
+        versionProvider = MavenVersionProvider)
 class DeployerCommandLine implements Callable<Integer> {
     @Parameters(index = '0', description = 'The path to your DSL file')
     private File groovyFile
@@ -37,11 +39,20 @@ class DeployerCommandLine implements Callable<Integer> {
     @Option(names = ['-a', '--arg'],
             description = 'Other arguments to use for params in your DSL. e.g. -a env=DEV will set params.env in your DSL')
     private Map<String, String> otherArguments = [:]
+    @Option(names = ['-V', '--version'],
+            versionHelp = true,
+            description = 'print version info')
+    private boolean versionRequested
     private static IDeployerFactory deployerFactory = new DeployerFactory()
     private static ILogger logger = new SimpleLogger()
 
     static void main(String... args) {
-        def exitCode = new CommandLine(new DeployerCommandLine()).execute(args)
+        def commandLine = new CommandLine(new DeployerCommandLine())
+        if (commandLine.versionHelpRequested) {
+            commandLine.printVersionHelp(System.out)
+            return
+        }
+        def exitCode = commandLine.execute(args)
         System.exit(exitCode)
     }
 
