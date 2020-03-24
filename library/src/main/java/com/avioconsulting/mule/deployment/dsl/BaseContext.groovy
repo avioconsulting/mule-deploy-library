@@ -23,6 +23,11 @@ abstract class BaseContext {
     }
 
     def methodMissing(String name, def args) {
+        def isField = this.class.declaredFields.find { f -> f.name == name}
+        if (!this.getProperties().containsKey(name) && !isField) {
+           throw new MissingMethodException(name,
+                                            this.class)
+        }
         if (fieldsThatHaveBeenSet.contains(name)) {
             throw new Exception("Field '${name}' has already been set!")
         }
@@ -32,7 +37,6 @@ abstract class BaseContext {
             def context = this[name]
             argument.delegate = context
             // avoid trying to resolve via higher level closures
-            argument.resolveStrategy = Closure.DELEGATE_FIRST
             argument.call()
         } else {
             this[name] = argument
