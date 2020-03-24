@@ -205,9 +205,16 @@
                 <artifactId>pitest-maven</artifactId>
                 <version>${pitest.version}</version>
                 <configuration>
+                    <coverageThreshold>95</coverageThreshold>
+                    <mutationThreshold>48</mutationThreshold>
                     <excludedClasses>
                         <!-- We did not write these, generated code -->
                         <excludedClass>com.avioconsulting.mule.deployment.internal.models.graphql.*</excludedClass>
+                        <!-- Groovy's equality code -->
+                        <excludedClass>com.avioconsulting.mule.deployment.internal.models.CloudhubAppProperties</excludedClass>
+                        <excludedClass>com.avioconsulting.mule.deployment.internal.models.ExistingPolicy</excludedClass>
+                        <excludedClass>com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec</excludedClass>
+                        <excludedClass>com.avioconsulting.mule.deployment.internal.models.ResolvedApiSpec</excludedClass>
                     </excludedClasses>
                 </configuration>
             </plugin>
