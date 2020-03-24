@@ -23,7 +23,7 @@ muleDeploy {
             muleVersion '4.2.2'
             workerType WorkerTypes.Micro
         }
-        file 'path/to/file.jar'
+        file params.jarPath
         cryptoKey 'theKey'
         autoDiscovery {
             clientId 'the_client_id'

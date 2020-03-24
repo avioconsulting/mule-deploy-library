@@ -64,7 +64,13 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
         }
         if (dryRunMode != DryRunMode.Run) {
             logger.println 'API definition does not yet exist, WOULD create but in dry-run mode'
-            return null
+            // fake
+            return new ExistingApiSpec('******',
+                                       resolvedApiSpec.exchangeAssetId,
+                                       resolvedApiSpec.exchangeAssetVersion,
+                                       resolvedApiSpec.endpoint,
+                                       resolvedApiSpec.environment,
+                                       resolvedApiSpec.isMule4OrAbove)
         }
         logger.println 'API definition does not yet exist, will create'
         createApiDefinition(resolvedApiSpec)

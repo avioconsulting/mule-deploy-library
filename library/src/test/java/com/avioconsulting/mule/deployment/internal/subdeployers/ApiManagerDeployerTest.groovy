@@ -1220,7 +1220,7 @@ class ApiManagerDeployerTest extends BaseTest {
         // assert
         assertThat created,
                    is(equalTo(false))
-        assertThat result,
-                   is(nullValue())
+        assertThat result.id,
+                   is(equalTo('******'))
     }
 }
