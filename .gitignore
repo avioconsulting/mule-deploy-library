@@ -5,3 +5,4 @@ target
 dependency-reduced-pom.xml
 schema.json
 evaluate.gdsl
+maven-plugin/stuff.groovy

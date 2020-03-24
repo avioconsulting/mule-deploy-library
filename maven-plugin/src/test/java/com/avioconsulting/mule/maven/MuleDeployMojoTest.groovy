@@ -1,14 +1,20 @@
 package com.avioconsulting.mule.maven
 
 import com.avioconsulting.mule.deployment.api.DryRunMode
+import com.avioconsulting.mule.deployment.api.IDeployer
+import com.avioconsulting.mule.deployment.api.IDeployerFactory
 import com.avioconsulting.mule.deployment.api.ILogger
+import com.avioconsulting.mule.deployment.api.models.ApiSpecification
+import com.avioconsulting.mule.deployment.api.models.Features
+import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.Matchers.equalTo
-import static org.hamcrest.Matchers.is
+import static org.hamcrest.Matchers.*
 
 @SuppressWarnings(value = ['GroovyVariableNotAssigned', 'GroovyAccessibility'])
 class MuleDeployMojoTest {
@@ -20,12 +26,14 @@ class MuleDeployMojoTest {
     }
 
     MuleDeployMojo getMojo(IDeployerFactory mockDeployerFactory,
-                           String user,
-                           String pass,
-                           File groovyFile,
+                           String groovyFileText,
+                           String user = 'our user',
+                           String pass = 'our pass',
                            DryRunMode dryRunMode = DryRunMode.Run,
                            String orgName = null,
                            List<String> envs = ['DEV']) {
+        def groovyFile = new File('stuff.groovy')
+        groovyFile.text = groovyFileText
         new MuleDeployMojo().with {
             it.anypointUsername = user
             it.anypointPassword = pass
@@ -62,10 +70,23 @@ class MuleDeployMojoTest {
                     return null
                 }
         ] as IDeployerFactory
+        def dslText = """
+muleDeploy {
+    version '1.0'
+    
+    onPremApplication {
+        environment 'DEV'
+        applicationName 'the-app'
+        appVersion '1.2.3'
+        file 'path/to/file.jar'
+        targetServerOrClusterName 'theServer'
+    }
+}
+"""
         def mojo = getMojo(mock,
+                           dslText,
                            'the user',
                            'the pass',
-                           new File('stuff.groovy'),
                            // we don't want this thing to actually run
                            DryRunMode.OfflineValidate,
                            'the org',
@@ -90,11 +111,64 @@ class MuleDeployMojoTest {
     @Test
     void runs() {
         // arrange
-        // TODO: min params
+        FileBasedAppDeploymentRequest actualApp
+        ApiSpecification actualApiSpec
+        List<Policy> actualPolicies
+        List<Features> actualFeatures
+        def mockDeployer = [
+                deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
+                                     ApiSpecification apiSpecification,
+                                     List<Policy> desiredPolicies,
+                                     List<Features> enabledFeatures ->
+                    actualApp = appDeploymentRequest
+                    actualApiSpec = apiSpecification
+                    actualPolicies = desiredPolicies
+                    actualFeatures = enabledFeatures
+                }
+        ] as IDeployer
+        def mock = [
+                create: { String username,
+                          String password,
+                          ILogger logger,
+                          DryRunMode dryRunMode,
+                          String anypointOrganizationName,
+                          List<String> environmentsToDoDesignCenterDeploymentOn ->
+                    return mockDeployer
+                }
+        ] as IDeployerFactory
+        def dslText = """
+muleDeploy {
+    version '1.0'
+    
+    onPremApplication {
+        environment 'DEV'
+        applicationName 'the-app'
+        appVersion '1.2.3'
+        file 'path/to/file.jar'
+        targetServerOrClusterName 'theServer'
+    }
+}
+"""
+        def mojo = getMojo(mock,
+                           dslText)
+
         // act
+        mojo.execute()
 
         // assert
-        Assert.fail("write it")
+        assertThat actualFeatures,
+                   is(equalTo([Features.All]))
+        assertThat actualPolicies,
+                   is(nullValue())
+        assertThat actualApiSpec,
+                   is(nullValue())
+        assert actualApp instanceof OnPremDeploymentRequest
+        actualApp.with {
+            assertThat it.appName,
+                       is(equalTo('the-app'))
+            assertThat it.environment,
+                       is(equalTo('DEV'))
+        }
     }
 
     @Test

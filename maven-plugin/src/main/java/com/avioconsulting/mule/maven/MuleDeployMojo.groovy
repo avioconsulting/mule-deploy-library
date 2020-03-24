@@ -1,7 +1,8 @@
 package com.avioconsulting.mule.maven
 
-
+import com.avioconsulting.mule.deployment.api.DeployerFactory
 import com.avioconsulting.mule.deployment.api.DryRunMode
+import com.avioconsulting.mule.deployment.api.IDeployerFactory
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugin.MojoFailureException
