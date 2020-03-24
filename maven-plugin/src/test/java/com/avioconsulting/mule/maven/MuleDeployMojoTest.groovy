@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.maven
 
 import com.avioconsulting.mule.deployment.api.DryRunMode
+import com.avioconsulting.mule.deployment.api.ILogger
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -22,11 +23,13 @@ class MuleDeployMojoTest {
                            String user,
                            String pass,
                            File groovyFile,
+                           DryRunMode dryRunMode = DryRunMode.Run,
                            String orgName = null,
                            List<String> envs = ['DEV']) {
         new MuleDeployMojo().with {
             it.anypointUsername = user
             it.anypointPassword = pass
+            it.dryRunMode = dryRunMode
             it.groovyFile = groovyFile
             it.anypointOrganizationName = orgName
             it.environmentsToDoDesignCenterDeploymentOn = envs
@@ -40,13 +43,13 @@ class MuleDeployMojoTest {
     void gets_correct_params() {
         // arrange
         String actualUser, actualPass, actualOrg
-        PrintStream actualLogger
+        ILogger actualLogger
         DryRunMode actualDryRunMode
         List<String> actualEnvs
         def mock = [
                 create: { String username,
                           String password,
-                          PrintStream logger,
+                          ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,
                           List<String> environmentsToDoDesignCenterDeploymentOn ->
@@ -63,6 +66,8 @@ class MuleDeployMojoTest {
                            'the user',
                            'the pass',
                            new File('stuff.groovy'),
+                           // we don't want this thing to actually run
+                           DryRunMode.OfflineValidate,
                            'the org',
                            ['TST'])
 
@@ -71,8 +76,15 @@ class MuleDeployMojoTest {
 
         // assert
         assertThat actualUser,
-                   is(equalTo('stuff'))
-        Assert.fail("write it")
+                   is(equalTo('the user'))
+        assertThat actualPass,
+                   is(equalTo('the pass'))
+        assertThat actualOrg,
+                   is(equalTo('the org'))
+        assertThat actualDryRunMode,
+                   is(equalTo(DryRunMode.OfflineValidate))
+        assertThat actualEnvs,
+                   is(equalTo(['TST']))
     }
 
     @Test

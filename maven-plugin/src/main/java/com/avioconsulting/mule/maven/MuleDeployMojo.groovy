@@ -27,9 +27,12 @@ class MuleDeployMojo extends AbstractMojo {
 
     @Override
     void execute() throws MojoExecutionException, MojoFailureException {
-        this.log.info "would deploy with ${dryRunMode}"
-        environmentsToDoDesignCenterDeploymentOn.each { e ->
-            log.info "with env ${e}"
-        }
+        def logger = new MavenDeployerLogger(this.log)
+        def deployer = deployerFactory.create(this.anypointUsername,
+                                              this.anypointPassword,
+                                              logger,
+                                              this.dryRunMode,
+                                              this.anypointOrganizationName,
+                                              this.environmentsToDoDesignCenterDeploymentOn)
     }
 }
