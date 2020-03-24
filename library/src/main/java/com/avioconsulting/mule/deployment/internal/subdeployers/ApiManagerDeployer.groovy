@@ -196,7 +196,8 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
                                                    'GraphQL query')
             def source = Okio.source(response.entity.content)
             def bufferedSource = Okio.buffer(source)
-            query.parse(bufferedSource).data().get().assets
+            def dataOptional = query.parse(bufferedSource).data()
+            dataOptional.isPresent() ? dataOptional.get().assets : []
         }
         def chosenAsset = pickVersion(appVersion,
                                       assets)
