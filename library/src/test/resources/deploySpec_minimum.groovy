@@ -3,7 +3,7 @@ muleDeploy {
     version '1.0'
 
     apiSpecification {
-        name 'Design Center Project Name'
+        name 'Mule Deploy Design Center Test Project'
     }
 
     policies {
