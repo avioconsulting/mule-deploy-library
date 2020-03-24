@@ -1,5 +1,6 @@
 package com.avioconsulting.mule.maven
 
+
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugin.MojoExecutionException
@@ -13,15 +14,22 @@ class MuleDeployMojo extends AbstractMojo {
     private String anypointUsername
     @Parameter(required = true, property = 'anypoint.password')
     private String anypointPassword
+    @Parameter(property = 'anypoint.org.name')
+    private String anypointOrganizationName
     @Parameter(defaultValue = 'Run', property = 'deploy.mode')
     private DryRunMode dryRunMode
     @Parameter(required = true, property = 'groovy.file')
     private File groovyFile
-    @Parameter(property = 'dsl.params')
-    private Map<String, String> dslParams
+    @Parameter(defaultValue = 'DEV', property = 'design.center.deployments')
+    private List<String> environmentsToDoDesignCenterDeploymentOn
+
+    private IDeployerFactory deployerFactory = new DeployerFactory()
 
     @Override
     void execute() throws MojoExecutionException, MojoFailureException {
         this.log.info "would deploy with ${dryRunMode}"
+        environmentsToDoDesignCenterDeploymentOn.each { e ->
+            log.info "with env ${e}"
+        }
     }
 }
