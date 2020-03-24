@@ -9,7 +9,6 @@ import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -219,10 +218,49 @@ muleDeploy {
     @Test
     void dsl_params() {
         // arrange
+        System.setProperty('env',
+                           'foobar')
+        FileBasedAppDeploymentRequest actualApp
+        def mockDeployer = [
+                deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
+                                     ApiSpecification apiSpecification,
+                                     List<Policy> desiredPolicies,
+                                     List<Features> enabledFeatures ->
+                    actualApp = appDeploymentRequest
+                }
+        ] as IDeployer
+        def mock = [
+                create: { String username,
+                          String password,
+                          ILogger logger,
+                          DryRunMode dryRunMode,
+                          String anypointOrganizationName,
+                          List<String> environmentsToDoDesignCenterDeploymentOn ->
+                    return mockDeployer
+                }
+        ] as IDeployerFactory
+        def dslText = """
+muleDeploy {
+    version '1.0'
+    
+    onPremApplication {
+        environment params.env
+        applicationName 'the-app'
+        appVersion '1.2.3'
+        file 'path/to/file.jar'
+        targetServerOrClusterName 'theServer'
+    }
+}
+"""
+        def mojo = getMojo(mock,
+                           dslText)
 
         // act
+        mojo.execute()
 
         // assert
-        Assert.fail("write it")
+        assert actualApp instanceof OnPremDeploymentRequest
+        assertThat actualApp.environment,
+                   is(equalTo('foobar'))
     }
 }

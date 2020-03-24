@@ -12,11 +12,6 @@ class MuleDeployContext extends BaseContext {
     private CloudhubContext cloudHubApplication = new CloudhubContext()
     private OnPremContext onPremApplication = new OnPremContext()
     private FeaturesContext enabledFeatures = new FeaturesContext()
-    private final Map params
-
-    MuleDeployContext(Map params = [:]) {
-        this.params = params
-    }
 
     def findErrors() {
         List<String> errors = super.findErrors()

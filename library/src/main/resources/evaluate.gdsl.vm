@@ -66,6 +66,8 @@ contributor([closureScopeContext]) {
     def call = enclosingCall('muleDeploy')
     if (call) {
         #stringParam('version')
+        property name: 'params',
+                 type: Map.name
         #closureParam('cloudHubApplication')
         #closureParam('onPremApplication')
         #closureParam('apiSpecification')

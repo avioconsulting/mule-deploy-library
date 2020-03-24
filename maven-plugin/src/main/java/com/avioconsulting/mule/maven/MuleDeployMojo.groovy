@@ -37,6 +37,10 @@ class MuleDeployMojo extends AbstractMojo {
         }
         def shell = new GroovyShell(this.class.classLoader,
                                     compilerConfig)
+        def binding = new Binding()
+        binding.setVariable('params',
+                            System.getProperties())
+        shell.context = binding
         def context = shell.evaluate(groovyFile) as MuleDeployContext
         def deploymentPackage = context.createDeploymentPackage()
         log.info "Successfully processed ${groovyFile} through DSL"
@@ -48,7 +52,7 @@ class MuleDeployMojo extends AbstractMojo {
                                               this.anypointOrganizationName,
                                               this.environmentsToDoDesignCenterDeploymentOn)
         if (this.dryRunMode == DryRunMode.OfflineValidate) {
-            log.info 'Offline validate was specified, so not deloying'
+            log.info 'Offline validate was specified, so not deploying'
             return
         }
         log.info 'Beginning deployment'
