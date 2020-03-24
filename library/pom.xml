@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.avioconsulting.mule</groupId>
+    <artifactId>mule-deploy-library</artifactId>
+    <version>1.0.0</version>
+    <packaging>jar</packaging>
+    <name>Mule deployment library</name>
+    <description>Deploys Mule applications via Runtime Manager APIs</description>
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+
+    <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <groovy.compiler.version>2.4.15</groovy.compiler.version>
+        <apache.http.version>4.5.10</apache.http.version>
+        <log4j2.version>2.13.0</log4j2.version>
+        <generate.file.for.testing>false</generate.file.for.testing>
+    </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>avio-releases</id>
+            <name>AVIO Releases Repository</name>
+            <url>https://devops.avioconsulting.com/nexus/repository/avio-releases/</url>
+            <layout>default</layout>
+        </repository>
+    </distributionManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.6.1</version>
+                <configuration>
+                    <compilerId>groovy-eclipse-compiler</compilerId>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-eclipse-compiler</artifactId>
+                        <version>3.0.0-01</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-eclipse-batch</artifactId>
+                        <version>${groovy.compiler.version}-02</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>com.bluetrainsoftware.maven</groupId>
+                <artifactId>groovydoc-maven-plugin</artifactId>
+                <version>2.1</version>
+                <configuration>
+                    <destinationDirectory>${project.build.directory}/site/groovydocs</destinationDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.8.2</version>
+                <configuration>
+                    <validate>true</validate>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <!-- Allows plugin to use the Maven version we are running with  -->
+                        <maven.home>${maven.home}</maven.home>
+                    </systemPropertyVariables>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>default-test</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <phase>test</phase>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/IntegrationTest.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>integration-test</id>
+                        <phase>none</phase>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <configuration>
+                            <includes>
+                                <include>**/IntegrationTest.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.github.sparow199</groupId>
+                <artifactId>apollo-client-maven-plugin</artifactId>
+                <version>2.3.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <generateIntrospectionFile>true</generateIntrospectionFile>
+                            <schemaUrl>https://anypoint.mulesoft.com/graph/api/v1/graphql</schemaUrl>
+                            <rootPackageName>com.avioconsulting.mule.deployment.internal.models.graphql
+                            </rootPackageName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.gmaven</groupId>
+                <artifactId>groovy-maven-plugin</artifactId>
+                <version>2.1.1</version>
+                <executions>
+                    <execution>
+                        <id>generate-gdsl</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>execute</goal>
+                        </goals>
+                        <configuration>
+                            <properties>
+                                <output.dir>${project.build.outputDirectory}</output.dir>
+                                <generate.file.for.testing>${generate.file.for.testing}</generate.file.for.testing>
+                            </properties>
+                            <classpathScope>runtime</classpathScope>
+                            <source>import com.avioconsulting.mule.deployment.api.models.AwsRegions
+                            import com.avioconsulting.mule.deployment.api.models.Features
+                            import com.avioconsulting.mule.deployment.api.models.HttpMethod
+                            import com.avioconsulting.mule.deployment.api.models.WorkerTypes
+                            import org.apache.commons.io.FileUtils
+
+                            def engine = new org.apache.velocity.app.VelocityEngine()
+                            engine.setProperty(org.apache.velocity.runtime.RuntimeConstants.FILE_RESOURCE_LOADER_PATH,
+                                               properties['output.dir'])
+                            engine.init()
+                            def templateFileName = 'evaluate.gdsl.vm'
+                            def template = engine.getTemplate(templateFileName)
+                            def context = new org.apache.velocity.VelocityContext()
+                            context.put('workerTypes',
+                                        WorkerTypes.values().collect { v -> v.name().toLowerCase() })
+                            context.put('awsRegions',
+                                        AwsRegions.values().collect { v -> v.name().toLowerCase() })
+                            context.put('httpMethods',
+                                        HttpMethod.values().collect { v -> v.name().toLowerCase() })
+                            context.put('features',
+                                        Features.values().collect { v -> v.name().uncapitalize() })
+                            def file = new File(properties['output.dir'],
+                                                'evaluate.gdsl')
+                            def writer = new OutputStreamWriter(new FileOutputStream(file))
+                            template.merge(context,
+                                           writer)
+                            writer.close()
+                            new File(properties['output.dir'],
+                                     templateFileName).delete()
+                            if (properties['generate.file.for.testing'] == 'true') {
+                                println 'making a copy for testing'
+                                FileUtils.copyFileToDirectory(file,
+                                                              new File('src/main/resources'))
+                            }
+                            </source>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.velocity</groupId>
+                        <artifactId>velocity-engine-core</artifactId>
+                        <version>2.1</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>${groovy.compiler.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${apache.http.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpmime</artifactId>
+            <version>${apache.http.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.10.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.10.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.10.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.apollographql.apollo</groupId>
+            <artifactId>apollo-api</artifactId>
+            <version>1.3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>19.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.13</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-web</artifactId>
+            <version>3.8.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.9.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.shared</groupId>
+            <artifactId>maven-invoker</artifactId>
+            <version>3.0.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-1.2-api</artifactId>
+            <version>${log4j2.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${log4j2.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <repositories>
+        <repository>
+            <id>android</id>
+            <url>https://dl.bintray.com/apollographql/android/</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>groovy</id>
+            <name>Groovy</name>
+            <layout>default</layout>
+            <url>https://dl.bintray.com/groovy/maven/</url>
+            <snapshots>
+
+            </snapshots>
+        </pluginRepository>
+    </pluginRepositories>
+</project>
