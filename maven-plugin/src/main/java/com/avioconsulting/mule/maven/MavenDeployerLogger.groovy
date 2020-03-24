@@ -12,6 +12,6 @@ class MavenDeployerLogger implements ILogger {
 
     @Override
     def println(String message) {
-        mavenLogger.info("[info] ${message}")
+        mavenLogger.info(message)
     }
 }
