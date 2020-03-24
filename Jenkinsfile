@@ -48,20 +48,33 @@ pipeline {
             }
         }
 
+        stage('Mutation Test/Site Report') {
+            steps {
+                withMaven(jdk: env.jdk,
+                          maven: env.mvn,
+                          mavenSettingsConfig: env.standard_avio_mvn_settings) {
+                    dir('library') {
+                        // simple way to guarantee the mutation test has run before generating the site
+                        quietMaven 'clean test-compile org.pitest:pitest-maven:mutationCoverage groovydoc:generate site'
+                        publishHTML([allowMissing         : false,
+                                     alwaysLinkToLastBuild: true,
+                                     keepAll              : true,
+                                     reportDir            : 'target/site',
+                                     reportFiles          : 'index.html',
+                                     reportName           : 'Maven site'])
+                    }
+                }
+            }
+        }
+
         stage('Deploy') {
             steps {
                 withMaven(jdk: env.jdk,
                           maven: env.mvn,
                           mavenSettingsConfig: env.standard_avio_mvn_settings) {
-                    quietMaven 'clean deploy groovydoc:generate site -DskipTests'
+                    quietMaven 'clean deploy -DskipTests'
                     // keeps buildDiscarder from getting rid of stuff we've published
                     keepBuild()
-                    publishHTML([allowMissing         : false,
-                                 alwaysLinkToLastBuild: true,
-                                 keepAll              : true,
-                                 reportDir            : 'target/site',
-                                 reportFiles          : 'index.html',
-                                 reportName           : 'Maven site'])
                 }
             }
 

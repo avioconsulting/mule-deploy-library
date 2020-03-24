@@ -7,6 +7,7 @@
             <item name="Dependencies" href="dependencies.html"/>
             <item name="POM snippets" href="dependency-info.html"/>
             <item name="Groovy/Javadocs" href="groovydocs/index.html" />
+            <item name="Mutation Testing Report" href="pit-reports/index.html" />
         </menu>
     </body>
 </project>
