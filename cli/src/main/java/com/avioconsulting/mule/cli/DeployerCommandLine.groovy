@@ -3,6 +3,7 @@ package com.avioconsulting.mule.cli
 import com.avioconsulting.mule.deployment.api.DeployerFactory
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.IDeployerFactory
+import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.dsl.DeploymentPackage
 import com.avioconsulting.mule.deployment.dsl.MuleDeployContext
 import com.avioconsulting.mule.deployment.dsl.MuleDeployScript
@@ -34,6 +35,7 @@ class DeployerCommandLine implements Callable<Integer> {
             description = 'Which environments to do the design center deployment during. Default is DEV only')
     private List<String> environmentsToDoDesignCenterDeploymentOn
     private static IDeployerFactory deployerFactory = new DeployerFactory()
+    private static ILogger logger = new SimpleLogger()
 
     static void main(String... args) {
         def exitCode = new CommandLine(new DeployerCommandLine()).execute(args)
@@ -42,7 +44,6 @@ class DeployerCommandLine implements Callable<Integer> {
 
     @Override
     Integer call() throws Exception {
-        def logger = new SimpleLogger()
         def deploymentPackage = processDsl()
         logger.println "Successfully processed ${groovyFile} through DSL"
         def deployer = deployerFactory.create(this.anypointUsername,
