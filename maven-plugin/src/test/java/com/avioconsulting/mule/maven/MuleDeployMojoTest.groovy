@@ -113,7 +113,6 @@ muleDeploy {
         // arrange
         FileBasedAppDeploymentRequest actualApp
         ApiSpecification actualApiSpec
-        List<Policy> actualPolicies
         List<Features> actualFeatures
         def mockDeployer = [
                 deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
@@ -122,7 +121,6 @@ muleDeploy {
                                      List<Features> enabledFeatures ->
                     actualApp = appDeploymentRequest
                     actualApiSpec = apiSpecification
-                    actualPolicies = desiredPolicies
                     actualFeatures = enabledFeatures
                 }
         ] as IDeployer
@@ -156,10 +154,9 @@ muleDeploy {
         mojo.execute()
 
         // assert
-        assertThat actualFeatures,
-                   is(equalTo([Features.All]))
-        assertThat actualPolicies,
-                   is(nullValue())
+        assertThat 'No policies since we omitted that section',
+                   actualFeatures,
+                   is(equalTo([Features.AppDeployment, Features.DesignCenterSync, Features.ApiManagerDefinitions]))
         assertThat actualApiSpec,
                    is(nullValue())
         assert actualApp instanceof OnPremDeploymentRequest

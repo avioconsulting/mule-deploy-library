@@ -3,6 +3,7 @@ package com.avioconsulting.mule.maven
 import com.avioconsulting.mule.deployment.api.DeployerFactory
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.IDeployerFactory
+import com.avioconsulting.mule.deployment.dsl.MuleDeployContext
 import com.avioconsulting.mule.deployment.dsl.MuleDeployScript
 import org.apache.maven.plugin.AbstractMojo
 import org.apache.maven.plugin.MojoExecutionException
@@ -36,8 +37,9 @@ class MuleDeployMojo extends AbstractMojo {
         }
         def shell = new GroovyShell(this.class.classLoader,
                                     compilerConfig)
-        def stuff = shell.evaluate(groovyFile)
-        println "we got ${stuff}!"
+        def context = shell.evaluate(groovyFile) as MuleDeployContext
+        def deploymentPackage = context.createDeploymentPackage()
+        log.info "Successfully processed ${groovyFile} through DSL"
         def logger = new MavenDeployerLogger(this.log)
         def deployer = deployerFactory.create(this.anypointUsername,
                                               this.anypointPassword,
@@ -45,5 +47,14 @@ class MuleDeployMojo extends AbstractMojo {
                                               this.dryRunMode,
                                               this.anypointOrganizationName,
                                               this.environmentsToDoDesignCenterDeploymentOn)
+        if (this.dryRunMode == DryRunMode.OfflineValidate) {
+            log.info 'Offline validate was specified, so not deloying'
+            return
+        }
+        log.info 'Beginning deployment'
+        deployer.deployApplication(deploymentPackage.deploymentRequest,
+                                   deploymentPackage.apiSpecification,
+                                   deploymentPackage.desiredPolicies,
+                                   deploymentPackage.enabledFeatures)
     }
 }
