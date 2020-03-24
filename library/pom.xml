@@ -200,6 +200,7 @@
                     </dependency>
                 </dependencies>
             </plugin>
+            <!-- Right now pitest does not fully support Groovy but it can be slightly informative anyways -->
             <plugin>
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
@@ -207,6 +208,7 @@
                 <configuration>
                     <coverageThreshold>89</coverageThreshold>
                     <mutationThreshold>48</mutationThreshold>
+                    <threads>2</threads>
                     <excludedClasses>
                         <!-- We did not write these, generated code -->
                         <excludedClass>com.avioconsulting.mule.deployment.internal.models.graphql.*</excludedClass>
