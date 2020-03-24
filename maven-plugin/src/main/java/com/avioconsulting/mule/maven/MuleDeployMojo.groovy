@@ -1,4 +1,4 @@
-package com.avioconsulting.mule
+package com.avioconsulting.mule.maven
 
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import org.apache.maven.plugin.AbstractMojo
