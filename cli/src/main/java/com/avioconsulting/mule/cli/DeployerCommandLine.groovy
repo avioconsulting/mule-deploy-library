@@ -1,6 +1,12 @@
 package com.avioconsulting.mule.cli
 
+import com.avioconsulting.mule.deployment.api.DeployerFactory
 import com.avioconsulting.mule.deployment.api.DryRunMode
+import com.avioconsulting.mule.deployment.api.IDeployerFactory
+import com.avioconsulting.mule.deployment.dsl.DeploymentPackage
+import com.avioconsulting.mule.deployment.dsl.MuleDeployContext
+import com.avioconsulting.mule.deployment.dsl.MuleDeployScript
+import org.codehaus.groovy.control.CompilerConfiguration
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import picocli.CommandLine.Option
@@ -21,12 +27,13 @@ class DeployerCommandLine implements Callable<Integer> {
     private String anypointOrganizationName
     @Option(names = ['-m', '--dry-run-mode'],
             defaultValue = 'Run',
-            description = 'Choices are Run (normal run), OfflineValidate (check your DSL but 100% offline), or OnlineValidate (does GET operations but no changes)')
+            description = 'Choices are Run (normal run), OfflineValidate (checks your DSL but is offline), or OnlineValidate (does GET operations but no changes)')
     private DryRunMode dryRunMode
     @Option(names = ['-e', '--design-center-environments'],
             defaultValue = 'DEV',
             description = 'Which environments to do the design center deployment during. Default is DEV only')
     private List<String> environmentsToDoDesignCenterDeploymentOn
+    private static IDeployerFactory deployerFactory = new DeployerFactory()
 
     static void main(String... args) {
         def exitCode = new CommandLine(new DeployerCommandLine()).execute(args)
@@ -36,7 +43,58 @@ class DeployerCommandLine implements Callable<Integer> {
     @Override
     Integer call() throws Exception {
         def logger = new SimpleLogger()
-        logger.println 'hi'
+        def deploymentPackage = processDsl()
+        logger.println "Successfully processed ${groovyFile} through DSL"
+        def deployer = deployerFactory.create(this.anypointUsername,
+                                              this.anypointPassword,
+                                              logger,
+                                              this.dryRunMode,
+                                              this.anypointOrganizationName,
+                                              this.environmentsToDoDesignCenterDeploymentOn)
+        if (this.dryRunMode == DryRunMode.OfflineValidate) {
+            logger.println 'Offline validate was specified, so not deploying'
+            return
+        }
+        logger.println 'Beginning deployment'
+        try {
+            deployer.deployApplication(deploymentPackage.deploymentRequest,
+                                       deploymentPackage.apiSpecification,
+                                       deploymentPackage.desiredPolicies,
+                                       deploymentPackage.enabledFeatures)
+            logger.println 'Deployment completed'
+        }
+        catch (e) {
+            def exception = e.cause ?: e
+            System.err.println("Unable to perform deployment because ${exception.class} ${exception.message}")
+            throw new Exception('Unable to perform deployment',
+                                e)
+        }
         return 0
+    }
+
+    private DeploymentPackage processDsl() {
+        try {
+            // allows us to use our 'MuleDeployScript'/MuleDeployContext class to interpret the user's DSL file
+            def compilerConfig = new CompilerConfiguration().with {
+                scriptBaseClass = MuleDeployScript.name
+                it
+            }
+            def shell = new GroovyShell(this.class.classLoader,
+                                        compilerConfig)
+            // in case they specify additional runtime settings not in source control via -D maven command line args
+//            def binding = new Binding()
+//            binding.setVariable('params',
+//                                new ParamsWrapper())
+//            shell.context = binding
+            // last line of MuleDeployScript.muleDeploy method returns this
+            def context = shell.evaluate(groovyFile) as MuleDeployContext
+            return context.createDeploymentPackage()
+        }
+        catch (e) {
+            def exception = e.cause ?: e
+            System.err.println("Unable to process DSL because ${exception.class} ${exception.message}")
+            throw new Exception('Unable to process DSL',
+                                e)
+        }
     }
 }

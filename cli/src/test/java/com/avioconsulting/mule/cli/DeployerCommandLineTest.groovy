@@ -1,4 +1,4 @@
-package com.avioconsulting.mule.maven
+package com.avioconsulting.mule.cli
 
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.IDeployer
@@ -6,103 +6,47 @@ import com.avioconsulting.mule.deployment.api.IDeployerFactory
 import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.api.models.*
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
-import org.junit.Before
+import org.apache.commons.io.FileUtils
 import org.junit.Test
+import picocli.CommandLine
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-@SuppressWarnings(value = ['GroovyVariableNotAssigned', 'GroovyAccessibility'])
-class MuleDeployMojoTest {
-    def logger = new TestLogger()
-
-    @Before
-    void cleanup() {
-        logger.errors.clear()
-    }
-
-    @Test
-    void gets_correct_params() {
-        // arrange
-        String actualUser, actualPass, actualOrg
-        ILogger actualLogger
-        DryRunMode actualDryRunMode
-        List<String> actualEnvs
-        def mock = [
-                create: { String username,
-                          String password,
-                          ILogger logger,
-                          DryRunMode dryRunMode,
-                          String anypointOrganizationName,
-                          List<String> environmentsToDoDesignCenterDeploymentOn ->
-                    actualUser = username
-                    actualPass = password
-                    actualLogger = logger
-                    actualDryRunMode = dryRunMode
-                    actualEnvs = environmentsToDoDesignCenterDeploymentOn
-                    actualOrg = anypointOrganizationName
-                    return null
-                }
-        ] as IDeployerFactory
-        def dslText = """
-muleDeploy {
-    version '1.0'
-    
-    onPremApplication {
-        environment 'DEV'
-        applicationName 'the-app'
-        appVersion '1.2.3'
-        file 'path/to/file.jar'
-        targetServerOrClusterName 'theServer'
-    }
-}
-"""
-        def mojo = getMojo(mock,
-                           dslText,
-                           'the user',
-                           'the pass',
-                           // we don't want this thing to actually run
-                           DryRunMode.OfflineValidate,
-                           'the org',
-                           ['TST'])
-
-        // act
-        mojo.execute()
-
-        // assert
-        assertThat actualUser,
-                   is(equalTo('the user'))
-        assertThat actualPass,
-                   is(equalTo('the pass'))
-        assertThat actualOrg,
-                   is(equalTo('the org'))
-        assertThat actualDryRunMode,
-                   is(equalTo(DryRunMode.OfflineValidate))
-        assertThat actualEnvs,
-                   is(equalTo(['TST']))
-    }
-
-    MuleDeployMojo getMojo(IDeployerFactory mockDeployerFactory,
-                           String groovyFileText,
-                           String user = 'our user',
-                           String pass = 'our pass',
-                           DryRunMode dryRunMode = DryRunMode.Run,
-                           String orgName = null,
-                           List<String> envs = ['DEV']) {
+class DeployerCommandLineTest {
+    DeployerCommandLine executeCommandLine(IDeployerFactory mockDeployerFactory,
+                                           String groovyFileText,
+                                           String user = 'our user',
+                                           String pass = 'our pass',
+                                           DryRunMode dryRunMode = DryRunMode.Run,
+                                           String orgName = null) {
         def groovyFile = new File('stuff.groovy')
-        groovyFile.text = groovyFileText
-        new MuleDeployMojo().with {
-            it.anypointUsername = user
-            it.anypointPassword = pass
-            it.dryRunMode = dryRunMode
-            it.groovyFile = groovyFile
-            it.anypointOrganizationName = orgName
-            it.environmentsToDoDesignCenterDeploymentOn = envs
-            it.log = logger
-            it.deployerFactory = mockDeployerFactory
-            it
+        if (!groovyFileText) {
+            FileUtils.deleteQuietly(groovyFile)
+        } else {
+            groovyFile.text = groovyFileText
         }
+        DeployerCommandLine.deployerFactory = mockDeployerFactory
+        def args = [
+                '-u',
+                "\"${user}\"".toString(),
+                '-p',
+                "\"${pass}\"".toString(),
+                '-m',
+                dryRunMode.name(),
+        ]
+        if (orgName) {
+            args += [
+                    '-o',
+                    "\"${orgName}\"".toString()
+            ]
+        }
+        args += [
+                groovyFile.absolutePath
+        ]
+        def exitCode = new CommandLine(new DeployerCommandLine()).execute(args.toArray(new String[0]))
+        assert exitCode == 0
     }
 
     @Test
@@ -144,11 +88,10 @@ muleDeploy {
     }
 }
 """
-        def mojo = getMojo(mock,
-                           dslText)
 
         // act
-        mojo.execute()
+        executeCommandLine(mock,
+                           dslText)
 
         // assert
         assertThat 'No policies since we omitted that section',
@@ -200,13 +143,12 @@ muleDeploy {
     }
 }
 """
-        def mojo = getMojo(mock,
+        // act
+        executeCommandLine(mock,
                            dslText,
                            'user',
                            'pass',
                            DryRunMode.OfflineValidate)
-        // act
-        mojo.execute()
 
         // assert
         assertThat deployed,
@@ -258,11 +200,10 @@ muleDeploy {
     }
 }
 """
-        def mojo = getMojo(mock,
-                           dslText)
 
         // act
-        mojo.execute()
+        executeCommandLine(mock,
+                           dslText)
 
         // assert
         assert actualApp instanceof CloudhubDeploymentRequest
@@ -294,26 +235,11 @@ muleDeploy {
                     return mockDeployer
                 }
         ] as IDeployerFactory
-        def dslText = """
-muleDeploy {
-    version '1.0'
-    
-    onPremApplication {
-        environment 'DEV'
-        applicationName 'the-app'
-        appVersion '1.2.3'
-        file 'path/to/file.jar'
-        targetServerOrClusterName 'theServer'
-    }
-}
-"""
-        def mojo = getMojo(mock,
-                           dslText)
-        mojo.groovyFile = new File('foobar')
 
         // act
         def exception = shouldFail {
-            mojo.execute()
+            executeCommandLine(mock,
+                               null)
         }
 
         // assert
@@ -359,12 +285,11 @@ muleDeploy {
     }
 }
 """
-        def mojo = getMojo(mock,
-                           dslText)
 
         // act
         def exception = shouldFail {
-            mojo.execute()
+            executeCommandLine(mock,
+                               dslText)
         }
 
         // assert
