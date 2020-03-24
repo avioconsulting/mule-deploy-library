@@ -1,10 +1,11 @@
 package com.avioconsulting.mule.deployment.internal.http
 
+import com.avioconsulting.mule.deployment.api.ILogger
 import org.apache.http.client.methods.HttpGet
 
 class EnvironmentLocator {
     private final HttpClientWrapper clientWrapper
-    private final PrintStream logger
+    private final ILogger logger
     @Lazy
     private Map<String, String> environments = {
         logger.println('Fetching all environment GUIDs')
@@ -24,7 +25,7 @@ class EnvironmentLocator {
     }()
 
     EnvironmentLocator(HttpClientWrapper httpClientWrapper,
-                       PrintStream logger) {
+                       ILogger logger) {
         this.logger = logger
         this.clientWrapper = httpClientWrapper
     }

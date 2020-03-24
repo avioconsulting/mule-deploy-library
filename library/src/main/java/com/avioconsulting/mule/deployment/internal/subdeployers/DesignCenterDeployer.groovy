@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.api.DryRunMode
+import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
@@ -24,7 +25,7 @@ import java.nio.file.Files
 
 class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCenterDeployer {
     private final HttpClientWrapper clientWrapper
-    private final PrintStream logger
+    private final ILogger logger
     private static final List<String> IGNORE_DC_FILES = [
             'exchange_modules', // we don't deal with Exchange dependencies
             '.gitignore',
@@ -34,7 +35,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
     private final DryRunMode dryRunMode
 
     DesignCenterDeployer(HttpClientWrapper clientWrapper,
-                         PrintStream logger,
+                         ILogger logger,
                          DryRunMode dryRunMode) {
         this.dryRunMode = dryRunMode
         this.logger = logger

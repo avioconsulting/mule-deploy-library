@@ -105,7 +105,7 @@ class DeployerTest {
         ] as IPolicyDeployer
         deployer = new Deployer(null,
                                 dryRunMode,
-                                System.out,
+                                new TestConsoleLogger(),
                                 ['DEV'],
                                 null,
                                 // shouldn't need this since we mock so much

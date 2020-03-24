@@ -1,13 +1,14 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.api.DryRunMode
+import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import org.apache.http.client.methods.HttpUriRequest
 
 abstract class BaseDeployer {
     protected final EnvironmentLocator environmentLocator
-    protected final PrintStream logger
+    protected final ILogger logger
     protected final int retryIntervalInMs
     protected final int maxTries
     protected final HttpClientWrapper clientWrapper
@@ -15,7 +16,7 @@ abstract class BaseDeployer {
 
     BaseDeployer(int retryIntervalInMs,
                  int maxTries,
-                 PrintStream logger,
+                 ILogger logger,
                  HttpClientWrapper clientWrapper,
                  EnvironmentLocator environmentLocator,
                  DryRunMode dryRunMode) {

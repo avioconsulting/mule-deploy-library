@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.http
 
 import com.avioconsulting.mule.deployment.BaseTest
+import com.avioconsulting.mule.deployment.TestConsoleLogger
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpServerRequest
@@ -207,7 +208,7 @@ class HttpClientWrapperTest extends BaseTest {
         clientWrapper = new HttpClientWrapper("http://localhost:${httpServer.actualPort()}",
                                               'the user',
                                               'the password',
-                                              System.out)
+                                              new TestConsoleLogger())
         withHttpServer { HttpServerRequest request ->
             request.response().with {
                 statusCode = 200

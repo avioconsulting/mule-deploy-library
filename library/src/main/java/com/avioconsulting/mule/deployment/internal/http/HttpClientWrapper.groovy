@@ -1,5 +1,6 @@
 package com.avioconsulting.mule.deployment.internal.http
 
+import com.avioconsulting.mule.deployment.api.ILogger
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import org.apache.http.HttpException
@@ -19,7 +20,7 @@ class HttpClientWrapper implements HttpRequestInterceptor {
     private final String password
     private String accessToken
     private String ownerGuid
-    private final PrintStream logger
+    private final ILogger logger
     final String baseUrl
     private final CloseableHttpClient httpClient
     private final String anypointOrganizationName
@@ -28,7 +29,7 @@ class HttpClientWrapper implements HttpRequestInterceptor {
     HttpClientWrapper(String baseUrl,
                       String username,
                       String password,
-                      PrintStream logger,
+                      ILogger logger,
                       String anypointOrganizationName = null) {
         this.anypointOrganizationName = anypointOrganizationName
         this.password = password

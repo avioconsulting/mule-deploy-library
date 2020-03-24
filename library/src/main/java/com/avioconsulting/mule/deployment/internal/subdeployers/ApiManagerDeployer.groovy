@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.api.DryRunMode
+import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.*
@@ -16,13 +17,13 @@ import org.apache.http.entity.StringEntity
 
 class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality {
     final HttpClientWrapper clientWrapper
-    final PrintStream logger
+    final ILogger logger
     final EnvironmentLocator environmentLocator
     private final DryRunMode dryRunMode
 
     ApiManagerDeployer(HttpClientWrapper clientWrapper,
                        EnvironmentLocator environmentLocator,
-                       PrintStream logger,
+                       ILogger logger,
                        DryRunMode dryRunMode) {
         this.dryRunMode = dryRunMode
         this.environmentLocator = environmentLocator

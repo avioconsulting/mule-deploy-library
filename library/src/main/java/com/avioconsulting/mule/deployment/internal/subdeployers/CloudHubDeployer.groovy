@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.api.DryRunMode
+import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
@@ -15,7 +16,7 @@ import org.apache.http.entity.StringEntity
 class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
     CloudHubDeployer(HttpClientWrapper clientWrapper,
                      EnvironmentLocator environmentLocator,
-                     PrintStream logger,
+                     ILogger logger,
                      DryRunMode dryRunMode) {
         this(clientWrapper,
              environmentLocator,
@@ -30,7 +31,7 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
                      EnvironmentLocator environmentLocator,
                      int retryIntervalInMs,
                      int maxTries,
-                     PrintStream logger,
+                     ILogger logger,
                      DryRunMode dryRunMode) {
         super(retryIntervalInMs,
               maxTries,

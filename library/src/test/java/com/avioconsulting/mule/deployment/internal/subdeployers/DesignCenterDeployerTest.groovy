@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
+import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
@@ -27,7 +28,7 @@ class DesignCenterDeployerTest extends BaseTest {
 
     def setupDeployer(DryRunMode dryRunMode) {
         deployer = new DesignCenterDeployer(clientWrapper,
-                                            System.out,
+                                            new TestConsoleLogger(),
                                             dryRunMode)
     }
 

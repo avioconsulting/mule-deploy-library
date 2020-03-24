@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
+import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.models.OnPremDeploymentStatus
@@ -28,7 +29,7 @@ class OnPremDeployerTest extends BaseTest {
                                       environmentLocator,
                                       500,
                                       10,
-                                      System.out,
+                                      new TestConsoleLogger(),
                                       dryRunMode)
     }
 

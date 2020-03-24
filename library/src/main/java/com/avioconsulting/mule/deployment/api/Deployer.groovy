@@ -12,7 +12,7 @@ import com.avioconsulting.mule.deployment.internal.subdeployers.*
  * Top level deployer. This is what most of your interaction should be with
  */
 class Deployer {
-    private final PrintStream logger
+    private final ILogger logger
     private final EnvironmentLocator environmentLocator
     private final HttpClientWrapper clientWrapper
     private final ICloudHubDeployer cloudHubDeployer
@@ -36,7 +36,7 @@ class Deployer {
      */
     Deployer(String username,
              String password,
-             PrintStream logger,
+             ILogger logger,
              DryRunMode dryRunMode,
              String anypointOrganizationName = null,
              String baseUrl = 'https://anypoint.mulesoft.com',
@@ -54,7 +54,7 @@ class Deployer {
 
     private Deployer(HttpClientWrapper httpClientWrapper,
                      DryRunMode dryRunMode,
-                     PrintStream logger,
+                     ILogger logger,
                      List<String> environmentsToDoDesignCenterDeploymentOn,
                      EnvironmentLocator environmentLocator = null,
                      ICloudHubDeployer cloudHubDeployer = null,

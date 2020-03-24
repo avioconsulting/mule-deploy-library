@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.api.DryRunMode
+import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
@@ -21,7 +22,7 @@ class OnPremDeployer extends BaseDeployer implements IOnPremDeployer {
      */
     OnPremDeployer(HttpClientWrapper clientWrapper,
                    EnvironmentLocator environmentLocator,
-                   PrintStream logger,
+                   ILogger logger,
                    DryRunMode dryRunMode) {
         this(clientWrapper,
              environmentLocator,
@@ -35,7 +36,7 @@ class OnPremDeployer extends BaseDeployer implements IOnPremDeployer {
                    EnvironmentLocator environmentLocator,
                    int retryIntervalInMs,
                    int maxTries,
-                   PrintStream logger,
+                   ILogger logger,
                    DryRunMode dryRunMode) {
         super(retryIntervalInMs,
               maxTries,

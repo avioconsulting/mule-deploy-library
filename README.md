@@ -33,7 +33,7 @@ You'll want to start by instantiating the `Deployer` class and then calling the 
 
 Javadocs are published on [AVIO Jenkins](https://devops.avioconsulting.com/jenkins/job/Mulesoft%20Deployment/job/mule-deploy-library/job/master/Maven_20site/).
 
-NOTE: This library assumes that whatever logger mechanism you provide via The `PrintStream logger` parameter hides ANY credentials or secrets you provide this. If you use Jenkins with its credentials plugin, it will handle this but make sure SOMETHING handles this.
+NOTE: This library assumes that whatever logger mechanism you provide via The `ILogger logger` parameter hides ANY credentials or secrets you provide this. If you use Jenkins with its credentials plugin, it will handle this but make sure SOMETHING handles this.
 
 # Development/building/maintenance
 

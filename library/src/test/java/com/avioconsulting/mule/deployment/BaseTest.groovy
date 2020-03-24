@@ -42,10 +42,10 @@ class BaseTest {
         clientWrapper = new HttpClientWrapper("http://localhost:${httpServer.actualPort()}",
                                               'the user',
                                               'the password',
-                                              System.out,
+                                              new TestConsoleLogger(),
                                               'the-org-name')
         environmentLocator = new EnvironmentLocator(clientWrapper,
-                                                    System.out)
+                                                    new TestConsoleLogger())
     }
 
     @After

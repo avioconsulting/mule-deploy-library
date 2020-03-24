@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
+import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.HttpMethod
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
@@ -29,7 +30,7 @@ class PolicyDeployerTest extends BaseTest {
     def setupDeployer(DryRunMode dryRunMode) {
         policyDeployer = new PolicyDeployer(this.clientWrapper,
                                             this.environmentLocator,
-                                            System.out,
+                                            new TestConsoleLogger(),
                                             dryRunMode)
     }
 

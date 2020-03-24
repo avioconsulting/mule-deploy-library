@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
+import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.internal.models.ApiQueryResponse
 import com.avioconsulting.mule.deployment.internal.models.ApiSpec
@@ -30,7 +31,7 @@ class ApiManagerDeployerTest extends BaseTest {
     def setupDeployer(DryRunMode dryRunMode) {
         deployer = new ApiManagerDeployer(clientWrapper,
                                           environmentLocator,
-                                          System.out,
+                                          new TestConsoleLogger(),
                                           dryRunMode)
     }
 
