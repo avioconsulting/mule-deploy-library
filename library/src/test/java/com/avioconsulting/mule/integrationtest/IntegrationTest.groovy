@@ -1,5 +1,6 @@
 package com.avioconsulting.mule.integrationtest
 
+import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.Deployer
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
@@ -165,19 +166,20 @@ class IntegrationTest {
                                                                   ANYPOINT_CLIENT_ID,
                                                                   ANYPOINT_CLIENT_SECRET,
                                                                   CLOUDHUB_APP_PREFIX)
+        def logger = new TestConsoleLogger()
         clientWrapper = new HttpClientWrapper('https://anypoint.mulesoft.com',
                                               ANYPOINT_USERNAME,
                                               ANYPOINT_PASSWORD,
-                                              System.out,
+                                              logger,
                                               AVIO_SANDBOX_BIZ_GROUP_NAME)
         def environmentLocator = new EnvironmentLocator(this.clientWrapper,
-                                                        System.out)
+                                                        logger)
         cloudHubDeployer = new CloudHubDeployer(this.clientWrapper,
                                                 environmentLocator,
                                                 10000,
                                                 // faster testing
                                                 100,
-                                                System.out,
+                                                logger,
                                                 DryRunMode.Run)
         try {
             deleteCloudHubApp(cloudhubDeploymentRequest)
@@ -190,11 +192,11 @@ class IntegrationTest {
         }
         onPremDeployer = new OnPremDeployer(this.clientWrapper,
                                             environmentLocator,
-                                            System.out,
+                                            logger,
                                             DryRunMode.Run)
         overallDeployer = new Deployer(clientWrapper,
                                        DryRunMode.Run,
-                                       System.out,
+                                       logger,
                                        ['DEV'],
                                        environmentLocator)
     }
