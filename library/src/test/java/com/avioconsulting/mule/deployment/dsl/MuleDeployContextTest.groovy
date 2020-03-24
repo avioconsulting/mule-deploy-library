@@ -13,10 +13,12 @@ import static org.hamcrest.Matchers.*
 // optimizing refs would prevent us from testing DSL resolution
 class MuleDeployContextTest {
     private MuleDeployContext context
+    private Map params
 
     @Before
     void setup() {
-        context = new MuleDeployContext()
+        this.params = [:]
+        context = new MuleDeployContext(this.params)
     }
 
     @Test
@@ -357,5 +359,48 @@ class MuleDeployContextTest {
                    is(equalTo([
                            Features.All
                    ]))
+    }
+
+    @Test
+    void params() {
+        // arrange
+        this.params['env'] = 'TST'
+        def closure = {
+            version '1.0'
+
+            apiSpecification {
+                name 'Design Center Project Name'
+            }
+
+            policies {
+                clientEnforcementPolicyBasic()
+            }
+
+            cloudHubApplication {
+                environment params.env
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                workerSpecs {
+                    muleVersion '4.2.2'
+                }
+                file 'path/to/file.jar'
+                cryptoKey 'theKey'
+                autoDiscovery {
+                    clientId 'the_client_id'
+                    clientSecret 'the_client_secret'
+                }
+                cloudHubAppPrefix 'AVI'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def deploymentPackage = context.createDeploymentPackage()
+
+        // assert
+        def appRequest = deploymentPackage.deploymentRequest as CloudhubDeploymentRequest
+        assertThat appRequest.environment,
+                   is(equalTo('TST'))
     }
 }
