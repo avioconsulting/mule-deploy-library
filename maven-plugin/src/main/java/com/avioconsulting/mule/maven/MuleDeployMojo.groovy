@@ -46,10 +46,18 @@ class MuleDeployMojo extends AbstractMojo {
             return
         }
         log.info 'Beginning deployment'
-        deployer.deployApplication(deploymentPackage.deploymentRequest,
-                                   deploymentPackage.apiSpecification,
-                                   deploymentPackage.desiredPolicies,
-                                   deploymentPackage.enabledFeatures)
+        try {
+            deployer.deployApplication(deploymentPackage.deploymentRequest,
+                                       deploymentPackage.apiSpecification,
+                                       deploymentPackage.desiredPolicies,
+                                       deploymentPackage.enabledFeatures)
+        }
+        catch (e) {
+            log.error('Unable to perform deployment because',
+                      e)
+            throw new Exception('Unable to perform deployment',
+                                e)
+        }
     }
 
     private DeploymentPackage processDsl() {

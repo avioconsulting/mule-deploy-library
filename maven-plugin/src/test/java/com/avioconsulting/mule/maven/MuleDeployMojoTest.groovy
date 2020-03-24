@@ -315,4 +315,55 @@ muleDeploy {
                            'Unable to process DSL because'
                    ]))
     }
+
+    @Test
+    void deployment_failure() {
+        // arrange
+        def mockDeployer = [
+                deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
+                                     ApiSpecification apiSpecification,
+                                     List<Policy> desiredPolicies,
+                                     List<Features> enabledFeatures ->
+                    throw new Exception('some deployment problem')
+                }
+        ] as IDeployer
+        def mock = [
+                create: { String username,
+                          String password,
+                          ILogger logger,
+                          DryRunMode dryRunMode,
+                          String anypointOrganizationName,
+                          List<String> environmentsToDoDesignCenterDeploymentOn ->
+                    return mockDeployer
+                }
+        ] as IDeployerFactory
+        def dslText = """
+muleDeploy {
+    version '1.0'
+    
+    onPremApplication {
+        environment 'DEV'
+        applicationName 'the-app'
+        appVersion '1.2.3'
+        file 'path/to/file.jar'
+        targetServerOrClusterName 'theServer'
+    }
+}
+"""
+        def mojo = getMojo(mock,
+                           dslText)
+
+        // act
+        def exception = shouldFail {
+            mojo.execute()
+        }
+
+        // assert
+        assertThat exception.message,
+                   is(containsString('Unable to perform deployment'))
+        assertThat logger.errors,
+                   is(equalTo([
+                           'Unable to perform deployment because'
+                   ]))
+    }
 }
