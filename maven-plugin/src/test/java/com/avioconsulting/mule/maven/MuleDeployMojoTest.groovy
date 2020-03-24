@@ -266,8 +266,12 @@ muleDeploy {
 
         // assert
         assert actualApp instanceof CloudhubDeploymentRequest
-        assertThat actualApp.environment,
-                   is(equalTo('foobar'))
+        actualApp.with {
+            assertThat environment,
+                       is(equalTo('foobar'))
+            assertThat workerSpecRequest.muleVersion,
+                       is(equalTo('4.1.5'))
+        }
     }
 
     @Test
