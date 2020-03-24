@@ -41,6 +41,7 @@ class MuleDeployMojo extends AbstractMojo {
         binding.setVariable('params',
                             System.getProperties())
         shell.context = binding
+        // last line of MuleDeployScript.muleDeploy method returns this
         def context = shell.evaluate(groovyFile) as MuleDeployContext
         def deploymentPackage = context.createDeploymentPackage()
         log.info "Successfully processed ${groovyFile} through DSL"
