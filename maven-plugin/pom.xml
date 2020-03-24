@@ -6,7 +6,7 @@
     <artifactId>mule-deploy-maven-plugin</artifactId>
     <version>1.0.0</version>
     <packaging>maven-plugin</packaging>
-    <name>Mule deployment library</name>
+    <name>Mule deployment Maven plugin</name>
     <description>Deploys Mule applications via Runtime Manager APIs</description>
     <licenses>
         <license>
