@@ -53,8 +53,8 @@ class MuleDeployMojo extends AbstractMojo {
                                        deploymentPackage.enabledFeatures)
         }
         catch (e) {
-            log.error('Unable to perform deployment because',
-                      e)
+            def exception = e.cause ?: e
+            log.error("Unable to perform deployment because ${exception.class} ${exception.message}")
             throw new Exception('Unable to perform deployment',
                                 e)
         }
@@ -79,8 +79,8 @@ class MuleDeployMojo extends AbstractMojo {
             return context.createDeploymentPackage()
         }
         catch (e) {
-            log.error('Unable to process DSL because',
-                      e)
+            def exception = e.cause ?: e
+            log.error("Unable to process DSL because ${exception.class} ${exception.message}")
             throw new Exception('Unable to process DSL',
                                 e)
         }

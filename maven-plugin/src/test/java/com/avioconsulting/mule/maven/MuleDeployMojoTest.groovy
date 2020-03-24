@@ -310,10 +310,10 @@ muleDeploy {
         // assert
         assertThat exception.message,
                    is(containsString('Unable to process DSL'))
-        assertThat logger.errors,
-                   is(equalTo([
-                           'Unable to process DSL because'
-                   ]))
+        assertThat logger.errors.size(),
+                   is(equalTo(1))
+        assertThat logger.errors[0],
+                   is(containsString('Unable to process DSL because class java.io.FileNotFoundException'))
     }
 
     @Test
@@ -363,7 +363,7 @@ muleDeploy {
                    is(containsString('Unable to perform deployment'))
         assertThat logger.errors,
                    is(equalTo([
-                           'Unable to perform deployment because'
+                           'Unable to perform deployment because class java.lang.Exception some deployment problem'
                    ]))
     }
 }
