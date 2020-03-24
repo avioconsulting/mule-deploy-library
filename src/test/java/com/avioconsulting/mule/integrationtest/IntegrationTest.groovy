@@ -6,7 +6,7 @@ import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
-import com.avioconsulting.mule.deployment.api.models.policies.Policy
+import com.avioconsulting.mule.deployment.api.models.policies.MulesoftPolicy
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
@@ -209,13 +209,12 @@ class IntegrationTest {
             overallDeployer.deployApplication(cloudhubDeploymentRequest,
                                               apiSpec,
                                               [
-                                                      new Policy(Policy.mulesoftGroupId,
-                                                                 'http-basic-authentication',
-                                                                 '1.2.1',
-                                                                 [
-                                                                         username: 'john',
-                                                                         password: 'doe'
-                                                                 ])
+                                                      new MulesoftPolicy('http-basic-authentication',
+                                                                         '1.2.1',
+                                                                         [
+                                                                                 username: 'john',
+                                                                                 password: 'doe'
+                                                                         ])
                                               ])
             println 'test: app deployed OK, now trying to hit its HTTP listener'
 
@@ -291,13 +290,12 @@ class IntegrationTest {
         overallDeployer.deployApplication(onPremDeploymentRequest,
                                           apiSpec,
                                           [
-                                                  new Policy(Policy.mulesoftGroupId,
-                                                             'http-basic-authentication',
-                                                             '1.2.1',
-                                                             [
-                                                                     username: 'john',
-                                                                     password: 'doe'
-                                                             ])
+                                                  new MulesoftPolicy('http-basic-authentication',
+                                                                     '1.2.1',
+                                                                     [
+                                                                             username: 'john',
+                                                                             password: 'doe'
+                                                                     ])
                                           ])
         println 'test: app deployed OK, now trying to hit its HTTP listener'
 
