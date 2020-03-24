@@ -20,7 +20,8 @@ class DeployerCommandLineTest {
                                            String user = 'our user',
                                            String pass = 'our pass',
                                            DryRunMode dryRunMode = DryRunMode.Run,
-                                           String orgName = null) {
+                                           String orgName = null,
+                                           Map<String, String> otherArgs = [:]) {
         def groovyFile = new File('stuff.groovy')
         if (!groovyFileText) {
             FileUtils.deleteQuietly(groovyFile)
@@ -42,9 +43,14 @@ class DeployerCommandLineTest {
                     "\"${orgName}\"".toString()
             ]
         }
+        otherArgs.each { k, v ->
+            args << '-a'
+            args << "${k}=${v}".toString()
+        }
         args += [
                 groovyFile.absolutePath
         ]
+        println "Calling with args ${args}"
         def exitCode = new CommandLine(new DeployerCommandLine()).execute(args.toArray(new String[0]))
         assert exitCode == 0
     }
@@ -158,8 +164,6 @@ muleDeploy {
     @Test
     void dsl_params() {
         // arrange
-        System.setProperty('env',
-                           'foobar')
         FileBasedAppDeploymentRequest actualApp
         def mockDeployer = [
                 deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
@@ -203,7 +207,14 @@ muleDeploy {
 
         // act
         executeCommandLine(mock,
-                           dslText)
+                           dslText,
+                           'our user',
+                           'our pass',
+                           DryRunMode.Run,
+                           null,
+                           [
+                                   env: 'foobar'
+                           ])
 
         // assert
         assert actualApp instanceof CloudhubDeploymentRequest

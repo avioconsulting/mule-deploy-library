@@ -34,6 +34,9 @@ class DeployerCommandLine implements Callable<Integer> {
             defaultValue = 'DEV',
             description = 'Which environments to do the design center deployment during. Default is DEV only')
     private List<String> environmentsToDoDesignCenterDeploymentOn
+    @Option(names = ['-a', '--arg'],
+            description = 'Other arguments to use for params in your DSL. e.g. -a env=DEV will set params.env in your DSL')
+    private Map<String, String> otherArguments
     private static IDeployerFactory deployerFactory = new DeployerFactory()
     private static ILogger logger = new SimpleLogger()
 
@@ -83,10 +86,10 @@ class DeployerCommandLine implements Callable<Integer> {
             def shell = new GroovyShell(this.class.classLoader,
                                         compilerConfig)
             // in case they specify additional runtime settings not in source control via -D maven command line args
-//            def binding = new Binding()
-//            binding.setVariable('params',
-//                                new ParamsWrapper())
-//            shell.context = binding
+            def binding = new Binding()
+            binding.setVariable('params',
+                                new ParamsWrapper(this.otherArguments))
+            shell.context = binding
             // last line of MuleDeployScript.muleDeploy method returns this
             def context = shell.evaluate(groovyFile) as MuleDeployContext
             return context.createDeploymentPackage()
