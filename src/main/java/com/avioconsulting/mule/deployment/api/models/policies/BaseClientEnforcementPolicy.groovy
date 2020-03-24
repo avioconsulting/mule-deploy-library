@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.api.models.policies
 
-abstract class BaseClientEnforcementPolicy extends Policy {
+abstract class BaseClientEnforcementPolicy extends MulesoftPolicy {
     BaseClientEnforcementPolicy(String credentialsOriginHasHttpBasicAuthenticationHeader,
                                 String clientIdExpression,
                                 String clientSecretExpression,
@@ -11,7 +11,6 @@ abstract class BaseClientEnforcementPolicy extends Policy {
               getConfig(credentialsOriginHasHttpBasicAuthenticationHeader,
                         clientIdExpression ?: "#[attributes.headers['client_id']]",
                         clientSecretExpression),
-              getMulesoftGroupId(),
               policyPathApplications)
     }
 

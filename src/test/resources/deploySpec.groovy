@@ -30,10 +30,11 @@ muleDeploy {
                     regex '.*bar'
                 }
             }
-            // by default, groupId is assumed to be Mulesoft's built-in policy group. Otherwise, you can do this
+            // by default, groupId is assumed to be your organization's group. You can customize it like this
             groupId 'stuff'
-            // OR use the same organization being used for deployment
-            groupId ourGroupId
+        }
+        mulesoftPolicy {
+            version '1.2.1'
         }
         clientEnforcementPolicyBasic {
             // version is optional (will use version in this library by default)

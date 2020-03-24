@@ -10,7 +10,7 @@ class PolicyListContext {
     }
 
     def policy(Closure closure) {
-        def policyContext = new PolicyContext()
+        def policyContext = new PolicyContext(null)
         closure.delegate = policyContext
         closure.resolveStrategy = Closure.DELEGATE_FIRST
         closure.call()
@@ -19,6 +19,14 @@ class PolicyListContext {
 
     def clientEnforcementPolicyBasic(Closure closure = {}) {
         def policyContext = new ClientEnforcementPolicyBasicContext()
+        closure.delegate = policyContext
+        closure.resolveStrategy = Closure.DELEGATE_FIRST
+        closure.call()
+        policies << policyContext.createPolicyModel()
+    }
+
+    def mulesoftPolicy(Closure closure) {
+        def policyContext = new PolicyContext(Policy.getMulesoftGroupId())
         closure.delegate = policyContext
         closure.resolveStrategy = Closure.DELEGATE_FIRST
         closure.call()

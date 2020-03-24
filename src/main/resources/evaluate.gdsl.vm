@@ -112,12 +112,20 @@ contributor([closureScopeContext]) {
     call = enclosingCall('policies')
     if (call) {
         #closureParam('policy')
+        #closureParam('mulesoftPolicy')
         #closureParam('clientEnforcementPolicyBasic')
     }
     call = enclosingCall('policy')
     if (call) {
         #stringParam('assetId')
         #stringParam('groupId')
+        #stringParam('version')
+        #mapParam('config')
+        #closureParam('paths')
+    }
+    call = enclosingCall('mulesoftPolicy')
+    if (call) {
+        #stringParam('assetId')
         #stringParam('version')
         #mapParam('config')
         #closureParam('paths')

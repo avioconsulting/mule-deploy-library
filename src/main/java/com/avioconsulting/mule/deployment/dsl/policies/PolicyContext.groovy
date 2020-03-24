@@ -8,6 +8,11 @@ class PolicyContext extends BaseContext {
     Map<String, String> config
     private PathsContext paths = new PathsContext()
     private boolean pathsCalled = false
+    private final String defaultGroupId
+
+    PolicyContext(String defaultGroupId) {
+        this.defaultGroupId = defaultGroupId
+    }
 
     Policy createPolicyModel() {
         def pathListing = paths.createModel()
@@ -19,10 +24,10 @@ class PolicyContext extends BaseContext {
             def errorList = errors.join('\n')
             throw new Exception("Your policy spec is not complete. The following errors exist:\n${errorList}")
         }
-        new Policy(this.groupId ?: Policy.mulesoftGroupId,
-                   this.assetId,
+        new Policy(this.assetId,
                    this.version,
                    this.config,
+                   this.groupId ?: this.defaultGroupId,
                    pathListing)
     }
 

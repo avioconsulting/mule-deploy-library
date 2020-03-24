@@ -259,8 +259,8 @@ class MuleDeployContextTest {
             }
 
             enabledFeatures {
-                ApiManagerDefinitions
-                AppDeployment
+                apiManagerDefinitions
+                appDeployment
             }
 
             onPremApplication {
@@ -296,9 +296,9 @@ class MuleDeployContextTest {
             }
 
             enabledFeatures {
-                ApiManagerDefinitions
-                AppDeployment
-                PolicySync
+                apiManagerDefinitions
+                appDeployment
+                policySync
             }
 
             onPremApplication {

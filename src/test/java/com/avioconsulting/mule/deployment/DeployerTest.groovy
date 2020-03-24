@@ -174,10 +174,10 @@ class DeployerTest {
         deployer.deployApplication(request,
                                    apiSpec,
                                    [
-                                           new Policy(Policy.mulesoftGroupId,
-                                                      'openidconnect-access-token-enforcement',
+                                           new Policy('openidconnect-access-token-enforcement',
                                                       '1.2.0',
-                                                      [exposeHeaders: false])
+                                                      [exposeHeaders: false],
+                                                      Policy.mulesoftGroupId)
                                    ])
 
         // assert

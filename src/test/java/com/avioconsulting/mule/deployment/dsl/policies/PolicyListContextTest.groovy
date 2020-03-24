@@ -36,6 +36,33 @@ class PolicyListContextTest {
     }
 
     @Test
+    void mulesoft_policy() {
+        // arrange
+        def context = new PolicyListContext()
+        def closure = {
+            mulesoftPolicy {
+                assetId 'the-asset-id'
+                version '1.2.1'
+                config hello: 'there'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def result = context.createPolicyList()
+
+        // assert
+        assertThat result.size(),
+                   is(equalTo(1))
+        def policy = result[0]
+        assertThat policy,
+                   is(instanceOf(Policy))
+        assertThat policy.groupId,
+                   is(equalTo(Policy.getMulesoftGroupId()))
+    }
+
+    @Test
     void clientEnforcementPolicyBasic_with_details() {
         // arrange
         def context = new PolicyListContext()

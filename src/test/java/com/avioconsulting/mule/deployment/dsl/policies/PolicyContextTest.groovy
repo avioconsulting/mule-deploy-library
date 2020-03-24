@@ -12,7 +12,7 @@ import static org.hamcrest.Matchers.*
 
 class PolicyContextTest {
     @Test
-    void default_mule_policy_minimum() {
+    void default_policy_minimum() {
         // arrange
         def context = new PolicyContext()
         def closure = {
@@ -28,19 +28,17 @@ class PolicyContextTest {
 
         // assert
         assertThat request,
-                   is(equalTo(new Policy(Policy.mulesoftGroupId,
-                                         'the-asset-id',
+                   is(equalTo(new Policy('the-asset-id',
                                          '1.2.1',
                                          [hello: 'there'])))
     }
 
     @Test
-    void default_mule_policy_our_group_id() {
+    void default_policy_our_group_id() {
         // arrange
         def context = new PolicyContext()
         def closure = {
             assetId 'the-asset-id'
-            groupId ourGroupId
             version '1.2.1'
             config hello: 'there'
         }
@@ -52,14 +50,13 @@ class PolicyContextTest {
 
         // assert
         assertThat request,
-                   is(equalTo(new Policy('the-group-id',
-                                         'the-asset-id',
+                   is(equalTo(new Policy('the-asset-id',
                                          '1.2.1',
                                          [hello: 'there'])))
     }
 
     @Test
-    void default_mule_policy_full() {
+    void default_policy_full() {
         // arrange
         def context = new PolicyContext()
         def closure = {
@@ -87,12 +84,12 @@ class PolicyContextTest {
 
         // assert
         assertThat request,
-                   is(equalTo(new Policy('the-group-id',
-                                         'the-asset-id',
+                   is(equalTo(new Policy('the-asset-id',
                                          '1.2.1',
                                          [
                                                  hello: 'there'
                                          ],
+                                         'the-group-id',
                                          [
                                                  new PolicyPathApplication([HttpMethod.GET,
                                                                             HttpMethod.PUT],
