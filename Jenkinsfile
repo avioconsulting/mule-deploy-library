@@ -9,19 +9,6 @@ pipeline {
     }
 
     stages {
-        stage('Fetch dependencies') {
-            steps {
-                withMaven(jdk: env.jdk,
-                          maven: env.mvn,
-                          mavenSettingsConfig: env.standard_avio_mvn_settings,
-                          // Don't want to capture artifacts w/ un-set version (see build/test stage)
-                          options: [artifactsPublisher(disabled: true)]) {
-                    // Used to clarify Maven phases a bit more than pure dependency as you go mode.
-                    mavenFetchDependencies()
-                }
-            }
-        }
-
         stage('Build and unit test') {
             steps {
                 withMaven(jdk: env.jdk,
