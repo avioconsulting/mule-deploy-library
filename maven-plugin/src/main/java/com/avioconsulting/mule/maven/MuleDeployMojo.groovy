@@ -3,6 +3,7 @@ package com.avioconsulting.mule.maven
 import com.avioconsulting.mule.deployment.api.DeployerFactory
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.IDeployerFactory
+import com.avioconsulting.mule.deployment.dsl.DeploymentPackage
 import com.avioconsulting.mule.deployment.dsl.MuleDeployContext
 import com.avioconsulting.mule.deployment.dsl.MuleDeployScript
 import org.apache.maven.plugin.AbstractMojo
@@ -31,19 +32,7 @@ class MuleDeployMojo extends AbstractMojo {
 
     @Override
     void execute() throws MojoExecutionException, MojoFailureException {
-        def compilerConfig = new CompilerConfiguration().with {
-            scriptBaseClass = MuleDeployScript.name
-            it
-        }
-        def shell = new GroovyShell(this.class.classLoader,
-                                    compilerConfig)
-        def binding = new Binding()
-        binding.setVariable('params',
-                            System.getProperties())
-        shell.context = binding
-        // last line of MuleDeployScript.muleDeploy method returns this
-        def context = shell.evaluate(groovyFile) as MuleDeployContext
-        def deploymentPackage = context.createDeploymentPackage()
+        def deploymentPackage = processDsl()
         log.info "Successfully processed ${groovyFile} through DSL"
         def logger = new MavenDeployerLogger(this.log)
         def deployer = deployerFactory.create(this.anypointUsername,
@@ -61,5 +50,23 @@ class MuleDeployMojo extends AbstractMojo {
                                    deploymentPackage.apiSpecification,
                                    deploymentPackage.desiredPolicies,
                                    deploymentPackage.enabledFeatures)
+    }
+
+    private DeploymentPackage processDsl() {
+        // allows us to use our 'MuleDeployScript'/MuleDeployContext class to interpret the user's DSL file
+        def compilerConfig = new CompilerConfiguration().with {
+            scriptBaseClass = MuleDeployScript.name
+            it
+        }
+        def shell = new GroovyShell(this.class.classLoader,
+                                    compilerConfig)
+        // in case they specify additional runtime settings not in source control via -D maven command line args
+        def binding = new Binding()
+        binding.setVariable('params',
+                            System.getProperties())
+        shell.context = binding
+        // last line of MuleDeployScript.muleDeploy method returns this
+        def context = shell.evaluate(groovyFile) as MuleDeployContext
+        context.createDeploymentPackage()
     }
 }
