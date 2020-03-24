@@ -1393,6 +1393,9 @@ class CloudHubDeployerTest extends BaseTest {
                    is(equalTo(false))
         assertThat deployed,
                    is(equalTo(false))
+        assertThat 'We should only check status once since we are in dry run mode',
+                   statusCheckCount,
+                   is(equalTo(1))
     }
 
     def mockDeploymentAndXStatusChecks(HttpServerRequest request,
