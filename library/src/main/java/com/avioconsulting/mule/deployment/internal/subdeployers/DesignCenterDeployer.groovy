@@ -119,10 +119,11 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                         !IGNORE_DC_FILES.contains(asFile.parentFile?.name)
             }
             return filesWeCareAbout.collect { result ->
-                def file = result.path
-                executeDesignCenterRequest(new HttpGet("${url}/${file}"),
-                                           "Fetching file ${file}") { String contents ->
-                    new RamlFile(file,
+                def filePath = result.path
+                def escapedForUrl = URLEncoder.encode(filePath)
+                executeDesignCenterRequest(new HttpGet("${url}/${escapedForUrl}"),
+                                           "Fetching file ${filePath}") { String contents ->
+                    new RamlFile(filePath,
                                  contents)
                 }
             }

@@ -242,6 +242,10 @@ class DesignCenterDeployerTest extends BaseTest {
                                     type: 'FILE'
                             ],
                             [
+                                    path: 'examples/foo.raml',
+                                    type: 'FILE'
+                            ],
+                            [
                                     path: 'howdy',
                                     type: 'FOLDER'
                             ],
@@ -268,12 +272,15 @@ class DesignCenterDeployerTest extends BaseTest {
         assertThat result,
                    is(equalTo([
                            new RamlFile('stuff.raml',
+                                        'the contents'),
+                           new RamlFile('examples/foo.raml',
                                         'the contents')
                    ]))
         assertThat urls,
                    is(equalTo([
                            '/designcenter/api-designer/projects/ourprojectId/branches/master/files',
-                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/stuff.raml'
+                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/stuff.raml',
+                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/examples%2Ffoo.raml'
                    ]))
         assertThat anypointOrgId,
                    is(equalTo('the-org-id'))
