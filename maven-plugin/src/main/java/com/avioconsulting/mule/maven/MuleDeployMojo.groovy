@@ -46,6 +46,11 @@ class MuleDeployMojo extends AbstractMojo {
         }
         def deploymentPackage = processDsl(artifact)
         log.info "Successfully processed ${groovyFile} through DSL"
+        if (this.dryRunMode == DryRunMode.OfflineValidate) {
+            log.info 'Offline validate was specified, so not deploying'
+            return
+        }
+        log.info 'Beginning deployment'
         def logger = new MavenDeployerLogger(this.log)
         def deployer = deployerFactory.create(this.anypointUsername,
                                               this.anypointPassword,
@@ -53,11 +58,6 @@ class MuleDeployMojo extends AbstractMojo {
                                               this.dryRunMode,
                                               this.anypointOrganizationName,
                                               this.environmentsToDoDesignCenterDeploymentOn)
-        if (this.dryRunMode == DryRunMode.OfflineValidate) {
-            log.info 'Offline validate was specified, so not deploying'
-            return
-        }
-        log.info 'Beginning deployment'
         try {
             deployer.deployApplication(deploymentPackage.deploymentRequest,
                                        deploymentPackage.apiSpecification,

@@ -32,6 +32,13 @@ class MuleDeployMojoTest {
         ILogger actualLogger
         DryRunMode actualDryRunMode
         List<String> actualEnvs
+        def mockDeployer = [
+                deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
+                                     ApiSpecification apiSpecification,
+                                     List<Policy> desiredPolicies,
+                                     List<Features> enabledFeatures ->
+                }
+        ] as IDeployer
         def mock = [
                 create: { String username,
                           String password,
@@ -45,7 +52,7 @@ class MuleDeployMojoTest {
                     actualDryRunMode = dryRunMode
                     actualEnvs = environmentsToDoDesignCenterDeploymentOn
                     actualOrg = anypointOrganizationName
-                    return null
+                    return mockDeployer
                 }
         ] as IDeployerFactory
         def dslText = """
@@ -66,7 +73,7 @@ muleDeploy {
                            'the user',
                            'the pass',
                            // we don't want this thing to actually run
-                           DryRunMode.OfflineValidate,
+                           DryRunMode.OnlineValidate,
                            'the org',
                            ['TST'])
 
@@ -81,7 +88,7 @@ muleDeploy {
         assertThat actualOrg,
                    is(equalTo('the org'))
         assertThat actualDryRunMode,
-                   is(equalTo(DryRunMode.OfflineValidate))
+                   is(equalTo(DryRunMode.OnlineValidate))
         assertThat actualEnvs,
                    is(equalTo(['TST']))
     }
