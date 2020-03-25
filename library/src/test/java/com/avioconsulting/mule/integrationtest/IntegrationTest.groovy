@@ -39,8 +39,6 @@ class IntegrationTest implements MavenInvoke {
     private static final String ANYPOINT_CLIENT_SECRET = System.getProperty('anypoint.client.secret')
     private static final String ON_PREM_SERVER_NAME = System.getProperty('mule4.onprem.server.name')
     private static final String CLOUDHUB_APP_PREFIX = 'avio'
-    private static final String CLOUDHUB_APP_NAME = 'mule-deploy-lib-v4-test-app-ch'
-    private static final String ONPREM_APP_NAME = 'mule-deploy-lib-v4-test-app-onprem'
 
     public static final String AVIO_ENVIRONMENT_DEV = 'DEV'
     private CloudHubDeployer cloudHubDeployer
@@ -117,18 +115,16 @@ class IntegrationTest implements MavenInvoke {
         onPremDeploymentRequest = new OnPremDeploymentRequest(AVIO_ENVIRONMENT_DEV,
                                                               ON_PREM_SERVER_NAME,
                                                               builtFile,
-                                                              ONPREM_APP_NAME,
-                                                              '1.2.3',
+                                                              null,
+                                                              null,
                                                               [env: AVIO_ENVIRONMENT_DEV])
         cloudhubDeploymentRequest = new CloudhubDeploymentRequest(AVIO_ENVIRONMENT_DEV,
-                                                                  new CloudhubWorkerSpecRequest('4.2.2'),
+                                                                  new CloudhubWorkerSpecRequest(),
                                                                   builtFile,
                                                                   'abcdefg',
                                                                   ANYPOINT_CLIENT_ID,
                                                                   ANYPOINT_CLIENT_SECRET,
-                                                                  CLOUDHUB_APP_PREFIX,
-                                                                  CLOUDHUB_APP_NAME,
-                                                                  '1.2.3')
+                                                                  CLOUDHUB_APP_PREFIX)
         def logger = new TestConsoleLogger()
         clientWrapper = new HttpClientWrapper('https://anypoint.mulesoft.com',
                                               ANYPOINT_USERNAME,

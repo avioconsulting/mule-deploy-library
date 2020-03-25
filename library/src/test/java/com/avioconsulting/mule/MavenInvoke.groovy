@@ -30,7 +30,7 @@ trait MavenInvoke {
         def targetDir = new File(projectDirectory,
                                  'target')
         builtFile = new File(targetDir,
-                             getFileName('mule4testapp',
+                             getFileName('mule-deploy-lib-v4-test-app',
                                          '1.0.0',
                                          '4.2.2'))
         def mavenInvokeRequest = new DefaultInvocationRequest().with {

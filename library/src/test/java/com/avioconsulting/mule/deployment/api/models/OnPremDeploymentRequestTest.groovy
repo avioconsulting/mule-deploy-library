@@ -46,7 +46,7 @@ class OnPremDeploymentRequestTest implements MavenInvoke {
         // assert
         request.with {
             assertThat appName,
-                       is(equalTo('mule4testapp'))
+                       is(equalTo('mule-deploy-lib-v4-test-app'))
             assertThat appVersion,
                        is(equalTo('1.0.0'))
         }
