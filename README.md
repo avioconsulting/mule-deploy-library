@@ -6,38 +6,40 @@ There are 3 ways to use this:
 2. Via a CLI
 3. Consume the library directly with code.
 
-Both approaches 1 and 2 lean on using a Groovy DSL to supply your deployment specs. #3 leaves the choice up to you (either building request objects in Java or Groovy code or using the DSL).
+Both approaches 1 and 2 lean on using a Groovy DSL to supply your deployment specs. #3 leaves the choice up to you (either building request objects in Java or Groovy code or using the DSL). Keep in mind that the "Groovy DSL file" that specifies actual deployment specs can live anywhere (build system artifacts, etc.). It just has to be present on the filesystem by the time the Maven plugin or the CLI (if you choose that route) runs.
 
 # Maven plugin
 
-The Maven plugin can be used 2 ways (in a project POM or standalone)
+## Use when
 
-## Maven plugin in a project POM
-
-### Use when
-* You have JDK and Maven installed on the agent(s) your CI/CD system performs releases on
-
-### Do NOT use when
-* Strict config management practices are required by the client and deployment stuff cannot/should not be controlled by the Mule app's repo.
-* The app's repo is not available during deployment time.
-
-## Maven plugin standalone
-
-### Use when
-* You have JDK and Maven installed on the agent(s) your CI/CD system performs releases on
+* You have JDK and Maven installed on the agent(s) your CI/CD system performs releases on.
 * Installing artifacts like a CLI on a build/release agent ahead of time is difficult because the agent is ephemeral.
-* Strict config management practices are required by the client and deployment stuff cannot/should not be controlled by the Mule app's repo.
 
-### Do NOT use when
-* The config management piece above does not apply. Executing this way results in non-ideal command line executions.
+## Do NOT use when
+
+* Organization does not have and/or does not want Maven on their agents.
+
+## Details
+
+The Maven plugin can be used 2 ways (in a project POM or without a POM). There is no hard and fast answer and it largely depends on what your organization is comfortable with.
+
+If you have no strong preference, then stick with the "without POM" approach which involves running like this:
+
+```sh
+mvn com.avioconsulting.mule:mule-deploy-maven-plugin:1.0.0:muleDeploy -Dgroovy.file=deploySpec_minimum.groovy -Denvironment=DEV -Danypoint.username=bob -Danypoint.password=asecret
+```
+
+See maven-plugin/README.md for more information.
 
 # CLI
 
 ## Use when
-* Maven is not available on the agents (and can't be)
-* TODO: Right now we don't bundle a JDK with the CLI but we could
+
+* Maven is not available on the agents (and can't or won't be installed)
+* At the moment, the CLI does not have a bundled JDK, just bundled dependencies. This could be changed if need be though.
 
 ## Do NOT use when
+
 * Maven is available (that approach makes "setting up" the agent easier)
 
 # Further Info

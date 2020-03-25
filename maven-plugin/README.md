@@ -4,9 +4,9 @@ This Maven plugin uses the `mule-deploy-library` DSL and offers a goal/mojo that
 
 # Configuring/installing
 
-The plugin can either be dropped in a Mule project's POM or executed standalone without a project. This will largely depend on your CI/CD system and pipeline setup as to which way is best. See README.md in the root directory for recommendations on how to choose.
+The plugin can either be dropped in a Mule project's POM or executed without a POM. See README.md in the root directory for recommendations on which method to use.
 
-## Project approach
+## In POM approach
 
 In your project's POM, add the following snippet. Get the latest version number from Nexus.
 
@@ -48,7 +48,7 @@ In your project's POM, add the following snippet. Get the latest version number 
 
 Now follow the steps under 'DSL' below.
 
-## Standalone/no Maven project approach
+## Without POM approach
 
 1. Create a DSL file
 2. Invoke from the command line as described below
