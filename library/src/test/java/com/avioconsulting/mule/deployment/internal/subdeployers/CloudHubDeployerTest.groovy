@@ -990,32 +990,6 @@ class CloudHubDeployerTest extends BaseTest {
     }
 
     @Test
-    void perform_deployment_space_in_app() {
-        // arrange
-        def file = new File('src/test/resources/some_file.txt')
-        // act
-        def exception = shouldFail {
-            new CloudhubDeploymentRequest('DEV',
-                                          new CloudhubWorkerSpecRequest('3.9.1',
-                                                                        false,
-                                                                        1,
-                                                                        WorkerTypes.Micro,
-                                                                        AwsRegions.UsEast1),
-                                          file,
-                                          'theKey',
-                                          'theClientId',
-                                          'theSecret',
-                                          'client',
-                                          'some app name',
-                                          '1.2.3')
-        }
-
-        // assert
-        assertThat exception.message,
-                   is(equalTo("Runtime Manager does not like spaces in app names and you specified 'some app name'!"))
-    }
-
-    @Test
     void perform_deployment_fails_immediately() {
         // arrange
         withHttpServer { HttpServerRequest request ->
