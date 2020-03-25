@@ -62,6 +62,12 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     final String appVersion
 
+    /***
+     * Sets anypoint.platform.config.analytics.agent.enabled to true in CH props
+     * False by default
+     */
+    final boolean analyticsAgentEnabled
+
     private CloudhubAppProperties cloudhubAppProperties
 
     /**
@@ -77,7 +83,8 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                               String appName = null,
                               String appVersion = null,
                               Map<String, String> appProperties = [:],
-                              Map<String, String> otherCloudHubProperties = [:]) {
+                              Map<String, String> otherCloudHubProperties = [:],
+                              boolean analyticsAgentEnabled = false) {
         this.file = file
         this.environment = environment
         this.appName = appName ?: parsedPomProperties.artifactId
@@ -107,6 +114,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                                                                cryptoKey,
                                                                anypointClientId,
                                                                anypointClientSecret)
+        this.analyticsAgentEnabled = analyticsAgentEnabled
     }
 
     HttpEntity getHttpPayload() {
