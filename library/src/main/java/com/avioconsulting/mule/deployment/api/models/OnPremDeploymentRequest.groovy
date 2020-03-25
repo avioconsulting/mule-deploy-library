@@ -43,15 +43,18 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
                             String appName = null,
                             String appVersion = null,
                             Map<String, String> appProperties = [:]) {
+        this.file = file
+        if (!appName) {
+            appName = parsedPomProperties.artifactId
+        }
         if (appName.contains(' ')) {
             throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
         }
         this.environment = environment
         this.appName = appName
-        this.appVersion = appVersion
+        this.appVersion = appVersion ?: parsedPomProperties.version
         this.targetServerOrClusterName = targetServerOrClusterName
         this.appProperties = appProperties
-        this.file = file
     }
 
     private String getConfigJson() {
