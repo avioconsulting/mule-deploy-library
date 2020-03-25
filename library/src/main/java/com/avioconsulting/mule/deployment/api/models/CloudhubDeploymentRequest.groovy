@@ -78,17 +78,23 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                               String appVersion = null,
                               Map<String, String> appProperties = [:],
                               Map<String, String> otherCloudHubProperties = [:]) {
+        this.file = file
         this.environment = environment
-        this.appName = appName
-        this.appVersion = appVersion
-        this.workerSpecRequest = workerSpecRequest
+        this.appName = appName ?: parsedPomProperties.artifactId
+        this.appVersion = appVersion ?: parsedPomProperties.version
+        if (!workerSpecRequest.muleVersion) {
+            def propertyToUse = mule4Request ? 'app.runtime' : 'mule.version'
+            this.workerSpecRequest = workerSpecRequest.withNewMuleVersion(parsedPomProperties.props[propertyToUse])
+        } else {
+            this.workerSpecRequest = workerSpecRequest
+        }
         this.cryptoKey = cryptoKey
         this.anypointClientId = anypointClientId
         this.anypointClientSecret = anypointClientSecret
         this.cloudHubAppPrefix = cloudHubAppPrefix
         this.appProperties = appProperties
         this.otherCloudHubProperties = otherCloudHubProperties
-        if (appName.contains(' ')) {
+        if (this.appName.contains(' ')) {
             throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
         }
         def newAppName = "${cloudHubAppPrefix}-${appName}-${environment}"
@@ -97,7 +103,6 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
             newAppName = appNameLowerCase
         }
         normalizedAppName = newAppName
-        this.file = file
         this.cloudhubAppProperties = new CloudhubAppProperties(environment.toLowerCase(),
                                                                cryptoKey,
                                                                anypointClientId,

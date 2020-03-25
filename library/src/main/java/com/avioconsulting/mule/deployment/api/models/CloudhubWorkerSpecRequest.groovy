@@ -41,4 +41,12 @@ class CloudhubWorkerSpecRequest {
         this.workerCount = workerCount
         this.awsRegion = awsRegion
     }
+
+    CloudhubWorkerSpecRequest withNewMuleVersion(String newMuleVersion) {
+        new CloudhubWorkerSpecRequest(newMuleVersion,
+                                      usePersistentQueues,
+                                      workerCount,
+                                      workerType,
+                                      awsRegion)
+    }
 }
