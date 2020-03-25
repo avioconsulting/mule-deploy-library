@@ -8,6 +8,8 @@ There are 3 ways to use this:
 
 Both approaches 1 and 2 lean on using a Groovy DSL to supply your deployment specs. #3 leaves the choice up to you (either building request objects in Java or Groovy code or using the DSL). Keep in mind that the "Groovy DSL file" that specifies actual deployment specs can live anywhere (build system artifacts, etc.). It just has to be present on the filesystem by the time the Maven plugin or the CLI (if you choose that route) runs.
 
+ALL of these methods assume your CI/CD tool white lists secrets from output. If it does not, it's on YOU to deal with that. Jenkins and Azure DevOps should do this out of the box with no further configuration.
+
 # Maven plugin
 
 NOTE: The Maven plugin has 2 goals (deploy and validate). Regardless of whether you use it to actually perform the deployment, it's highly recommended you use the validate goal to ensure your DSL file is correct during the build pipeline.

@@ -7,6 +7,10 @@ class ParamsWrapper {
         this.props = props
     }
 
+    Map<String, String> getAllProperties() {
+        this.props
+    }
+
     def propertyMissing(String name) {
         if (!props.containsKey(name)) {
             def options = props.keySet()
