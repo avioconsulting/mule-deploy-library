@@ -37,6 +37,23 @@
 				<configuration>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>com.avioconsulting.mule</groupId>
+                <artifactId>mule-deploy-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <id>stuff</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>muleDeploy</goal>
+                        </goals>
+                        <configuration>
+                            <groovyFile>withPom.groovy</groovyFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 

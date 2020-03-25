@@ -57,9 +57,11 @@ Now follow the steps under 'DSL' below.
 
 Now you'll want to create your DSL file. You can use the GDSL file from this project to help IntelliJ with syntax completion.
 
-See `deploySpec_minimum.groovy` as an example. This file is intended to be in source control. Obviously do not commit secrets to source control.
+See `examples/mule4_project/withPom.groovy` or `examples/mule4_project/withoutPom.groovy` as an example. This file is intended to be in source control. Obviously do not commit secrets to source control.
 
+The only difference between those 2 files is if you run with a POM, there is a shortcut to get the app's built/target filename directly from your Maven project.
 
+Things like crypto keys, client secrets, and environments will need to use `params` so that the CI/CD system can choose what to use. The Maven plugin and DSL will take care of dropping in `-DsomeProp=someValue` such that `params.someProp` evaluates to `someValue`.
 
 ## User/service account access
 
@@ -67,17 +69,21 @@ You'll need a service account user/password to run this. See the README.md file 
 
 # Running
 
+If you read the DSL section, you should have a DSL file that's ready to go.
 
+For the project case, the plugin will run during whichever phase you bind it to (e.g. deploy). Your command line will look something like this:
 
-TBD: Describe params stuff
-
-For the project case, the plugin will run during whichever phase you bind it to (e.g. deploy). You'll probably want to supply `-Danypoint.username=bob` and `-Danypoint.password=asecret` on the command line using credentials from your CI/CD system.
+```sh
+mvn clean deploy -Denvironment=DEV -Danypoint.username=bob -Danypoint.password=asecret -DcryptoKey=hello -DautoDiscClientId=theId -DautoDiscClientSecret=theSecret
+```
 
 For standalone cases, do something like this:
 
 ```sh
-mvn com.avioconsulting.mule:mule-deploy-maven-plugin:1.0.0:muleDeploy -Dgroovy.file=deploySpec_minimum.groovy -Denvironment=DEV -Danypoint.username=bob -Danypoint.password=asecret
+mvn com.avioconsulting.mule:mule-deploy-maven-plugin:1.0.0:muleDeploy -Dgroovy.file=withoutPom.groovy -Denvironment=DEV -Danypoint.username=bob -Danypoint.password=asecret -DcryptoKey=hello -DautoDiscClientId=theId -DautoDiscClientSecret=theSecret
 ```
+
+In both cases, you can configure properties like `anypoint.username` in the `settings.xml` file's `<properties>` section and omit them from the command line. 
 
 ## Dry runs
 
