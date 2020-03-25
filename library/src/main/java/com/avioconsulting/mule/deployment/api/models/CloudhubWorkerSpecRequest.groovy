@@ -80,6 +80,20 @@ class CloudhubWorkerSpecRequest {
                                       usePersistentQueues,
                                       workerCount,
                                       workerType,
-                                      awsRegion)
+                                      awsRegion,
+                                      updateId,
+                                      customLog4j2Enabled,
+                                      staticIpEnabled,
+                                      objectStoreV2Enabled)
+    }
+
+    Map<String, String> getVersionInfo() {
+        def map = [
+                version: muleVersion
+        ]
+        if (updateId) {
+            map['updateId'] = updateId
+        }
+        map
     }
 }

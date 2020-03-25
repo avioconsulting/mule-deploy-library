@@ -113,7 +113,8 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
         this.cloudhubAppProperties = new CloudhubAppProperties(environment.toLowerCase(),
                                                                cryptoKey,
                                                                anypointClientId,
-                                                               anypointClientSecret)
+                                                               anypointClientSecret,
+                                                               analyticsAgentEnabled ? true : null)
         this.analyticsAgentEnabled = analyticsAgentEnabled
     }
 
@@ -137,21 +138,22 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                                                     Map)
         def result = [
                 // CloudHub's API calls the Mule application the 'domain'
-                domain               : normalizedAppName,
-                muleVersion          : [
-                        version: workerSpecRequest.muleVersion
-                ],
-                region               : workerSpecRequest.awsRegion?.awsCode,
-                monitoringAutoRestart: true,
-                workers              : [
+                domain                   : normalizedAppName,
+                muleVersion              : workerSpecRequest.versionInfo,
+                region                   : workerSpecRequest.awsRegion?.awsCode,
+                monitoringAutoRestart    : true,
+                workers                  : [
                         type  : [
                                 name: workerSpecRequest.workerType.toString()
                         ],
                         amount: workerSpecRequest.workerCount
                 ],
-                persistentQueues     : workerSpecRequest.usePersistentQueues,
+                staticIPsEnabled         : workerSpecRequest.staticIpEnabled,
+                loggingCustomLog4JEnabled: workerSpecRequest.customLog4j2Enabled,
+                objectStoreV1            : !workerSpecRequest.objectStoreV2Enabled,
+                persistentQueues         : workerSpecRequest.usePersistentQueues,
                 // these are the actual properties in the 'Settings' tab
-                properties           : props
+                properties               : props
         ] as Map<String, String>
         if (!result.region) {
             // use default/runtime manager region

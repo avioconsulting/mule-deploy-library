@@ -114,19 +114,22 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
         // assert
         assertThat appInfo,
                    is(equalTo([
-                           domain               : 'client-mule-deploy-lib-v4-test-app-dev',
-                           muleVersion          : [
+                           domain                   : 'client-mule-deploy-lib-v4-test-app-dev',
+                           muleVersion              : [
                                    version: '4.1.4'
                            ],
-                           monitoringAutoRestart: true,
-                           workers              : [
+                           monitoringAutoRestart    : true,
+                           workers                  : [
                                    type  : [
                                            name: 'Micro'
                                    ],
                                    amount: 1
                            ],
-                           persistentQueues     : false,
-                           properties           : [
+                           staticIPsEnabled         : false,
+                           loggingCustomLog4JEnabled: false,
+                           objectStoreV1            : false,
+                           persistentQueues         : false,
+                           properties               : [
                                    env                              : 'dev',
                                    'crypto.key'                     : 'theKey',
                                    'anypoint.platform.client_id'    : 'theClientId',
@@ -159,20 +162,23 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
         // assert
         assertThat appInfo,
                    is(equalTo([
-                           domain               : 'client-mule-deploy-lib-v4-test-app-dev',
-                           muleVersion          : [
+                           domain                   : 'client-mule-deploy-lib-v4-test-app-dev',
+                           muleVersion              : [
                                    version: '4.1.4'
                            ],
-                           region               : 'us-east-1',
-                           monitoringAutoRestart: true,
-                           workers              : [
+                           region                   : 'us-east-1',
+                           monitoringAutoRestart    : true,
+                           workers                  : [
                                    type  : [
                                            name: 'Micro'
                                    ],
                                    amount: 1
                            ],
-                           persistentQueues     : false,
-                           properties           : [
+                           staticIPsEnabled         : false,
+                           loggingCustomLog4JEnabled: false,
+                           objectStoreV1            : false,
+                           persistentQueues         : false,
+                           properties               : [
                                    env                              : 'dev',
                                    'crypto.key'                     : 'theKey',
                                    'anypoint.platform.client_id'    : 'theClientId',
@@ -205,20 +211,23 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
         // assert
         assertThat appInfo,
                    is(equalTo([
-                           domain               : 'client-mule-deploy-lib-v4-test-app-dev',
-                           muleVersion          : [
+                           domain                   : 'client-mule-deploy-lib-v4-test-app-dev',
+                           muleVersion              : [
                                    version: '4.1.4'
                            ],
-                           region               : 'us-east-1',
-                           monitoringAutoRestart: true,
-                           workers              : [
+                           region                   : 'us-east-1',
+                           monitoringAutoRestart    : true,
+                           workers                  : [
                                    type  : [
                                            name: 'Micro'
                                    ],
                                    amount: 1
                            ],
-                           persistentQueues     : true,
-                           properties           : [
+                           staticIPsEnabled         : false,
+                           loggingCustomLog4JEnabled: false,
+                           objectStoreV1            : false,
+                           persistentQueues         : true,
+                           properties               : [
                                    env                              : 'dev',
                                    'crypto.key'                     : 'theKey',
                                    'anypoint.platform.client_id'    : 'theClientId',
@@ -254,19 +263,22 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
         // assert
         assertThat appInfo,
                    is(equalTo([
-                           domain               : 'client-mule-deploy-lib-v4-test-app-dev',
-                           muleVersion          : [
+                           domain                   : 'client-mule-deploy-lib-v4-test-app-dev',
+                           muleVersion              : [
                                    version: '4.1.4'
                            ],
-                           monitoringAutoRestart: true,
-                           workers              : [
+                           monitoringAutoRestart    : true,
+                           workers                  : [
                                    type  : [
                                            name: 'Micro'
                                    ],
                                    amount: 1
                            ],
-                           persistentQueues     : true,
-                           properties           : [
+                           staticIPsEnabled         : false,
+                           loggingCustomLog4JEnabled: false,
+                           objectStoreV1            : false,
+                           persistentQueues         : true,
+                           properties               : [
                                    env                              : 'TST',
                                    'crypto.key'                     : 'theKey',
                                    'anypoint.platform.client_id'    : 'theClientId',
@@ -299,19 +311,22 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
         // assert
         assertThat appInfo,
                    is(equalTo([
-                           domain               : 'client-mule-deploy-lib-v4-test-app-dev',
-                           muleVersion          : [
+                           domain                   : 'client-mule-deploy-lib-v4-test-app-dev',
+                           muleVersion              : [
                                    version: '4.1.4'
                            ],
-                           monitoringAutoRestart: true,
-                           workers              : [
+                           monitoringAutoRestart    : true,
+                           workers                  : [
                                    type  : [
                                            name: 'Micro'
                                    ],
                                    amount: 1
                            ],
-                           persistentQueues     : true,
-                           properties           : [
+                           staticIPsEnabled         : false,
+                           loggingCustomLog4JEnabled: false,
+                           objectStoreV1            : false,
+                           persistentQueues         : true,
+                           properties               : [
                                    env                              : 'dev',
                                    'crypto.key'                     : 'theKey',
                                    'anypoint.platform.client_id'    : 'theClientId',
@@ -348,19 +363,22 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
         // assert
         assertThat appInfo,
                    is(equalTo([
-                           domain               : 'client-mule-deploy-lib-v4-test-app-dev',
-                           muleVersion          : [
+                           domain                   : 'client-mule-deploy-lib-v4-test-app-dev',
+                           muleVersion              : [
                                    version: '4.1.4'
                            ],
-                           monitoringAutoRestart: true,
-                           workers              : [
+                           monitoringAutoRestart    : true,
+                           workers                  : [
                                    type  : [
                                            name: 'Micro'
                                    ],
                                    amount: 1
                            ],
-                           persistentQueues     : true,
-                           properties           : [
+                           staticIPsEnabled         : false,
+                           loggingCustomLog4JEnabled: false,
+                           objectStoreV1            : false,
+                           persistentQueues         : true,
+                           properties               : [
                                    env                              : 'TST',
                                    'crypto.key'                     : 'theKey',
                                    'anypoint.platform.client_id'    : 'theClientId',
@@ -390,25 +408,83 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
         // assert
         assertThat appInfo,
                    is(equalTo([
-                           domain               : 'client-new-app-dev',
-                           muleVersion          : [
+                           domain                   : 'client-new-app-dev',
+                           muleVersion              : [
                                    version: '3.9.1'
                            ],
-                           monitoringAutoRestart: true,
-                           workers              : [
+                           monitoringAutoRestart    : true,
+                           workers                  : [
                                    type  : [
                                            name: 'Micro'
                                    ],
                                    amount: 1
                            ],
-                           persistentQueues     : false,
-                           properties           : [
+                           staticIPsEnabled         : false,
+                           loggingCustomLog4JEnabled: false,
+                           objectStoreV1            : false,
+                           persistentQueues         : false,
+                           properties               : [
                                    env                              : 'dev',
                                    'crypto.key'                     : 'theKey',
                                    'anypoint.platform.client_id'    : 'theClientId',
                                    'anypoint.platform.client_secret': 'theSecret'
                            ]
 
+                   ]))
+    }
+
+    @Test
+    void getCloudhubAppInfo_optional_props() {
+        // arrange
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    new CloudhubWorkerSpecRequest(null,
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  null,
+                                                                                  'abcdefg',
+                                                                                  true,
+                                                                                  true,
+                                                                                  false),
+                                                    builtFile,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client',
+                                                    null,
+                                                    null,
+                                                    [:],
+                                                    [:],
+                                                    true)
+        // act
+        def appInfo = request.getCloudhubAppInfo()
+
+        // assert
+        assertThat appInfo,
+                   is(equalTo([
+                           domain                   : 'client-mule-deploy-lib-v4-test-app-dev',
+                           muleVersion              : [
+                                   version : '4.1.4',
+                                   updateId: 'abcdefg'
+                           ],
+                           monitoringAutoRestart    : true,
+                           workers                  : [
+                                   type  : [
+                                           name: 'Micro'
+                                   ],
+                                   amount: 1
+                           ],
+                           staticIPsEnabled         : true,
+                           loggingCustomLog4JEnabled: true,
+                           objectStoreV1            : true,
+                           persistentQueues         : false,
+                           properties               : [
+                                   env                                               : 'dev',
+                                   'crypto.key'                                      : 'theKey',
+                                   'anypoint.platform.client_id'                     : 'theClientId',
+                                   'anypoint.platform.client_secret'                 : 'theSecret',
+                                   'anypoint.platform.config.analytics.agent.enabled': true
+                           ]
                    ]))
     }
 }
