@@ -28,13 +28,12 @@ class MuleDeployMojo extends BaseMojo {
             throw new Exception("In order to ${dryRunMode}, credentials must be supplied via the anypointUsername <config> item/anypoint.username property and the anypointPassword <config> item/anypoint.password property")
         }
         def deploymentPackage = processDsl()
-        log.info "Successfully processed ${groovyFile} through DSL"
+        logger.println "Successfully processed ${groovyFile} through DSL"
         if (this.dryRunMode == DryRunMode.OfflineValidate) {
-            log.info 'Offline validate was specified, so not deploying'
+            logger.println 'Offline validate was specified, so not deploying'
             return
         }
-        log.info 'Beginning deployment'
-        def logger = new MavenDeployerLogger(this.log)
+        logger.println 'Beginning deployment'
         def deployer = deployerFactory.create(this.anypointUsername,
                                               this.anypointPassword,
                                               logger,
@@ -49,7 +48,7 @@ class MuleDeployMojo extends BaseMojo {
         }
         catch (e) {
             def exception = e.cause ?: e
-            log.error("Unable to perform deployment because ${exception.class} ${exception.message}")
+            logger.error("Unable to perform deployment because ${exception.class} ${exception.message}")
             throw new Exception('Unable to perform deployment',
                                 e)
         }

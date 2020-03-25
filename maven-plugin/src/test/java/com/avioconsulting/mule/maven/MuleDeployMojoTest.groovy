@@ -110,7 +110,7 @@ muleDeploy {
             it.groovyFile = groovyFile
             it.anypointOrganizationName = orgName
             it.environmentsToDoDesignCenterDeploymentOn = envs
-            it.log = logger
+            it.log = this.logger
             it.mavenProject = mockMavenProject ?: ([:] as MavenProject)
             it.deployerFactory = mockDeployerFactory
             it
@@ -459,9 +459,9 @@ muleDeploy {
         // assert
         assertThat exception.message,
                    is(containsString('Unable to perform deployment'))
-        assertThat logger.errors,
-                   is(equalTo([
-                           'Unable to perform deployment because class java.lang.Exception some deployment problem'
-                   ]))
+        assertThat logger.errors.size(),
+                   is(equalTo(1))
+        assertThat logger.errors[0],
+                   is(equalTo('Unable to perform deployment because class java.lang.Exception some deployment problem'))
     }
 }

@@ -13,6 +13,10 @@ abstract class BaseMojo extends AbstractMojo {
     protected File groovyFile
     @Parameter(defaultValue = '${project}')
     protected MavenProject mavenProject
+    @Lazy
+    protected MavenDeployerLogger logger = {
+        new MavenDeployerLogger(this.log)
+    }()
 
     Map<String, String> getAdditionalProperties() {
         [:]
@@ -30,7 +34,7 @@ abstract class BaseMojo extends AbstractMojo {
             [withoutPrefix, v]
         }
         if (artifact) {
-            log.info "Adding ${artifact} path as projectFile in your DSL"
+            logger.println "Adding ${artifact} path as projectFile in your DSL"
             props['appArtifact'] = artifact.absolutePath
         }
         new ParamsWrapper(props + additionalProperties)
@@ -48,7 +52,7 @@ abstract class BaseMojo extends AbstractMojo {
             // in case they specify additional runtime settings not in source control via -D maven command line args
             def binding = new Binding()
             def wrapper = getParamsWrapper()
-            log.info "Will resolve `params` in DSL using: ${wrapper.allProperties}"
+            logger.println "Will resolve `params` in DSL using: ${wrapper.allProperties}"
             binding.setVariable('params',
                                 wrapper)
             shell.context = binding
@@ -58,7 +62,7 @@ abstract class BaseMojo extends AbstractMojo {
         }
         catch (e) {
             def exception = e.cause ?: e
-            log.error("Unable to process DSL because ${exception.class} ${exception.message}")
+            logger.error("Unable to process DSL because ${exception.class} ${exception.message}")
             throw new Exception('Unable to process DSL',
                                 e)
         }

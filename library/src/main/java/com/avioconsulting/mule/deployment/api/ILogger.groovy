@@ -4,4 +4,5 @@ package com.avioconsulting.mule.deployment.api
 // a real simple interface that can be implemented easily using a variety of methods (System.out, etc.)
 interface ILogger {
     def println(String message)
+    def error(String message)
 }

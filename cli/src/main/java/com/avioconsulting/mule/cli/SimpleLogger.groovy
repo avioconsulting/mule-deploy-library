@@ -7,4 +7,9 @@ class SimpleLogger implements ILogger {
     def println(String message) {
         System.out.println(message)
     }
+
+    @Override
+    def error(String message) {
+        println("ERROR: ${message}")
+    }
 }

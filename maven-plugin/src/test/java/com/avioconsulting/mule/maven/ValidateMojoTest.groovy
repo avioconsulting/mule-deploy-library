@@ -8,8 +8,7 @@ import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.Matchers.containsString
-import static org.hamcrest.Matchers.is
+import static org.hamcrest.Matchers.*
 
 class ValidateMojoTest {
     def logger = new TestLogger()
@@ -40,7 +39,10 @@ class ValidateMojoTest {
         ] as MavenProject
         new ValidateMojo().with {
             it.groovyFile = groovyFile
-            it.log = logger
+            it.log = this.logger
+            it.placeholderProperties = 'cryptoKey,autoDiscClientId,autoDiscClientSecret,jarFile'.split(',')
+            it.environmentsToTest = 'DEV,QA,PRD'.split(',')
+            it.environmentProperty = 'env'
             it.mavenProject = mockMavenProject ?: ([:] as MavenProject)
             it
         }
@@ -97,7 +99,13 @@ muleDeploy {
 
         // assert
         assertThat exception.message,
-                   is(containsString('foobar'))
+                   is(containsString('Validation failed, see log message'))
+        assertThat logger.errors,
+                   is(equalTo([
+                           'DEV environment - Unable to process DSL because class groovy.lang.MissingPropertyException No such property: d for class: stuff',
+                           'QA environment - Unable to process DSL because class groovy.lang.MissingPropertyException No such property: d for class: stuff',
+                           'PRD environment - Unable to process DSL because class groovy.lang.MissingPropertyException No such property: d for class: stuff',
+                   ]))
     }
 
     @Test
@@ -129,6 +137,11 @@ muleDeploy {
 
         // assert
         assertThat exception.message,
-                   is(containsString('foobar problem with tst and prd'))
+                   is(containsString('Validation failed, see log messages'))
+        assertThat logger.errors,
+                   is(equalTo([
+                           'PRD environment - Unable to process DSL because class java.lang.Exception Your deployment request is not complete. The following errors exist:\n' +
+                                   '- appVersion missing'
+                   ]))
     }
 }
