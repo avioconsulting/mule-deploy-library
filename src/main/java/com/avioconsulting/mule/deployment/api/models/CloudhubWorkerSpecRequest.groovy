@@ -1,5 +1,8 @@
 package com.avioconsulting.mule.deployment.api.models
 
+import groovy.transform.ToString
+
+@ToString
 class CloudhubWorkerSpecRequest {
     /**
      * E.g. 4.2.2

@@ -1,0 +1,159 @@
+#macro(methodParam $param $type)
+method name: '$param',
+       params: [
+           $param: $type
+       ]
+#end
+#macro(stringParam $param)
+    #methodParam($param 'String.name')
+#end
+#macro(mapParam $param)
+    #methodParam($param 'Map.name')
+#end
+#macro(closureParam $param)
+method name: '$param',
+       params: [
+               closure: Closure.name
+       ]
+#end
+#macro(enumParam $paramName $enumType)
+    #methodParam($paramName "'com.avioconsulting.mule.deployment.api.models.$enumType'")
+method name: '$enumType',
+       type: 'com.avioconsulting.mule.deployment.api.models.$enumType'
+#end
+#macro(prop $propName)
+property name: '$propName',
+         type: String.name
+#end
+
+def ctx = context(scriptScope: 'deploySpec.groovy')
+contributor([ctx]) {
+    method name: 'muleDeploy',
+           params: [
+                   closure: Closure.name
+           ]
+}
+
+def workerTypeContext = context(ctype: 'com.avioconsulting.mule.deployment.api.models.WorkerTypes')
+contributor([workerTypeContext]) {
+    // Properties can't be upper cased so we make them lower case and then the DSL code makes ENUMs case insensitive
+    #foreach($enumValue in $workerTypes)
+        property name: '$enumValue',
+                 type: 'com.avioconsulting.mule.deployment.api.models.WorkerTypes'
+    #end
+}
+
+def awsRegionContext = context(ctype: 'com.avioconsulting.mule.deployment.api.models.AwsRegions')
+contributor([awsRegionContext]) {
+    // Properties can't be upper cased so we make them lower case and then the DSL code makes ENUMs case insensitive
+    #foreach($enumValue in $awsRegions)
+        property name: '$enumValue',
+                 type: 'com.avioconsulting.mule.deployment.api.models.AwsRegions'
+    #end
+}
+
+def httpMethodContext = context(ctype: 'com.avioconsulting.mule.deployment.api.models.HttpMethod')
+contributor([httpMethodContext]) {
+    // Properties can't be upper cased so we make them lower case and then the DSL code makes ENUMs case insensitive
+    #foreach($enumValue in $httpMethods)
+        property name: '$enumValue',
+                 type: 'com.avioconsulting.mule.deployment.api.models.HttpMethod'
+    #end
+}
+
+def closureScopeContext = context(scope: closureScope())
+contributor([closureScopeContext]) {
+    def call = enclosingCall('muleDeploy')
+    if (call) {
+        #stringParam('version')
+        #closureParam('cloudHubApplication')
+        #closureParam('onPremApplication')
+        #closureParam('apiSpecification')
+        #closureParam('policies')
+        #closureParam('enabledFeatures')
+    }
+    call = enclosingCall('enabledFeatures')
+    if (call) {
+        #foreach ($feat in $features)
+            #prop($feat)
+        #end
+    }
+    call = enclosingCall('cloudHubApplication')
+    if (call) {
+        #stringParam('environment')
+        #stringParam('applicationName')
+        #stringParam('appVersion')
+        #closureParam('workerSpecs')
+        #stringParam('file')
+        #stringParam('cryptoKey')
+        #closureParam('autoDiscovery')
+        #stringParam('cloudHubAppPrefix')
+        #mapParam('appProperties')
+        #mapParam('otherCloudHubProperties')
+    }
+    call = enclosingCall('onPremApplication')
+    if (call) {
+        #stringParam('environment')
+        #stringParam('applicationName')
+        #stringParam('appVersion')
+        #stringParam('file')
+        #stringParam('targetServerOrClusterName')
+        #mapParam('appProperties')
+        #mapParam('otherCloudHubProperties')
+    }
+    call = enclosingCall('apiSpecification')
+    if (call) {
+        #stringParam('name')
+        #stringParam('exchangeAssetId')
+        #stringParam('apiMajorVersion')
+        #stringParam('mainRamlFile')
+        #stringParam('endpoint')
+    }
+    call = enclosingCall('policies')
+    if (call) {
+        #closureParam('policy')
+        #closureParam('mulesoftPolicy')
+        #closureParam('clientEnforcementPolicyBasic')
+    }
+    call = enclosingCall('policy')
+    if (call) {
+        #stringParam('assetId')
+        #stringParam('groupId')
+        #stringParam('version')
+        #mapParam('config')
+        #closureParam('paths')
+    }
+    call = enclosingCall('mulesoftPolicy')
+    if (call) {
+        #stringParam('assetId')
+        #stringParam('version')
+        #mapParam('config')
+        #closureParam('paths')
+    }
+    call = enclosingCall('clientEnforcementPolicyBasic')
+    if (call) {
+        #stringParam('version')
+    }
+    call = enclosingCall('paths')
+    if (call) {
+        #closureParam('path')
+    }
+    call = enclosingCall('path')
+    if (call) {
+        #enumParam('method' 'HttpMethod')
+        #stringParam('regex')
+    }
+    call = enclosingCall('workerSpecs')
+    if (call) {
+        #stringParam('muleVersion')
+        #methodParam('usePersistentQueues' 'Boolean.name')
+        #enumParam('workerType' 'WorkerTypes')
+        #methodParam('workerCount' 'Integer.name')
+        #enumParam('awsRegion' 'AwsRegions')
+    }
+    call = enclosingCall('autoDiscovery')
+    if (call) {
+        #stringParam('clientId')
+        #stringParam('clientSecret')
+    }
+}

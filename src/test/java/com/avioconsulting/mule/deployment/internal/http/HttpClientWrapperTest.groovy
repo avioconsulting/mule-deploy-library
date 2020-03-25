@@ -36,8 +36,14 @@ class HttpClientWrapperTest extends BaseTest {
             } else if (request.uri() == '/accounts/api/me') {
                 payload = [
                         user: [
-                                id      : 'the_id',
-                                username: 'the_username'
+                                id                   : 'the_id',
+                                username             : 'the_username',
+                                memberOfOrganizations: [
+                                        [
+                                                name: 'the-org-name',
+                                                id  : 'the-org-id'
+                                        ]
+                                ]
                         ]
                 ]
             }
@@ -85,8 +91,14 @@ class HttpClientWrapperTest extends BaseTest {
                 if (request.uri() == '/accounts/api/me') {
                     jsonPayload = [
                             user: [
-                                    id      : 'the_id',
-                                    username: 'the_username'
+                                    id                   : 'the_id',
+                                    username             : 'the_username',
+                                    memberOfOrganizations: [
+                                            [
+                                                    name: 'the-org-name',
+                                                    id  : 'the-org-id'
+                                            ]
+                                    ]
                             ]
                     ]
                 } else {
@@ -187,5 +199,135 @@ class HttpClientWrapperTest extends BaseTest {
         // assert
         assertThat cookieValue,
                    is(nullValue())
+    }
+
+    @Test
+    void getAnypointOrganizationId_default_org() {
+        // arrange
+        clientWrapper = new HttpClientWrapper("http://localhost:${httpServer.actualPort()}",
+                                              'the user',
+                                              'the password',
+                                              System.out)
+        withHttpServer { HttpServerRequest request ->
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                Map jsonPayload
+                if (request.uri() == '/accounts/api/me') {
+                    jsonPayload = [
+                            user: [
+                                    id                     : 'the_id',
+                                    username               : 'the_username',
+                                    organizationPreferences: [
+                                            'the-org-id-2': [
+                                                    defaultEnvironment: 'the_id'
+                                            ]
+                                    ],
+                                    memberOfOrganizations  : [
+                                            [
+                                                    name: 'the-org-name-2',
+                                                    id  : 'the-org-id-2'
+                                            ]
+                                    ]
+                            ]
+                    ]
+                } else {
+                    jsonPayload = [
+                            access_token: 'the token'
+                    ]
+                }
+                end(JsonOutput.toJson(jsonPayload))
+            }
+        }
+        clientWrapper.authenticate()
+
+        // act
+        def result = clientWrapper.anypointOrganizationId
+
+        // assert
+        assertThat result,
+                   is(equalTo('the-org-id-2'))
+    }
+
+    @Test
+    void getAnypointOrganizationId_specified_org_does_not_exist() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                Map jsonPayload
+                if (request.uri() == '/accounts/api/me') {
+                    jsonPayload = [
+                            user: [
+                                    id                   : 'the_id',
+                                    username             : 'the_username',
+                                    memberOfOrganizations: [
+                                            [
+                                                    name: 'the-other-org-name',
+                                                    id  : 'the-org-id'
+                                            ]
+                                    ]
+                            ]
+                    ]
+                } else {
+                    jsonPayload = [
+                            access_token: 'the token'
+                    ]
+                }
+                end(JsonOutput.toJson(jsonPayload))
+            }
+        }
+
+        // act
+        def exception = shouldFail {
+            clientWrapper.authenticate()
+        }
+
+        // assert
+        assertThat exception.message,
+                   is(containsString("You specified Anypoint organization 'the-org-name' but that organization was not found. Options are [the-other-org-name]"))
+    }
+
+    @Test
+    void getAnypointOrganizationId_specified_org_does_exist() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                Map jsonPayload
+                if (request.uri() == '/accounts/api/me') {
+                    jsonPayload = [
+                            user: [
+                                    id                   : 'the_id',
+                                    username             : 'the_username',
+                                    memberOfOrganizations: [
+                                            [
+                                                    name: 'the-org-name',
+                                                    id  : 'the-org-id'
+                                            ]
+                                    ]
+                            ]
+                    ]
+                } else {
+                    jsonPayload = [
+                            access_token: 'the token'
+                    ]
+                }
+                end(JsonOutput.toJson(jsonPayload))
+            }
+        }
+        clientWrapper.authenticate()
+
+        // act
+        def result = clientWrapper.anypointOrganizationId
+
+        // assert
+        assertThat result,
+                   is(equalTo('the-org-id'))
     }
 }

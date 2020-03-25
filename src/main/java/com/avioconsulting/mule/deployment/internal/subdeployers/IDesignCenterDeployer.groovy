@@ -5,6 +5,5 @@ import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentReque
 
 interface IDesignCenterDeployer {
     def synchronizeDesignCenterFromApp(ApiSpecification apiSpec,
-                                       FileBasedAppDeploymentRequest appFileInfo,
-                                       String appVersion)
+                                       FileBasedAppDeploymentRequest appFileInfo)
 }

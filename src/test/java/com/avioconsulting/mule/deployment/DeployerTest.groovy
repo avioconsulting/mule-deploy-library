@@ -1,13 +1,13 @@
 package com.avioconsulting.mule.deployment
 
 import com.avioconsulting.mule.deployment.api.Deployer
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.*
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.internal.models.ApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
 import com.avioconsulting.mule.deployment.internal.subdeployers.*
 import groovy.transform.Canonical
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -15,6 +15,7 @@ import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
+@SuppressWarnings('GroovyAssignabilityCheck')
 class DeployerTest {
     private Deployer deployer
     private List<CloudhubDeploymentRequest> deployedChApps
@@ -28,7 +29,6 @@ class DeployerTest {
     class DesignCenterSync {
         ApiSpecification apiSpec
         FileBasedAppDeploymentRequest appFileInfo
-        String appVersion
     }
 
     @Canonical
@@ -44,13 +44,19 @@ class DeployerTest {
     }
 
     @Before
-    void setupDeployer() {
+    void cleanup() {
         deployedChApps = []
         deployedOnPremApps = []
         designCenterSyncs = []
         apiSyncs = []
         policySyncCalls = []
         failDeployment = false
+        deployer = null
+        // "default"
+        setupDeployer(DryRunMode.Run)
+    }
+
+    def setupDeployer(DryRunMode dryRunMode) {
         def mockCloudHubDeployer = [
                 deploy        : { CloudhubDeploymentRequest request ->
                     if (failDeployment) {
@@ -72,11 +78,9 @@ class DeployerTest {
         ] as IOnPremDeployer
         def mockDcDeployer = [
                 synchronizeDesignCenterFromApp: { ApiSpecification apiSpec,
-                                                  FileBasedAppDeploymentRequest appFileInfo,
-                                                  String appVersion ->
+                                                  FileBasedAppDeploymentRequest appFileInfo ->
                     designCenterSyncs << new DesignCenterSync(apiSpec,
-                                                              appFileInfo,
-                                                              appVersion)
+                                                              appFileInfo)
                 }
         ] as IDesignCenterDeployer
         def mockApiDeployer = [
@@ -100,6 +104,7 @@ class DeployerTest {
                 }
         ] as IPolicyDeployer
         deployer = new Deployer(null,
+                                dryRunMode,
                                 System.out,
                                 ['DEV'],
                                 null,
@@ -118,6 +123,7 @@ class DeployerTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -133,7 +139,6 @@ class DeployerTest {
         // act
         def exception = shouldFail {
             deployer.deployApplication(request,
-                                       '1.2.3',
                                        apiSpec)
         }
 
@@ -148,6 +153,7 @@ class DeployerTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app-mule3',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -166,13 +172,12 @@ class DeployerTest {
 
         // act
         deployer.deployApplication(request,
-                                   '1.2.3',
                                    apiSpec,
                                    [
-                                           new Policy(Policy.mulesoftGroupId,
-                                                      'openidconnect-access-token-enforcement',
+                                           new Policy('openidconnect-access-token-enforcement',
                                                       '1.2.0',
-                                                      [exposeHeaders: false])
+                                                      [exposeHeaders: false],
+                                                      Policy.mulesoftGroupId)
                                    ])
 
         // assert
@@ -208,7 +213,7 @@ class DeployerTest {
         assertThat designCenterSyncs.size(),
                    is(equalTo(1))
         def sync = designCenterSyncs[0]
-        assertThat sync.appVersion,
+        assertThat sync.appFileInfo.appVersion,
                    is(equalTo('1.2.3'))
         assertThat sync.apiSpec,
                    is(equalTo(apiSpec))
@@ -229,6 +234,7 @@ class DeployerTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app-mule4',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('4.2.2',
                                                                                   false,
                                                                                   1,
@@ -247,7 +253,6 @@ class DeployerTest {
 
         // act
         deployer.deployApplication(request,
-                                   '1.2.3',
                                    apiSpec)
 
         // assert
@@ -267,6 +272,7 @@ class DeployerTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('TST',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -281,7 +287,6 @@ class DeployerTest {
 
         // act
         deployer.deployApplication(request,
-                                   '1.2.3',
                                    apiSpec)
 
         // assert
@@ -299,12 +304,12 @@ class DeployerTest {
         def apiSpec = new ApiSpecification('Hello API')
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app-mule3',
+                                                  '1.2.3',
                                                   'clustera',
                                                   file)
 
         // act
         deployer.deployApplication(request,
-                                   '1.2.3',
                                    apiSpec)
 
         // assert
@@ -329,12 +334,12 @@ class DeployerTest {
         def apiSpec = new ApiSpecification('Hello API')
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-ap-mule4',
+                                                  '1.2.3',
                                                   'clustera',
                                                   file)
 
         // act
         deployer.deployApplication(request,
-                                   '1.2.3',
                                    apiSpec)
 
         // assert
@@ -358,6 +363,7 @@ class DeployerTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -371,7 +377,6 @@ class DeployerTest {
 
         // act
         deployer.deployApplication(request,
-                                   '1.2.3',
                                    null)
 
         // assert
@@ -394,6 +399,7 @@ class DeployerTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -408,7 +414,6 @@ class DeployerTest {
 
         // act
         deployer.deployApplication(request,
-                                   '1.2.3',
                                    apiSpec,
                                    null,
                                    [Features.DesignCenterSync])
@@ -430,6 +435,7 @@ class DeployerTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -444,7 +450,6 @@ class DeployerTest {
 
         // act
         deployer.deployApplication(request,
-                                   '1.2.3',
                                    apiSpec,
                                    null,
                                    [Features.AppDeployment])

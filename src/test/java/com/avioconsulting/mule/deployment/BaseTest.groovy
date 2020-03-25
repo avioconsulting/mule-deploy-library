@@ -42,8 +42,8 @@ class BaseTest {
         clientWrapper = new HttpClientWrapper("http://localhost:${httpServer.actualPort()}",
                                               'the user',
                                               'the password',
-                                              'the-org-id',
-                                              System.out)
+                                              System.out,
+                                              'the-org-name')
         environmentLocator = new EnvironmentLocator(clientWrapper,
                                                     System.out)
     }
@@ -130,8 +130,14 @@ class BaseTest {
                                'application/json')
             response.end(JsonOutput.toJson([
                     user: [
-                            id      : 'the_id',
-                            username: 'the_username'
+                            id                   : 'the_id',
+                            username             : 'the_username',
+                            memberOfOrganizations: [
+                                    [
+                                            name: 'the-org-name',
+                                            id  : 'the-org-id'
+                                    ]
+                            ]
                     ]
             ]))
             mocked = true

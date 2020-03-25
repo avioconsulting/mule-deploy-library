@@ -22,33 +22,38 @@ class Deployer {
     private final IPolicyDeployer policyDeployer
     private final List<String> environmentsToDoDesignCenterDeploymentOn
     private int stepNumber
+    private final DryRunMode dryRunMode
 
     /**
      *
      * @param username anypoint creds to deploy with
      * @param password anypoint creds to deploy with
-     * @param anypointOrganizationId GUID/org ID. Right now this tool doesn't differentiate between biz groups and root orgs
      * @param logger all messages will be logged like this. This is Jenkins plugins friendly (or you can supply System.out)
+     * @param dryRunMode Should we do a real run?
+     * @param anypointOrganizationName Optional parameter. If null, the default organization/biz group for the user will be used. Otherwise supply name (NOT GUID) of the biz group or organization you want to use
      * @param baseUrl Base URL, optional
      * @param environmentsToDoDesignCenterDeploymentOn Normally workflow wise you'd only want to do this on DEV
      */
     Deployer(String username,
              String password,
-             String anypointOrganizationId,
              PrintStream logger,
+             DryRunMode dryRunMode,
+             String anypointOrganizationName = null,
              String baseUrl = 'https://anypoint.mulesoft.com',
              List<String> environmentsToDoDesignCenterDeploymentOn = ['DEV']) {
         this(new HttpClientWrapper(baseUrl,
                                    username,
                                    password,
-                                   anypointOrganizationId,
-                                   logger),
+                                   logger,
+                                   anypointOrganizationName),
+             dryRunMode,
              logger,
              environmentsToDoDesignCenterDeploymentOn)
     }
 
 
     private Deployer(HttpClientWrapper httpClientWrapper,
+                     DryRunMode dryRunMode,
                      PrintStream logger,
                      List<String> environmentsToDoDesignCenterDeploymentOn,
                      EnvironmentLocator environmentLocator = null,
@@ -57,6 +62,7 @@ class Deployer {
                      IDesignCenterDeployer designCenterDeployer = null,
                      IApiManagerDeployer apiManagerDeployer = null,
                      IPolicyDeployer policyDeployer = null) {
+        this.dryRunMode = dryRunMode
         this.logger = logger
         this.environmentsToDoDesignCenterDeploymentOn = environmentsToDoDesignCenterDeploymentOn
         this.clientWrapper = httpClientWrapper
@@ -64,18 +70,23 @@ class Deployer {
                                                                                logger)
         this.cloudHubDeployer = cloudHubDeployer ?: new CloudHubDeployer(this.clientWrapper,
                                                                          this.environmentLocator,
-                                                                         logger)
+                                                                         logger,
+                                                                         dryRunMode)
         this.onPremDeployer = onPremDeployer ?: new OnPremDeployer(this.clientWrapper,
                                                                    this.environmentLocator,
-                                                                   logger)
+                                                                   logger,
+                                                                   dryRunMode)
         this.designCenterDeployer = designCenterDeployer ?: new DesignCenterDeployer(this.clientWrapper,
-                                                                                     logger)
+                                                                                     logger,
+                                                                                     dryRunMode)
         this.apiManagerDeployer = apiManagerDeployer ?: new ApiManagerDeployer(this.clientWrapper,
                                                                                this.environmentLocator,
-                                                                               logger)
+                                                                               logger,
+                                                                               dryRunMode)
         this.policyDeployer = policyDeployer ?: new PolicyDeployer(this.clientWrapper,
                                                                    this.environmentLocator,
-                                                                   this.logger)
+                                                                   this.logger,
+                                                                   dryRunMode)
     }
 
     /**
@@ -83,18 +94,15 @@ class Deployer {
      * @param appDeploymentRequest Details about how to deploy your app
      * @param apiSpecification How API specification details work. This can be optional. Doing so will automatically remove Design Center sync and policy sync from enabled features
      * @param desiredPolicies Which policies to apply. The default value is empty, which means apply no policies and remove any policies already there
-     * @param appVersion Version of the app you are deploying (e.g. <version> from the POM)
      * @param enabledFeatures Which features of this tool to turn on. All by default.
      */
     def deployApplication(CloudhubDeploymentRequest appDeploymentRequest,
-                          String appVersion,
                           ApiSpecification apiSpecification = null,
                           List<Policy> desiredPolicies = [],
                           List<Features> enabledFeatures = [Features.All]) {
         stepNumber = 0
         performCommonDeploymentTasks(apiSpecification,
                                      desiredPolicies,
-                                     appVersion,
                                      appDeploymentRequest,
                                      appDeploymentRequest.environment,
                                      enabledFeatures,
@@ -112,18 +120,15 @@ class Deployer {
      * @param appDeploymentRequest Details about how to deploy your app
      * @param apiSpecification How API specification details work. This can be optional. Doing so will automatically remove Design Center sync and policy sync from enabled features
      * @param desiredPolicies Which policies to apply. The default value is empty, which means apply no policies and remove any policies already there
-     * @param appVersion Version of the app you are deploying (e.g. <version> from the POM)
      * @param enabledFeatures Which features of this tool to turn on. All by default.
      */
     def deployApplication(OnPremDeploymentRequest appDeploymentRequest,
-                          String appVersion,
                           ApiSpecification apiSpecification = null,
                           List<Policy> desiredPolicies = [],
                           List<Features> enabledFeatures = [Features.All]) {
         stepNumber = 0
         performCommonDeploymentTasks(apiSpecification,
                                      desiredPolicies,
-                                     appVersion,
                                      appDeploymentRequest,
                                      appDeploymentRequest.environment,
                                      enabledFeatures,
@@ -165,11 +170,10 @@ class Deployer {
 
     private def performCommonDeploymentTasks(ApiSpecification apiSpecification,
                                              List<Policy> desiredPolicies,
-                                             String appVersion,
                                              FileBasedAppDeploymentRequest appDeploymentRequest,
                                              String environment,
                                              List<Features> enabledFeatures,
-                                             IDeployer deployer) {
+                                             ISubDeployer deployer) {
         def isFeatureDisabled = { Features feature ->
             getFeatureSkipReason(enabledFeatures,
                                  feature)
@@ -185,8 +189,7 @@ class Deployer {
         executeStep('Design Center Deployment',
                     skipReason) {
             designCenterDeployer.synchronizeDesignCenterFromApp(apiSpecification,
-                                                                appDeploymentRequest,
-                                                                appVersion)
+                                                                appDeploymentRequest)
         }
         if (!apiSpecification) {
             skipReason = "no API spec was provided"
@@ -201,7 +204,7 @@ class Deployer {
                                            environment,
                                            isMule4)
             apiManagerDeployer.synchronizeApiDefinition(internalSpec,
-                                                        appVersion)
+                                                        appDeploymentRequest.appVersion)
         } as ExistingApiSpec
         if (existingApiManagerDefinition) {
             appDeploymentRequest.autoDiscoveryId = existingApiManagerDefinition.id

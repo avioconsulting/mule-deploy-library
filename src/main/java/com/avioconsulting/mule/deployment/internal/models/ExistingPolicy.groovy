@@ -10,25 +10,25 @@ import groovy.transform.ToString
 class ExistingPolicy extends Policy {
     final String id
 
-    ExistingPolicy(String groupId,
-                   String assetId,
+    ExistingPolicy(String assetId,
                    String version,
                    Map<String, Object> policyConfiguration,
+                   String groupId,
                    List<PolicyPathApplication> policyPathApplications,
                    String id) {
-        super(groupId,
-              assetId,
+        super(assetId,
               version,
               policyConfiguration,
+              groupId,
               policyPathApplications)
         this.id = id
     }
 
     Policy getWithoutId() {
-        new Policy(groupId,
-                   assetId,
+        new Policy(assetId,
                    version,
                    policyConfiguration,
+                   groupId,
                    policyPathApplications)
     }
 }

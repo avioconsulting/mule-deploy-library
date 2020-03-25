@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.HttpMethod
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.api.models.policies.PolicyPathApplication
@@ -16,15 +17,20 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
-@SuppressWarnings("GroovyAccessibility")
+@SuppressWarnings('GroovyAccessibility')
 class PolicyDeployerTest extends BaseTest {
     private PolicyDeployer policyDeployer
 
     @Before
-    void setupDeployer() {
+    void clean() {
+        setupDeployer(DryRunMode.Run)
+    }
+
+    def setupDeployer(DryRunMode dryRunMode) {
         policyDeployer = new PolicyDeployer(this.clientWrapper,
                                             this.environmentLocator,
-                                            System.out)
+                                            System.out,
+                                            dryRunMode)
     }
 
     @Test
@@ -107,19 +113,19 @@ class PolicyDeployerTest extends BaseTest {
                    is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'))
         assertThat results,
                    is(equalTo([
-                           new ExistingPolicy(Policy.mulesoftGroupId,
-                                              'openidconnect-access-token-enforcement',
+                           new ExistingPolicy('openidconnect-access-token-enforcement',
                                               '1.3.0',
                                               [exposeHeaders: false],
+                                              Policy.mulesoftGroupId,
                                               [
                                                       new PolicyPathApplication([HttpMethod.POST],
                                                                                 '.*foo')
                                               ],
                                               '654160'),
-                           new ExistingPolicy(Policy.mulesoftGroupId,
-                                              'openidconnect-access-token-enforcement',
+                           new ExistingPolicy('openidconnect-access-token-enforcement',
                                               '1.2.0',
                                               [exposeHeaders: false],
+                                              Policy.mulesoftGroupId,
                                               [
                                                       new PolicyPathApplication([HttpMethod.POST],
                                                                                 '.*foo'),
@@ -182,10 +188,10 @@ class PolicyDeployerTest extends BaseTest {
                    is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'))
         assertThat results,
                    is(equalTo([
-                           new ExistingPolicy(Policy.mulesoftGroupId,
-                                              'openidconnect-access-token-enforcement',
+                           new ExistingPolicy('openidconnect-access-token-enforcement',
                                               '1.2.0',
                                               [exposeHeaders: false],
+                                              Policy.mulesoftGroupId,
                                               null,
                                               '654159')
                    ]))
@@ -248,10 +254,10 @@ class PolicyDeployerTest extends BaseTest {
                    is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'))
         assertThat results,
                    is(equalTo([
-                           new ExistingPolicy(Policy.mulesoftGroupId,
-                                              'openidconnect-access-token-enforcement',
+                           new ExistingPolicy('openidconnect-access-token-enforcement',
                                               '1.2.0',
                                               [exposeHeaders: false],
+                                              Policy.mulesoftGroupId,
                                               [
                                                       new PolicyPathApplication([
                                                                                         HttpMethod.GET,
@@ -293,10 +299,10 @@ class PolicyDeployerTest extends BaseTest {
                                           'https://foo',
                                           'DEV',
                                           true)
-        def policy = new Policy(Policy.mulesoftGroupId,
-                                'openidconnect-access-token-enforcement',
+        def policy = new Policy('openidconnect-access-token-enforcement',
                                 '1.2.0',
                                 [exposeHeaders: false],
+                                Policy.mulesoftGroupId,
                                 [
                                         new PolicyPathApplication([
                                                                           HttpMethod.GET,
@@ -361,10 +367,10 @@ class PolicyDeployerTest extends BaseTest {
                                           'https://foo',
                                           'DEV',
                                           true)
-        def policy = new Policy(Policy.mulesoftGroupId,
-                                'openidconnect-access-token-enforcement',
+        def policy = new Policy('openidconnect-access-token-enforcement',
                                 '1.2.0',
-                                [exposeHeaders: false])
+                                [exposeHeaders: false],
+                                Policy.mulesoftGroupId)
 
         // act
         policyDeployer.createPolicy(apiSpec,
@@ -415,10 +421,10 @@ class PolicyDeployerTest extends BaseTest {
                                           'https://foo',
                                           'DEV',
                                           true)
-        def policy = new ExistingPolicy(Policy.mulesoftGroupId,
-                                        'openidconnect-access-token-enforcement',
+        def policy = new ExistingPolicy('openidconnect-access-token-enforcement',
                                         '1.2.0',
                                         [exposeHeaders: false],
+                                        Policy.mulesoftGroupId,
                                         [],
                                         '654159')
         // act
@@ -500,10 +506,10 @@ class PolicyDeployerTest extends BaseTest {
                                           'DEV',
                                           true)
         def policies = [
-                new Policy(Policy.mulesoftGroupId,
-                           'openidconnect-access-token-enforcement',
+                new Policy('openidconnect-access-token-enforcement',
                            '1.2.0',
-                           [exposeHeaders: false])
+                           [exposeHeaders: false],
+                           Policy.mulesoftGroupId)
         ]
 
         // act
@@ -532,10 +538,10 @@ class PolicyDeployerTest extends BaseTest {
             requests << "${request.method().name()} ${request.uri()}".toString()
             if (mockPolicyGet(request,
                               [
-                                      new ExistingPolicy(Policy.mulesoftGroupId,
-                                                         'openidconnect-access-token-enforcement',
+                                      new ExistingPolicy('openidconnect-access-token-enforcement',
                                                          '1.2.0',
                                                          [exposeHeaders: false],
+                                                         Policy.mulesoftGroupId,
                                                          null,
                                                          '1234')
                               ])) {
@@ -556,10 +562,10 @@ class PolicyDeployerTest extends BaseTest {
                                           'DEV',
                                           true)
         def policies = [
-                new Policy(Policy.mulesoftGroupId,
-                           'openidconnect-access-token-enforcement',
+                new Policy('openidconnect-access-token-enforcement',
                            '1.2.0',
-                           [exposeHeaders: false])
+                           [exposeHeaders: false],
+                           Policy.mulesoftGroupId)
         ]
 
         // act
@@ -587,10 +593,10 @@ class PolicyDeployerTest extends BaseTest {
             requests << "${request.method().name()} ${request.uri()}".toString()
             if (mockPolicyGet(request,
                               [
-                                      new ExistingPolicy(Policy.mulesoftGroupId,
-                                                         'openidconnect-access-token-enforcement',
+                                      new ExistingPolicy('openidconnect-access-token-enforcement',
                                                          '1.2.0',
                                                          [exposeHeaders: false],
+                                                         Policy.mulesoftGroupId,
                                                          null,
                                                          '987')
                               ])) {
@@ -611,14 +617,14 @@ class PolicyDeployerTest extends BaseTest {
                                           'DEV',
                                           true)
         def policies = [
-                new Policy(Policy.mulesoftGroupId,
-                           'openidconnect-access-token-enforcement',
+                new Policy('openidconnect-access-token-enforcement',
                            '1.2.0',
-                           [exposeHeaders: false]),
-                new Policy(Policy.mulesoftGroupId,
-                           'some-other-policy',
+                           [exposeHeaders: false],
+                           Policy.mulesoftGroupId),
+                new Policy('some-other-policy',
                            '1.2.0',
-                           [exposeHeaders: false])
+                           [exposeHeaders: false],
+                           Policy.mulesoftGroupId)
         ]
 
         // act
@@ -649,10 +655,10 @@ class PolicyDeployerTest extends BaseTest {
             requests << "${request.method().name()} ${request.uri()}".toString()
             if (mockPolicyGet(request,
                               [
-                                      new ExistingPolicy(Policy.mulesoftGroupId,
-                                                         'openidconnect-access-token-enforcement',
+                                      new ExistingPolicy('openidconnect-access-token-enforcement',
                                                          '1.1.0',
                                                          [exposeHeaders: false],
+                                                         Policy.mulesoftGroupId,
                                                          null,
                                                          '987')
                               ])) {
@@ -673,10 +679,10 @@ class PolicyDeployerTest extends BaseTest {
                                           'DEV',
                                           true)
         def policies = [
-                new Policy(Policy.mulesoftGroupId,
-                           'openidconnect-access-token-enforcement',
+                new Policy('openidconnect-access-token-enforcement',
                            '1.2.0',
-                           [exposeHeaders: false])
+                           [exposeHeaders: false],
+                           Policy.mulesoftGroupId)
         ]
 
         // act
@@ -689,6 +695,103 @@ class PolicyDeployerTest extends BaseTest {
                            'GET /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies',
                            'DELETE /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies/987',
                            'POST /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'
+                   ]))
+    }
+
+    @Test
+    void synchronizePolicies_online_validate() {
+        // arrange
+        setupDeployer(DryRunMode.OnlineValidate)
+        def requests = []
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            requests << "${request.method().name()} ${request.uri()}".toString()
+            if (mockPolicyGet(request,
+                              [
+                                      new ExistingPolicy('openidconnect-access-token-enforcement',
+                                                         '1.2.0',
+                                                         [exposeHeaders: false],
+                                                         Policy.mulesoftGroupId,
+                                                         null,
+                                                         '987')
+                              ])) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def result = 'did it'
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def apiSpec = new ExistingApiSpec('1234',
+                                          'the-asset-id',
+                                          '1.2.3',
+                                          'https://foo',
+                                          'DEV',
+                                          true)
+        def policies = [
+                new Policy('openidconnect-access-token-enforcement',
+                           '1.2.0',
+                           [exposeHeaders: false],
+                           Policy.mulesoftGroupId),
+                new Policy('some-other-policy',
+                           '1.2.0',
+                           [exposeHeaders: false],
+                           Policy.mulesoftGroupId)
+        ]
+
+        // act
+        policyDeployer.synchronizePolicies(apiSpec,
+                                           policies)
+
+        // assert
+        assertThat requests,
+                   is(equalTo([
+                           'GET /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'
+                   ]))
+    }
+
+    @Test
+    void normalizePolicies() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+        }
+        def input = [
+                // should stay the same
+                new Policy('openidconnect-access-token-enforcement',
+                           '1.2.0',
+                           [exposeHeaders: false],
+                           Policy.mulesoftGroupId),
+                new Policy('some-other-policy',
+                           '1.2.0',
+                           [exposeHeaders: false])
+        ]
+
+        // act
+        def result = policyDeployer.normalizePolicies(input)
+
+        // assert
+        assertThat result,
+                   is(equalTo([
+                           // should stay the same
+                           new Policy('openidconnect-access-token-enforcement',
+                                      '1.2.0',
+                                      [exposeHeaders: false],
+                                      Policy.mulesoftGroupId),
+                           new Policy('some-other-policy',
+                                      '1.2.0',
+                                      [exposeHeaders: false],
+                                      'the-org-id')
                    ]))
     }
 }

@@ -22,14 +22,15 @@ class HttpClientWrapper implements HttpRequestInterceptor {
     private final PrintStream logger
     final String baseUrl
     private final CloseableHttpClient httpClient
-    final String anypointOrganizationId
+    private final String anypointOrganizationName
+    private String anypointOrganizationId
 
     HttpClientWrapper(String baseUrl,
                       String username,
                       String password,
-                      String anypointOrganizationId,
-                      PrintStream logger) {
-        this.anypointOrganizationId = anypointOrganizationId
+                      PrintStream logger,
+                      String anypointOrganizationName = null) {
+        this.anypointOrganizationName = anypointOrganizationName
         this.password = password
         this.username = username
         this.logger = logger
@@ -40,15 +41,17 @@ class HttpClientWrapper implements HttpRequestInterceptor {
                 .build()
     }
 
-    /**
-     *
-     * @param username
-     * @param password
-     * @return - an auth token
-     */
+    String getAnypointOrganizationId() {
+        // might need to auth to get this
+        authenticate()
+        return anypointOrganizationId
+    }
+
     private def authenticate() {
-        fetchAccessToken()
-        fetchUserInfo()
+        if (!this.accessToken) {
+            fetchAccessToken()
+            fetchUserInfo()
+        }
     }
 
     private def fetchUserInfo() {
@@ -56,7 +59,28 @@ class HttpClientWrapper implements HttpRequestInterceptor {
         def request = new HttpGet("${baseUrl}/accounts/api/me")
         executeWithSuccessfulCloseableResponse(request,
                                                'fetch user info') { result ->
-            this.ownerGuid = result.user.id
+            def user = result.user
+            this.ownerGuid = user.id
+            def memberOrgs = user.memberOfOrganizations
+            if (!this.anypointOrganizationName) {
+                this.anypointOrganizationId = user.organizationPreferences.keySet().first()
+                def name = memberOrgs.find { org ->
+                    org.id == this.anypointOrganizationId
+                }?.name
+                if (name) {
+                    logger.println("Using default organization for ${username} of '${name}'")
+                } else {
+                    throw new Exception('No Anypoint org was specified and was unable to find a default one! This should not happen!')
+                }
+            } else {
+                this.anypointOrganizationId = memberOrgs.find { org ->
+                    org.name == this.anypointOrganizationName
+                }?.id
+                if (!this.anypointOrganizationId) {
+                    def options = memberOrgs.collect { org -> org.name }
+                    throw new Exception("You specified Anypoint organization '${this.anypointOrganizationName}' but that organization was not found. Options are ${options}")
+                }
+            }
         }
     }
 
@@ -123,6 +147,8 @@ class HttpClientWrapper implements HttpRequestInterceptor {
     }
 
     String getOwnerGuid() {
+        // need to auth to get this
+        authenticate()
         this.ownerGuid
     }
 

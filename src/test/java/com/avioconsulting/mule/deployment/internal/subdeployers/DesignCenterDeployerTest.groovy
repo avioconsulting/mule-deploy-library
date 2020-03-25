@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
@@ -20,9 +21,14 @@ class DesignCenterDeployerTest extends BaseTest {
     private DesignCenterDeployer deployer
 
     @Before
-    void setupDeployer() {
+    void clean() {
+        setupDeployer(DryRunMode.Run)
+    }
+
+    def setupDeployer(DryRunMode dryRunMode) {
         deployer = new DesignCenterDeployer(clientWrapper,
-                                            System.out)
+                                            System.out,
+                                            dryRunMode)
     }
 
     @Test
@@ -86,6 +92,11 @@ class DesignCenterDeployerTest extends BaseTest {
             @Override
             def setAutoDiscoveryId(String autoDiscoveryId) {
                 return null
+            }
+
+            @Override
+            String getAppVersion() {
+                '1.2.3'
             }
         }
     }
@@ -209,7 +220,7 @@ class DesignCenterDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def jsonResult = null
+                def jsonResult
                 if (request.absoluteURI().endsWith('files')) {
                     jsonResult = [
                             [
@@ -327,7 +338,7 @@ class DesignCenterDeployerTest extends BaseTest {
             method = request.method().toString()
             ownerGuid = request.getHeader('X-OWNER-ID')
             request.bodyHandler { body ->
-                sentPayload = new JsonSlurper().parseText(body.toString())
+                sentPayload = new JsonSlurper().parseText(body.toString()) as List<Map>
             }
             request.response().with {
                 statusCode = 204
@@ -385,7 +396,7 @@ class DesignCenterDeployerTest extends BaseTest {
             method = request.method().toString()
             ownerGuid = request.getHeader('X-OWNER-ID')
             request.bodyHandler { body ->
-                sentPayload = new JsonSlurper().parseText(body.toString())
+                sentPayload = new JsonSlurper().parseText(body.toString()) as Map
             }
             request.response().with {
                 statusCode = 204
@@ -447,7 +458,7 @@ class DesignCenterDeployerTest extends BaseTest {
             method = request.method().toString()
             ownerGuid = request.getHeader('X-OWNER-ID')
             request.bodyHandler { body ->
-                sentPayload = new JsonSlurper().parseText(body.toString())
+                sentPayload = new JsonSlurper().parseText(body.toString()) as Map
             }
             request.response().with {
                 statusCode = 204
@@ -1027,14 +1038,101 @@ class DesignCenterDeployerTest extends BaseTest {
 
         // act
         deployer.synchronizeDesignCenterFromApp(apiSpec,
-                                                appInfo,
-                                                '1.2.3')
+                                                appInfo)
 
         // assert
         assertThat filesUploaded,
                    is(equalTo(true))
         assertThat exchangePushed,
                    is(equalTo(true))
+        assertThat 'We should always unlock if we lock',
+                   locked,
+                   is(equalTo(false))
+    }
+
+    @Test
+    void synchronizeDesignCenter_online_validate() {
+        // arrange
+        setupDeployer(DryRunMode.OnlineValidate)
+        def filesUploaded = false
+        def exchangePushed = false
+        def locked = false
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockAcquireLock(request,
+                                'abcd')) {
+                locked = true
+                return
+            }
+            if (mockReleaseLock(request,
+                                'abcd')) {
+                locked = false
+                return
+            }
+            if (mockDesignCenterProjectId(request,
+                                          'Hello API',
+                                          'abcd')) {
+                return
+            }
+            if (locked && mockFileUpload(request,
+                                         'abcd')) {
+                filesUploaded = true
+                return
+            }
+            if (locked && mockExchangePush(request,
+                                           'abcd')) {
+                exchangePushed = true
+                return
+            }
+            if (locked && mockGetExistingFiles(request,
+                                               'abcd',
+                                               [:])) {
+                return
+            }
+            request.response().with {
+                statusCode = 404
+                end("Unexpected request ${request.absoluteURI()}")
+            }
+        }
+        def apiSpec = new ApiSpecification('Hello API')
+        def tempDir = new File('target/temp')
+        def tempAppDirectory = new File(tempDir,
+                                        'designcenterapp')
+        tempAppDirectory.deleteDir()
+        tempAppDirectory.mkdirs()
+        def apiDirectory = new File(tempAppDirectory,
+                                    'api')
+        def file = new File(apiDirectory,
+                            'stuff.yaml')
+        FileUtils.touch(file)
+        file.text = 'howdy2'
+        def folder = new File(apiDirectory,
+                              'folder')
+        file = new File(folder,
+                        'lib.yaml')
+        FileUtils.touch(file)
+        file.text = 'howdy1'
+        def exchangeModules = new File(apiDirectory,
+                                       'exchange_modules')
+        file = new File(exchangeModules,
+                        'junk')
+        FileUtils.touch(file)
+        FileUtils.touch(new File(apiDirectory,
+                                 'exchange.json'))
+        def appInfo = buildZip(tempDir,
+                               tempAppDirectory)
+
+        // act
+        deployer.synchronizeDesignCenterFromApp(apiSpec,
+                                                appInfo)
+
+        // assert
+        assertThat filesUploaded,
+                   is(equalTo(false))
+        assertThat exchangePushed,
+                   is(equalTo(false))
         assertThat 'We should always unlock if we lock',
                    locked,
                    is(equalTo(false))

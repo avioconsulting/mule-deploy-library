@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.models.OnPremDeploymentStatus
 import groovy.json.JsonOutput
@@ -18,12 +19,17 @@ class OnPremDeployerTest extends BaseTest {
     private OnPremDeployer deployer
 
     @Before
-    void setupDeployer() {
+    void clean() {
+        setupDeployer(DryRunMode.Run)
+    }
+
+    def setupDeployer(DryRunMode dryRunMode) {
         deployer = new OnPremDeployer(this.clientWrapper,
                                       environmentLocator,
                                       500,
                                       10,
-                                      System.out)
+                                      System.out,
+                                      dryRunMode)
     }
 
     @Test
@@ -353,7 +359,7 @@ class OnPremDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
+                def result
                 if (uri.endsWith('servers')) {
                     result = [
                             data: [
@@ -418,6 +424,7 @@ class OnPremDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
+                                                  '1.2.3',
                                                   'clustera',
                                                   file)
 
@@ -469,7 +476,7 @@ class OnPremDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
+                def result
                 if (uri.endsWith('servers')) {
                     result = [
                             data: [
@@ -528,6 +535,7 @@ class OnPremDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
+                                                  '1.2.3',
                                                   'clustera',
                                                   file)
         request.setAutoDiscoveryId('1234')
@@ -570,7 +578,7 @@ class OnPremDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
+                def result
                 if (uri.endsWith('servers')) {
                     result = [
                             data: [
@@ -635,6 +643,7 @@ class OnPremDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
+                                                  '1.2.3',
                                                   'clustera',
                                                   file,
                                                   [prop1: 'foo', prop2: 'bar'])
@@ -683,6 +692,7 @@ class OnPremDeployerTest extends BaseTest {
         def exception = shouldFail {
             new OnPremDeploymentRequest('DEV',
                                         'some app name',
+                                        '1.2.3',
                                         'clustera',
                                         file)
         }
@@ -714,7 +724,7 @@ class OnPremDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
+                def result
                 if (uri.endsWith('servers')) {
                     result = [
                             data: [
@@ -779,6 +789,7 @@ class OnPremDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
                                                   'the-app',
+                                                  '1.2.3',
                                                   'clustera',
                                                   file)
 
@@ -832,7 +843,7 @@ class OnPremDeployerTest extends BaseTest {
                 statusCode = 200
                 putHeader('Content-Type',
                           'application/json')
-                def result = null
+                def result
                 if (uri.endsWith('servers')) {
                     result = [
                             data: [
@@ -897,6 +908,7 @@ class OnPremDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
                                                   'the-app',
+                                                  '1.2.3',
                                                   'clustera',
                                                   file,
                                                   [prop1: 'foo', prop2: 'bar'])
@@ -1261,10 +1273,10 @@ class OnPremDeployerTest extends BaseTest {
         }
     }
 
-    def getAppStatusJson(String desired,
-                         String reported1,
-                         String reported2,
-                         String fileName) {
+    static def getAppStatusJson(String desired,
+                                String reported1,
+                                String reported2,
+                                String fileName) {
         def serverArtifacts = [
                 [
                         id           : 'wrongone',
@@ -1327,6 +1339,7 @@ class OnPremDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
+                                                  '1.2.3',
                                                   'clustera',
                                                   file)
 
@@ -1373,6 +1386,7 @@ class OnPremDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
+                                                  '1.2.3',
                                                   'clustera',
                                                   file)
 
@@ -1409,6 +1423,7 @@ class OnPremDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
+                                                  '1.2.3',
                                                   'clustera',
                                                   file)
 
@@ -1451,6 +1466,7 @@ class OnPremDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
+                                                  '1.2.3',
                                                   'clustera',
                                                   file)
 
@@ -1470,6 +1486,7 @@ class OnPremDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.zip')
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
+                                                  '1.2.3',
                                                   'clustera',
                                                   file)
 
@@ -1487,6 +1504,7 @@ class OnPremDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.jar')
         def request = new OnPremDeploymentRequest('DEV',
                                                   'new-app',
+                                                  '1.2.3',
                                                   'clustera',
                                                   file)
 
@@ -1496,5 +1514,92 @@ class OnPremDeployerTest extends BaseTest {
         // assert
         assertThat result,
                    is(equalTo(true))
+    }
+
+    @Test
+    void deploy_online_validate() {
+        // arrange
+        setupDeployer(DryRunMode.OnlineValidate)
+        def deployed = false
+        withHttpServer { HttpServerRequest request ->
+            def uri = request.uri()
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def result
+                if (uri.endsWith('servers')) {
+                    result = [
+                            data: [
+                                    [
+                                            id  : 'abc123',
+                                            name: 'serverb'
+                                    ],
+                                    [
+                                            id         : 'def456',
+                                            name       : 'servera',
+                                            clusterId  : 'cluster1',
+                                            clusterName: 'clustera'
+                                    ]
+                            ]
+                    ]
+                } else if (uri.endsWith('applications') && request.method().name() == 'GET') {
+                    result = [
+                            data: [
+                                    [
+                                            id  : 'abc123',
+                                            name: 'app1'
+                                    ],
+                                    [
+                                            id  : 'def456',
+                                            name: 'the-app'
+                                    ]
+                            ]
+                    ]
+                } else if (uri.endsWith('applications/1234') && request.method().name() == 'GET') {
+                    statusCode = 200
+                    // we test most of this in other methods
+                    result = getAppStatusJson('STARTED',
+                                              'STARTED',
+                                              'STARTED',
+                                              'some_file.txt')
+                } else {
+                    // deployment service returns this
+                    deployed = true
+                    statusCode = 202
+                    result = [
+                            data: [
+                                    id             : 1234,
+                                    serverArtifacts: [
+                                            [
+                                                    id           : 'artid1',
+                                                    desiredStatus: 'UPDATED'
+                                            ]
+                                    ]
+                            ]
+                    ]
+                    request.expectMultipart = true
+                }
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def file = new File('src/test/resources/some_file.txt')
+        def request = new OnPremDeploymentRequest('DEV',
+                                                  'new-app',
+                                                  '1.2.3',
+                                                  'clustera',
+                                                  file)
+        // act
+        deployer.deploy(request)
+
+        // assert
+        assertThat deployed,
+                   is(equalTo(false))
     }
 }

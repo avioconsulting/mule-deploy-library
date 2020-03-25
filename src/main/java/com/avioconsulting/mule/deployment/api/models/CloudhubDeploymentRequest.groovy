@@ -3,11 +3,13 @@ package com.avioconsulting.mule.deployment.api.models
 import com.avioconsulting.mule.deployment.internal.models.CloudhubAppProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
+import groovy.transform.ToString
 import org.apache.http.HttpEntity
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
 
+@ToString
 class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
     /**
      * environment name (e.g. DEV, not GUID)
@@ -53,6 +55,10 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
      * Get only property, derived from app, environment, and prefix, this the real application name that will be used in CloudHub to ensure uniqueness.
      */
     final String normalizedAppName
+    /**
+     * Version of the app you are deploying (e.g. <version> from the POM)
+     */
+    final String appVersion
 
     private CloudhubAppProperties cloudhubAppProperties
 
@@ -61,6 +67,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     CloudhubDeploymentRequest(String environment,
                               String appName,
+                              String appVersion,
                               CloudhubWorkerSpecRequest workerSpecRequest,
                               File file,
                               String cryptoKey,
@@ -71,6 +78,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                               Map<String, String> otherCloudHubProperties = [:]) {
         this.environment = environment
         this.appName = appName
+        this.appVersion = appVersion
         this.workerSpecRequest = workerSpecRequest
         this.cryptoKey = cryptoKey
         this.anypointClientId = anypointClientId
@@ -110,8 +118,8 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
     }
 
     Map<String, String> getCloudhubAppInfo() {
-        def props =  new ObjectMapper().convertValue(this.cloudhubAppProperties,
-                                                     Map)
+        def props = new ObjectMapper().convertValue(this.cloudhubAppProperties,
+                                                    Map)
         def result = [
                 // CloudHub's API calls the Mule application the 'domain'
                 domain               : normalizedAppName,

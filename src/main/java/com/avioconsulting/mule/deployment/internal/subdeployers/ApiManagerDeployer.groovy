@@ -1,5 +1,6 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.*
@@ -17,10 +18,13 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
     final HttpClientWrapper clientWrapper
     final PrintStream logger
     final EnvironmentLocator environmentLocator
+    private final DryRunMode dryRunMode
 
     ApiManagerDeployer(HttpClientWrapper clientWrapper,
                        EnvironmentLocator environmentLocator,
-                       PrintStream logger) {
+                       PrintStream logger,
+                       DryRunMode dryRunMode) {
+        this.dryRunMode = dryRunMode
         this.environmentLocator = environmentLocator
         this.logger = logger
         this.clientWrapper = clientWrapper
@@ -42,6 +46,10 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
                 logger.println 'API definition already exists and is already correct, no changes required'
                 return existing
             } else {
+                if (dryRunMode != DryRunMode.Run) {
+                    logger.println 'API definition already exists but is out of date. WOULD update but in dry-run mode'
+                    return null
+                }
                 logger.println 'API definition already exists but is out of date, updating'
                 def newDefinition = new ExistingApiSpec(existing.id,
                                                         resolvedApiSpec.exchangeAssetId,
@@ -52,6 +60,10 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
                 updateApiDefinition(newDefinition)
                 return newDefinition
             }
+        }
+        if (dryRunMode != DryRunMode.Run) {
+            logger.println 'API definition does not yet exist, WOULD create but in dry-run mode'
+            return null
         }
         logger.println 'API definition does not yet exist, will create'
         createApiDefinition(resolvedApiSpec)

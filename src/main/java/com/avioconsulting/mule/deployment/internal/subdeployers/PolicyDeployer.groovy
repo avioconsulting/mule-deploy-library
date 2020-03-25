@@ -1,5 +1,6 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.HttpMethod
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.api.models.policies.PolicyPathApplication
@@ -18,11 +19,14 @@ class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
     final HttpClientWrapper clientWrapper
     final EnvironmentLocator environmentLocator
     final PrintStream logger
+    private final DryRunMode dryRunMode
 
     PolicyDeployer(HttpClientWrapper clientWrapper,
                    EnvironmentLocator environmentLocator,
-                   PrintStream logger) {
+                   PrintStream logger,
+                   DryRunMode dryRunMode) {
 
+        this.dryRunMode = dryRunMode
         this.logger = logger
         this.environmentLocator = environmentLocator
         this.clientWrapper = clientWrapper
@@ -30,6 +34,7 @@ class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
 
     def synchronizePolicies(ExistingApiSpec apiSpec,
                             List<Policy> desiredPolicies) {
+        desiredPolicies = normalizePolicies(desiredPolicies)
         def existing = getExistingPolicies(apiSpec)
         def existingForComparison = existing.collect { policy -> policy.withoutId }
         if (existingForComparison == desiredPolicies) {
@@ -51,8 +56,22 @@ class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
         }
     }
 
+    private List<Policy> normalizePolicies(List<Policy> desiredPolicies) {
+        desiredPolicies.collect { policy ->
+            if (policy.groupId) {
+                return policy
+            }
+            // we don't know what our org ID is until we're in here
+            policy.withGroupId(clientWrapper.anypointOrganizationId)
+        }
+    }
+
     private def deletePolicy(ExistingApiSpec apiSpec,
                              ExistingPolicy policy) {
+        if (dryRunMode != DryRunMode.Run) {
+            logger.println("For API ${apiSpec.id}, WOULD delete policy ${policy} but in dry-run mode")
+            return
+        }
         logger.println("For API ${apiSpec.id}, deleting policy ${policy}")
         def request = new HttpDelete(getApiManagerUrl("/${apiSpec.id}/policies/${policy.id}",
                                                       apiSpec.environment))
@@ -78,6 +97,10 @@ class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
                 assetVersion     : policy.version
         ]
         String requestPayload = JsonOutput.toJson(requestPayloadMap)
+        if (dryRunMode != DryRunMode.Run) {
+            logger.println("For API ${apiSpec.id}, WOULD create policy ${JsonOutput.prettyPrint(requestPayload)} but in dry-run mode")
+            return
+        }
         logger.println("For API ${apiSpec.id}, creating policy ${JsonOutput.prettyPrint(requestPayload)}")
         def request = new HttpPost(getApiManagerUrl("/${apiSpec.id}/policies",
                                                     apiSpec.environment)).with {
@@ -106,10 +129,10 @@ class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
                     new PolicyPathApplication(methods,
                                               pointCutMap.uriTemplateRegex as String)
                 }
-                new ExistingPolicy(template.groupId as String,
-                                   template.assetId as String,
+                new ExistingPolicy(template.assetId as String,
                                    template.assetVersion as String,
                                    policyMap.configuration as Map<String, Object>,
+                                   template.groupId as String,
                                    paths.any() ? paths : null,
                                    policyMap.policyId as String)
             }

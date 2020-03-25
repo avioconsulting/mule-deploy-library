@@ -16,15 +16,31 @@ class Policy {
         '68ef9520-24e9-4cf2-b2f5-620025690913'
     }
 
-    Policy(String groupId,
-           String assetId,
+    /**
+     * Create a policy
+     * @param assetId name of the policy asset (might have to use APIs to find this)
+     * @param version version
+     * @param policyConfiguration additional policy configuration
+     * @param groupId - Which group (goes with asset ID) is the policy from? If not supplied, it will be assumed to be your own group (e.g. a custom policy). You can also use the getMulesoftGroupId static method
+     * @param policyPathApplications - Optional. If not supplied, will apply to every resource
+     */
+    Policy(String assetId,
            String version,
            Map<String, String> policyConfiguration,
+           String groupId = null,
            List<PolicyPathApplication> policyPathApplications = null) {
         this.groupId = groupId
         this.assetId = assetId
         this.version = version
         this.policyConfiguration = policyConfiguration
         this.policyPathApplications = policyPathApplications
+    }
+
+    Policy withGroupId(String groupId) {
+        new Policy(assetId,
+                   version,
+                   policyConfiguration,
+                   groupId,
+                   policyPathApplications)
     }
 }

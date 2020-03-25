@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.AwsRegions
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
@@ -20,30 +21,36 @@ import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
+@SuppressWarnings("GroovyAccessibility")
 class CloudHubDeployerTest extends BaseTest {
     private CloudHubDeployer deployer
     private int statusCheckCount
     private int maxTries
 
     @Before
-    void setupDeployer() {
+    void clean() {
         statusCheckCount = 0
         maxTries = 10
+        setupDeployer(DryRunMode.Run)
+    }
+
+    def setupDeployer(DryRunMode dryRunMode) {
         deployer = new CloudHubDeployer(this.clientWrapper,
                                         environmentLocator,
                                         500,
                                         maxTries,
-                                        System.out)
+                                        System.out,
+                                        dryRunMode)
     }
 
     static final Map<AppStatus, String> ReverseAppStatusMappings = AppStatusMapper.AppStatusMappings.collectEntries {
         k, v ->
             [v, k]
-    }
+    } as Map<AppStatus, String>
     static final Map<DeploymentUpdateStatus, String> ReverseDeployUpdateStatusMappings = AppStatusMapper.DeployUpdateStatusMappings.collectEntries {
         k, v ->
             [v, k]
-    }
+    } as Map<DeploymentUpdateStatus, String>
 
     static def getAppDeployResponsePayload(String appName) {
         [
@@ -95,6 +102,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -195,6 +203,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1),
@@ -292,6 +301,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -395,6 +405,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   true,
                                                                                   1,
@@ -501,6 +512,7 @@ class CloudHubDeployerTest extends BaseTest {
         ] as Map<String, String>
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -606,6 +618,7 @@ class CloudHubDeployerTest extends BaseTest {
         ] as Map<String, String>
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -714,6 +727,7 @@ class CloudHubDeployerTest extends BaseTest {
         ] as Map<String, String>
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -818,6 +832,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'NEW-APP',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -916,6 +931,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -980,6 +996,7 @@ class CloudHubDeployerTest extends BaseTest {
         def exception = shouldFail {
             new CloudhubDeploymentRequest('DEV',
                                           'some app name',
+                                          '1.2.3',
                                           new CloudhubWorkerSpecRequest('3.9.1',
                                                                         false,
                                                                         1,
@@ -1021,6 +1038,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -1068,6 +1086,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -1113,6 +1132,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -1160,6 +1180,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -1222,6 +1243,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -1284,6 +1306,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -1303,6 +1326,72 @@ class CloudHubDeployerTest extends BaseTest {
                    is(equalTo(true))
         assertThat deployed,
                    is(equalTo(true))
+    }
+
+    @Test
+    void perform_deployment_existing_failed_app_never_successful_but_this_one_is_dry_run_online_validate() {
+        // arrange
+        setupDeployer(DryRunMode.OnlineValidate)
+        def appStartRequested = false
+        def deployed = false
+        withHttpServer { HttpServerRequest request ->
+            def uri = request.uri()
+            if (mockDeploymentAndXStatusChecks(request,
+                                               new AppStatusPackage(AppStatus.Failed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Failed,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Deploying,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def result = null
+                if (uri.endsWith('applications/client-new-app-dev/status') && request.method() == HttpMethod.POST && deployed) {
+                    appStartRequested = true
+                    statusCode = 200
+                } else if (uri == '/cloudhub/api/v2/applications/client-new-app-dev' && request.method() == HttpMethod.PUT) {
+                    // deployment service returns this
+                    statusCode = 200
+                    deployed = true
+                    result = getAppDeployResponsePayload('client-new-app-dev')
+                } else {
+                    statusCode = 500
+                    result = [
+                            message: "Not sure how we got in this state ${request.method()} ${request.uri()}"
+                    ]
+                }
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def file = new File('src/test/resources/some_file.txt')
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    '1.2.3',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
+
+        // act
+        deployer.deploy(request)
+
+        // assert
+        assertThat appStartRequested,
+                   is(equalTo(false))
+        assertThat deployed,
+                   is(equalTo(false))
     }
 
     def mockDeploymentAndXStatusChecks(HttpServerRequest request,
@@ -1374,6 +1463,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -1421,6 +1511,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -1466,6 +1557,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -1519,6 +1611,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -1540,6 +1633,54 @@ class CloudHubDeployerTest extends BaseTest {
                    is(equalTo(5))
         assertThat exception.message,
                    is(equalTo('Deployment failed on 1 or more workers. Please see logs and messages as to why app did not start'))
+    }
+
+    @Test
+    void deploy_online_validate() {
+        // arrange
+        setupDeployer(DryRunMode.OnlineValidate)
+        def deployed = false
+        withHttpServer { HttpServerRequest request ->
+            if (mockDeploymentAndXStatusChecks(request,
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    DeploymentUpdateStatus.Deploying),
+                                               new AppStatusPackage(AppStatus.Started,
+                                                                    null))) {
+                return
+            }
+            request.response().with {
+                putHeader('Content-Type',
+                          'application/json')
+                // deployment service returns this
+                statusCode = 200
+                deployed = true
+                def result = getAppDeployResponsePayload('new-app')
+                request.expectMultipart = true
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def file = new File('src/test/resources/some_file.txt')
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    'new-app',
+                                                    '1.2.3',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client')
+        // act
+        deployer.deploy(request)
+
+        // assert
+        assertThat deployed,
+                   is(equalTo(false))
     }
 
     @Test
@@ -1619,6 +1760,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -1644,6 +1786,7 @@ class CloudHubDeployerTest extends BaseTest {
         def file = new File('src/test/resources/some_file.jar')
         def request = new CloudhubDeploymentRequest('DEV',
                                                     'new-app',
+                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('4.2.2',
                                                                                   false,
                                                                                   1,

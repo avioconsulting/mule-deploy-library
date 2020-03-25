@@ -1,7 +1,8 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
-import com.avioconsulting.mule.deployment.internal.http.LazyHeader
+
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
@@ -30,10 +31,12 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
             'exchange.json', // see above
             '.designer.json'
     ]
+    private final DryRunMode dryRunMode
 
     DesignCenterDeployer(HttpClientWrapper clientWrapper,
-                         PrintStream logger) {
-
+                         PrintStream logger,
+                         DryRunMode dryRunMode) {
+        this.dryRunMode = dryRunMode
         this.logger = logger
         this.clientWrapper = clientWrapper
     }
@@ -127,12 +130,12 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
 
     List<RamlFile> getRamlFilesFromApp(FileBasedAppDeploymentRequest deploymentRequest) {
         return FileSystems.newFileSystem(deploymentRequest.file.toPath(),
-                                  null).withCloseable { fs ->
+                                         null).withCloseable { fs ->
             def apiPath = fs.getPath('/api')
             if (!Files.exists(apiPath)) {
                 return []
             }
-            Files.walk(apiPath).findAll {p ->
+            Files.walk(apiPath).findAll { p ->
                 def relativeToApiDirectory = apiPath.relativize(p)
                 !Files.isDirectory(p) &&
                         !IGNORE_DC_FILES.contains(relativeToApiDirectory.toString()) &&
@@ -179,12 +182,11 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
     }
 
     def synchronizeDesignCenterFromApp(ApiSpecification apiSpec,
-                                       FileBasedAppDeploymentRequest appFileInfo,
-                                       String appVersion) {
+                                       FileBasedAppDeploymentRequest appFileInfo) {
         def ramlFiles = getRamlFilesFromApp(appFileInfo)
         synchronizeDesignCenter(apiSpec,
                                 ramlFiles,
-                                appVersion)
+                                appFileInfo.appVersion)
     }
 
     def synchronizeDesignCenter(ApiSpecification apiSpec,
@@ -208,6 +210,10 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
             if (changes.empty) {
                 logger.println('New RAML contents match the old contents, will not update Design Center')
             } else {
+                if (dryRunMode != DryRunMode.Run) {
+                    logger.println('RAML quantity/contents have changed, WOULD update Design Center but in dry-run mode')
+                    return
+                }
                 logger.println('RAML quantity/contents have changed, will update Design Center')
                 def noLongerExist = existingFiles.findAll { file ->
                     !ramlFiles.any { toBeFile -> file.fileName == toBeFile.fileName }

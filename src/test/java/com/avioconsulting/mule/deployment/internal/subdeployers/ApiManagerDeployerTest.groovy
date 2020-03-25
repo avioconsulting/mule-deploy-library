@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.BaseTest
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.internal.models.ApiQueryResponse
 import com.avioconsulting.mule.deployment.internal.models.ApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
@@ -22,10 +23,15 @@ class ApiManagerDeployerTest extends BaseTest {
     private ApiManagerDeployer deployer
 
     @Before
-    void setupDeployer() {
+    void clean() {
+        setupDeployer(DryRunMode.Run)
+    }
+
+    def setupDeployer(DryRunMode dryRunMode) {
         deployer = new ApiManagerDeployer(clientWrapper,
                                           environmentLocator,
-                                          System.out)
+                                          System.out,
+                                          dryRunMode)
     }
 
     @Test
@@ -720,7 +726,7 @@ class ApiManagerDeployerTest extends BaseTest {
             request.response().with {
                 putHeader('Content-Type',
                           'application/json')
-                Map response = null
+                Map response
                 def uri = request.uri()
                 if (uri.contains('graphql')) {
                     statusCode = 200
@@ -1100,5 +1106,84 @@ class ApiManagerDeployerTest extends BaseTest {
         assertThat 'Existing version is mule 4 false',
                    updated,
                    is(equalTo(true))
+    }
+
+    @Test
+    void synchronizeApiDefinition_online_validate() {
+        // arrange
+        setupDeployer(DryRunMode.OnlineValidate)
+        def created = false
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                putHeader('Content-Type',
+                          'application/json')
+                Map response
+                def uri = request.uri()
+                if (uri.contains('graphql')) {
+                    statusCode = 200
+                    response = [
+                            data: [
+                                    assets: [
+                                            [
+                                                    '__typename': 'Asset',
+                                                    assetId     : 'foo',
+                                                    version     : '1.0.201910193'
+
+                                            ],
+                                            [
+                                                    '__typename': 'Asset',
+                                                    assetId     : 'foo',
+                                                    version     : '1.0.202010213'
+
+                                            ]
+                                    ]
+                            ]
+                    ]
+                } else if (uri == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis?assetId=the-asset-id') {
+                    statusCode = 200
+                    response = [
+                            total : 0,
+                            assets: []
+                    ]
+                } else if (uri == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis' && request.method() == HttpMethod.POST) {
+                    created = true
+                    statusCode = 200
+                    response = [
+                            id           : 123,
+                            endpoint     : [
+                                    uri                : 'https://some.endpoint',
+                                    muleVersion4OrAbove: true
+                            ],
+                            assetId      : 'the-asset-id',
+                            assetVersion : '1.2.3',
+                            instanceLabel: 'DEV - Automated'
+                    ]
+                } else {
+                    statusCode = 500
+                    response = 'Unknown request!'
+                }
+                end(JsonOutput.toJson(response))
+            }
+        }
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               true)
+
+        // act
+        def result = deployer.synchronizeApiDefinition(desiredApiDefinition,
+                                                       '1.0.202010213')
+
+        // assert
+        assertThat created,
+                   is(equalTo(false))
+        assertThat result,
+                   is(nullValue())
     }
 }

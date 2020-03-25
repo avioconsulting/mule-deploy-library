@@ -28,15 +28,16 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     final Map<String, String> appProperties
     /**
-     * The original filename
+     * Version of the app you are deploying (e.g. <version> from the POM)
      */
-    final String originalFileName
+    final String appVersion
 
     /**
      * Standard deployment request. See properties for parameter info.
      */
     OnPremDeploymentRequest(String environment,
                             String appName,
+                            String appVersion,
                             String targetServerOrClusterName,
                             File file,
                             Map<String, String> appProperties = [:]) {
@@ -45,6 +46,7 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
         }
         this.environment = environment
         this.appName = appName
+        this.appVersion = appVersion
         this.targetServerOrClusterName = targetServerOrClusterName
         this.appProperties = appProperties
         this.file = file

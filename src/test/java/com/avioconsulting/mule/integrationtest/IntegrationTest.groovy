@@ -1,11 +1,12 @@
 package com.avioconsulting.mule.integrationtest
 
 import com.avioconsulting.mule.deployment.api.Deployer
+import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
-import com.avioconsulting.mule.deployment.api.models.policies.Policy
+import com.avioconsulting.mule.deployment.api.models.policies.MulesoftPolicy
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
@@ -31,7 +32,7 @@ import static org.hamcrest.Matchers.is
 import static org.junit.Assume.assumeTrue
 
 class IntegrationTest {
-    private static final String AVIO_ORG_ID = 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee'
+    private static final String AVIO_SANDBOX_BIZ_GROUP_NAME = 'AVIO Sandbox'
     private static final String ANYPOINT_USERNAME = System.getProperty('anypoint.username')
     private static final String ANYPOINT_PASSWORD = System.getProperty('anypoint.password')
     private static final String ANYPOINT_CLIENT_ID = System.getProperty('anypoint.client.id')
@@ -148,14 +149,16 @@ class IntegrationTest {
     }
 
     @Before
-    void cleanup() {
+    void cleanup_and_instantiate() {
         onPremDeploymentRequest = new OnPremDeploymentRequest(AVIO_ENVIRONMENT_DEV,
                                                               ONPREM_APP_NAME,
+                                                              '1.2.3',
                                                               ON_PREM_SERVER_NAME,
                                                               builtFile,
                                                               [env: AVIO_ENVIRONMENT_DEV])
         cloudhubDeploymentRequest = new CloudhubDeploymentRequest(AVIO_ENVIRONMENT_DEV,
                                                                   CLOUDHUB_APP_NAME,
+                                                                  '1.2.3',
                                                                   new CloudhubWorkerSpecRequest('4.2.2'),
                                                                   builtFile,
                                                                   'abcdefg',
@@ -165,8 +168,8 @@ class IntegrationTest {
         clientWrapper = new HttpClientWrapper('https://anypoint.mulesoft.com',
                                               ANYPOINT_USERNAME,
                                               ANYPOINT_PASSWORD,
-                                              AVIO_ORG_ID,
-                                              System.out)
+                                              System.out,
+                                              AVIO_SANDBOX_BIZ_GROUP_NAME)
         def environmentLocator = new EnvironmentLocator(this.clientWrapper,
                                                         System.out)
         cloudHubDeployer = new CloudHubDeployer(this.clientWrapper,
@@ -174,7 +177,8 @@ class IntegrationTest {
                                                 10000,
                                                 // faster testing
                                                 100,
-                                                System.out)
+                                                System.out,
+                                                DryRunMode.Run)
         try {
             deleteCloudHubApp(cloudhubDeploymentRequest)
         } catch (e) {
@@ -186,8 +190,10 @@ class IntegrationTest {
         }
         onPremDeployer = new OnPremDeployer(this.clientWrapper,
                                             environmentLocator,
-                                            System.out)
+                                            System.out,
+                                            DryRunMode.Run)
         overallDeployer = new Deployer(clientWrapper,
+                                       DryRunMode.Run,
                                        System.out,
                                        ['DEV'],
                                        environmentLocator)
@@ -201,16 +207,14 @@ class IntegrationTest {
         // act
         try {
             overallDeployer.deployApplication(cloudhubDeploymentRequest,
-                                              '1.2.3',
                                               apiSpec,
                                               [
-                                                      new Policy(Policy.mulesoftGroupId,
-                                                                 'http-basic-authentication',
-                                                                 '1.2.1',
-                                                                 [
-                                                                         username: 'john',
-                                                                         password: 'doe'
-                                                                 ])
+                                                      new MulesoftPolicy('http-basic-authentication',
+                                                                         '1.2.1',
+                                                                         [
+                                                                                 username: 'john',
+                                                                                 password: 'doe'
+                                                                         ])
                                               ])
             println 'test: app deployed OK, now trying to hit its HTTP listener'
 
@@ -230,9 +234,9 @@ class IntegrationTest {
         }
     }
 
-    def hitEndpoint(String username,
-                    String password,
-                    String url) {
+    static def hitEndpoint(String username,
+                           String password,
+                           String url) {
         def credsProvider = new BasicCredentialsProvider().with {
             setCredentials(AuthScope.ANY,
                            new UsernamePasswordCredentials(username,
@@ -284,16 +288,14 @@ class IntegrationTest {
 
         // act
         overallDeployer.deployApplication(onPremDeploymentRequest,
-                                          '1.2.3',
                                           apiSpec,
                                           [
-                                                  new Policy(Policy.mulesoftGroupId,
-                                                             'http-basic-authentication',
-                                                             '1.2.1',
-                                                             [
-                                                                     username: 'john',
-                                                                     password: 'doe'
-                                                             ])
+                                                  new MulesoftPolicy('http-basic-authentication',
+                                                                     '1.2.1',
+                                                                     [
+                                                                             username: 'john',
+                                                                             password: 'doe'
+                                                                     ])
                                           ])
         println 'test: app deployed OK, now trying to hit its HTTP listener'
 

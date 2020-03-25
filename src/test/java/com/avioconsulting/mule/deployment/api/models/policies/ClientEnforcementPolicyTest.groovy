@@ -28,10 +28,10 @@ class ClientEnforcementPolicyTest {
                            clientIdExpression                               : "#[attributes.headers['client_id']]"
                    ]))
         println "tostring is ${model.toString()}"
-        def compare = new Policy(model.groupId,
-                                 model.assetId,
+        def compare = new Policy(model.assetId,
                                  model.version,
                                  model.policyConfiguration,
+                                 model.groupId,
                                  model.policyPathApplications)
         assertThat model,
                    is(equalTo(compare))
@@ -58,10 +58,10 @@ class ClientEnforcementPolicyTest {
                            clientSecretExpression                           : "#[attributes.headers['client_secret']]"
                    ]))
         println "tostring is ${model.toString()}"
-        def compare = new Policy(model.groupId,
-                                 model.assetId,
+        def compare = new Policy(model.assetId,
                                  model.version,
                                  model.policyConfiguration,
+                                 model.groupId,
                                  model.policyPathApplications)
         assertThat model,
                    is(equalTo(compare))

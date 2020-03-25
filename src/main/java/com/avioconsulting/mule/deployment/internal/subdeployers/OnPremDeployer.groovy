@@ -1,8 +1,9 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
+import com.avioconsulting.mule.deployment.api.DryRunMode
+import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
-import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.models.OnPremDeploymentStatus
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpDelete
@@ -20,29 +21,37 @@ class OnPremDeployer extends BaseDeployer implements IOnPremDeployer {
      */
     OnPremDeployer(HttpClientWrapper clientWrapper,
                    EnvironmentLocator environmentLocator,
-                   PrintStream logger) {
+                   PrintStream logger,
+                   DryRunMode dryRunMode) {
         this(clientWrapper,
              environmentLocator,
              10000,
              30,
-             logger)
+             logger,
+             dryRunMode)
     }
 
     OnPremDeployer(HttpClientWrapper clientWrapper,
                    EnvironmentLocator environmentLocator,
                    int retryIntervalInMs,
                    int maxTries,
-                   PrintStream logger) {
+                   PrintStream logger,
+                   DryRunMode dryRunMode) {
         super(retryIntervalInMs,
               maxTries,
               logger,
               clientWrapper,
-              environmentLocator)
+              environmentLocator,
+              dryRunMode)
     }
 
     def deploy(OnPremDeploymentRequest request) {
         def existingApp = locateApplication(request.environment,
                                             request.appName)
+        if (dryRunMode != DryRunMode.Run) {
+            logger.println("Would ${existingApp ? 'UPDATE existing app' : 'deploy NEW APP'} but dry run mode is on.")
+            return
+        }
         def appId = existingApp ?
                 updateDeployment(existingApp,
                                  request) :
