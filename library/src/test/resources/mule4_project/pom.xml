@@ -18,17 +18,17 @@
 		<mule.maven.plugin.version>3.1.6</mule.maven.plugin.version>
 	</properties>
 
-    <distributionManagement>
-        <repository>
-            <id>avio-exchange</id>
-            <name>Mule Exchange Repository</name>
-            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/${project.groupId}/maven</url>
-            <layout>default</layout>
-        </repository>
-    </distributionManagement>
-
 	<build>
 		<plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.2</version>
+                <configuration>
+                    <!-- parent project is only used during the build process -->
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
 			<plugin>
 				<groupId>org.mule.tools.maven</groupId>
 				<artifactId>mule-maven-plugin</artifactId>
@@ -37,6 +37,23 @@
 				<configuration>
 				</configuration>
 			</plugin>
+            <plugin>
+                <groupId>com.avioconsulting.mule</groupId>
+                <artifactId>mule-deploy-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <id>stuff</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>muleDeploy</goal>
+                        </goals>
+                        <configuration>
+                            <groovyFile>../deploySpec_minimum.groovy</groovyFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 		</plugins>
 	</build>
 

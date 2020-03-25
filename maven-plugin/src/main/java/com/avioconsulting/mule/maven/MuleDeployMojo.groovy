@@ -15,9 +15,9 @@ import org.codehaus.groovy.control.CompilerConfiguration
 
 @Mojo(name = 'muleDeploy', requiresProject = false)
 class MuleDeployMojo extends AbstractMojo {
-    @Parameter(required = true, property = 'anypoint.username')
+    @Parameter(property = 'anypoint.username')
     private String anypointUsername
-    @Parameter(required = true, property = 'anypoint.password')
+    @Parameter(property = 'anypoint.password')
     private String anypointPassword
     @Parameter(property = 'anypoint.org.name')
     private String anypointOrganizationName
@@ -32,6 +32,9 @@ class MuleDeployMojo extends AbstractMojo {
 
     @Override
     void execute() throws MojoExecutionException, MojoFailureException {
+        if (dryRunMode != DryRunMode.OfflineValidate && !(anypointUsername || anypointPassword)) {
+            throw new Exception("In order to ${dryRunMode}, credentials must be supplied via the anypointUsername <config> item/anypoint.username property and the anypointPassword <config> item/anypoint.password property")
+        }
         def deploymentPackage = processDsl()
         log.info "Successfully processed ${groovyFile} through DSL"
         def logger = new MavenDeployerLogger(this.log)

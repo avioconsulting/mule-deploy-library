@@ -202,8 +202,8 @@ muleDeploy {
 """
         def mojo = getMojo(mock,
                            dslText,
-                           'user',
-                           'pass',
+                           null,
+                           null,
                            DryRunMode.OfflineValidate)
         // act
         mojo.execute()
@@ -211,6 +211,58 @@ muleDeploy {
         // assert
         assertThat deployed,
                    is(equalTo(false))
+    }
+
+    @Test
+    void online_validate_missing_creds() {
+        // arrange
+        def deployed = false
+        def mockDeployer = [
+                deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
+                                     ApiSpecification apiSpecification,
+                                     List<Policy> desiredPolicies,
+                                     List<Features> enabledFeatures ->
+                    deployed = true
+                }
+        ] as IDeployer
+        def mock = [
+                create: { String username,
+                          String password,
+                          ILogger logger,
+                          DryRunMode dryRunMode,
+                          String anypointOrganizationName,
+                          List<String> environmentsToDoDesignCenterDeploymentOn ->
+                    return mockDeployer
+                }
+        ] as IDeployerFactory
+        def dslText = """
+muleDeploy {
+    version '1.0'
+    
+    onPremApplication {
+        environment 'DEV'
+        applicationName 'the-app'
+        appVersion '1.2.3'
+        file 'path/to/file.jar'
+        targetServerOrClusterName 'theServer'
+    }
+}
+"""
+        def mojo = getMojo(mock,
+                           dslText,
+                           null,
+                           null,
+                           DryRunMode.OnlineValidate)
+        // act
+        def exception = shouldFail {
+            mojo.execute()
+        }
+
+        // assert
+        assertThat deployed,
+                   is(equalTo(false))
+        assertThat exception.message,
+                   is(containsString('In order to OnlineValidate, credentials must be supplied via the anypointUsername <config> item/anypoint.username property and the anypointPassword <config> item/anypoint.password property'))
     }
 
     @Test

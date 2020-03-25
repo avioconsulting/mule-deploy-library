@@ -35,6 +35,8 @@ Javadocs are published on [AVIO Jenkins](https://devops.avioconsulting.com/jenki
 
 NOTE: This library assumes that whatever logger mechanism you provide via The `ILogger logger` parameter hides ANY credentials or secrets you provide this. If you use Jenkins with its credentials plugin, it will handle this but make sure SOMETHING handles this.
 
+There is also a DSL framework included in the library. You can see the CLI and Maven plugin modules, which are siblings to this one, for how to use it.
+
 # Development/building/maintenance
 
 ## Required development environment
