@@ -20,17 +20,17 @@ muleDeploy {
     }
 
     cloudHubApplication {
-        environment params.environment
+        environment params.env
         applicationName 'the-app'
         appVersion '1.2.3'
         workerSpecs {
             // only muleVersion is required
-            muleVersion muleVersionsForEnvironments[params.environment]
+            muleVersion muleVersionsForEnvironments[params.env]
             workerType WorkerTypes().micro
         }
-        // the Maven plugin will automatically set `projectFile` to the path of the target JAR if it is used
+        // the Maven plugin will automatically set `params.appArtifact` to the path of the target JAR if it is used
         // in a project POM
-        file projectFile
+        file params.appArtifact
         cryptoKey params.cryptoKey
         autoDiscovery {
             clientId params.autoDiscClientId

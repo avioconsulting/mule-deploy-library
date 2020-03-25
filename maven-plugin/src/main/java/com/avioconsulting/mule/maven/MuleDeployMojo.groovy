@@ -10,6 +10,8 @@ import org.apache.maven.plugins.annotations.Parameter
 
 @Mojo(name = 'muleDeploy', requiresProject = false)
 class MuleDeployMojo extends BaseMojo {
+    @Parameter(defaultValue = 'Run', property = 'deploy.mode')
+    private DryRunMode dryRunMode
     @Parameter(property = 'anypoint.username')
     private String anypointUsername
     @Parameter(property = 'anypoint.password')
@@ -22,17 +24,10 @@ class MuleDeployMojo extends BaseMojo {
 
     @Override
     void execute() throws MojoExecutionException, MojoFailureException {
-        def artifact = mavenProject.attachedArtifacts.find { a ->
-            a.classifier == 'mule-application'
-        }?.file
-        if (artifact) {
-            log.info "Adding ${artifact} path as projectFile in your DSL"
-        }
         if (dryRunMode != DryRunMode.OfflineValidate && !(anypointUsername || anypointPassword)) {
             throw new Exception("In order to ${dryRunMode}, credentials must be supplied via the anypointUsername <config> item/anypoint.username property and the anypointPassword <config> item/anypoint.password property")
         }
-        def deploymentPackage = processDsl(artifact,
-                                           new ParamsWrapper(System.getProperties()))
+        def deploymentPackage = processDsl()
         log.info "Successfully processed ${groovyFile} through DSL"
         if (this.dryRunMode == DryRunMode.OfflineValidate) {
             log.info 'Offline validate was specified, so not deploying'

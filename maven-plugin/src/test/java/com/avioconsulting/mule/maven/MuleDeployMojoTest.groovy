@@ -280,7 +280,7 @@ muleDeploy {
     @Test
     void dsl_params() {
         // arrange
-        System.setProperty('env',
+        System.setProperty('muleDeploy.env',
                            'foobar')
         FileBasedAppDeploymentRequest actualApp
         def mockDeployer = [
@@ -312,7 +312,7 @@ muleDeploy {
         workerSpecs {
             muleVersion params.env == 'DEV' ? '4.2.2' : '4.1.5'
         }
-        file projectFile
+        file params.appArtifact
         cryptoKey 'theKey'
         autoDiscovery {
             clientId 'the_client_id'

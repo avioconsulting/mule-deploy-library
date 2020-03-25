@@ -41,19 +41,13 @@
                 <groupId>com.avioconsulting.mule</groupId>
                 <artifactId>mule-deploy-maven-plugin</artifactId>
                 <version>1.0.0</version>
-                <configuration>
-                    <groovyFile>withPom.groovy</groovyFile>
-                </configuration>
                 <executions>
                     <execution>
                         <id>do_validation</id>
                         <phase>process-resources</phase>
                         <goals>
-                            <goal>muleDeploy</goal>
+                            <goal>validate</goal>
                         </goals>
-                        <configuration>
-                            <dryRunMode>OfflineValidate</dryRunMode>
-                        </configuration>
                     </execution>
                     <execution>
                         <id>do_deployment</id>
