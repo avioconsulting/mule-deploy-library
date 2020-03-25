@@ -49,7 +49,7 @@
                             <goal>muleDeploy</goal>
                         </goals>
                         <configuration>
-                            <groovyFile>../../../../examples/deploySpec_minimum.groovy</groovyFile>
+                            <groovyFile>../../../../examples/minimum.groovy</groovyFile>
                         </configuration>
                     </execution>
                 </executions>
