@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
-	<groupId>f2ea2cb4-c600-4bb5-88e8-e952ff5591ee</groupId>
-	<artifactId>mule4testapp</artifactId>
+    <groupId>f2ea2cb4-c600-4bb5-88e8-e952ff5591ee</groupId>
+    <artifactId>mule4testapp</artifactId>
     <version>1.0.0</version>
     <packaging>mule-application</packaging>
 
-	<name>mule4testapp</name>
+    <name>mule4testapp</name>
 
     <properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<app.runtime>4.1.4</app.runtime>
-		<mule.maven.plugin.version>3.1.6</mule.maven.plugin.version>
-	</properties>
+        <app.runtime>4.1.4</app.runtime>
+        <mule.maven.plugin.version>3.1.6</mule.maven.plugin.version>
+    </properties>
 
-	<build>
-		<plugins>
+    <build>
+        <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
@@ -29,35 +29,45 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-			<plugin>
-				<groupId>org.mule.tools.maven</groupId>
-				<artifactId>mule-maven-plugin</artifactId>
-				<version>${mule.maven.plugin.version}</version>
-				<extensions>true</extensions>
-				<configuration>
-				</configuration>
-			</plugin>
+            <plugin>
+                <groupId>org.mule.tools.maven</groupId>
+                <artifactId>mule-maven-plugin</artifactId>
+                <version>${mule.maven.plugin.version}</version>
+                <extensions>true</extensions>
+                <configuration>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>com.avioconsulting.mule</groupId>
                 <artifactId>mule-deploy-maven-plugin</artifactId>
                 <version>1.0.0</version>
+                <configuration>
+                    <groovyFile>withPom.groovy</groovyFile>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>stuff</id>
-                        <phase>deploy</phase>
+                        <id>do_validation</id>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>muleDeploy</goal>
                         </goals>
                         <configuration>
-                            <groovyFile>withPom.groovy</groovyFile>
+                            <dryRunMode>OfflineValidate</dryRunMode>
                         </configuration>
+                    </execution>
+                    <execution>
+                        <id>do_deployment</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>muleDeploy</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
-		</plugins>
-	</build>
+        </plugins>
+    </build>
 
-	<dependencies>
+    <dependencies>
         <dependency>
             <groupId>org.mule.connectors</groupId>
             <artifactId>mule-http-connector</artifactId>
@@ -70,10 +80,10 @@
             <version>1.1.2</version>
             <classifier>mule-plugin</classifier>
         </dependency>
-	</dependencies>
+    </dependencies>
 
-	<repositories>
-          <repository>
+    <repositories>
+        <repository>
             <id>anypoint-exchange</id>
             <name>Anypoint Exchange</name>
             <url>https://maven.anypoint.mulesoft.com/api/v1/maven</url>
