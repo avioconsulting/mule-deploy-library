@@ -8,7 +8,7 @@ import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
 
-@Mojo(name = 'muleDeploy', requiresProject = false)
+@Mojo(name = 'deploy', requiresProject = false)
 class MuleDeployMojo extends BaseMojo {
     @Parameter(defaultValue = 'Run', property = 'deploy.mode')
     private DryRunMode dryRunMode

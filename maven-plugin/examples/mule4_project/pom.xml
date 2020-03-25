@@ -53,7 +53,7 @@
                         <id>do_deployment</id>
                         <phase>deploy</phase>
                         <goals>
-                            <goal>muleDeploy</goal>
+                            <goal>deploy</goal>
                         </goals>
                     </execution>
                 </executions>
