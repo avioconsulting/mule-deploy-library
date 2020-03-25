@@ -22,6 +22,6 @@ class OnPremContext extends BaseContext {
 
     @Override
     List<String> findOptionalProperties() {
-        []
+        ['applicationName', 'appVersion']
     }
 }
