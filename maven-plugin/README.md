@@ -57,13 +57,17 @@ Now follow the steps under 'DSL' below.
 
 Now you'll want to create your DSL file. You can use the GDSL file from this project to help IntelliJ with syntax completion.
 
-See `deploySpec_minimum.groovy` as an example.
+See `deploySpec_minimum.groovy` as an example. This file is intended to be in source control. Obviously do not commit secrets to source control.
+
+
 
 ## User/service account access
 
 You'll need a service account user/password to run this. See the README.md file inside the library directory for what permissions the user needs.
 
 # Running
+
+
 
 TBD: Describe params stuff
 

@@ -29,10 +29,10 @@ muleDeploy {
             workerType WorkerTypes().micro
         }
         file projectFile
-        cryptoKey 'theKey'
+        cryptoKey params.cryptoKey
         autoDiscovery {
-            clientId 'the_client_id'
-            clientSecret 'the_client_secret'
+            clientId params.autoDiscClientId
+            clientSecret params.autoDiscClientSecret
         }
         cloudHubAppPrefix 'AVI'
     }
