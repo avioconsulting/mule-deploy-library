@@ -1,6 +1,7 @@
 def muleVersionsForEnvironments = [
         DEV: '4.2.2',
-        QA: '4.1.4'
+        QA : '4.1.5',
+        PRD: '4.1.4'
 ]
 
 muleDeploy {

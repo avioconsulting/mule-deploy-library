@@ -44,7 +44,7 @@
                 <executions>
                     <execution>
                         <id>do_validation</id>
-                        <phase>process-resources</phase>
+                        <phase>package</phase>
                         <goals>
                             <goal>validate</goal>
                         </goals>

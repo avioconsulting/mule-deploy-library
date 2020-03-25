@@ -7,7 +7,7 @@ import org.apache.maven.plugins.annotations.Parameter
 
 @Mojo(name = 'validate')
 class ValidateMojo extends BaseMojo {
-    @Parameter(defaultValue = 'cryptoKey,autoDiscClientId,autoDiscClientSecret,jarFile')
+    @Parameter(defaultValue = 'cryptoKey,autoDiscClientId,autoDiscClientSecret')
     private List<String> placeholderProperties
     @Parameter(defaultValue = 'DEV,QA,PRD')
     private List<String> environmentsToTest
