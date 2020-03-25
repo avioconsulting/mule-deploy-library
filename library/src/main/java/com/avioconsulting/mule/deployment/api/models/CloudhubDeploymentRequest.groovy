@@ -114,6 +114,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                                                                cryptoKey,
                                                                anypointClientId,
                                                                anypointClientSecret,
+                                                               // only include prop if it's true
                                                                analyticsAgentEnabled ? true : null)
         this.analyticsAgentEnabled = analyticsAgentEnabled
     }

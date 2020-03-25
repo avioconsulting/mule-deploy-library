@@ -1,6 +1,8 @@
 package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.MavenInvoke
+import com.avioconsulting.mule.deployment.api.models.AwsRegions
+import com.avioconsulting.mule.deployment.api.models.WorkerTypes
 import org.junit.BeforeClass
 import org.junit.Test
 
@@ -9,7 +11,7 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
 // optimizing refs would prevent us from testing DSL resolution
-@SuppressWarnings(['UnnecessaryQualifiedReference', 'GroovyAssignabilityCheck'])
+@SuppressWarnings(['GroovyAssignabilityCheck'])
 class CloudhubContextTest implements MavenInvoke {
     @BeforeClass
     static void setup() {
@@ -55,7 +57,7 @@ class CloudhubContextTest implements MavenInvoke {
                 assertThat workerCount,
                            is(equalTo(1))
                 assertThat workerType,
-                           is(equalTo(com.avioconsulting.mule.deployment.api.models.WorkerTypes.Micro))
+                           is(equalTo(WorkerTypes.Micro))
             }
             assertThat file,
                        is(equalTo(builtFile))
@@ -97,12 +99,20 @@ class CloudhubContextTest implements MavenInvoke {
                            is(equalTo('4.1.4'))
                 assertThat usePersistentQueues,
                            is(equalTo(false))
+                assertThat updateId,
+                           is(nullValue())
+                assertThat customLog4j2Enabled,
+                           is(equalTo(false))
+                assertThat staticIpEnabled,
+                           is(equalTo(false))
+                assertThat objectStoreV2Enabled,
+                           is(equalTo(true))
                 assertThat awsRegion,
                            is(nullValue())
                 assertThat workerCount,
                            is(equalTo(1))
                 assertThat workerType,
-                           is(equalTo(com.avioconsulting.mule.deployment.api.models.WorkerTypes.Micro))
+                           is(equalTo(WorkerTypes.Micro))
             }
         }
     }
@@ -118,11 +128,15 @@ class CloudhubContextTest implements MavenInvoke {
             workerSpecs {
                 muleVersion '4.2.2'
                 usePersistentQueues true
-                workerType WorkerTypes.xLarge
+                workerType WorkerTypes().xLarge
                 workerCount 22
-                // DO NOT Optimize!!!!
-                awsRegion com.avioconsulting.mule.deployment.api.models.AwsRegions.UsEast1
+                awsRegion AwsRegions().useast1
+                updateId 'abc'
+                customLog4j2Enabled true
+                staticIpEnabled true
+                objectStoreV2Enabled false
             }
+            analyticsAgentEnabled true
             file 'path/to/file.jar'
             cryptoKey 'theKey'
             autoDiscovery {
@@ -158,12 +172,22 @@ class CloudhubContextTest implements MavenInvoke {
                 assertThat usePersistentQueues,
                            is(equalTo(true))
                 assertThat workerType,
-                           is(equalTo(com.avioconsulting.mule.deployment.api.models.WorkerTypes.xLarge))
+                           is(equalTo(WorkerTypes.xLarge))
                 assertThat workerCount,
                            is(equalTo(22))
                 assertThat awsRegion,
-                           is(equalTo(com.avioconsulting.mule.deployment.api.models.AwsRegions.UsEast1))
+                           is(equalTo(AwsRegions.UsEast1))
+                assertThat updateId,
+                           is(equalTo('abc'))
+                assertThat customLog4j2Enabled,
+                           is(equalTo(true))
+                assertThat staticIpEnabled,
+                           is(equalTo(true))
+                assertThat objectStoreV2Enabled,
+                           is(equalTo(false))
             }
+            assertThat analyticsAgentEnabled,
+                       is(equalTo(true))
             assertThat file,
                        is(equalTo(new File('path/to/file.jar')))
             assertThat cryptoKey,
@@ -198,7 +222,6 @@ class CloudhubContextTest implements MavenInvoke {
                 usePersistentQueues true
                 workerType WorkerTypes().xlarge
                 workerCount 22
-                // DO NOT Optimize!!!!
                 awsRegion AwsRegions().useast1
             }
             file 'path/to/file.jar'
@@ -219,9 +242,9 @@ class CloudhubContextTest implements MavenInvoke {
         request.with {
             workerSpecRequest.with {
                 assertThat workerType,
-                           is(equalTo(com.avioconsulting.mule.deployment.api.models.WorkerTypes.xLarge))
+                           is(equalTo(WorkerTypes.xLarge))
                 assertThat awsRegion,
-                           is(equalTo(com.avioconsulting.mule.deployment.api.models.AwsRegions.UsEast1))
+                           is(equalTo(AwsRegions.UsEast1))
             }
         }
     }
