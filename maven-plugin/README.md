@@ -86,11 +86,19 @@ If you do not want to execute the deployment with the project POM, then run some
 
 ```sh
 # -Dgroovy.file=muleDeploy.groovy is optional, goal will assume muleDeploy.groovy is the filename if not supplied
-mvn com.avioconsulting.mule:mule-deploy-maven-plugin:1.0.0:deploy -DmuleDeploy.env=DEV -Danypoint.username=bob -Danypoint.password=asecret -DmuleDeploy.cryptoKey=hello -DmuleDeploy.autoDiscClientId=theId -DmuleDeploy.autoDiscClientSecret=theSecret
+mvn com.avioconsulting.mule:mule-deploy-maven-plugin:1.0.0:deploy -DmuleDeploy.env=DEV -Danypoint.username=bob -Danypoint.password=asecret -DmuleDeploy.cryptoKey=hello -DmuleDeploy.autoDiscClientId=theId -DmuleDeploy.autoDiscClientSecret=theSecret -DmuleDeploy.appArtifact=target/mule4testapp-1.0.0-mule-application.jar
 ```
 
 In both cases, you can configure properties like `anypoint.username` in the `settings.xml` file's `<properties>` section and omit them from the command line. 
 
 ## Dry runs
 
-TBD. Describe how this works.
+There are 3 'dry run' options.
+
+1. `Run` - does a real deployment
+2. `OfflineValidate` - Just ensures your DSL file can be processed correctly. Does no networking traffic with anypoint.mulesoft.com
+3. `OnlineValidate` - Will do GETs and read-only activity with anypoint.mulesoft.com and tell you what it would do. 
+
+The `validate` goal described above is hard wired to run `OfflineValidate` on your DSL file using a standard set of placeholder properties (see `ValidateMojo.placeholderProperties`).
+
+If you wish to use `OnlineValidate` with the deploy goal, you can set `-Ddeploy.mode=OnlineValidate` on your command line.
