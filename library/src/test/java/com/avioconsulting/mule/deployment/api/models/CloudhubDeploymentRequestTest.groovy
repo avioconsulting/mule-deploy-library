@@ -32,10 +32,14 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     '1.2.3')
 
         // assert
-        assertThat request.appName,
-                   is(equalTo('new-app'))
-        assertThat request.appVersion,
-                   is(equalTo('1.2.3'))
+        request.with {
+            assertThat appName,
+                       is(equalTo('new-app'))
+            assertThat normalizedAppName,
+                       is(equalTo('client-new-app-dev'))
+            assertThat appVersion,
+                       is(equalTo('1.2.3'))
+        }
     }
 
     @Test
@@ -55,6 +59,8 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
         request.with {
             assertThat appName,
                        is(equalTo('mule-deploy-lib-v4-test-app'))
+            assertThat normalizedAppName,
+                       is(equalTo('client-mule-deploy-lib-v4-test-app-dev'))
             assertThat appVersion,
                        is(equalTo('1.0.0'))
             assertThat 'app.runtime in the POM',
