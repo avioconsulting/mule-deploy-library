@@ -6,6 +6,9 @@ import com.avioconsulting.mule.deployment.api.IDeployerFactory
 import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.api.models.*
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
+import org.apache.maven.artifact.DefaultArtifact
+import org.apache.maven.artifact.handler.ArtifactHandler
+import org.apache.maven.project.MavenProject
 import org.junit.Before
 import org.junit.Test
 
@@ -89,7 +92,8 @@ muleDeploy {
                            String pass = 'our pass',
                            DryRunMode dryRunMode = DryRunMode.Run,
                            String orgName = null,
-                           List<String> envs = ['DEV']) {
+                           List<String> envs = ['DEV'],
+                           MavenProject mockMavenProject = null) {
         def groovyFile = new File('stuff.groovy')
         groovyFile.text = groovyFileText
         new MuleDeployMojo().with {
@@ -100,6 +104,7 @@ muleDeploy {
             it.anypointOrganizationName = orgName
             it.environmentsToDoDesignCenterDeploymentOn = envs
             it.log = logger
+            it.mavenProject = mockMavenProject ?: ([:] as MavenProject)
             it.deployerFactory = mockDeployerFactory
             it
         }
@@ -300,7 +305,7 @@ muleDeploy {
         workerSpecs {
             muleVersion params.env == 'DEV' ? '4.2.2' : '4.1.5'
         }
-        file 'path/to/file.jar'
+        file projectFile
         cryptoKey 'theKey'
         autoDiscovery {
             clientId 'the_client_id'
@@ -310,8 +315,31 @@ muleDeploy {
     }
 }
 """
+        def handler = [:] as ArtifactHandler
+        def mockProject = [
+                getAttachedArtifacts: {
+                    [
+                            new DefaultArtifact('thegroup',
+                                                'theart',
+                                                '1.0.0',
+                                                'compile',
+                                                'jar',
+                                                'mule-application',
+                                                handler).with {
+                                it.setFile(new File('foo.jar'))
+                                it
+                            }
+                    ]
+                }
+        ] as MavenProject
         def mojo = getMojo(mock,
-                           dslText)
+                           dslText,
+                           'user',
+                           'pass',
+                           DryRunMode.Run,
+                           null,
+                           ['DEV'],
+                           mockProject)
 
         // act
         mojo.execute()
@@ -321,6 +349,8 @@ muleDeploy {
         actualApp.with {
             assertThat environment,
                        is(equalTo('foobar'))
+            assertThat file.name,
+                       is(equalTo('foo.jar'))
             assertThat workerSpecRequest.muleVersion,
                        is(equalTo('4.1.5'))
         }

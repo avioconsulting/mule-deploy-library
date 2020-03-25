@@ -28,7 +28,7 @@ muleDeploy {
             muleVersion muleVersionsForEnvironments[params.environment]
             workerType WorkerTypes().micro
         }
-        file params.jarPath
+        file projectFile
         cryptoKey 'theKey'
         autoDiscovery {
             clientId 'the_client_id'

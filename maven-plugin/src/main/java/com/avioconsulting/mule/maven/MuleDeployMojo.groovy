@@ -11,6 +11,7 @@ import org.apache.maven.plugin.MojoExecutionException
 import org.apache.maven.plugin.MojoFailureException
 import org.apache.maven.plugins.annotations.Mojo
 import org.apache.maven.plugins.annotations.Parameter
+import org.apache.maven.project.MavenProject
 import org.codehaus.groovy.control.CompilerConfiguration
 
 @Mojo(name = 'muleDeploy', requiresProject = false)
@@ -27,15 +28,23 @@ class MuleDeployMojo extends AbstractMojo {
     private File groovyFile
     @Parameter(defaultValue = 'DEV', property = 'design.center.deployments')
     private List<String> environmentsToDoDesignCenterDeploymentOn
+    @Parameter(defaultValue = '${project}')
+    private MavenProject mavenProject
 
     private IDeployerFactory deployerFactory = new DeployerFactory()
 
     @Override
     void execute() throws MojoExecutionException, MojoFailureException {
+        def artifact = mavenProject.attachedArtifacts.find { a ->
+            a.classifier == 'mule-application'
+        }?.file
+        if (artifact) {
+            log.info "Adding ${artifact} path as projectFile in your DSL"
+        }
         if (dryRunMode != DryRunMode.OfflineValidate && !(anypointUsername || anypointPassword)) {
             throw new Exception("In order to ${dryRunMode}, credentials must be supplied via the anypointUsername <config> item/anypoint.username property and the anypointPassword <config> item/anypoint.password property")
         }
-        def deploymentPackage = processDsl()
+        def deploymentPackage = processDsl(artifact)
         log.info "Successfully processed ${groovyFile} through DSL"
         def logger = new MavenDeployerLogger(this.log)
         def deployer = deployerFactory.create(this.anypointUsername,
@@ -63,7 +72,7 @@ class MuleDeployMojo extends AbstractMojo {
         }
     }
 
-    private DeploymentPackage processDsl() {
+    private DeploymentPackage processDsl(File artifact) {
         try {
             // allows us to use our 'MuleDeployScript'/MuleDeployContext class to interpret the user's DSL file
             def compilerConfig = new CompilerConfiguration().with {
@@ -76,6 +85,8 @@ class MuleDeployMojo extends AbstractMojo {
             def binding = new Binding()
             binding.setVariable('params',
                                 new ParamsWrapper())
+            binding.setVariable('projectFile',
+                                artifact?.absolutePath)
             shell.context = binding
             // last line of MuleDeployScript.muleDeploy method returns this
             def context = shell.evaluate(groovyFile) as MuleDeployContext
