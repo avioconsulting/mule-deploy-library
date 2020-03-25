@@ -424,10 +424,10 @@ class OnPremDeployerTest extends BaseTest {
         }
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
-                                                  'new-app',
-                                                  '1.2.3',
                                                   'clustera',
-                                                  file)
+                                                  file,
+                                                  'new-app',
+                                                  '1.2.3')
 
         // act
         deployer.deploy(request)
@@ -535,10 +535,10 @@ class OnPremDeployerTest extends BaseTest {
         }
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
-                                                  'new-app',
-                                                  '1.2.3',
                                                   'clustera',
-                                                  file)
+                                                  file,
+                                                  'new-app',
+                                                  '1.2.3')
         request.setAutoDiscoveryId('1234')
 
         // act
@@ -643,10 +643,10 @@ class OnPremDeployerTest extends BaseTest {
         }
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
-                                                  'new-app',
-                                                  '1.2.3',
                                                   'clustera',
                                                   file,
+                                                  'new-app',
+                                                  '1.2.3',
                                                   [prop1: 'foo', prop2: 'bar'])
 
         // act
@@ -692,10 +692,10 @@ class OnPremDeployerTest extends BaseTest {
         // act
         def exception = shouldFail {
             new OnPremDeploymentRequest('DEV',
-                                        'some app name',
-                                        '1.2.3',
                                         'clustera',
-                                        file)
+                                        file,
+                                        'some app name',
+                                        '1.2.3')
         }
 
         // assert
@@ -789,10 +789,10 @@ class OnPremDeployerTest extends BaseTest {
         }
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
-                                                  'the-app',
-                                                  '1.2.3',
                                                   'clustera',
-                                                  file)
+                                                  file,
+                                                  'the-app',
+                                                  '1.2.3')
 
         // act
         deployer.deploy(request)
@@ -908,10 +908,10 @@ class OnPremDeployerTest extends BaseTest {
         }
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
-                                                  'the-app',
-                                                  '1.2.3',
                                                   'clustera',
                                                   file,
+                                                  'the-app',
+                                                  '1.2.3',
                                                   [prop1: 'foo', prop2: 'bar'])
 
         // act
@@ -1339,10 +1339,10 @@ class OnPremDeployerTest extends BaseTest {
         }
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
-                                                  'new-app',
-                                                  '1.2.3',
                                                   'clustera',
-                                                  file)
+                                                  file,
+                                                  'new-app',
+                                                  '1.2.3')
 
         // act
         deployer.deploy(request)
@@ -1386,10 +1386,10 @@ class OnPremDeployerTest extends BaseTest {
         }
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
-                                                  'new-app',
-                                                  '1.2.3',
                                                   'clustera',
-                                                  file)
+                                                  file,
+                                                  'new-app',
+                                                  '1.2.3')
 
         // act
         deployer.deploy(request)
@@ -1423,10 +1423,10 @@ class OnPremDeployerTest extends BaseTest {
         }
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
-                                                  'new-app',
-                                                  '1.2.3',
                                                   'clustera',
-                                                  file)
+                                                  file,
+                                                  'new-app',
+                                                  '1.2.3')
 
         // act
         def exception = shouldFail {
@@ -1466,10 +1466,10 @@ class OnPremDeployerTest extends BaseTest {
         }
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
-                                                  'new-app',
-                                                  '1.2.3',
                                                   'clustera',
-                                                  file)
+                                                  file,
+                                                  'new-app',
+                                                  '1.2.3')
 
         // act
         def exception = shouldFail {
@@ -1486,10 +1486,10 @@ class OnPremDeployerTest extends BaseTest {
         // arrange
         def file = new File('src/test/resources/some_file.zip')
         def request = new OnPremDeploymentRequest('DEV',
-                                                  'new-app',
-                                                  '1.2.3',
                                                   'clustera',
-                                                  file)
+                                                  file,
+                                                  'new-app',
+                                                  '1.2.3')
 
         // act
         def result = deployer.isMule4Request(request)
@@ -1504,10 +1504,10 @@ class OnPremDeployerTest extends BaseTest {
         // arrange
         def file = new File('src/test/resources/some_file.jar')
         def request = new OnPremDeploymentRequest('DEV',
-                                                  'new-app',
-                                                  '1.2.3',
                                                   'clustera',
-                                                  file)
+                                                  file,
+                                                  'new-app',
+                                                  '1.2.3')
 
         // act
         def result = deployer.isMule4Request(request)
@@ -1592,10 +1592,10 @@ class OnPremDeployerTest extends BaseTest {
         }
         def file = new File('src/test/resources/some_file.txt')
         def request = new OnPremDeploymentRequest('DEV',
-                                                  'new-app',
-                                                  '1.2.3',
                                                   'clustera',
-                                                  file)
+                                                  file,
+                                                  'new-app',
+                                                  '1.2.3')
         // act
         deployer.deploy(request)
 

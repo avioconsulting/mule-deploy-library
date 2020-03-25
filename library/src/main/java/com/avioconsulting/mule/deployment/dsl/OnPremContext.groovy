@@ -13,10 +13,10 @@ class OnPremContext extends BaseContext {
             throw new Exception("Your deployment request is not complete. The following errors exist:\n${errorList}")
         }
         new OnPremDeploymentRequest(this.environment,
-                                    this.applicationName,
-                                    this.appVersion,
                                     this.targetServerOrClusterName,
                                     new File(this.file),
+                                    this.applicationName,
+                                    this.appVersion,
                                     this.appProperties)
     }
 
