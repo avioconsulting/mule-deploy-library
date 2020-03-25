@@ -69,7 +69,12 @@ muleDeploy {
             workerType WorkerTypes().small
             workerCount 1
             awsRegion AwsRegions().uswest1
+            updateId 'abc'
+            customLog4j2Enabled true
+            staticIpEnabled true
+            objectStoreV2Enabled false
         }
+        analyticsAgentEnabled true
         file 'path/to/file.jar'
         cryptoKey 'theKey'
         autoDiscovery {
