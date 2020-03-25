@@ -116,7 +116,6 @@ class CloudhubContextTest implements MavenInvoke {
             applicationName 'the-app'
             appVersion '1.2.3'
             workerSpecs {
-                // only muleVersion is required
                 muleVersion '4.2.2'
                 usePersistentQueues true
                 workerType WorkerTypes.xLarge
@@ -195,7 +194,6 @@ class CloudhubContextTest implements MavenInvoke {
             applicationName 'the-app'
             appVersion '1.2.3'
             workerSpecs {
-                // only muleVersion is required
                 muleVersion '4.2.2'
                 usePersistentQueues true
                 workerType WorkerTypes().xlarge
