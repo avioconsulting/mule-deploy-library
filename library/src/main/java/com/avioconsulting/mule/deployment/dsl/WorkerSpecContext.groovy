@@ -5,8 +5,9 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.WorkerTypes
 
 class WorkerSpecContext extends BaseContext {
-    String muleVersion
-    boolean usePersistentQueues
+    String muleVersion, updateId
+    boolean usePersistentQueues, customLog4j2Enabled, staticIpEnabled
+    boolean objectStoreV2Enabled = true
     WorkerTypes workerType = WorkerTypes.Micro
     int workerCount = 1
     AwsRegions awsRegion
@@ -16,12 +17,16 @@ class WorkerSpecContext extends BaseContext {
                                       this.usePersistentQueues,
                                       this.workerCount,
                                       this.workerType,
-                                      this.awsRegion)
+                                      this.awsRegion,
+                                      this.updateId,
+                                      this.customLog4j2Enabled,
+                                      this.staticIpEnabled,
+                                      this.objectStoreV2Enabled)
     }
 
     @Override
     List<String> findOptionalProperties() {
-        ['muleVersion', 'awsRegion']
+        ['muleVersion', 'awsRegion', 'updateId', 'customLog4j2Enabled', 'staticIpEnabled', 'objectStoreV2Enabled']
     }
 
     /***

@@ -4,6 +4,7 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 
 class CloudhubContext extends BaseContext {
     String environment, applicationName, appVersion, file, cryptoKey, cloudHubAppPrefix
+    boolean analyticsAgentEnabled
     private WorkerSpecContext workerSpecs = new WorkerSpecContext()
     private AutodiscoveryContext autoDiscovery = new AutodiscoveryContext()
     Map<String, String> appProperties = [:]
@@ -29,11 +30,12 @@ class CloudhubContext extends BaseContext {
                                       this.applicationName,
                                       this.appVersion,
                                       this.appProperties,
-                                      this.otherCloudHubProperties)
+                                      this.otherCloudHubProperties,
+                                      this.analyticsAgentEnabled)
     }
 
     @Override
     List<String> findOptionalProperties() {
-        ['appVersion', 'applicationName', 'workerSpecs']
+        ['appVersion', 'applicationName', 'workerSpecs', 'analyticsAgentEnabled']
     }
 }

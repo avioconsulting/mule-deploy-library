@@ -58,6 +58,8 @@ class CloudhubContextTest implements MavenInvoke {
                            is(equalTo(1))
                 assertThat workerType,
                            is(equalTo(WorkerTypes.Micro))
+                assertThat objectStoreV2Enabled,
+                           is(equalTo(true))
             }
             assertThat file,
                        is(equalTo(builtFile))
