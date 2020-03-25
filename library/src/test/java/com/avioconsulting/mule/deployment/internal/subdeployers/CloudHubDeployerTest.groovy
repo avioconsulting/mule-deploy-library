@@ -136,20 +136,23 @@ class CloudHubDeployerTest extends BaseTest {
         def map = new JsonSlurper().parseText(sentFormAttributes.get('appInfoJson'))
         assertThat map,
                    is(equalTo([
-                           domain               : 'client-new-app-dev',
-                           muleVersion          : [
+                           domain                   : 'client-new-app-dev',
+                           muleVersion              : [
                                    version: '3.9.1'
                            ],
-                           region               : 'us-east-1',
-                           monitoringAutoRestart: true,
-                           workers              : [
+                           region                   : 'us-east-1',
+                           monitoringAutoRestart    : true,
+                           workers                  : [
                                    type  : [
                                            name: 'Micro'
                                    ],
                                    amount: 1
                            ],
-                           persistentQueues     : false,
-                           properties           : [
+                           objectStoreV1            : false,
+                           staticIPsEnabled         : false,
+                           loggingCustomLog4JEnabled: false,
+                           persistentQueues         : false,
+                           properties               : [
                                    env                              : 'dev',
                                    'crypto.key'                     : 'theKey',
                                    'anypoint.platform.client_id'    : 'theClientId',
@@ -235,20 +238,23 @@ class CloudHubDeployerTest extends BaseTest {
         def map = new JsonSlurper().parseText(sentFormAttributes.get('appInfoJson'))
         assertThat map,
                    is(equalTo([
-                           domain               : 'client-new-app-dev',
-                           muleVersion          : [
+                           domain                   : 'client-new-app-dev',
+                           muleVersion              : [
                                    version: '3.9.1'
                            ],
-                           region               : 'us-east-1',
-                           monitoringAutoRestart: true,
-                           workers              : [
+                           region                   : 'us-east-1',
+                           monitoringAutoRestart    : true,
+                           workers                  : [
                                    type  : [
                                            name: 'Micro'
                                    ],
                                    amount: 1
                            ],
-                           persistentQueues     : false,
-                           properties           : [
+                           objectStoreV1            : false,
+                           staticIPsEnabled         : false,
+                           loggingCustomLog4JEnabled: false,
+                           persistentQueues         : false,
+                           properties               : [
                                    env                              : 'dev',
                                    'crypto.key'                     : 'theKey',
                                    'anypoint.platform.client_id'    : 'theClientId',
