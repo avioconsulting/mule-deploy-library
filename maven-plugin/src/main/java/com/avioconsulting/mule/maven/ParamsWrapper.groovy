@@ -1,7 +1,11 @@
 package com.avioconsulting.mule.maven
 
 class ParamsWrapper {
-    private properties = System.getProperties()
+    private final Properties properties
+
+    ParamsWrapper(Properties properties) {
+        this.properties = properties
+    }
 
     def propertyMissing(String name) {
         if (!properties.containsKey(name)) {
