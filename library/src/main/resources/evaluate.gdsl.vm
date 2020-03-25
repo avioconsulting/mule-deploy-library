@@ -67,7 +67,7 @@ contributor([closureScopeContext]) {
     if (call) {
         #stringParam('version')
         property name: 'params',
-                 type: Map.name
+                 type: 'java.util.Map<java.lang.String,java.lang.String>'
         #closureParam('cloudHubApplication')
         #closureParam('onPremApplication')
         #closureParam('apiSpecification')
