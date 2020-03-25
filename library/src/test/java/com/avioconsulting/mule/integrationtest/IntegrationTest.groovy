@@ -1,5 +1,6 @@
 package com.avioconsulting.mule.integrationtest
 
+import com.avioconsulting.mule.MavenInvoke
 import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.Deployer
 import com.avioconsulting.mule.deployment.api.DryRunMode
@@ -21,8 +22,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.core.config.Configurator
-import org.apache.maven.shared.invoker.DefaultInvocationRequest
-import org.apache.maven.shared.invoker.DefaultInvoker
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
@@ -32,7 +31,7 @@ import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 import static org.junit.Assume.assumeTrue
 
-class IntegrationTest {
+class IntegrationTest implements MavenInvoke {
     private static final String AVIO_SANDBOX_BIZ_GROUP_NAME = 'AVIO Sandbox'
     private static final String ANYPOINT_USERNAME = System.getProperty('anypoint.username')
     private static final String ANYPOINT_PASSWORD = System.getProperty('anypoint.password')
@@ -42,8 +41,7 @@ class IntegrationTest {
     private static final String CLOUDHUB_APP_PREFIX = 'avio'
     private static final String CLOUDHUB_APP_NAME = 'mule-deploy-lib-v4-test-app-ch'
     private static final String ONPREM_APP_NAME = 'mule-deploy-lib-v4-test-app-onprem'
-    private static File projectDirectory
-    private static File builtFile
+
     public static final String AVIO_ENVIRONMENT_DEV = 'DEV'
     private CloudHubDeployer cloudHubDeployer
     private OnPremDeployer onPremDeployer
@@ -52,25 +50,10 @@ class IntegrationTest {
     private CloudhubDeploymentRequest cloudhubDeploymentRequest
     private OnPremDeploymentRequest onPremDeploymentRequest
 
-    private static File getProjectDir(String proj) {
-        def pomFileUrl = IntegrationTest.getResource("/${proj}/pom.xml")
-        new File(pomFileUrl.toURI())
-    }
-
-    static String getFileName(String appName,
-                              String appVersion,
-                              String muleVersion) {
-        return muleVersion.startsWith("3") ?
-                String.format("%s-%s.zip",
-                              appName,
-                              appVersion) :
-                String.format("%s-%s-mule-application.jar",
-                              appName,
-                              appVersion)
-    }
 
     @BeforeClass
     static void setup() {
+        buildApp()
         // cut down on the unit test noise here
         Configurator.setLevel('org.apache.http.wire',
                               Level.INFO)
@@ -78,26 +61,6 @@ class IntegrationTest {
         assert ANYPOINT_PASSWORD: 'Did you forget -Danypoint.password?'
         assert ANYPOINT_CLIENT_ID: 'Did you forget -Danypoint.client.id?'
         assert ANYPOINT_CLIENT_SECRET: 'Did you forget -Danypoint.client.secret?'
-        def pomFile = getProjectDir('mule4_project')
-        projectDirectory = pomFile.parentFile
-        def targetDir = new File(projectDirectory,
-                                 'target')
-        builtFile = new File(targetDir,
-                             getFileName('mule4testapp',
-                                         '1.0.0',
-                                         '4.2.2'))
-        def mavenInvokeRequest = new DefaultInvocationRequest().with {
-            setGoals(['clean', 'package'])
-            setPomFile(pomFile)
-            setShowErrors(true)
-            it
-        }
-        def mavenInvoker = new DefaultInvoker()
-        def mavenHome = System.getProperty('maven.home')
-        assert mavenHome: 'Did you forget maven.home in surefire config?'
-        mavenInvoker.setMavenHome(new File(mavenHome))
-        def result = mavenInvoker.execute(mavenInvokeRequest)
-        assert result.exitCode == 0
     }
 
     def deleteCloudHubApp(CloudhubDeploymentRequest request) {
@@ -152,20 +115,20 @@ class IntegrationTest {
     @Before
     void cleanup_and_instantiate() {
         onPremDeploymentRequest = new OnPremDeploymentRequest(AVIO_ENVIRONMENT_DEV,
-                                                              ONPREM_APP_NAME,
-                                                              '1.2.3',
                                                               ON_PREM_SERVER_NAME,
                                                               builtFile,
+                                                              ONPREM_APP_NAME,
+                                                              '1.2.3',
                                                               [env: AVIO_ENVIRONMENT_DEV])
         cloudhubDeploymentRequest = new CloudhubDeploymentRequest(AVIO_ENVIRONMENT_DEV,
-                                                                  CLOUDHUB_APP_NAME,
-                                                                  '1.2.3',
                                                                   new CloudhubWorkerSpecRequest('4.2.2'),
                                                                   builtFile,
                                                                   'abcdefg',
                                                                   ANYPOINT_CLIENT_ID,
                                                                   ANYPOINT_CLIENT_SECRET,
-                                                                  CLOUDHUB_APP_PREFIX)
+                                                                  CLOUDHUB_APP_PREFIX,
+                                                                  CLOUDHUB_APP_NAME,
+                                                                  '1.2.3')
         def logger = new TestConsoleLogger()
         clientWrapper = new HttpClientWrapper('https://anypoint.mulesoft.com',
                                               ANYPOINT_USERNAME,

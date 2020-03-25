@@ -685,25 +685,6 @@ class OnPremDeployerTest extends BaseTest {
     }
 
     @Test
-    void perform_deployment_space_in_app_name() {
-        // arrange
-        def file = new File('src/test/resources/some_file.txt')
-
-        // act
-        def exception = shouldFail {
-            new OnPremDeploymentRequest('DEV',
-                                        'clustera',
-                                        file,
-                                        'some app name',
-                                        '1.2.3')
-        }
-
-        // assert
-        assertThat exception.message,
-                   is(equalTo("Runtime Manager does not like spaces in app names and you specified 'some app name'!"))
-    }
-
-    @Test
     void perform_deployment_correct_request_existing_app() {
         // arrange
         String url = null
