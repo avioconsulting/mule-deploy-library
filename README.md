@@ -1,6 +1,7 @@
 # Overview
 
 There are 3 ways to use this:
+
 1. Via a Maven plugin
 2. Via a CLI
 3. Consume the library directly with code.

@@ -67,7 +67,7 @@ You'll need a service account user/password to run this. See the README.md file 
 
 TBD: Describe params stuff
 
-For the project case, the plugin will run during whichever phase you bind it to (e.g. deploy). You'll probably want to supply -Danypoint.username=bob and -Danypoint.password=asecret on the command line using credentials from your CI/CD system.
+For the project case, the plugin will run during whichever phase you bind it to (e.g. deploy). You'll probably want to supply `-Danypoint.username=bob` and `-Danypoint.password=asecret` on the command line using credentials from your CI/CD system.
 
 For standalone cases, do something like this:
 
