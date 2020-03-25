@@ -10,6 +10,8 @@ Both approaches 1 and 2 lean on using a Groovy DSL to supply your deployment spe
 
 # Maven plugin
 
+NOTE: The Maven plugin has 2 goals (deploy and validate). Regardless of whether you use it to actually perform the deployment, it's highly recommended you use the validate goal to ensure your DSL file is correct during the build pipeline.
+
 ## Use when
 
 * You have JDK and Maven installed on the agent(s) your CI/CD system performs releases on.
@@ -21,12 +23,45 @@ Both approaches 1 and 2 lean on using a Groovy DSL to supply your deployment spe
 
 ## Details
 
-The Maven plugin can be used 2 ways (in a project POM or without a POM). There is no hard and fast answer and it largely depends on what your organization is comfortable with.
+The Maven plugin's `validate` goal is best run by putting it in the POM explicitly. The `deploy` goal can be used 2 ways (in a project POM or without a POM). There is no hard and fast answer and it largely depends on what your organization is comfortable with.
 
-If you have no strong preference, then stick with the "without POM" approach which involves running like this:
+If you have no strong preference, then stick with the "with POM" approach which looks like this.
+
+```xml
+<project>
+    ...
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.avioconsulting.mule</groupId>
+                <artifactId>mule-deploy-maven-plugin</artifactId>
+                <version>1.0.0</version>                
+                <executions>
+                    <execution>
+                        <id>do_validation</id>
+                        <!-- Needs to be at the package phase so we have an artifact to use -->
+                        <phase>package</phase>
+                        <goals>
+                            <goal>validate</goal>
+                        </goals>
+                    </execution>                  
+                    <execution>
+                        <id>stuff</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>                       
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    ...
+</project>
+```
 
 ```sh
-mvn com.avioconsulting.mule:mule-deploy-maven-plugin:1.0.0:muleDeploy -Dgroovy.file=deploySpec_minimum.groovy -Denvironment=DEV -Danypoint.username=bob -Danypoint.password=asecret
+mvn clean deploy -DmuleDeploy.env=DEV -Danypoint.username=bob -Danypoint.password=asecret -DmuleDeploy.cryptoKey=hello -DmuleDeploy.autoDiscClientId=theId -DmuleDeploy.autoDiscClientSecret=theSecret
 ```
 
 See maven-plugin/README.md for more information.
