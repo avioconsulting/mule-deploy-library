@@ -1,5 +1,7 @@
 package com.avioconsulting.mule.deployment.dsl
 
+import com.avioconsulting.mule.MavenInvoke
+import org.junit.BeforeClass
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -7,20 +9,21 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
 // optimizing refs would prevent us from testing DSL resolution
-@SuppressWarnings(["UnnecessaryQualifiedReference", "GroovyAssignabilityCheck"])
-class CloudhubContextTest {
+@SuppressWarnings(['UnnecessaryQualifiedReference', 'GroovyAssignabilityCheck'])
+class CloudhubContextTest implements MavenInvoke {
+    @BeforeClass
+    static void setup() {
+        buildApp()
+    }
+
     @Test
     void required_only() {
         // arrange
         def context = new CloudhubContext()
         def closure = {
             environment 'DEV'
-            applicationName 'the-app'
-            appVersion '1.2.3'
-            workerSpecs {
-                muleVersion '4.2.2'
-            }
-            file 'path/to/file.jar'
+            workerSpecs {}
+            file builtFile.absolutePath
             cryptoKey 'theKey'
             autoDiscovery {
                 clientId 'the_client_id'
@@ -39,12 +42,12 @@ class CloudhubContextTest {
             assertThat environment,
                        is(equalTo('DEV'))
             assertThat request.appName,
-                       is(equalTo('the-app'))
+                       is(equalTo('mule-deploy-lib-v4-test-app'))
             assertThat appVersion,
-                       is(equalTo('1.2.3'))
+                       is(equalTo('1.0.0'))
             workerSpecRequest.with {
                 assertThat muleVersion,
-                           is(equalTo('4.2.2'))
+                           is(equalTo('4.1.4'))
                 assertThat usePersistentQueues,
                            is(equalTo(false))
                 assertThat awsRegion,
@@ -55,7 +58,7 @@ class CloudhubContextTest {
                            is(equalTo(com.avioconsulting.mule.deployment.api.models.WorkerTypes.Micro))
             }
             assertThat file,
-                       is(equalTo(new File('path/to/file.jar')))
+                       is(equalTo(builtFile))
             assertThat cryptoKey,
                        is(equalTo('theKey'))
             assertThat anypointClientId,
@@ -68,6 +71,43 @@ class CloudhubContextTest {
     }
 
     @Test
+    void no_worker_specs_needed() {
+        // arrange
+        def context = new CloudhubContext()
+        def closure = {
+            environment 'DEV'
+            file builtFile.absolutePath
+            cryptoKey 'theKey'
+            autoDiscovery {
+                clientId 'the_client_id'
+                clientSecret 'the_client_secret'
+            }
+            cloudHubAppPrefix 'AVI'
+        }
+        closure.delegate = context
+
+        // act
+        closure.call()
+        def request = context.createDeploymentRequest()
+
+        // assert
+        request.with {
+            workerSpecRequest.with {
+                assertThat muleVersion,
+                           is(equalTo('4.1.4'))
+                assertThat usePersistentQueues,
+                           is(equalTo(false))
+                assertThat awsRegion,
+                           is(nullValue())
+                assertThat workerCount,
+                           is(equalTo(1))
+                assertThat workerType,
+                           is(equalTo(com.avioconsulting.mule.deployment.api.models.WorkerTypes.Micro))
+            }
+        }
+    }
+
+    @Test
     void include_optional() {
         // arrange
         def context = new CloudhubContext()
@@ -76,7 +116,6 @@ class CloudhubContextTest {
             applicationName 'the-app'
             appVersion '1.2.3'
             workerSpecs {
-                // only muleVersion is required
                 muleVersion '4.2.2'
                 usePersistentQueues true
                 workerType WorkerTypes.xLarge
@@ -155,7 +194,6 @@ class CloudhubContextTest {
             applicationName 'the-app'
             appVersion '1.2.3'
             workerSpecs {
-                // only muleVersion is required
                 muleVersion '4.2.2'
                 usePersistentQueues true
                 workerType WorkerTypes().xlarge
@@ -210,13 +248,10 @@ class CloudhubContextTest {
         // assert
         assertThat exception.message,
                    is(equalTo("""Your deployment request is not complete. The following errors exist:
-- appVersion missing
-- applicationName missing
 - cloudHubAppPrefix missing
 - cryptoKey missing
 - environment missing
 - file missing
-- workerSpecs.muleVersion missing
 - autoDiscovery.clientSecret missing
 """.trim()))
     }

@@ -21,7 +21,7 @@ class WorkerSpecContext extends BaseContext {
 
     @Override
     List<String> findOptionalProperties() {
-        ['awsRegion']
+        ['muleVersion', 'awsRegion']
     }
 
     /***

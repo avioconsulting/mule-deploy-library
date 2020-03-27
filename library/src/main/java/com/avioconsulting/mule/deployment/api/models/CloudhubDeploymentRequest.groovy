@@ -17,6 +17,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
     final String environment
     /**
      * Actual name of your application WITHOUT any kind of customer/environment prefix or suffix. Spaces in the name are not allowed and will be rejected.
+     * This parameter is optional. If you don't supply it, the <artifactId> from your app's POM will be used.
      */
     final String appName
     /**
@@ -56,7 +57,8 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     final String normalizedAppName
     /**
-     * Version of the app you are deploying (e.g. <version> from the POM)
+     * Version of the app you are deploying (e.g. <version> from the POM). This parameter is optional and if it's not supplied
+     * then it will be derived from the <version> parameter in the project's POM based on the JAR/ZIP
      */
     final String appVersion
 
@@ -66,36 +68,41 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
      * Construct a "standard" request. See properties for parameter info.
      */
     CloudhubDeploymentRequest(String environment,
-                              String appName,
-                              String appVersion,
                               CloudhubWorkerSpecRequest workerSpecRequest,
                               File file,
                               String cryptoKey,
                               String anypointClientId,
                               String anypointClientSecret,
                               String cloudHubAppPrefix,
+                              String appName = null,
+                              String appVersion = null,
                               Map<String, String> appProperties = [:],
                               Map<String, String> otherCloudHubProperties = [:]) {
+        this.file = file
         this.environment = environment
-        this.appName = appName
-        this.appVersion = appVersion
-        this.workerSpecRequest = workerSpecRequest
+        this.appName = appName ?: parsedPomProperties.artifactId
+        this.appVersion = appVersion ?: parsedPomProperties.version
+        if (!workerSpecRequest.muleVersion) {
+            def propertyToUse = mule4Request ? 'app.runtime' : 'mule.version'
+            this.workerSpecRequest = workerSpecRequest.withNewMuleVersion(parsedPomProperties.props[propertyToUse])
+        } else {
+            this.workerSpecRequest = workerSpecRequest
+        }
         this.cryptoKey = cryptoKey
         this.anypointClientId = anypointClientId
         this.anypointClientSecret = anypointClientSecret
         this.cloudHubAppPrefix = cloudHubAppPrefix
         this.appProperties = appProperties
         this.otherCloudHubProperties = otherCloudHubProperties
-        if (appName.contains(' ')) {
-            throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
+        if (this.appName.contains(' ')) {
+            throw new Exception("Runtime Manager does not like spaces in app names and you specified '${this.appName}'!")
         }
-        def newAppName = "${cloudHubAppPrefix}-${appName}-${environment}"
+        def newAppName = "${cloudHubAppPrefix}-${this.appName}-${environment}"
         def appNameLowerCase = newAppName.toLowerCase()
         if (appNameLowerCase != newAppName) {
             newAppName = appNameLowerCase
         }
         normalizedAppName = newAppName
-        this.file = file
         this.cloudhubAppProperties = new CloudhubAppProperties(environment.toLowerCase(),
                                                                cryptoKey,
                                                                anypointClientId,

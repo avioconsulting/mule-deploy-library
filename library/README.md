@@ -41,7 +41,8 @@ There is also a DSL framework included in the library. You can see the CLI and M
 
 ## Required development environment
 1. JDK - 1.8.0_191 works OK for running the tests as does JDK11. JDK ~> 1.8.0_232 seems to cause issues with the test web server and `CompleteableFuture` (`SocketClosed` exceptions). It's recommended to either use JDK 1.8 <= 191 or use >= 11 to run the unit tests.
-1. Maven
+2. Maven
+3. In IntelliJ, make sure you disable the embedded Maven installation and use a system one. Otherwise the Maven invoker in the tests may not work.
 
 ## Maintenance
 

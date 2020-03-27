@@ -1,5 +1,7 @@
 package com.avioconsulting.mule.deployment.dsl
 
+import com.avioconsulting.mule.MavenInvoke
+import org.junit.BeforeClass
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -8,16 +10,19 @@ import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
 @SuppressWarnings(["UnnecessaryQualifiedReference", "GroovyAssignabilityCheck"])
-class OnPremContextTest {
+class OnPremContextTest implements MavenInvoke {
+    @BeforeClass
+    static void setup() {
+        buildApp()
+    }
+
     @Test
     void required_only() {
         // arrange
         def context = new OnPremContext()
         def closure = {
             environment 'DEV'
-            applicationName 'the-app'
-            appVersion '1.2.3'
-            file 'path/to/file.jar'
+            file builtFile.absolutePath
             targetServerOrClusterName 'server1'
         }
         closure.delegate = context
@@ -31,11 +36,11 @@ class OnPremContextTest {
             assertThat environment,
                        is(equalTo('DEV'))
             assertThat appName,
-                       is(equalTo('the-app'))
+                       is(equalTo('mule-deploy-lib-v4-test-app'))
             assertThat appVersion,
-                       is(equalTo('1.2.3'))
+                       is(equalTo('1.0.0'))
             assertThat file,
-                       is(equalTo(new File('path/to/file.jar')))
+                       is(equalTo(builtFile))
             assertThat targetServerOrClusterName,
                        is(equalTo('server1'))
         }
@@ -98,8 +103,6 @@ class OnPremContextTest {
         // assert
         assertThat exception.message,
                    is(equalTo("""Your deployment request is not complete. The following errors exist:
-- appVersion missing
-- applicationName missing
 - environment missing
 - file missing
 - targetServerOrClusterName missing

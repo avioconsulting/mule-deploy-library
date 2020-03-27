@@ -5,7 +5,9 @@ import groovy.transform.ToString
 @ToString
 class CloudhubWorkerSpecRequest {
     /**
-     * E.g. 4.2.2
+     * E.g. 4.2.2. This parameter is optional. If you do not supply it, then the deployer will derive it
+     * by looking at POM properties, the <app.runtime> property for Mule 4 projects and <mule.version> for
+     * Mule 3 projects. The POM will be read from the JAR/ZIP of the app
      */
     final String muleVersion
     /***
@@ -28,7 +30,7 @@ class CloudhubWorkerSpecRequest {
     /***
      * Standard request, see properties for parameter info.
      */
-    CloudhubWorkerSpecRequest(String muleVersion,
+    CloudhubWorkerSpecRequest(String muleVersion = null,
                               boolean usePersistentQueues = false,
                               int workerCount = 1,
                               WorkerTypes workerType = WorkerTypes.Micro,
@@ -38,5 +40,13 @@ class CloudhubWorkerSpecRequest {
         this.workerType = workerType
         this.workerCount = workerCount
         this.awsRegion = awsRegion
+    }
+
+    CloudhubWorkerSpecRequest withNewMuleVersion(String newMuleVersion) {
+        new CloudhubWorkerSpecRequest(newMuleVersion,
+                                      usePersistentQueues,
+                                      workerCount,
+                                      workerType,
+                                      awsRegion)
     }
 }

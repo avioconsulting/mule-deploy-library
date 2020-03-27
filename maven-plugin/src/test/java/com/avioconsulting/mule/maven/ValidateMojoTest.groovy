@@ -114,7 +114,12 @@ muleDeploy {
         def dslText = """
 def versionsForEnvironments = [
         DEV: '4.2.2',
-        QA: '4.1.4'
+        QA: '4.1.4',
+        PRD: '4.1.3'
+]
+def serverForEnvironments = [
+    DEV: 'svr1',
+    QA: 'svr2'
 ]
 muleDeploy {
     version '1.0'
@@ -124,7 +129,7 @@ muleDeploy {
         applicationName 'the-app'
         appVersion versionsForEnvironments[params.env]
         file 'path/to/file.jar'
-        targetServerOrClusterName 'theServer'
+        targetServerOrClusterName serverForEnvironments[params.env]
     }
 }
 """
@@ -141,7 +146,7 @@ muleDeploy {
         assertThat logger.errors,
                    is(equalTo([
                            'PRD environment - Unable to process DSL because class java.lang.Exception Your deployment request is not complete. The following errors exist:\n' +
-                                   '- appVersion missing'
+                                   '- targetServerOrClusterName missing'
                    ]))
     }
 }

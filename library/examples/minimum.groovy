@@ -23,11 +23,7 @@ muleDeploy {
         environment params.environment
         applicationName 'the-app'
         appVersion '1.2.3'
-        workerSpecs {
-            // only muleVersion is required
-            muleVersion muleVersionsForEnvironments[params.environment]
-            workerType WorkerTypes().micro
-        }
+        // mule version for workerSpecs will be derived from POM
         file 'something.jar'
         cryptoKey params.cryptoKey
         autoDiscovery {

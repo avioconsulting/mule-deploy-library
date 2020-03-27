@@ -122,8 +122,6 @@ class DeployerTest {
         failDeployment = true
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
-                                                    'new-app',
-                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -133,7 +131,9 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client')
+                                                    'client',
+                                                    'new-app',
+                                                    '1.2.3',)
         def apiSpec = new ApiSpecification('Hello API')
 
         // act
@@ -152,8 +152,6 @@ class DeployerTest {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
-                                                    'new-app-mule3',
-                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -163,7 +161,9 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client')
+                                                    'client',
+                                                    'new-app-mule3',
+                                                    '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
                                            'v1',
                                            'main.raml',
@@ -233,8 +233,6 @@ class DeployerTest {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
-                                                    'new-app-mule4',
-                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('4.2.2',
                                                                                   false,
                                                                                   1,
@@ -244,7 +242,9 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client')
+                                                    'client',
+                                                    'new-app-mule4',
+                                                    '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
                                            'v1',
                                            'main.raml',
@@ -271,8 +271,6 @@ class DeployerTest {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('TST',
-                                                    'new-app',
-                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -282,7 +280,9 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client')
+                                                    'client',
+                                                    'new-app',
+                                                    '1.2.3')
         def apiSpec = new ApiSpecification('Hello API')
 
         // act
@@ -303,10 +303,10 @@ class DeployerTest {
         def file = new File('src/test/resources/some_file.txt')
         def apiSpec = new ApiSpecification('Hello API')
         def request = new OnPremDeploymentRequest('DEV',
-                                                  'new-app-mule3',
-                                                  '1.2.3',
                                                   'clustera',
-                                                  file)
+                                                  file,
+                                                  'new-app-mule3',
+                                                  '1.2.3')
 
         // act
         deployer.deployApplication(request,
@@ -333,10 +333,10 @@ class DeployerTest {
         def file = new File('src/test/resources/some_file.txt')
         def apiSpec = new ApiSpecification('Hello API')
         def request = new OnPremDeploymentRequest('DEV',
-                                                  'new-ap-mule4',
-                                                  '1.2.3',
                                                   'clustera',
-                                                  file)
+                                                  file,
+                                                  'new-ap-mule4',
+                                                  '1.2.3')
 
         // act
         deployer.deployApplication(request,
@@ -362,8 +362,6 @@ class DeployerTest {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
-                                                    'new-app',
-                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -373,7 +371,9 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client')
+                                                    'client',
+                                                    'new-app',
+                                                    '1.2.3')
 
         // act
         deployer.deployApplication(request,
@@ -398,8 +398,6 @@ class DeployerTest {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
-                                                    'new-app',
-                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -409,7 +407,9 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client')
+                                                    'client',
+                                                    'new-app',
+                                                    '1.2.3')
         def apiSpec = new ApiSpecification('Hello API')
 
         // act
@@ -434,8 +434,6 @@ class DeployerTest {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
-                                                    'new-app',
-                                                    '1.2.3',
                                                     new CloudhubWorkerSpecRequest('3.9.1',
                                                                                   false,
                                                                                   1,
@@ -445,7 +443,9 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client')
+                                                    'client',
+                                                    'new-app',
+                                                    '1.2.3')
         def apiSpec = new ApiSpecification('Hello API')
 
         // act
