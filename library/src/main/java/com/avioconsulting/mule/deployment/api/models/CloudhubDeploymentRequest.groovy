@@ -62,6 +62,12 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     final String appVersion
 
+    /***
+     * Sets anypoint.platform.config.analytics.agent.enabled to true in CH props
+     * False by default
+     */
+    final boolean analyticsAgentEnabled
+
     private CloudhubAppProperties cloudhubAppProperties
 
     /**
@@ -77,7 +83,8 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                               String appName = null,
                               String appVersion = null,
                               Map<String, String> appProperties = [:],
-                              Map<String, String> otherCloudHubProperties = [:]) {
+                              Map<String, String> otherCloudHubProperties = [:],
+                              boolean analyticsAgentEnabled = false) {
         this.file = file
         this.environment = environment
         this.appName = appName ?: parsedPomProperties.artifactId
@@ -106,7 +113,10 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
         this.cloudhubAppProperties = new CloudhubAppProperties(environment.toLowerCase(),
                                                                cryptoKey,
                                                                anypointClientId,
-                                                               anypointClientSecret)
+                                                               anypointClientSecret,
+                                                               // only include prop if it's true
+                                                               analyticsAgentEnabled ? true : null)
+        this.analyticsAgentEnabled = analyticsAgentEnabled
     }
 
     HttpEntity getHttpPayload() {
@@ -129,21 +139,22 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                                                     Map)
         def result = [
                 // CloudHub's API calls the Mule application the 'domain'
-                domain               : normalizedAppName,
-                muleVersion          : [
-                        version: workerSpecRequest.muleVersion
-                ],
-                region               : workerSpecRequest.awsRegion?.awsCode,
-                monitoringAutoRestart: true,
-                workers              : [
+                domain                   : normalizedAppName,
+                muleVersion              : workerSpecRequest.versionInfo,
+                region                   : workerSpecRequest.awsRegion?.awsCode,
+                monitoringAutoRestart    : true,
+                workers                  : [
                         type  : [
                                 name: workerSpecRequest.workerType.toString()
                         ],
                         amount: workerSpecRequest.workerCount
                 ],
-                persistentQueues     : workerSpecRequest.usePersistentQueues,
+                staticIPsEnabled         : workerSpecRequest.staticIpEnabled,
+                loggingCustomLog4JEnabled: workerSpecRequest.customLog4j2Enabled,
+                objectStoreV1            : !workerSpecRequest.objectStoreV2Enabled,
+                persistentQueues         : workerSpecRequest.usePersistentQueues,
                 // these are the actual properties in the 'Settings' tab
-                properties           : props
+                properties               : props
         ] as Map<String, String>
         if (!result.region) {
             // use default/runtime manager region

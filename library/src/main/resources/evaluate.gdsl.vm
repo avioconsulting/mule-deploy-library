@@ -7,6 +7,9 @@ method name: '$param',
 #macro(stringParam $param)
     #methodParam($param 'String.name')
 #end
+#macro(boolParam $param)
+    #methodParam($param 'Boolean.name')
+#end
 #macro(mapParam $param)
     #methodParam($param 'Map.name')
 #end
@@ -88,6 +91,7 @@ contributor([closureScopeContext]) {
         #closureParam('workerSpecs')
         #stringParam('file')
         #stringParam('cryptoKey')
+        #boolParam('analyticsAgentEnabled')
         #closureParam('autoDiscovery')
         #stringParam('cloudHubAppPrefix')
         #mapParam('appProperties')
@@ -148,10 +152,14 @@ contributor([closureScopeContext]) {
     call = enclosingCall('workerSpecs')
     if (call) {
         #stringParam('muleVersion')
-        #methodParam('usePersistentQueues' 'Boolean.name')
+        #boolParam('usePersistentQueues')
         #enumParam('workerType' 'WorkerTypes')
         #methodParam('workerCount' 'Integer.name')
         #enumParam('awsRegion' 'AwsRegions')
+        #stringParam('updateId')
+        #boolParam('customLog4j2Enabled')
+        #boolParam('staticIpEnabled')
+        #boolParam('objectStoreV2Enabled')
     }
     call = enclosingCall('autoDiscovery')
     if (call) {
