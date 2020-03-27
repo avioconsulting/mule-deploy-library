@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.api.models
 
-import groovy.xml.QName
+import groovy.util.slurpersupport.GPathResult
 
 import java.nio.file.FileSystems
 import java.nio.file.Files
@@ -16,18 +16,17 @@ abstract class FileBasedAppDeploymentRequest {
                 p.endsWith('pom.xml')
             } as Path
             assert pomXmlPath: 'Was not able to find pom.xml in ZIP/JAR'
-            def parser = new XmlParser().parseText(pomXmlPath.text)
-            def props = [:]
-            def getLocalValue = { Node node ->
-                (node.value() as QName).localPart
+            def parser = new XmlSlurper().parseText(pomXmlPath.text)
+            def props = parser.properties.children().collectEntries { GPathResult node ->
+                [node.name(), node.text()]
             }
-            parser['properties'][0].each { Node node ->
-                def key = (node.name() as QName).localPart
-                props[key] = getLocalValue(node)
+            def textFromNode = { String element ->
+                def res = parser[element][0] as GPathResult
+                res.text()
             }
-            return new PomInfo(getLocalValue(parser['groupId'][0] as Node),
-                               getLocalValue(parser['artifactId'][0] as Node),
-                               getLocalValue(parser['version'][0] as Node),
+            return new PomInfo(textFromNode('groupId'),
+                               textFromNode('artifactId'),
+                               textFromNode('version'),
                                props)
         } as PomInfo
     }()
