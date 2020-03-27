@@ -9,19 +9,6 @@ pipeline {
     }
 
     stages {
-        stage('Fetch dependencies') {
-            steps {
-                withMaven(jdk: env.jdk,
-                          maven: env.mvn,
-                          mavenSettingsConfig: env.standard_avio_mvn_settings,
-                          // Don't want to capture artifacts w/ un-set version (see build/test stage)
-                          options: [artifactsPublisher(disabled: true)]) {
-                    // Used to clarify Maven phases a bit more than pure dependency as you go mode.
-                    mavenFetchDependencies()
-                }
-            }
-        }
-
         stage('Build and unit test') {
             steps {
                 withMaven(jdk: env.jdk,
@@ -30,7 +17,28 @@ pipeline {
                           // only want to capture artifact if we're deploying (see below)
                           options: [artifactsPublisher(disabled: true)]) {
                     mavenSetVersion(env.version)
-                    quietMaven 'clean package'
+                    // would usually use package but we have a multi module interdependent project
+                    quietMaven 'clean install'
+                }
+                archiveArtifacts 'cli/target/appassembler/**/*'
+            }
+        }
+
+        stage('Mutation Test/Site Report') {
+            steps {
+                withMaven(jdk: env.jdk,
+                          maven: env.mvn,
+                          mavenSettingsConfig: env.standard_avio_mvn_settings) {
+                    dir('library') {
+                        // simple way to guarantee the mutation test has run before generating the site
+                        quietMaven 'clean test-compile org.pitest:pitest-maven:mutationCoverage groovydoc:generate site'
+                        publishHTML([allowMissing         : false,
+                                     alwaysLinkToLastBuild: true,
+                                     keepAll              : true,
+                                     reportDir            : 'target/site',
+                                     reportFiles          : 'index.html',
+                                     reportName           : 'Maven site'])
+                    }
                 }
             }
         }
@@ -47,7 +55,10 @@ pipeline {
                           mavenSettingsConfig: env.standard_avio_mvn_settings,
                           // only want to capture artifact if we're deploying (see below)
                           options: [artifactsPublisher(disabled: true)]) {
-                    quietMaven "clean test-compile surefire:test@integration-test -Danypoint.username=${env.ANYPOINT_CREDS_USR} -Danypoint.password=${env.ANYPOINT_CREDS_PSW} -Danypoint.client.id=${env.ANYPOINT_CLIENT_CREDS_USR} -Danypoint.client.secret=${env.ANYPOINT_CLIENT_CREDS_PSW}"
+                    // don't need to run integration tests on other modules (and they are not defined)
+                    dir('library') {
+                        quietMaven "clean test-compile surefire:test@integration-test -Danypoint.username=${env.ANYPOINT_CREDS_USR} -Danypoint.password=${env.ANYPOINT_CREDS_PSW} -Danypoint.client.id=${env.ANYPOINT_CLIENT_CREDS_USR} -Danypoint.client.secret=${env.ANYPOINT_CLIENT_CREDS_PSW}"
+                    }
                 }
             }
 
@@ -62,15 +73,9 @@ pipeline {
                 withMaven(jdk: env.jdk,
                           maven: env.mvn,
                           mavenSettingsConfig: env.standard_avio_mvn_settings) {
-                    quietMaven 'clean deploy groovydoc:generate site -DskipTests'
+                    quietMaven 'clean deploy -DskipTests'
                     // keeps buildDiscarder from getting rid of stuff we've published
                     keepBuild()
-                    publishHTML([allowMissing         : false,
-                                 alwaysLinkToLastBuild: true,
-                                 keepAll              : true,
-                                 reportDir            : 'target/site',
-                                 reportFiles          : 'index.html',
-                                 reportName           : 'Maven site'])
                 }
             }
 

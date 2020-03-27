@@ -1,48 +1,85 @@
 # Overview
 
-A Java/Groovy library that handles CloudHub/On-Prem Mule app deployment and Design Center sync'ing.
+There are 3 ways to use this:
 
-Automatically handles failed/undeployed app cases and also waits for app to start before returning control.
+1. Via a Maven plugin
+2. Via a CLI
+3. Consume the library directly with code.
 
-# Usage
+Both approaches 1 and 2 lean on using a Groovy DSL to supply your deployment specs. #3 leaves the choice up to you (either building request objects in Java or Groovy code or using the DSL). Keep in mind that the "Groovy DSL file" that specifies actual deployment specs can live anywhere (build system artifacts, etc.). It just has to be present on the filesystem by the time the Maven plugin or the CLI (if you choose that route) runs.
 
-## "Install"
+ALL of these methods assume your CI/CD tool white lists secrets from output. If it does not, it's on YOU to deal with that. Jenkins and Azure DevOps should do this out of the box with no further configuration.
 
-Just include this dependency in your POM. See [AVIO Nexus](https://devops.avioconsulting.com/nexus/#browse/browse:avio-releases:com%2Favioconsulting%2Fmule%2Fmule-deploy-library) for the latest version.
+# Maven plugin
 
-## Create an Anypoint user with the right permissions
+NOTE: The Maven plugin has 2 goals (deploy and validate). Regardless of whether you use it to actually perform the deployment, it's highly recommended you use the validate goal to ensure your DSL file is correct during the build pipeline.
 
-Roles:
-* Cloudhub Admin (DEV/TST/PRD) - to deploy the actual app
-* Exchange Administrators - to publish Exchange assets
+## Use when
 
-Permissions:
-* Design Center Developer permission - to update Design Center
-* API Manager For each environment (DEV/TST/PRD):
-    * API Manager Environment Administrator
-    * Manage APIs Configuration
-    * Manage Contracts
-    * Manage Policies
-    * View APIs Configuration
-    * View Contracts
-    * View Policies
+* You have JDK and Maven installed on the agent(s) your CI/CD system performs releases on.
+* Installing artifacts like a CLI on a build/release agent ahead of time is difficult because the agent is ephemeral.
 
-## In your code
+## Do NOT use when
 
-You'll want to start by instantiating the `Deployer` class and then calling the appropriate methods.
+* Organization does not have and/or does not want Maven on their agents.
 
-Javadocs are published on [AVIO Jenkins](https://devops.avioconsulting.com/jenkins/job/Mulesoft%20Deployment/job/mule-deploy-library/job/master/Maven_20site/).
+## Details
 
-NOTE: This library assumes that whatever logger mechanism you provide via The `PrintStream logger` parameter hides ANY credentials or secrets you provide this. If you use Jenkins with its credentials plugin, it will handle this but make sure SOMETHING handles this.
+The Maven plugin's `validate` goal is best run by putting it in the POM explicitly. The `deploy` goal can be used 2 ways (in a project POM or without a POM). There is no hard and fast answer and it largely depends on what your organization is comfortable with.
 
-# Development/building/maintenance
+If you have no strong preference, then stick with the "with POM" approach which looks like this.
 
-## Required development environment
-1. JDK - 1.8.0_191 works OK for running the tests as does JDK11. JDK ~> 1.8.0_232 seems to cause issues with the test web server and `CompleteableFuture` (`SocketClosed` exceptions). It's recommended to either use JDK 1.8 <= 191 or use >= 11 to run the unit tests.
-1. Maven
+```xml
+<project>
+    ...
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>com.avioconsulting.mule</groupId>
+                <artifactId>mule-deploy-maven-plugin</artifactId>
+                <version>1.0.0</version>                
+                <executions>
+                    <execution>
+                        <id>do_validation</id>
+                        <!-- Needs to be at the package phase so we have an artifact to use -->
+                        <phase>package</phase>
+                        <goals>
+                            <goal>validate</goal>
+                        </goals>
+                    </execution>                  
+                    <execution>
+                        <id>stuff</id>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>deploy</goal>
+                        </goals>                       
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    ...
+</project>
+```
 
-## Maintenance
+```sh
+mvn clean deploy -DmuleDeploy.env=DEV -Danypoint.username=bob -Danypoint.password=asecret -DmuleDeploy.cryptoKey=hello -DmuleDeploy.autoDiscClientId=theId -DmuleDeploy.autoDiscClientSecret=theSecret
+```
 
-This is largely just a standard Maven project. There are a couple ENUMs that should be kept up to date.
-1. `com.avioconsulting.mule.deployment.api.models.AwsRegions` - [Javadoc](https://devops.avioconsulting.com/jenkins/job/Mulesoft%20Deployment/job/mule-deploy-library/job/master/Maven_20site/groovydocs/com/avioconsulting/mule/deployment/api/models/AwsRegions.html)
-2. `com.avioconsulting.mule.deployment.api.models.WorkerTypes` - [Javadoc](https://devops.avioconsulting.com/jenkins/job/Mulesoft%20Deployment/job/mule-deploy-library/job/master/Maven_20site/groovydocs/com/avioconsulting/mule/deployment/api/models/WorkerTypes.html)
+See maven-plugin/README.md for more information.
+
+# CLI
+
+## Use when
+
+* Maven is not available on the agents (and can't or won't be installed)
+* At the moment, the CLI does not have a bundled JDK, just bundled dependencies. This could be changed if need be though.
+
+## Do NOT use when
+
+* Maven is available (that approach makes "setting up" the agent easier)
+
+# Further Info
+
+See the respective README files in each of the 3 subprojects for more details.
+
