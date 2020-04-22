@@ -5,18 +5,18 @@ class JwtPolicy extends MulesoftPolicy {
               String expectedAudience,
               List<PolicyPathApplication> policyPathApplications = null,
               Map<String, String> customClaimValidations = [:],
-              String clientIdExpression = '#[vars.claimSet.client_id]',
+              String clientIdExpression = null,
               boolean skipClientIdEnforcement = false,
-              int jwksCachingTtlInMinutes = 60,
+              Integer jwksCachingTtlInMinutes = null,
               String version = '1.1.2') {
         super('jwt-validation',
               version,
               getConfig(jwksUrl,
                         expectedAudience,
                         skipClientIdEnforcement,
-                        clientIdExpression,
+                        clientIdExpression ?: '#[vars.claimSet.client_id]',
                         customClaimValidations,
-                        jwksCachingTtlInMinutes),
+                        jwksCachingTtlInMinutes ?: 60),
               policyPathApplications)
     }
 

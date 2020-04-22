@@ -1,13 +1,16 @@
 package com.avioconsulting.mule.deployment.dsl.policies
 
-import com.avioconsulting.mule.deployment.api.models.policies.ClientEnforcementPolicyBasicAuth
+
 import com.avioconsulting.mule.deployment.api.models.policies.JwtPolicy
 import com.avioconsulting.mule.deployment.dsl.BaseContext
 
 class JwtPolicyBasicContext extends BaseContext {
-    String version, jwksUrl, expectedAudience
+    String version, jwksUrl, expectedAudience, clientIdExpression
     private PathsContext paths = new PathsContext()
     private boolean pathsCalled = false
+    private Map<String, String> customClaims = [:]
+    private boolean skipClientIdEnforcement = false
+    Integer jwksCachingTtlInMinutes
 
     JwtPolicy createPolicyModel() {
         def pathListing = paths.createModel()
@@ -20,7 +23,13 @@ class JwtPolicyBasicContext extends BaseContext {
             throw new Exception("Your policy spec is not complete. The following errors exist:\n${errorList}")
         }
         new JwtPolicy(this.jwksUrl,
-                      this.expectedAudience)
+                      this.expectedAudience,
+                      pathListing,
+                      customClaims,
+                      clientIdExpression,
+                      skipClientIdEnforcement,
+                      jwksCachingTtlInMinutes,
+                      version)
     }
 
     def methodMissing(String name, def args) {
@@ -31,8 +40,17 @@ class JwtPolicyBasicContext extends BaseContext {
                             args)
     }
 
+    def skipClientIdEnforcement() {
+        this.skipClientIdEnforcement = true
+    }
+
+    def validateClaim(String claim,
+                      String expression) {
+        customClaims[claim] = expression
+    }
+
     @Override
     List<String> findOptionalProperties() {
-        ['version']
+        ['version', 'clientIdExpression', 'jwksCachingTtlInMinutes']
     }
 }

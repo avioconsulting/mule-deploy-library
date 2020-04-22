@@ -222,6 +222,56 @@ class PolicyContextTest {
     }
 
     @Test
+    void jwt_policy_custom_stuff() {
+        // arrange
+        def context = new JwtPolicyBasicContext()
+        def closure = {
+            jwksUrl 'https://stuff'
+            expectedAudience 'https://aud'
+            validateClaim 'roles',
+                          'howdy'
+            validateClaim 'foo',
+                          'bar'
+            clientIdExpression 'othercliid'
+            skipClientIdEnforcement()
+            jwksCachingTtlInMinutes 90
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createPolicyModel()
+
+        // assert
+        assertThat request,
+                   is(instanceOf(JwtPolicy))
+        assertThat request.policyConfiguration,
+                   is(equalTo([
+                           jwtKeyOrigin          : 'jwks',
+                           jwksUrl               : 'https://stuff',
+                           skipClientIdValidation: true,
+                           clientIdExpression    : 'othercliid',
+                           validateAudClaim      : true,
+                           mandatoryAudClaim     : true,
+                           supportedAudiences    : 'https://aud',
+                           validateCustomClaim   : true,
+                           mandatoryCustomClaims : [
+                                   [
+                                           key  : 'roles',
+                                           value: 'howdy'
+                                   ],
+                                   [
+                                           key  : 'foo',
+                                           value: 'bar'
+                                   ]
+                           ],
+                           mandatoryExpClaim     : true,
+                           mandatoryNbfClaim     : true,
+                           jwksServiceTimeToLive : 90
+                   ]))
+    }
+
+    @Test
     void client_enforcement_policy_minimum() {
         // arrange
         def context = new ClientEnforcementPolicyBasicContext()
