@@ -2,6 +2,7 @@ package com.avioconsulting.mule.deployment.dsl.policies
 
 import com.avioconsulting.mule.deployment.api.models.HttpMethod
 import com.avioconsulting.mule.deployment.api.models.policies.ClientEnforcementPolicyBasicAuth
+import com.avioconsulting.mule.deployment.api.models.policies.JwtPolicy
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.api.models.policies.PolicyPathApplication
 import org.junit.Test
@@ -199,6 +200,25 @@ class PolicyContextTest {
 - policies.policy.assetId missing
 - policies.policy.config missing
 - policies.policy.version missing"""))
+    }
+
+    @Test
+    void jwt_policy() {
+        // arrange
+        def context = new JwtPolicyBasicContext()
+        def closure = {
+            jwksUrl 'https://stuff'
+            expectedAudience 'https://aud'
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createPolicyModel()
+
+        // assert
+        assertThat request,
+                   is(instanceOf(JwtPolicy))
     }
 
     @Test
