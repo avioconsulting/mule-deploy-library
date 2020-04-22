@@ -9,7 +9,7 @@ class Policy {
     final String groupId
     final String assetId
     final String version
-    final Map<String, String> policyConfiguration
+    final Map<String, Object> policyConfiguration
     final List<PolicyPathApplication> policyPathApplications
 
     static String getMulesoftGroupId() {
@@ -26,7 +26,7 @@ class Policy {
      */
     Policy(String assetId,
            String version,
-           Map<String, String> policyConfiguration,
+           Map<String, Object> policyConfiguration,
            String groupId = null,
            List<PolicyPathApplication> policyPathApplications = null) {
         this.groupId = groupId

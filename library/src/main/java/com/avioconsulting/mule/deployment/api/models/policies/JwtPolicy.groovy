@@ -20,12 +20,12 @@ class JwtPolicy extends MulesoftPolicy {
               policyPathApplications)
     }
 
-    private static Map getConfig(String jwksUrl,
-                                 String expectedAudience,
-                                 boolean skipClientIdEnforcement,
-                                 String clientIdExpression,
-                                 Map<String, String> customClaimValidations,
-                                 int jwksCachingTtlInMinutes) {
+    private static Map<String, Object> getConfig(String jwksUrl,
+                                                 String expectedAudience,
+                                                 boolean skipClientIdEnforcement,
+                                                 String clientIdExpression,
+                                                 Map<String, String> customClaimValidations,
+                                                 int jwksCachingTtlInMinutes) {
         def map = [
                 jwtKeyOrigin          : 'jwks',
                 jwksUrl               : jwksUrl,
