@@ -27,8 +27,15 @@ class JwtPolicy extends MulesoftPolicy {
                                                  Map<String, String> customClaimValidations,
                                                  int jwksCachingTtlInMinutes) {
         def map = [
+                jwtOrigin             : 'httpBearerAuthenticationHeader',
+                jwtExpression         : "#[attributes.headers['jwt']]",
+                signingMethod         : 'rsa',
+                // we have to include this our API Manager rejects, even though we are not using text keys
+                textKey               : 'your-(256|384|512)-bit-secret',
+                signingKeyLength      : 256,
                 jwtKeyOrigin          : 'jwks',
                 jwksUrl               : jwksUrl,
+                jwksServiceTimeToLive : jwksCachingTtlInMinutes,
                 skipClientIdValidation: skipClientIdEnforcement,
                 clientIdExpression    : clientIdExpression,
                 validateAudClaim      : true,
@@ -36,7 +43,7 @@ class JwtPolicy extends MulesoftPolicy {
                 supportedAudiences    : expectedAudience,
                 mandatoryExpClaim     : true,
                 mandatoryNbfClaim     : true,
-                jwksServiceTimeToLive : jwksCachingTtlInMinutes
+                validateCustomClaim   : false
         ]
         if (customClaimValidations.any()) {
             map['validateCustomClaim'] = true

@@ -249,8 +249,14 @@ class PolicyContextTest {
                    is(instanceOf(JwtPolicy))
         assertThat request.policyConfiguration,
                    is(equalTo([
+                           jwtOrigin             : 'httpBearerAuthenticationHeader',
+                           jwtExpression         : "#[attributes.headers['jwt']]",
+                           signingMethod         : 'rsa',
+                           textKey               : 'your-(256|384|512)-bit-secret',
+                           signingKeyLength      : 256,
                            jwtKeyOrigin          : 'jwks',
                            jwksUrl               : 'https://stuff',
+                           jwksServiceTimeToLive : 90,
                            skipClientIdValidation: true,
                            clientIdExpression    : 'othercliid',
                            validateAudClaim      : true,
@@ -268,8 +274,7 @@ class PolicyContextTest {
                                    ]
                            ],
                            mandatoryExpClaim     : true,
-                           mandatoryNbfClaim     : true,
-                           jwksServiceTimeToLive : 90
+                           mandatoryNbfClaim     : true
                    ]))
     }
 

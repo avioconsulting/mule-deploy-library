@@ -25,8 +25,14 @@ class JwtPolicyTest {
                    is(equalTo('1.1.2'))
         assertThat model.policyConfiguration,
                    is(equalTo([
+                           jwtOrigin             : 'httpBearerAuthenticationHeader',
+                           jwtExpression         : "#[attributes.headers['jwt']]",
+                           signingMethod         : 'rsa',
+                           textKey               : 'your-(256|384|512)-bit-secret',
+                           signingKeyLength      : 256,
                            jwtKeyOrigin          : 'jwks',
                            jwksUrl               : 'https://foo',
+                           jwksServiceTimeToLive : 60,
                            skipClientIdValidation: false,
                            clientIdExpression    : '#[vars.claimSet.client_id]',
                            validateAudClaim      : true,
@@ -34,7 +40,7 @@ class JwtPolicyTest {
                            supportedAudiences    : 'https://the_audience',
                            mandatoryExpClaim     : true,
                            mandatoryNbfClaim     : true,
-                           jwksServiceTimeToLive : 60
+                           validateCustomClaim   : false
                    ]))
         println "tostring is ${model.toString()}"
         def compare = new Policy(model.assetId,
@@ -67,8 +73,14 @@ class JwtPolicyTest {
                    is(equalTo('1.1.2'))
         assertThat model.policyConfiguration,
                    is(equalTo([
+                           jwtOrigin             : 'httpBearerAuthenticationHeader',
+                           jwtExpression         : "#[attributes.headers['jwt']]",
+                           signingMethod         : 'rsa',
+                           textKey               : 'your-(256|384|512)-bit-secret',
+                           signingKeyLength      : 256,
                            jwtKeyOrigin          : 'jwks',
                            jwksUrl               : 'https://foo',
+                           jwksServiceTimeToLive : 60,
                            skipClientIdValidation: false,
                            clientIdExpression    : '#[vars.claimSet.client_id]',
                            validateAudClaim      : true,
@@ -82,8 +94,7 @@ class JwtPolicyTest {
                                    ]
                            ],
                            mandatoryExpClaim     : true,
-                           mandatoryNbfClaim     : true,
-                           jwksServiceTimeToLive : 60
+                           mandatoryNbfClaim     : true
                    ]))
         println "tostring is ${model.toString()}"
         def compare = new Policy(model.assetId,
@@ -117,8 +128,14 @@ class JwtPolicyTest {
                    is(equalTo('1.1.2'))
         assertThat model.policyConfiguration,
                    is(equalTo([
+                           jwtOrigin             : 'httpBearerAuthenticationHeader',
+                           jwtExpression         : "#[attributes.headers['jwt']]",
+                           signingMethod         : 'rsa',
+                           textKey               : 'your-(256|384|512)-bit-secret',
+                           signingKeyLength      : 256,
                            jwtKeyOrigin          : 'jwks',
                            jwksUrl               : 'https://foo',
+                           jwksServiceTimeToLive : 90,
                            skipClientIdValidation: true,
                            clientIdExpression    : 'othercliid',
                            validateAudClaim      : true,
@@ -126,7 +143,7 @@ class JwtPolicyTest {
                            supportedAudiences    : 'https://the_audience',
                            mandatoryExpClaim     : true,
                            mandatoryNbfClaim     : true,
-                           jwksServiceTimeToLive : 90
+                           validateCustomClaim   : false
                    ]))
         println "tostring is ${model.toString()}"
         def compare = new Policy(model.assetId,
