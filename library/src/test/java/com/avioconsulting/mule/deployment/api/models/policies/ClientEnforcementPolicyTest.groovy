@@ -1,6 +1,5 @@
 package com.avioconsulting.mule.deployment.api.models.policies
 
-
 import org.junit.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
