@@ -15,7 +15,8 @@ class JwtPolicy extends MulesoftPolicy {
                         expectedAudience,
                         skipClientIdEnforcement,
                         clientIdExpression,
-                        customClaimValidations),
+                        customClaimValidations,
+                        jwksCachingTtlInMinutes),
               policyPathApplications)
     }
 
@@ -23,7 +24,8 @@ class JwtPolicy extends MulesoftPolicy {
                                  String expectedAudience,
                                  boolean skipClientIdEnforcement,
                                  String clientIdExpression,
-                                 Map<String, String> customClaimValidations) {
+                                 Map<String, String> customClaimValidations,
+                                 int jwksCachingTtlInMinutes) {
         def map = [
                 jwtKeyOrigin          : 'jwks',
                 jwksUrl               : jwksUrl,
@@ -33,7 +35,8 @@ class JwtPolicy extends MulesoftPolicy {
                 mandatoryAudClaim     : true,
                 supportedAudiences    : expectedAudience,
                 mandatoryExpClaim     : true,
-                mandatoryNbfClaim     : true
+                mandatoryNbfClaim     : true,
+                jwksServiceTimeToLive : jwksCachingTtlInMinutes
         ]
         if (customClaimValidations.any()) {
             map['validateCustomClaim'] = true
