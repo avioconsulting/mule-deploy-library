@@ -8,9 +8,9 @@ class JwtPolicy extends MulesoftPolicy {
               String clientIdExpression = null,
               boolean skipClientIdEnforcement = false,
               Integer jwksCachingTtlInMinutes = null,
-              String version = '1.1.2') {
+              String version = null) {
         super('jwt-validation',
-              version,
+              version ?: '1.1.2',
               getConfig(jwksUrl,
                         expectedAudience,
                         skipClientIdEnforcement,

@@ -219,6 +219,8 @@ class PolicyContextTest {
         // assert
         assertThat request,
                    is(instanceOf(JwtPolicy))
+        assertThat request.version,
+                   is(equalTo('1.1.2'))
     }
 
     @Test

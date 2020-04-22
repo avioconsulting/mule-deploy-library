@@ -32,4 +32,12 @@ class PolicyListContext {
         closure.call()
         policies << policyContext.createPolicyModel()
     }
+
+    def jwtPolicy(Closure closure) {
+        def policyContext = new JwtPolicyBasicContext()
+        closure.delegate = policyContext
+        closure.resolveStrategy = Closure.DELEGATE_FIRST
+        closure.call()
+        policies << policyContext.createPolicyModel()
+    }
 }
