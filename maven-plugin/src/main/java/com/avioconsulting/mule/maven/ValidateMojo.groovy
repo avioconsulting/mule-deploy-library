@@ -14,6 +14,9 @@ class ValidateMojo extends BaseMojo {
     @Parameter(defaultValue = 'env')
     private String environmentProperty
     private String currentEnvironment
+    // match up with JUnit/etc.
+    @Parameter(property = 'skipTests')
+    private boolean skip
 
     @Override
     Map<String, String> getAdditionalProperties() {
@@ -26,6 +29,10 @@ class ValidateMojo extends BaseMojo {
 
     @Override
     void execute() throws MojoExecutionException, MojoFailureException {
+        if (skip) {
+            logger.println 'Skipping due to -DskipTests flag'
+            return
+        }
         def failed = false
         logger.println "Will validate environments: ${environmentsToTest}"
         environmentsToTest.each { env ->
