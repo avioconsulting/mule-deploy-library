@@ -120,6 +120,7 @@ contributor([closureScopeContext]) {
         #closureParam('policy')
         #closureParam('mulesoftPolicy')
         #closureParam('clientEnforcementPolicyBasic')
+        #closureParam('jwtPolicy')
     }
     call = enclosingCall('policy')
     if (call) {
@@ -139,6 +140,19 @@ contributor([closureScopeContext]) {
     call = enclosingCall('clientEnforcementPolicyBasic')
     if (call) {
         #stringParam('version')
+    }
+    call = enclosingCall('jwtPolicy')
+    if (call) {
+        #stringParam('jwksUrl')
+        #stringParam('expectedAudience')
+        #stringParam('clientIdExpression')
+        method name: 'validateClaim',
+               params: [
+                       claim: String.name,
+                       value: String.name
+               ]
+        method name: 'skipClientIdEnforcement'
+        #methodParam('jwksCachingTtlInMinutes' 'Integer.name')
     }
     call = enclosingCall('paths')
     if (call) {
