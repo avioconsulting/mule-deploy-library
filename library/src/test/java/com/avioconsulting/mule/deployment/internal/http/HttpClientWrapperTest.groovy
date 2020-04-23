@@ -203,7 +203,7 @@ class HttpClientWrapperTest extends BaseTest {
     }
 
     @Test
-    void getAnypointOrganizationId_default_org() {
+    void getAnypointOrganizationId_default_org_prefs_exist() {
         // arrange
         clientWrapper = new HttpClientWrapper("http://localhost:${httpServer.actualPort()}",
                                               'the user',
@@ -225,6 +225,51 @@ class HttpClientWrapperTest extends BaseTest {
                                                     defaultEnvironment: 'the_id'
                                             ]
                                     ],
+                                    memberOfOrganizations  : [
+                                            [
+                                                    name: 'the-org-name-2',
+                                                    id  : 'the-org-id-2'
+                                            ]
+                                    ]
+                            ]
+                    ]
+                } else {
+                    jsonPayload = [
+                            access_token: 'the token'
+                    ]
+                }
+                end(JsonOutput.toJson(jsonPayload))
+            }
+        }
+        clientWrapper.authenticate()
+
+        // act
+        def result = clientWrapper.anypointOrganizationId
+
+        // assert
+        assertThat result,
+                   is(equalTo('the-org-id-2'))
+    }
+
+    @Test
+    void getAnypointOrganizationId_default_no_org_prefs_exist() {
+        // arrange
+        clientWrapper = new HttpClientWrapper("http://localhost:${httpServer.actualPort()}",
+                                              'the user',
+                                              'the password',
+                                              new TestConsoleLogger())
+        withHttpServer { HttpServerRequest request ->
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                Map jsonPayload
+                if (request.uri() == '/accounts/api/me') {
+                    jsonPayload = [
+                            user: [
+                                    id                     : 'the_id',
+                                    username               : 'the_username',
+                                    organizationPreferences: [:],
                                     memberOfOrganizations  : [
                                             [
                                                     name: 'the-org-name-2',

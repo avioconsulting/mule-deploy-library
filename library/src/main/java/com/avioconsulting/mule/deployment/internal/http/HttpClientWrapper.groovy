@@ -64,7 +64,13 @@ class HttpClientWrapper implements HttpRequestInterceptor {
             this.ownerGuid = user.id
             def memberOrgs = user.memberOfOrganizations
             if (!this.anypointOrganizationName) {
-                this.anypointOrganizationId = user.organizationPreferences.keySet().first()
+                def organizationPreferences = user.organizationPreferences
+                if (organizationPreferences) {
+                    this.anypointOrganizationId = organizationPreferences.keySet().first()
+                } else {
+                    assert memberOrgs.size() >= 1 : "Expected at least 1 member org in ${user}!"
+                    this.anypointOrganizationId = memberOrgs.first().id
+                }
                 def name = memberOrgs.find { org ->
                     org.id == this.anypointOrganizationId
                 }?.name
