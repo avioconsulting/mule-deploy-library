@@ -56,4 +56,13 @@ class JwtPolicy extends MulesoftPolicy {
         }
         return map
     }
+
+    @Override
+    Map<String, Object> getPolicyConfigForEquals() {
+        // existing policies don't return this field but we have to supply it when we create
+        def configCopy = new HashMap<String, Object>(this.policyConfiguration)
+        assert this.policyConfiguration.jwtKeyOrigin == 'jwks'
+        configCopy.remove('textKey')
+        return configCopy
+    }
 }

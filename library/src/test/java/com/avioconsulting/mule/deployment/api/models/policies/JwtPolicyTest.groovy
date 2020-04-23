@@ -43,13 +43,25 @@ class JwtPolicyTest {
                            validateCustomClaim   : false
                    ]))
         println "tostring is ${model.toString()}"
-        def compare = new Policy(model.assetId,
-                                 model.version,
-                                 model.policyConfiguration,
-                                 model.groupId,
-                                 model.policyPathApplications)
-        assertThat model,
-                   is(equalTo(compare))
+    }
+
+    @Test
+    void ignores_text_key_in_comparison() {
+        // arrange
+        def proposed = new JwtPolicy('https://foo',
+                                     'https://the_audience')
+        def proposedPolicies = [proposed]
+        def existingConfigDoesNotShowTextKey = new HashMap<String, Object>(proposed.policyConfiguration)
+        existingConfigDoesNotShowTextKey.remove('textKey')
+        def existingPolicies = [new Policy(proposed.assetId,
+                                           proposed.version,
+                                           existingConfigDoesNotShowTextKey,
+                                           proposed.groupId,
+                                           proposed.policyPathApplications)]
+
+        // act + assert
+        assertThat existingPolicies == proposedPolicies,
+                   is(true)
     }
 
     @Test
@@ -97,13 +109,6 @@ class JwtPolicyTest {
                            mandatoryNbfClaim     : true
                    ]))
         println "tostring is ${model.toString()}"
-        def compare = new Policy(model.assetId,
-                                 model.version,
-                                 model.policyConfiguration,
-                                 model.groupId,
-                                 model.policyPathApplications)
-        assertThat model,
-                   is(equalTo(compare))
     }
 
     @Test
@@ -146,12 +151,5 @@ class JwtPolicyTest {
                            validateCustomClaim   : false
                    ]))
         println "tostring is ${model.toString()}"
-        def compare = new Policy(model.assetId,
-                                 model.version,
-                                 model.policyConfiguration,
-                                 model.groupId,
-                                 model.policyPathApplications)
-        assertThat model,
-                   is(equalTo(compare))
     }
 }

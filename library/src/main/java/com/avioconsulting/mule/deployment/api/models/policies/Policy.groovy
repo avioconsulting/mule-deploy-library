@@ -1,9 +1,7 @@
 package com.avioconsulting.mule.deployment.api.models.policies
 
-import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
-@EqualsAndHashCode
 @ToString
 class Policy {
     final String groupId
@@ -42,5 +40,39 @@ class Policy {
                    policyConfiguration,
                    groupId,
                    policyPathApplications)
+    }
+
+    boolean isPolicyConfigTheSame(Policy other) {
+        this.policyConfigForEquals == other.policyConfigForEquals
+    }
+
+    Map<String, Object> getPolicyConfigForEquals() {
+        this.policyConfiguration
+    }
+
+    boolean equals(o) {
+        if (this.is(o)) return true
+        // we don't care about subclasses here since the subclasses do not have fields of there own
+        if (!(o instanceof Policy)) return false
+
+        Policy policy = (Policy) o
+
+        if (assetId != policy.assetId) return false
+        if (groupId != policy.groupId) return false
+        if (!isPolicyConfigTheSame(o)) return false
+        if (policyPathApplications != policy.policyPathApplications) return false
+        if (version != policy.version) return false
+
+        return true
+    }
+
+    int hashCode() {
+        int result
+        result = groupId.hashCode()
+        result = 31 * result + assetId.hashCode()
+        result = 31 * result + version.hashCode()
+        result = 31 * result + policyConfiguration.hashCode()
+        result = 31 * result + policyPathApplications.hashCode()
+        return result
     }
 }
