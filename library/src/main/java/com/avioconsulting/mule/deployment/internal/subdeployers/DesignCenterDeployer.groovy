@@ -17,6 +17,7 @@ import org.apache.http.entity.StringEntity
 
 import java.nio.file.FileSystems
 import java.nio.file.Files
+import java.nio.file.Path
 
 class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCenterDeployer {
     private final HttpClientWrapper clientWrapper
@@ -101,15 +102,15 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                                    resultHandler)
     }
 
-    private static boolean isIgnored(File something) {
-        def parent = something.parentFile
+    private static boolean isIgnored(Path something) {
+        def parent = something.parent
         if (parent) {
-            if (IGNORE_DC_FILES.contains(parent.name)) {
+            if (IGNORE_DC_FILES.contains(parent.toString())) {
                 return true
             }
             return isIgnored(parent)
         }
-        return IGNORE_DC_FILES.contains(something.name)
+        return IGNORE_DC_FILES.contains(something.toString())
     }
 
     List<RamlFile> getExistingDesignCenterFiles(String projectId) {
@@ -120,7 +121,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                                    'Fetching project files') { List<Map> results ->
             def filesWeCareAbout = results.findAll { result ->
                 def asFile = new File(result.path)
-                result.type != 'FOLDER' && !isIgnored(asFile)
+                result.type != 'FOLDER' && !isIgnored(asFile.toPath())
             }
             return filesWeCareAbout.collect { result ->
                 def filePath = result.path
@@ -144,8 +145,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
             Files.walk(apiPath).findAll { p ->
                 def relativeToApiDirectory = apiPath.relativize(p)
                 !Files.isDirectory(p) &&
-                        !IGNORE_DC_FILES.contains(relativeToApiDirectory.toString()) &&
-                        !IGNORE_DC_FILES.contains(relativeToApiDirectory.parent.toString())
+                        !isIgnored(relativeToApiDirectory)
             }.collect { p ->
                 def relativeToApiDirectory = apiPath.relativize(p)
                 new RamlFile(relativeToApiDirectory.toString(),

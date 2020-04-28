@@ -57,6 +57,11 @@ class DesignCenterDeployerTest extends BaseTest {
         file = new File(exchangeModules,
                         'junk')
         FileUtils.touch(file)
+        def exchangeChildDirectory = new File(exchangeModules,
+                                              'subdir')
+        file = new File(exchangeChildDirectory,
+                        'junk')
+        FileUtils.touch(file)
         FileUtils.touch(new File(apiDirectory,
                                  'exchange.json'))
         def request = buildZip(tempDir,
