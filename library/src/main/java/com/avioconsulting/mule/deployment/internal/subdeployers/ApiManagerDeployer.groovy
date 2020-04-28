@@ -8,7 +8,6 @@ import com.avioconsulting.mule.deployment.internal.models.*
 import com.avioconsulting.mule.deployment.internal.models.graphql.GetAssetsQuery
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
-import okio.Okio
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPatch
 import org.apache.http.client.methods.HttpPost
@@ -185,27 +184,7 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
 
     private ResolvedApiSpec resolveAssetVersion(ApiSpec apiManagerDefinition,
                                                 String appVersion) {
-        def assetId = apiManagerDefinition.exchangeAssetId
-        def query = new GetAssetsQuery(assetId,
-                                       clientWrapper.anypointOrganizationId)
-        def requestPayload = [
-                query    : query.queryDocument(),
-                variables: query.variables().marshal()
-        ]
-        logger.println "Searching for assets for Exchange asset '${assetId}'"
-        def request = new HttpPost("${clientWrapper.baseUrl}/graph/api/v1/graphql").with {
-            setEntity(new StringEntity(JsonOutput.toJson(requestPayload),
-                                       ContentType.APPLICATION_JSON))
-            it
-        }
-        def assets = clientWrapper.execute(request).withCloseable { response ->
-            clientWrapper.assertSuccessfulResponse(response,
-                                                   'GraphQL query')
-            def source = Okio.source(response.entity.content)
-            def bufferedSource = Okio.buffer(source)
-            def dataOptional = query.parse(bufferedSource).data()
-            dataOptional.isPresent() ? dataOptional.get().assets : []
-        }
+        def assets = getExchangeAssets(apiManagerDefinition)
         String chosenAssetVersion
         if (assets.empty && dryRunMode == DryRunMode.OnlineValidate) {
             logger.println('In dry-run mode and Exchange push has not yet occurred (could not find asset) so using placeholder')
