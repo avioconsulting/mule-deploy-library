@@ -256,6 +256,10 @@ class DesignCenterDeployerTest extends BaseTest {
                             [
                                     path: 'exchange_modules/something',
                                     type: 'FILE'
+                            ],
+                            [
+                                    path: 'exchange_modules/something/else',
+                                    type: 'FILE'
                             ]
                     ]
                 } else {
