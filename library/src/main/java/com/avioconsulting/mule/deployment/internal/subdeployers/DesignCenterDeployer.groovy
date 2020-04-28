@@ -241,6 +241,8 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                                    projectId,
                                    ramlFiles,
                                    appVersion)
+                } else {
+                    logger.println 'Exchange asset exists, no need for push'
                 }
             } else {
                 if (dryRunMode != DryRunMode.Run) {
