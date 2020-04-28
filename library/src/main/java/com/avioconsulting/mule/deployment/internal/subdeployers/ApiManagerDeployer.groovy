@@ -184,7 +184,7 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
 
     private ResolvedApiSpec resolveAssetVersion(ApiSpec apiManagerDefinition,
                                                 String appVersion) {
-        def assets = getExchangeAssets(apiManagerDefinition)
+        def assets = getExchangeAssets(apiManagerDefinition.exchangeAssetId)
         String chosenAssetVersion
         if (assets.empty && dryRunMode == DryRunMode.OnlineValidate) {
             logger.println('In dry-run mode and Exchange push has not yet occurred (could not find asset) so using placeholder')

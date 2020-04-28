@@ -2,10 +2,10 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.ILogger
-import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
-
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
+import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpDelete
@@ -19,7 +19,7 @@ import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
 
-class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCenterDeployer {
+class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCenterDeployer, ApiManagerFunctionality {
     private final HttpClientWrapper clientWrapper
     private final ILogger logger
     private static final List<String> IGNORE_DC_FILES = [
@@ -29,13 +29,28 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
             '.designer.json'
     ]
     private final DryRunMode dryRunMode
+    private final EnvironmentLocator environmentLocator
 
     DesignCenterDeployer(HttpClientWrapper clientWrapper,
                          ILogger logger,
-                         DryRunMode dryRunMode) {
+                         DryRunMode dryRunMode,
+                         EnvironmentLocator environmentLocator) {
+        this.environmentLocator = environmentLocator
         this.dryRunMode = dryRunMode
         this.logger = logger
         this.clientWrapper = clientWrapper
+    }
+
+    EnvironmentLocator getEnvironmentLocator() {
+        return environmentLocator
+    }
+
+    HttpClientWrapper getClientWrapper() {
+        return clientWrapper
+    }
+
+    ILogger getLogger() {
+        return logger
     }
 
     String getDesignCenterProjectId(String projectName) {
@@ -215,6 +230,20 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
             def changes = ramlFiles - existingFiles
             if (changes.empty) {
                 logger.println('New RAML contents match the old contents, will not update Design Center')
+                def assets = getExchangeAssets(apiSpec.exchangeAssetId)
+                if (assets.empty) {
+                    if (dryRunMode != DryRunMode.Run) {
+                        logger.println('No exchange asset was found so we WOULD have pushed to Exchange, but in dry-run mode')
+                        return
+                    }
+                    logger.println 'RAMLs have not changed but asset does not exist in Exchange so we have to push'
+                    pushToExchange(apiSpec,
+                                   projectId,
+                                   ramlFiles,
+                                   appVersion)
+                } else {
+                    logger.println 'Exchange asset exists, no need for push'
+                }
             } else {
                 if (dryRunMode != DryRunMode.Run) {
                     logger.println('RAML quantity/contents have changed, WOULD update Design Center but in dry-run mode')

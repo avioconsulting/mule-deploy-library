@@ -3,7 +3,6 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
-import com.avioconsulting.mule.deployment.internal.models.ApiSpec
 import com.avioconsulting.mule.deployment.internal.models.graphql.GetAssetsQuery
 import groovy.json.JsonOutput
 import okio.Okio
@@ -24,8 +23,7 @@ trait ApiManagerFunctionality {
         "${clientWrapper.baseUrl}/apimanager/api/v1/organizations/${clientWrapper.anypointOrganizationId}/environments/${environmentId}/apis${restOfUrl}"
     }
 
-    List<GetAssetsQuery.Asset> getExchangeAssets(ApiSpec apiManagerDefinition) {
-        def assetId = apiManagerDefinition.exchangeAssetId
+    List<GetAssetsQuery.Asset> getExchangeAssets(String assetId) {
         def query = new GetAssetsQuery(assetId,
                                        clientWrapper.anypointOrganizationId)
         def requestPayload = [

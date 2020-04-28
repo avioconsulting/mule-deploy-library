@@ -29,7 +29,8 @@ class DesignCenterDeployerTest extends BaseTest {
     def setupDeployer(DryRunMode dryRunMode) {
         deployer = new DesignCenterDeployer(clientWrapper,
                                             new TestConsoleLogger(),
-                                            dryRunMode)
+                                            dryRunMode,
+                                            environmentLocator)
     }
 
     @Test
@@ -884,6 +885,28 @@ class DesignCenterDeployerTest extends BaseTest {
                                                        'file1.raml': 'the contents',
                                                        'file2.raml': 'the contents2'
                                                ])) {
+                return
+            }
+            if (request.uri().endsWith('graphql')) {
+                println 'Received mock Exchange query, saying we got 1 asset'
+                request.response().with {
+                    statusCode = 200
+                    putHeader('Content-Type',
+                              'application/json')
+                    def response = [
+                            data: [
+                                    assets: [
+                                            [
+                                                    '__typename': 'Asset',
+                                                    assetId     : 'foo',
+                                                    version     : '1.0.201910193'
+
+                                            ]
+                                    ]
+                            ]
+                    ]
+                    end(JsonOutput.toJson(response))
+                }
                 return
             }
             request.response().with {
