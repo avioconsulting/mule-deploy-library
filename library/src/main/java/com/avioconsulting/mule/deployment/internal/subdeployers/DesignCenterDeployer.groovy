@@ -7,11 +7,7 @@ import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
-import com.avioconsulting.mule.deployment.internal.subdeployers.DesignCenterHttpFunctionality
-import com.avioconsulting.mule.deployment.internal.subdeployers.DesignCenterLock
 import groovy.json.JsonOutput
-import groovy.json.JsonSlurper
-import org.apache.commons.io.IOUtils
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
@@ -19,7 +15,6 @@ import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 
-import java.nio.charset.Charset
 import java.nio.file.FileSystems
 import java.nio.file.Files
 
@@ -106,6 +101,17 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                                    resultHandler)
     }
 
+    private static boolean isIgnored(File something) {
+        def parent = something.parentFile
+        if (parent) {
+            if (IGNORE_DC_FILES.contains(parent.name)) {
+                return true
+            }
+            return isIgnored(parent)
+        }
+        return IGNORE_DC_FILES.contains(something.name)
+    }
+
     List<RamlFile> getExistingDesignCenterFiles(String projectId) {
         logger.println('Fetching existing Design Center RAML files')
         def url = getFilesUrl(projectId)
@@ -114,9 +120,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                                    'Fetching project files') { List<Map> results ->
             def filesWeCareAbout = results.findAll { result ->
                 def asFile = new File(result.path)
-                result.type != 'FOLDER' &&
-                        !IGNORE_DC_FILES.contains(asFile.name) &&
-                        !IGNORE_DC_FILES.contains(asFile.parentFile?.name)
+                result.type != 'FOLDER' && !isIgnored(asFile)
             }
             return filesWeCareAbout.collect { result ->
                 def filePath = result.path
