@@ -24,8 +24,7 @@ trait ApiManagerFunctionality {
         "${clientWrapper.baseUrl}/apimanager/api/v1/organizations/${clientWrapper.anypointOrganizationId}/environments/${environmentId}/apis${restOfUrl}"
     }
 
-    List<GetAssetsQuery.Asset> getExchangeAssets(ApiSpec apiManagerDefinition) {
-        def assetId = apiManagerDefinition.exchangeAssetId
+    List<GetAssetsQuery.Asset> getExchangeAssets(String assetId) {
         def query = new GetAssetsQuery(assetId,
                                        clientWrapper.anypointOrganizationId)
         def requestPayload = [

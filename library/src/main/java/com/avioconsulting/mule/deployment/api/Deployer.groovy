@@ -82,7 +82,8 @@ class Deployer implements IDeployer {
                                                                    dryRunMode)
         this.designCenterDeployer = designCenterDeployer ?: new DesignCenterDeployer(this.clientWrapper,
                                                                                      logger,
-                                                                                     dryRunMode)
+                                                                                     dryRunMode,
+                                                                                     this.environmentLocator)
         this.apiManagerDeployer = apiManagerDeployer ?: new ApiManagerDeployer(this.clientWrapper,
                                                                                this.environmentLocator,
                                                                                logger,
