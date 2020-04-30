@@ -639,13 +639,13 @@ class ApiManagerDeployerTest extends BaseTest {
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.201910193'
+                                                version     : '1.0.202010213'
 
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.202010213'
+                                                version     : '1.0.201910193'
 
                                         ]
                                 ]
