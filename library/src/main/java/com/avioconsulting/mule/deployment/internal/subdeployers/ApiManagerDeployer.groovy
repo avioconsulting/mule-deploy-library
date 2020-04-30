@@ -6,6 +6,7 @@ import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.*
 import com.avioconsulting.mule.deployment.internal.models.graphql.GetAssetsQuery
+import com.fasterxml.jackson.core.Version
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpGet
@@ -190,25 +191,31 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
             logger.println('In dry-run mode and Exchange push has not yet occurred (could not find asset) so using placeholder')
             chosenAssetVersion = DRY_RUN_API_ID
         } else {
-            def chosenAsset = pickVersion(appVersion,
-                                          assets)
-            chosenAssetVersion = chosenAsset.version
+            chosenAssetVersion = pickVersion(appVersion,
+                                             assets)
         }
         logger.println("Identified asset version ${chosenAssetVersion}")
         new ResolvedApiSpec(apiManagerDefinition,
                             chosenAssetVersion)
     }
 
-    private static int getLastVersionOctet(String version) {
-        version.split('\\.').last().toInteger()
+    private static Version getVersion(String version) {
+        def split = version.split('\\.')
+        assert split.size() == 3: "Expected version ${version} to have only 3 parts!"
+        new Version(Integer.parseInt(split[0]),
+                    Integer.parseInt(split[1]),
+                    Integer.parseInt(split[2]),
+                    null)
     }
 
-    private static GetAssetsQuery.Asset pickVersion(String appVersion,
-                                                    List<GetAssetsQuery.Asset> assets) {
-        def lastAppVersionOctet = getLastVersionOctet(appVersion)
-        def result = assets.reverse().find { asset ->
-            def lastAssetVersionOctet = getLastVersionOctet(asset.version)
-            return lastAssetVersionOctet <= lastAppVersionOctet
+    private static String pickVersion(String appVersion,
+                                      List<GetAssetsQuery.Asset> assets) {
+        def parsedVersions = assets.collect { asset ->
+            getVersion(asset.version)
+        }
+        def appVersionParsed = getVersion(appVersion)
+        def result = parsedVersions.sort().reverse().find { version ->
+            version <= appVersionParsed
         }
         if (!result) {
             def availableVersions = assets.collect { a -> a.version }
