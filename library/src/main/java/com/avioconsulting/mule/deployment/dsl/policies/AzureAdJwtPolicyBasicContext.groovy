@@ -47,6 +47,12 @@ class AzureAdJwtPolicyBasicContext extends BaseContext {
     def validateClaim(String claim,
                       String expression) {
         customClaims[claim] = expression
+        return null
+    }
+
+    def requireRole(String role) {
+        rolesRequired << role
+        return null
     }
 
     @Override
