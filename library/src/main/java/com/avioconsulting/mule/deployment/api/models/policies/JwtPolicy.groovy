@@ -3,6 +3,7 @@ package com.avioconsulting.mule.deployment.api.models.policies
 class JwtPolicy extends MulesoftPolicy {
     JwtPolicy(String jwksUrl,
               String expectedAudience,
+              String expectedIssuer,
               List<PolicyPathApplication> policyPathApplications = null,
               Map<String, String> customClaimValidations = [:],
               String clientIdExpression = null,
@@ -13,6 +14,7 @@ class JwtPolicy extends MulesoftPolicy {
               version ?: '1.1.2',
               getConfig(jwksUrl,
                         expectedAudience,
+                        expectedIssuer,
                         skipClientIdEnforcement,
                         clientIdExpression ?: '#[vars.claimSet.client_id]',
                         customClaimValidations,
@@ -22,6 +24,7 @@ class JwtPolicy extends MulesoftPolicy {
 
     private static Map<String, Object> getConfig(String jwksUrl,
                                                  String expectedAudience,
+                                                 String expectedIssuer,
                                                  boolean skipClientIdEnforcement,
                                                  String clientIdExpression,
                                                  Map<String, String> customClaimValidations,
