@@ -1,6 +1,8 @@
 package com.avioconsulting.mule.deployment.dsl.policies
 
+import com.avioconsulting.mule.deployment.api.models.policies.AzureAdJwtPolicy
 import com.avioconsulting.mule.deployment.api.models.policies.ClientEnforcementPolicyBasicAuth
+import com.avioconsulting.mule.deployment.api.models.policies.JwtPolicy
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import org.junit.Test
 
@@ -104,5 +106,52 @@ class PolicyListContextTest {
         // assert
         assertThat result,
                    is(equalTo([]))
+    }
+
+    @Test
+    void jwtPolicy() {
+        // arrange
+        def context = new PolicyListContext()
+        def closure = {
+            jwtPolicy {
+                jwksUrl 'https://stuff'
+                expectedAudience 'https://aud'
+                expectedIssuer 'https://issuer'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def result = context.createPolicyList()
+
+        // assert
+        assertThat result.size(),
+                   is(equalTo(1))
+        assertThat result[0],
+                   is(instanceOf(JwtPolicy))
+    }
+
+    @Test
+    void azureAdJwtPolicy() {
+        // arrange
+        def context = new PolicyListContext()
+        def closure = {
+            azureAdJwtPolicy {
+                azureAdTenantId 'abcd'
+                expectedAudience 'https://aud'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def result = context.createPolicyList()
+
+        // assert
+        assertThat result.size(),
+                   is(equalTo(1))
+        assertThat result[0],
+                   is(instanceOf(AzureAdJwtPolicy))
     }
 }
