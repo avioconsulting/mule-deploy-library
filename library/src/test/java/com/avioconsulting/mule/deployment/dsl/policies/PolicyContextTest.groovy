@@ -1,10 +1,7 @@
 package com.avioconsulting.mule.deployment.dsl.policies
 
 import com.avioconsulting.mule.deployment.api.models.HttpMethod
-import com.avioconsulting.mule.deployment.api.models.policies.ClientEnforcementPolicyBasicAuth
-import com.avioconsulting.mule.deployment.api.models.policies.JwtPolicy
-import com.avioconsulting.mule.deployment.api.models.policies.Policy
-import com.avioconsulting.mule.deployment.api.models.policies.PolicyPathApplication
+import com.avioconsulting.mule.deployment.api.models.policies.*
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -283,6 +280,26 @@ class PolicyContextTest {
                            mandatoryNbfClaim     : true
                    ]))
     }
+
+    @Test
+    void azureAdJwtPolicy() {
+        // arrange
+        def context = new AzureAdJwtPolicyBasicContext()
+        def closure = {
+            azureAdTenantId 'abcd'
+            expectedAudience 'https://aud'
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createPolicyModel()
+
+        // assert
+        assertThat request,
+                   is(instanceOf(AzureAdJwtPolicy))
+    }
+
 
     @Test
     void client_enforcement_policy_minimum() {
