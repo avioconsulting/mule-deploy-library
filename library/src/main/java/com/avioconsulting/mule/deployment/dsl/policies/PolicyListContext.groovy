@@ -40,4 +40,12 @@ class PolicyListContext {
         closure.call()
         policies << policyContext.createPolicyModel()
     }
+
+    def azureAdJwtPolicy(Closure closure) {
+        def policyContext = new AzureAdJwtPolicyBasicContext()
+        closure.delegate = policyContext
+        closure.resolveStrategy = Closure.DELEGATE_FIRST
+        closure.call()
+        policies << policyContext.createPolicyModel()
+    }
 }

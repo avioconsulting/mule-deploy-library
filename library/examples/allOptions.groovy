@@ -36,6 +36,10 @@ muleDeploy {
         mulesoftPolicy {
             version '1.2.1'
         }
+        azureAdJwtPolicy {
+            azureAdTenantId 'abcd'
+            expectedAudience 'https://aud'
+        }
         clientEnforcementPolicyBasic {
             // version is optional (will use version in this library by default)
             version '1.2.1'

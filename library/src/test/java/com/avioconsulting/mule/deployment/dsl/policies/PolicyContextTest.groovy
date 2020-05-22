@@ -1,10 +1,7 @@
 package com.avioconsulting.mule.deployment.dsl.policies
 
 import com.avioconsulting.mule.deployment.api.models.HttpMethod
-import com.avioconsulting.mule.deployment.api.models.policies.ClientEnforcementPolicyBasicAuth
-import com.avioconsulting.mule.deployment.api.models.policies.JwtPolicy
-import com.avioconsulting.mule.deployment.api.models.policies.Policy
-import com.avioconsulting.mule.deployment.api.models.policies.PolicyPathApplication
+import com.avioconsulting.mule.deployment.api.models.policies.*
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -209,6 +206,7 @@ class PolicyContextTest {
         def closure = {
             jwksUrl 'https://stuff'
             expectedAudience 'https://aud'
+            expectedIssuer 'https://issuer'
         }
         closure.delegate = context
         closure.call()
@@ -230,6 +228,7 @@ class PolicyContextTest {
         def closure = {
             jwksUrl 'https://stuff'
             expectedAudience 'https://aud'
+            expectedIssuer 'https://issuer'
             validateClaim 'roles',
                           'howdy'
             validateClaim 'foo',
@@ -265,8 +264,89 @@ class PolicyContextTest {
                            validateCustomClaim   : true,
                            mandatoryCustomClaims : [
                                    [
+                                           key  : 'iss',
+                                           value: 'https://issuer'
+                                   ],
+                                   [
                                            key  : 'roles',
                                            value: 'howdy'
+                                   ],
+                                   [
+                                           key  : 'foo',
+                                           value: 'bar'
+                                   ]
+                           ],
+                           mandatoryExpClaim     : true,
+                           mandatoryNbfClaim     : true
+                   ]))
+    }
+
+    @Test
+    void azureAdJwtPolicy() {
+        // arrange
+        def context = new AzureAdJwtPolicyBasicContext()
+        def closure = {
+            azureAdTenantId 'abcd'
+            expectedAudience 'https://aud'
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createPolicyModel()
+
+        // assert
+        assertThat request,
+                   is(instanceOf(AzureAdJwtPolicy))
+    }
+
+    @Test
+    void azureAdJwtPolicy_custom_stuff() {
+        // arrange
+        def context = new AzureAdJwtPolicyBasicContext()
+        def closure = {
+            azureAdTenantId 'abcd'
+            expectedAudience 'https://aud'
+            requireRole 'role1'
+            requireRole 'role2'
+            validateClaim 'foo',
+                          'bar'
+            skipClientIdEnforcement()
+            jwksCachingTtlInMinutes 90
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createPolicyModel()
+
+        // assert
+        assertThat request,
+                   is(instanceOf(AzureAdJwtPolicy))
+        assertThat request.policyConfiguration,
+                   is(equalTo([
+                           jwtOrigin             : 'httpBearerAuthenticationHeader',
+                           jwtExpression         : "#[attributes.headers['jwt']]",
+                           signingMethod         : 'rsa',
+                           textKey               : 'your-(256|384|512)-bit-secret',
+                           signingKeyLength      : 256,
+                           jwtKeyOrigin          : 'jwks',
+                           jwksUrl               : 'https://login.microsoftonline.com/abcd/discovery/v2.0/keys',
+                           jwksServiceTimeToLive : 90,
+                           skipClientIdValidation: true,
+                           clientIdExpression    : '#[vars.claimSet.appid]',
+                           validateAudClaim      : true,
+                           mandatoryAudClaim     : true,
+                           supportedAudiences    : 'https://aud',
+                           validateCustomClaim   : true,
+                           mandatoryCustomClaims : [
+                                   [
+                                           key  : 'iss',
+                                           value: 'https://sts.windows.net/abcd/'
+                                   ],
+                                   [
+                                           key  : 'roles',
+                                           value: "#[(vars.claimSet.roles contains 'role1') or (vars.claimSet.roles contains 'role2')]".toString()
                                    ],
                                    [
                                            key  : 'foo',

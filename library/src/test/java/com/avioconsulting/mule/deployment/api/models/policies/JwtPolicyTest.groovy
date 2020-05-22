@@ -14,7 +14,8 @@ class JwtPolicyTest {
 
         // act
         def model = new JwtPolicy('https://foo',
-                                  'https://the_audience')
+                                  'https://the_audience',
+                                  'https://theissuer')
 
         // assert
         assertThat model.groupId,
@@ -40,7 +41,13 @@ class JwtPolicyTest {
                            supportedAudiences    : 'https://the_audience',
                            mandatoryExpClaim     : true,
                            mandatoryNbfClaim     : true,
-                           validateCustomClaim   : false
+                           validateCustomClaim   : true,
+                           mandatoryCustomClaims : [
+                                   [
+                                           key  : 'iss',
+                                           value: 'https://theissuer'
+                                   ]
+                           ]
                    ]))
         println "tostring is ${model.toString()}"
     }
@@ -49,7 +56,8 @@ class JwtPolicyTest {
     void ignores_text_key_in_comparison() {
         // arrange
         def proposed = new JwtPolicy('https://foo',
-                                     'https://the_audience')
+                                     'https://the_audience',
+                                     'https://theissuer')
         def proposedPolicies = [proposed]
         def existingConfigDoesNotShowTextKey = new HashMap<String, Object>(proposed.policyConfiguration)
         existingConfigDoesNotShowTextKey.remove('textKey')
@@ -71,6 +79,7 @@ class JwtPolicyTest {
         // act
         def model = new JwtPolicy('https://foo',
                                   'https://the_audience',
+                                  'https://theissuer',
                                   null,
                                   [
                                           roles: '#[vars.claimSet.roles contains \'Access.To.App\']'
@@ -101,6 +110,10 @@ class JwtPolicyTest {
                            validateCustomClaim   : true,
                            mandatoryCustomClaims : [
                                    [
+                                           key  : 'iss',
+                                           value: 'https://theissuer'
+                                   ],
+                                   [
                                            key  : 'roles',
                                            value: '#[vars.claimSet.roles contains \'Access.To.App\']'
                                    ]
@@ -118,8 +131,9 @@ class JwtPolicyTest {
         // act
         def model = new JwtPolicy('https://foo',
                                   'https://the_audience',
+                                  'https://theissuer',
                                   null,
-                                  null,
+                                  [:],
                                   'othercliid',
                                   true,
                                   90)
@@ -148,7 +162,13 @@ class JwtPolicyTest {
                            supportedAudiences    : 'https://the_audience',
                            mandatoryExpClaim     : true,
                            mandatoryNbfClaim     : true,
-                           validateCustomClaim   : false
+                           validateCustomClaim   : true,
+                           mandatoryCustomClaims : [
+                                   [
+                                           key  : 'iss',
+                                           value: 'https://theissuer'
+                                   ]
+                           ]
                    ]))
         println "tostring is ${model.toString()}"
     }

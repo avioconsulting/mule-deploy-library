@@ -1,8 +1,21 @@
 package com.avioconsulting.mule.deployment.api.models.policies
 
 class JwtPolicy extends MulesoftPolicy {
+    /**
+     * Instantiate a JWT policy
+     * @param jwksUrl Most endpoints use this to get keys
+     * @param expectedAudience OIDC says you should always check this
+     * @param expectedIssuer OIDC says you should always check this
+     * @param policyPathApplications
+     * @param customClaimValidations optional
+     * @param clientIdExpression optional, #[vars.claimSet.client_id] by default
+     * @param skipClientIdEnforcement optional, false by default
+     * @param jwksCachingTtlInMinutes optional
+     * @param version optional, uses 1.1.2 by default
+     */
     JwtPolicy(String jwksUrl,
               String expectedAudience,
+              String expectedIssuer,
               List<PolicyPathApplication> policyPathApplications = null,
               Map<String, String> customClaimValidations = [:],
               String clientIdExpression = null,
@@ -13,6 +26,7 @@ class JwtPolicy extends MulesoftPolicy {
               version ?: '1.1.2',
               getConfig(jwksUrl,
                         expectedAudience,
+                        expectedIssuer,
                         skipClientIdEnforcement,
                         clientIdExpression ?: '#[vars.claimSet.client_id]',
                         customClaimValidations,
@@ -22,11 +36,16 @@ class JwtPolicy extends MulesoftPolicy {
 
     private static Map<String, Object> getConfig(String jwksUrl,
                                                  String expectedAudience,
+                                                 String expectedIssuer,
                                                  boolean skipClientIdEnforcement,
                                                  String clientIdExpression,
                                                  Map<String, String> customClaimValidations,
                                                  int jwksCachingTtlInMinutes) {
-        def map = [
+        customClaimValidations = [
+                // Mulesoft does not have this as a default claim to validate but it should
+                iss: expectedIssuer
+        ] + (customClaimValidations ?: [:])
+        return [
                 jwtOrigin             : 'httpBearerAuthenticationHeader',
                 jwtExpression         : "#[attributes.headers['jwt']]",
                 signingMethod         : 'rsa',
@@ -43,18 +62,14 @@ class JwtPolicy extends MulesoftPolicy {
                 supportedAudiences    : expectedAudience,
                 mandatoryExpClaim     : true,
                 mandatoryNbfClaim     : true,
-                validateCustomClaim   : false
+                validateCustomClaim   : true,
+                mandatoryCustomClaims : customClaimValidations.collect { k, v ->
+                    [
+                            key  : k,
+                            value: v
+                    ]
+                }
         ]
-        if (customClaimValidations.any()) {
-            map['validateCustomClaim'] = true
-            map['mandatoryCustomClaims'] = customClaimValidations.collect { k, v ->
-                [
-                        key  : k,
-                        value: v
-                ]
-            }
-        }
-        return map
     }
 
     @Override
