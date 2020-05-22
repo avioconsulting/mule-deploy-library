@@ -1,5 +1,6 @@
 package com.avioconsulting.mule.deployment.api.models.policies
 
+import org.junit.Assert
 import org.junit.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
@@ -92,5 +93,35 @@ class AzureAdJwtPolicyTest {
                            ]
                    ]))
         println "tostring is ${model.toString()}"
+    }
+
+    @Test
+    void with_role_multiple() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void custom_claims_no_roles() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void custom_claims_with_roles() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
     }
 }
