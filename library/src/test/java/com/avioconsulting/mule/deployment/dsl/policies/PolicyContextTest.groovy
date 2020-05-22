@@ -209,6 +209,7 @@ class PolicyContextTest {
         def closure = {
             jwksUrl 'https://stuff'
             expectedAudience 'https://aud'
+            expectedIssuer 'https://issuer'
         }
         closure.delegate = context
         closure.call()
@@ -230,6 +231,7 @@ class PolicyContextTest {
         def closure = {
             jwksUrl 'https://stuff'
             expectedAudience 'https://aud'
+            expectedIssuer 'https://issuer'
             validateClaim 'roles',
                           'howdy'
             validateClaim 'foo',
@@ -264,6 +266,10 @@ class PolicyContextTest {
                            supportedAudiences    : 'https://aud',
                            validateCustomClaim   : true,
                            mandatoryCustomClaims : [
+                                   [
+                                           key  : 'iss',
+                                           value: 'https://issuer'
+                                   ],
                                    [
                                            key  : 'roles',
                                            value: 'howdy'

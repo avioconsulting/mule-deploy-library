@@ -5,7 +5,7 @@ import com.avioconsulting.mule.deployment.api.models.policies.JwtPolicy
 import com.avioconsulting.mule.deployment.dsl.BaseContext
 
 class JwtPolicyBasicContext extends BaseContext {
-    String version, jwksUrl, expectedAudience, clientIdExpression
+    String version, jwksUrl, expectedAudience, expectedIssuer, clientIdExpression
     private PathsContext paths = new PathsContext()
     private boolean pathsCalled = false
     private Map<String, String> customClaims = [:]
@@ -24,6 +24,7 @@ class JwtPolicyBasicContext extends BaseContext {
         }
         new JwtPolicy(this.jwksUrl,
                       this.expectedAudience,
+                      this.expectedIssuer,
                       pathListing,
                       customClaims,
                       clientIdExpression,
