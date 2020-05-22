@@ -133,7 +133,7 @@ class JwtPolicyTest {
                                   'https://the_audience',
                                   'https://theissuer',
                                   null,
-                                  null,
+                                  [:],
                                   'othercliid',
                                   true,
                                   90)

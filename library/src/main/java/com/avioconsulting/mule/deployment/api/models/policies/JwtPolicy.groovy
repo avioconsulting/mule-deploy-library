@@ -41,7 +41,11 @@ class JwtPolicy extends MulesoftPolicy {
                                                  String clientIdExpression,
                                                  Map<String, String> customClaimValidations,
                                                  int jwksCachingTtlInMinutes) {
-        def map = [
+        customClaimValidations = [
+                // Mulesoft does not have this as a default claim to validate but it should
+                iss: expectedIssuer
+        ] + (customClaimValidations ?: [:])
+        return [
                 jwtOrigin             : 'httpBearerAuthenticationHeader',
                 jwtExpression         : "#[attributes.headers['jwt']]",
                 signingMethod         : 'rsa',
@@ -58,18 +62,14 @@ class JwtPolicy extends MulesoftPolicy {
                 supportedAudiences    : expectedAudience,
                 mandatoryExpClaim     : true,
                 mandatoryNbfClaim     : true,
-                validateCustomClaim   : false
+                validateCustomClaim   : true,
+                mandatoryCustomClaims : customClaimValidations.collect { k, v ->
+                    [
+                            key  : k,
+                            value: v
+                    ]
+                }
         ]
-        if (customClaimValidations.any()) {
-            map['validateCustomClaim'] = true
-            map['mandatoryCustomClaims'] = customClaimValidations.collect { k, v ->
-                [
-                        key  : k,
-                        value: v
-                ]
-            }
-        }
-        return map
     }
 
     @Override
