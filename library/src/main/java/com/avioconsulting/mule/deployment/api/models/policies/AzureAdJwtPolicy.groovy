@@ -13,7 +13,8 @@ class AzureAdJwtPolicy extends JwtPolicy {
               expectedAudience,
               "https://sts.windows.net/${azureAdTenantId}/",
               policyPathApplications,
-              getCustomClaimValidations(rolesAkaApiPermissionsToRequire),
+              getCustomClaimValidations(rolesAkaApiPermissionsToRequire,
+                                        customClaimValidations),
               // Azure AD calls it appid instead of client ID
               '#[vars.claimSet.appid]',
               skipClientIdEnforcement,
@@ -21,15 +22,14 @@ class AzureAdJwtPolicy extends JwtPolicy {
               version)
     }
 
-    private static Map<String, String> getCustomClaimValidations(List<String> rolesAkaApiPermissionsToRequire) {
+    private static Map<String, String> getCustomClaimValidations(List<String> rolesAkaApiPermissionsToRequire,
+                                                                 Map<String, String> customClaimValidations) {
         def roleString = rolesAkaApiPermissionsToRequire.collect { roleName ->
             "(vars.claimSet.roles contains '${roleName}')"
         }.join(' or ')
-        if (!roleString) {
-            return [:]
-        }
-        [
+        def roleClaims = roleString ? [
                 roles: "#[${roleString}]".toString() // GString issues
-        ]
+        ] : [:]
+        return roleClaims + customClaimValidations
     }
 }
