@@ -1,6 +1,18 @@
 package com.avioconsulting.mule.deployment.api.models.policies
 
 class JwtPolicy extends MulesoftPolicy {
+    /**
+     * Instantiate a JWT policy
+     * @param jwksUrl Most endpoints use this to get keys
+     * @param expectedAudience OIDC says you should always check this
+     * @param expectedIssuer OIDC says you should always check this
+     * @param policyPathApplications
+     * @param customClaimValidations optional
+     * @param clientIdExpression optional, #[vars.claimSet.client_id] by default
+     * @param skipClientIdEnforcement optional, false by default
+     * @param jwksCachingTtlInMinutes optional
+     * @param version optional, uses 1.1.2 by default
+     */
     JwtPolicy(String jwksUrl,
               String expectedAudience,
               String expectedIssuer,
