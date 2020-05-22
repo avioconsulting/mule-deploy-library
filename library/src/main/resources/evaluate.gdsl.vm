@@ -121,6 +121,7 @@ contributor([closureScopeContext]) {
         #closureParam('mulesoftPolicy')
         #closureParam('clientEnforcementPolicyBasic')
         #closureParam('jwtPolicy')
+        #closureParam('azureAdJwtPolicy')
     }
     call = enclosingCall('policy')
     if (call) {
@@ -150,6 +151,22 @@ contributor([closureScopeContext]) {
                params: [
                        claim: String.name,
                        value: String.name
+               ]
+        method name: 'skipClientIdEnforcement'
+        #methodParam('jwksCachingTtlInMinutes' 'Integer.name')
+    }
+    call = enclosingCall('azureAdJwtPolicy')
+    if (call) {
+        #stringParam('azureAdTenantId')
+        #stringParam('expectedAudience')
+        method name: 'validateClaim',
+               params: [
+                       claim: String.name,
+                       value: String.name
+               ]
+        method name: 'requireRole',
+               params: [
+                       role: String.name
                ]
         method name: 'skipClientIdEnforcement'
         #methodParam('jwksCachingTtlInMinutes' 'Integer.name')
