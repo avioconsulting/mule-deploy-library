@@ -345,6 +345,48 @@ class DesignCenterDeployerTest extends BaseTest {
     }
 
     @Test
+    void deleteDesignCenterFiles_subdirectory() {
+        // arrange
+        String anypointOrgId = null
+        List<String> urls = []
+        List<String> methods = []
+        String ownerGuid = null
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            anypointOrgId = request.getHeader('X-ORGANIZATION-ID')
+            urls << request.uri()
+            methods << request.method().toString()
+            ownerGuid = request.getHeader('X-OWNER-ID')
+            request.response().with {
+                statusCode = 204
+                end()
+            }
+        }
+
+        // act
+        deployer.deleteDesignCenterFiles('ourprojectId',
+                                         [
+                                                 new RamlFile('subdir/file1',
+                                                              'blah')
+                                         ])
+
+        // assert
+        assertThat methods.unique(),
+                   is(equalTo(['DELETE']))
+        assertThat anypointOrgId,
+                   is(equalTo('the-org-id'))
+        assertThat 'Design center needs this',
+                   ownerGuid,
+                   is(equalTo('the_id'))
+        assertThat urls,
+                   is(equalTo([
+                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/subdir%2Ffile1'
+                   ]))
+    }
+
+    @Test
     void uploadDesignCenterFiles_correct_request() {
         // arrange
         String anypointOrgId = null
