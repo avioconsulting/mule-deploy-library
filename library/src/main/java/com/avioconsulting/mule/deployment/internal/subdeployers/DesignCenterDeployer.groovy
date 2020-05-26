@@ -76,7 +76,9 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
         files.each { ramlFile ->
             def file = ramlFile.fileName
             logger.println("Removing unused file from Design Center: ${file}")
-            executeDesignCenterRequest(new HttpDelete("${getFilesUrl(projectId)}/${file}"),
+            // subdirectories in filename do not go in RESTful URL
+            def urlEncodedFileName = URLEncoder.encode(file)
+            executeDesignCenterRequest(new HttpDelete("${getFilesUrl(projectId)}/${urlEncodedFileName}"),
                                        "Removing file ${file}")
         }
     }
