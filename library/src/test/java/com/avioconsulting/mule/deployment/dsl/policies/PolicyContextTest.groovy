@@ -359,6 +359,146 @@ class PolicyContextTest {
     }
 
     @Test
+    void dlb_ip_white_list() {
+        // arrange
+        def context = new DLBIPWhiteListPolicyContext()
+        def closure = {
+            ipsToAllow(['192.168.1.1'])
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createPolicyModel()
+
+        // assert
+        assert request,
+                is(instanceOf(DLBIPWhiteListPolicy))
+        assertThat request.policyConfiguration,
+                   is(equalTo([
+                           ipExpression: "#[do {    var ipList = attributes.headers['x-forwarded-for'] splitBy ',' map trim(\$)    ---   if (sizeOf(ipList) == 1) ipList[0] else ipList[-2] }]",
+                           ips         : [
+                                   '192.168.1.1'
+                           ]
+                   ]))
+    }
+
+    @Test
+    void dlb_ip_white_list_paths() {
+        // arrange
+        def context = new DLBIPWhiteListPolicyContext()
+        def closure = {
+            version '1.1.1'
+            ipsToAllow(['192.168.1.1'])
+            paths {
+                path {
+                    method HttpMethod().put
+                    regex '.*bar'
+                }
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createPolicyModel()
+
+        // assert
+        assert request,
+                is(instanceOf(DLBIPWhiteListPolicy))
+        assertThat request.policyConfiguration,
+                   is(equalTo([
+                           ipExpression: "#[do {    var ipList = attributes.headers['x-forwarded-for'] splitBy ',' map trim(\$)    ---   if (sizeOf(ipList) == 1) ipList[0] else ipList[-2] }]",
+                           ips         : [
+                                   '192.168.1.1'
+                           ]
+                   ]))
+        assertThat request.version,
+                   is(equalTo('1.1.1'))
+        assertThat request.policyPathApplications,
+                   is(equalTo([new PolicyPathApplication([HttpMethod.PUT],
+                                                         '.*bar')]))
+    }
+
+    @Test
+    void dlb_ip_white_list_single_ip() {
+        // arrange
+        def context = new DLBIPWhiteListPolicyContext()
+        def closure = {
+            ipsToAllow '192.168.1.1'
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createPolicyModel()
+
+        // assert
+        assert request,
+                is(instanceOf(DLBIPWhiteListPolicy))
+        assertThat request.policyConfiguration,
+                   is(equalTo([
+                           ipExpression: "#[do {    var ipList = attributes.headers['x-forwarded-for'] splitBy ',' map trim(\$)    ---   if (sizeOf(ipList) == 1) ipList[0] else ipList[-2] }]",
+                           ips         : [
+                                   '192.168.1.1'
+                           ]
+                   ]))
+    }
+
+    @Test
+    void dlb_ip_white_list_repeat_ips() {
+        // arrange
+        def context = new DLBIPWhiteListPolicyContext()
+        def closure = {
+            ipToAllow '192.168.1.1'
+            ipToAllow '192.168.2.1'
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createPolicyModel()
+
+        // assert
+        assert request,
+                is(instanceOf(DLBIPWhiteListPolicy))
+        assertThat request.policyConfiguration,
+                   is(equalTo([
+                           ipExpression: "#[do {    var ipList = attributes.headers['x-forwarded-for'] splitBy ',' map trim(\$)    ---   if (sizeOf(ipList) == 1) ipList[0] else ipList[-2] }]",
+                           ips         : [
+                                   '192.168.1.1',
+                                   '192.168.2.1'
+                           ]
+                   ]))
+    }
+
+    @Test
+    void dlb_ip_white_custom_index() {
+        // arrange
+        def context = new DLBIPWhiteListPolicyContext()
+        def closure = {
+            ipsToAllow(['192.168.1.1'])
+            dwListIndexToUse(-1)
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createPolicyModel()
+
+        // assert
+        assert request,
+                is(instanceOf(DLBIPWhiteListPolicy))
+        assertThat request.policyConfiguration,
+                   is(equalTo([
+                           ipExpression: "#[do {    var ipList = attributes.headers['x-forwarded-for'] splitBy ',' map trim(\$)    ---   if (sizeOf(ipList) == 1) ipList[0] else ipList[-1] }]",
+                           ips         : [
+                                   '192.168.1.1'
+                           ]
+                   ]))
+    }
+
+    @Test
     void client_enforcement_policy_minimum() {
         // arrange
         def context = new ClientEnforcementPolicyBasicContext()

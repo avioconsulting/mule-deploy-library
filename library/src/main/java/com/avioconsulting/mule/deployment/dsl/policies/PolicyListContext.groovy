@@ -33,6 +33,14 @@ class PolicyListContext {
         policies << policyContext.createPolicyModel()
     }
 
+    def DLBIPWhiteListPolicy(Closure closure) {
+        def policyContext = new DLBIPWhiteListPolicyContext()
+        closure.delegate = policyContext
+        closure.resolveStrategy = Closure.DELEGATE_FIRST
+        closure.call()
+        policies << policyContext.createPolicyModel()
+    }
+
     def jwtPolicy(Closure closure) {
         def policyContext = new JwtPolicyBasicContext()
         closure.delegate = policyContext

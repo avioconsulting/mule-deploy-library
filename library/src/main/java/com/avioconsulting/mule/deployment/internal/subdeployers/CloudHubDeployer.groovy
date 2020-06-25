@@ -139,8 +139,15 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
         while (!deployed && tries < this.maxTries) {
             tries++
             logger.println "*** Try ${tries} ***"
-            def status = getAppStatus(environment,
+            AppStatusPackage status
+            try {
+                status = getAppStatus(environment,
                                       appName)
+            } catch (e) {
+                logger.println("Caught exception ${e.message} while checking app status, will ignore and retry")
+                sleep()
+                continue
+            }
             logger.println "Current status is '${status}'"
             if (status == baselineStatus && !hasBaselineStatusChanged) {
                 logger.println "We have not seen the baseline status change from '${baselineStatus}' so will keep checking"
@@ -184,7 +191,7 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
                                             null)
             }
             def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
-                                                                             'app status')
+                                                                             'check app status')
             def mapper = new AppStatusMapper()
             return mapper.parseAppStatus(result)
         }

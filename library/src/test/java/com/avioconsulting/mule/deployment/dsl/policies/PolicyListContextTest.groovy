@@ -1,9 +1,6 @@
 package com.avioconsulting.mule.deployment.dsl.policies
 
-import com.avioconsulting.mule.deployment.api.models.policies.AzureAdJwtPolicy
-import com.avioconsulting.mule.deployment.api.models.policies.ClientEnforcementPolicyBasicAuth
-import com.avioconsulting.mule.deployment.api.models.policies.JwtPolicy
-import com.avioconsulting.mule.deployment.api.models.policies.Policy
+import com.avioconsulting.mule.deployment.api.models.policies.*
 import org.junit.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
@@ -130,6 +127,28 @@ class PolicyListContextTest {
                    is(equalTo(1))
         assertThat result[0],
                    is(instanceOf(JwtPolicy))
+    }
+
+    @Test
+    void DLBIPWhiteListPolicy() {
+        // arrange
+        def context = new PolicyListContext()
+        def closure = {
+            DLBIPWhiteListPolicy {
+                ipsToAllow ' 192.168.1.1'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def result = context.createPolicyList()
+
+        // assert
+        assertThat result.size(),
+                   is(equalTo(1))
+        assertThat result[0],
+                   is(instanceOf(DLBIPWhiteListPolicy))
     }
 
     @Test

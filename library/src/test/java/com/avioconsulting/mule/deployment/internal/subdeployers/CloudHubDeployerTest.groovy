@@ -650,6 +650,8 @@ class CloudHubDeployerTest extends BaseTest {
 
     def mockDeploymentAndXStatusChecks(HttpServerRequest request,
                                        AppStatusPackage... appStatuses) {
+        def appStatusSize = appStatuses.size()
+        assert statusCheckCount <= appStatusSize: "You've performed ${statusCheckCount} status checks but only supplied ${appStatusSize} to work with!"
         def uri = request.absoluteURI()
         if (mockAuthenticationOk(request)) {
             return true
@@ -659,7 +661,7 @@ class CloudHubDeployerTest extends BaseTest {
         }
         if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
             statusCheckCount++
-            println "mock status invocation ${statusCheckCount}/${appStatuses.size()}"
+            println "mock status invocation ${statusCheckCount}/${appStatusSize}"
             if (statusCheckCount <= appStatuses.length) {
                 request.response().with {
                     statusCode = 200
@@ -750,6 +752,64 @@ class CloudHubDeployerTest extends BaseTest {
                                                                     null),
                                                new AppStatusPackage(AppStatus.Started,
                                                                     null))) {
+                return
+            }
+            request.response().with {
+                putHeader('Content-Type',
+                          'application/json')
+                // deployment service returns this
+                statusCode = 200
+                def result = getAppDeployResponsePayload('new-app')
+                request.expectMultipart = true
+                end(JsonOutput.toJson(result))
+            }
+        }
+        def file = new File('src/test/resources/some_file.txt')
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client',
+                                                    'new-app',
+                                                    '1.2.3')
+
+        // act
+        deployer.deploy(request)
+
+        // assert
+        assertThat statusCheckCount,
+                   is(equalTo(4))
+    }
+
+    @Test
+    void perform_deployment_succeeds_after_http_500_in_status_check() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            if (statusCheckCount != 2) {
+                if (mockDeploymentAndXStatusChecks(request,
+                                                   new AppStatusPackage(AppStatus.NotFound,
+                                                                        null),
+                                                   new AppStatusPackage(AppStatus.Deploying,
+                                                                        null),
+                                                   new AppStatusPackage(AppStatus.Deploying,
+                                                                        null),
+                                                   new AppStatusPackage(AppStatus.Started,
+                                                                        null))) {
+                    return
+                }
+            } else if (request.method() == HttpMethod.GET) {
+                statusCheckCount++
+                println 'triggering an HTTP 500 during a status check'
+                request.response().with {
+                    statusCode = 500
+                    end()
+                }
                 return
             }
             request.response().with {

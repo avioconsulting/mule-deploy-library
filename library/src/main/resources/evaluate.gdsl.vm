@@ -122,6 +122,7 @@ contributor([closureScopeContext]) {
         #closureParam('clientEnforcementPolicyBasic')
         #closureParam('jwtPolicy')
         #closureParam('azureAdJwtPolicy')
+        #closureParam('DLBIPWhiteListPolicy')
     }
     call = enclosingCall('policy')
     if (call) {
@@ -141,6 +142,7 @@ contributor([closureScopeContext]) {
     call = enclosingCall('clientEnforcementPolicyBasic')
     if (call) {
         #stringParam('version')
+        #closureParam('paths')
     }
     call = enclosingCall('jwtPolicy')
     if (call) {
@@ -154,6 +156,7 @@ contributor([closureScopeContext]) {
                ]
         method name: 'skipClientIdEnforcement'
         #methodParam('jwksCachingTtlInMinutes' 'Integer.name')
+        #closureParam('paths')
     }
     call = enclosingCall('azureAdJwtPolicy')
     if (call) {
@@ -170,6 +173,14 @@ contributor([closureScopeContext]) {
                ]
         method name: 'skipClientIdEnforcement'
         #methodParam('jwksCachingTtlInMinutes' 'Integer.name')
+        #closureParam('paths')
+    }
+    call = enclosingCall('DLBIPWhiteListPolicy')
+    if (call) {
+        property name: 'ipsToAllow',
+                 type: 'java.util.List<java.lang.String>'
+        #methodParam('dwListIndexToUse' 'Integer.name')
+        #closureParam('paths')
     }
     call = enclosingCall('paths')
     if (call) {
