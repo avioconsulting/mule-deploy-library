@@ -43,7 +43,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
     }
 
     @Test
-    void derived_app_version_and_name() {
+    void derived_app_version_and_name_normal() {
         // arrange
 
         // act
@@ -66,6 +66,32 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
             assertThat 'app.runtime in the POM',
                        workerSpecRequest.muleVersion,
                        is(equalTo('4.1.4'))
+        }
+    }
+
+    @Test
+    void derived_app_version_hf2() {
+        // arrange
+        buildApp('4.1.4-hf2')
+        try {
+
+            // act
+            def request = new CloudhubDeploymentRequest('DEV',
+                                                        new CloudhubWorkerSpecRequest(),
+                                                        builtFile,
+                                                        'theKey',
+                                                        'theClientId',
+                                                        'theSecret',
+                                                        'client')
+
+            // assert
+            assertThat 'app.runtime in the POM',
+                       request.workerSpecRequest.muleVersion,
+                       is(equalTo('4.1.4'))
+        }
+        finally {
+            // need to restore our 'normal' version as to not break the other tests
+            buildApp()
         }
     }
 

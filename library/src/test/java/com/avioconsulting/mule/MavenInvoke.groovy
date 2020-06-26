@@ -24,8 +24,10 @@ trait MavenInvoke {
                               appVersion)
     }
 
-    static def buildApp() {
+    static def buildApp(String muleVersion = '4.1.4') {
         def pomFile = getProjectDir('mule4_project')
+        pomFile.text = pomFile.text.replaceAll(/<app.runtime>\S+<\/app.runtime>/,
+                                               "<app.runtime>${muleVersion}</app.runtime>")
         projectDirectory = pomFile.parentFile
         def targetDir = new File(projectDirectory,
                                  'target')
