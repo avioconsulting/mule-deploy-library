@@ -730,9 +730,9 @@ class DesignCenterDeployerTest extends BaseTest {
                 exchangePushed = true
                 return
             }
-            if (locked && mockGetExistingFiles(request,
-                                               'abcd',
-                                               [:])) {
+            if (mockGetExistingFiles(request,
+                                     'abcd',
+                                     [:])) {
                 return
             }
             request.response().with {
@@ -843,11 +843,11 @@ class DesignCenterDeployerTest extends BaseTest {
                 exchangePushed = true
                 return
             }
-            if (locked && mockGetExistingFiles(request,
-                                               'abcd',
-                                               [
-                                                       'file_to_be_deleted.raml': 'the contents'
-                                               ])) {
+            if (mockGetExistingFiles(request,
+                                     'abcd',
+                                     [
+                                             'file_to_be_deleted.raml': 'the contents'
+                                     ])) {
                 return
             }
             if (locked && mockDeleteFile(request,
@@ -903,7 +903,7 @@ class DesignCenterDeployerTest extends BaseTest {
             }
             if (mockReleaseLock(request,
                                 'abcd')) {
-                locked = false
+                // we should not be doing any locking anyways
                 return
             }
             if (mockDesignCenterProjectId(request,
@@ -911,22 +911,22 @@ class DesignCenterDeployerTest extends BaseTest {
                                           'abcd')) {
                 return
             }
-            if (locked && mockFileUpload(request,
-                                         'abcd')) {
+            if (mockFileUpload(request,
+                               'abcd')) {
                 filesUploaded = true
                 return
             }
-            if (locked && mockExchangePush(request,
-                                           'abcd')) {
+            if (mockExchangePush(request,
+                                 'abcd')) {
                 exchangePushed = true
                 return
             }
-            if (locked && mockGetExistingFiles(request,
-                                               'abcd',
-                                               [
-                                                       'file1.raml': 'the contents',
-                                                       'file2.raml': 'the contents2'
-                                               ])) {
+            if (mockGetExistingFiles(request,
+                                     'abcd',
+                                     [
+                                             'file1.raml': 'the contents',
+                                             'file2.raml': 'the contents2'
+                                     ])) {
                 return
             }
             if (request.uri().endsWith('graphql')) {
@@ -1014,12 +1014,12 @@ class DesignCenterDeployerTest extends BaseTest {
                 exchangePushed = true
                 return
             }
-            if (locked && mockGetExistingFiles(request,
-                                               'abcd',
-                                               [
-                                                       'file1.raml': 'the contents',
-                                                       'file2.raml': 'the contents2'
-                                               ])) {
+            if (mockGetExistingFiles(request,
+                                     'abcd',
+                                     [
+                                             'file1.raml': 'the contents',
+                                             'file2.raml': 'the contents2'
+                                     ])) {
                 return
             }
             if (request.uri().endsWith('graphql')) {
@@ -1098,12 +1098,12 @@ class DesignCenterDeployerTest extends BaseTest {
                 exchangePushed = true
                 return
             }
-            if (locked && mockGetExistingFiles(request,
-                                               'abcd',
-                                               [
-                                                       'file1.raml': 'the contents',
-                                                       'file2.raml': 'the contents2'
-                                               ])) {
+            if (mockGetExistingFiles(request,
+                                     'abcd',
+                                     [
+                                             'file1.raml': 'the contents',
+                                             'file2.raml': 'the contents2'
+                                     ])) {
                 return
             }
             request.response().with {
@@ -1169,9 +1169,9 @@ class DesignCenterDeployerTest extends BaseTest {
                 exchangePushed = true
                 return
             }
-            if (locked && mockGetExistingFiles(request,
-                                               'abcd',
-                                               [:])) {
+            if (mockGetExistingFiles(request,
+                                     'abcd',
+                                     [:])) {
                 return
             }
             request.response().with {
@@ -1239,7 +1239,7 @@ class DesignCenterDeployerTest extends BaseTest {
             }
             if (mockReleaseLock(request,
                                 'abcd')) {
-                locked = false
+                // we should not be doing any locking anyways
                 return
             }
             if (mockDesignCenterProjectId(request,
@@ -1247,19 +1247,19 @@ class DesignCenterDeployerTest extends BaseTest {
                                           'abcd')) {
                 return
             }
-            if (locked && mockFileUpload(request,
-                                         'abcd')) {
+            if (mockFileUpload(request,
+                               'abcd')) {
                 filesUploaded = true
                 return
             }
-            if (locked && mockExchangePush(request,
-                                           'abcd')) {
+            if (mockExchangePush(request,
+                                 'abcd')) {
                 exchangePushed = true
                 return
             }
-            if (locked && mockGetExistingFiles(request,
-                                               'abcd',
-                                               [:])) {
+            if (mockGetExistingFiles(request,
+                                     'abcd',
+                                     [:])) {
                 return
             }
             request.response().with {
