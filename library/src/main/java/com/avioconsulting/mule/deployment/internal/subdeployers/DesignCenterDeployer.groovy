@@ -131,7 +131,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
     }
 
     List<RamlFile> getExistingDesignCenterFiles(String projectId) {
-        logger.println('Fetching existing Design Center RAML files')
+        logger.println('Fetching list of existing Design Center RAML files')
         def url = getFilesUrl(projectId)
         def request = new HttpGet(url)
         executeDesignCenterRequest(request,
@@ -142,6 +142,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
             }
             return filesWeCareAbout.collect { result ->
                 def filePath = result.path
+                logger.println("Fetching file ${filePath}")
                 def escapedForUrl = URLEncoder.encode(filePath)
                 executeDesignCenterRequest(new HttpGet("${url}/${escapedForUrl}"),
                                            "Fetching file ${filePath}") { String contents ->
@@ -225,36 +226,43 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
             throw new Exception("You specified '${mainRamlFile}' as your main RAML file but it does not exist in your application!")
         }
         def projectId = getDesignCenterProjectId(apiSpec.name)
-        new DesignCenterLock(clientWrapper,
-                             logger,
-                             projectId).withCloseable {
-            def existingFiles = getExistingDesignCenterFiles(projectId)
-            def changes = ramlFiles - existingFiles
-            if (changes.empty) {
-                logger.println('New RAML contents match the old contents, will not update Design Center')
-                def assets = getExchangeAssets(apiSpec.exchangeAssetId)
-                if (assets.empty) {
-                    if (dryRunMode != DryRunMode.Run) {
-                        logger.println('No exchange asset was found so we WOULD have pushed to Exchange, but in dry-run mode')
-                        return
-                    }
-                    logger.println 'RAMLs have not changed but asset does not exist in Exchange so we have to push'
+        def withLock = { Closure closure ->
+            new DesignCenterLock(clientWrapper,
+                                 logger,
+                                 projectId).withCloseable {
+                closure()
+            }
+        }
+        def existingFiles = getExistingDesignCenterFiles(projectId)
+        def changes = ramlFiles - existingFiles
+        if (changes.empty) {
+            logger.println('New RAML contents match the old contents, will not update Design Center')
+            def assets = getExchangeAssets(apiSpec.exchangeAssetId)
+            if (assets.empty) {
+                if (dryRunMode != DryRunMode.Run) {
+                    logger.println('No exchange asset was found so we WOULD have pushed to Exchange, but in dry-run mode')
+                    return
+                }
+                logger.println 'RAMLs have not changed but asset does not exist in Exchange so we have to push'
+                withLock {
                     pushToExchange(apiSpec,
                                    projectId,
                                    ramlFiles,
                                    appVersion)
-                } else {
-                    logger.println 'Exchange asset exists, no need for push'
                 }
             } else {
-                if (dryRunMode != DryRunMode.Run) {
-                    logger.println('RAML quantity/contents have changed, WOULD update Design Center but in dry-run mode')
-                    return
-                }
-                logger.println('RAML quantity/contents have changed, will update Design Center')
-                def noLongerExist = existingFiles.findAll { file ->
-                    !ramlFiles.any { toBeFile -> file.fileName == toBeFile.fileName }
-                }
+                logger.println 'Exchange asset exists, no need for push'
+            }
+        } else {
+            if (dryRunMode != DryRunMode.Run) {
+                logger.println('RAML quantity/contents have changed, WOULD update Design Center but in dry-run mode')
+                return
+            }
+            logger.println('RAML quantity/contents have changed, will update Design Center')
+            def noLongerExist = existingFiles.findAll { file ->
+                !ramlFiles.any { toBeFile -> file.fileName == toBeFile.fileName }
+            }
+            withLock {
                 if (noLongerExist.any()) {
                     deleteDesignCenterFiles(projectId,
                                             noLongerExist)
