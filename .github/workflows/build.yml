@@ -46,6 +46,13 @@ jobs:
       - name: Verify
         run: mvn --batch-mode verify
 
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          files: ./*/*/surefire-reports/*.xml
+
       - name: Publish package
         if: github.event_name != 'pull_request'
         run: mvn --batch-mode deploy -DskipTests
