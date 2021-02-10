@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.avioconsulting.mule</groupId>
     <artifactId>mule-deploy-maven-plugin</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
     <name>Mule deployment Maven plugin</name>
     <description>Deploys Mule applications via Runtime Manager APIs</description>
@@ -23,9 +23,9 @@
 
     <distributionManagement>
         <repository>
-            <id>avio-releases</id>
-            <name>AVIO Releases Repository</name>
-            <url>https://devops.avioconsulting.com/nexus/repository/avio-releases/</url>
+            <id>github</id>
+            <name>GitHub OWNER Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
             <layout>default</layout>
         </repository>
     </distributionManagement>
