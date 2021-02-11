@@ -82,4 +82,3 @@ See maven-plugin/README.md for more information.
 # Further Info
 
 See the respective README files in each of the 3 subprojects for more details.
-
