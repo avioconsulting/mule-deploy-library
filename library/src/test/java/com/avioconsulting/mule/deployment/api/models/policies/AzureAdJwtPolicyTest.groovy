@@ -20,7 +20,7 @@ class AzureAdJwtPolicyTest {
         assertThat model.assetId,
                    is(equalTo('jwt-validation'))
         assertThat model.version,
-                   is(equalTo('1.1.2'))
+                   is(equalTo('1.1.4'))
         assertThat model.policyConfiguration,
                    is(equalTo([
                            jwtOrigin             : 'httpBearerAuthenticationHeader',
@@ -30,7 +30,7 @@ class AzureAdJwtPolicyTest {
                            signingKeyLength      : 256,
                            jwtKeyOrigin          : 'jwks',
                            jwksUrl               : 'https://login.microsoftonline.com/1234/discovery/v2.0/keys',
-                           jwksServiceTimeToLive : 60,
+                           jwksServiceTimeToLive : 1440,
                            skipClientIdValidation: false,
                            clientIdExpression    : '#[vars.claimSet.appid]',
                            validateAudClaim      : true,
@@ -62,7 +62,7 @@ class AzureAdJwtPolicyTest {
         assertThat model.assetId,
                    is(equalTo('jwt-validation'))
         assertThat model.version,
-                   is(equalTo('1.1.2'))
+                   is(equalTo('1.1.4'))
         assertThat model.policyConfiguration,
                    is(equalTo([
                            jwtOrigin             : 'httpBearerAuthenticationHeader',
@@ -72,7 +72,7 @@ class AzureAdJwtPolicyTest {
                            signingKeyLength      : 256,
                            jwtKeyOrigin          : 'jwks',
                            jwksUrl               : 'https://login.microsoftonline.com/1234/discovery/v2.0/keys',
-                           jwksServiceTimeToLive : 60,
+                           jwksServiceTimeToLive : 1440,
                            skipClientIdValidation: false,
                            clientIdExpression    : '#[vars.claimSet.appid]',
                            validateAudClaim      : true,
@@ -108,7 +108,7 @@ class AzureAdJwtPolicyTest {
         assertThat model.assetId,
                    is(equalTo('jwt-validation'))
         assertThat model.version,
-                   is(equalTo('1.1.2'))
+                   is(equalTo('1.1.4'))
         assertThat model.policyConfiguration,
                    is(equalTo([
                            jwtOrigin             : 'httpBearerAuthenticationHeader',
@@ -118,7 +118,7 @@ class AzureAdJwtPolicyTest {
                            signingKeyLength      : 256,
                            jwtKeyOrigin          : 'jwks',
                            jwksUrl               : 'https://login.microsoftonline.com/1234/discovery/v2.0/keys',
-                           jwksServiceTimeToLive : 60,
+                           jwksServiceTimeToLive : 1440,
                            skipClientIdValidation: false,
                            clientIdExpression    : '#[vars.claimSet.appid]',
                            validateAudClaim      : true,
@@ -157,7 +157,7 @@ class AzureAdJwtPolicyTest {
         assertThat model.assetId,
                    is(equalTo('jwt-validation'))
         assertThat model.version,
-                   is(equalTo('1.1.2'))
+                   is(equalTo('1.1.4'))
         assertThat model.policyConfiguration,
                    is(equalTo([
                            jwtOrigin             : 'httpBearerAuthenticationHeader',
@@ -167,7 +167,7 @@ class AzureAdJwtPolicyTest {
                            signingKeyLength      : 256,
                            jwtKeyOrigin          : 'jwks',
                            jwksUrl               : 'https://login.microsoftonline.com/1234/discovery/v2.0/keys',
-                           jwksServiceTimeToLive : 60,
+                           jwksServiceTimeToLive : 1440,
                            skipClientIdValidation: false,
                            clientIdExpression    : '#[vars.claimSet.appid]',
                            validateAudClaim      : true,
@@ -206,7 +206,7 @@ class AzureAdJwtPolicyTest {
         assertThat model.assetId,
                    is(equalTo('jwt-validation'))
         assertThat model.version,
-                   is(equalTo('1.1.2'))
+                   is(equalTo('1.1.4'))
         assertThat model.policyConfiguration,
                    is(equalTo([
                            jwtOrigin             : 'httpBearerAuthenticationHeader',
@@ -216,7 +216,7 @@ class AzureAdJwtPolicyTest {
                            signingKeyLength      : 256,
                            jwtKeyOrigin          : 'jwks',
                            jwksUrl               : 'https://login.microsoftonline.com/1234/discovery/v2.0/keys',
-                           jwksServiceTimeToLive : 60,
+                           jwksServiceTimeToLive : 1440,
                            skipClientIdValidation: false,
                            clientIdExpression    : '#[vars.claimSet.appid]',
                            validateAudClaim      : true,

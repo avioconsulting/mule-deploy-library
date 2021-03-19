@@ -5,6 +5,7 @@ class AzureAdJwtPolicy extends JwtPolicy {
                      String expectedAudience,
                      List<String> rolesAkaApiPermissionsToRequire = [],
                      Map<String, String> customClaimValidations = [:],
+                     // see superclass for defaults
                      List<PolicyPathApplication> policyPathApplications = null,
                      boolean skipClientIdEnforcement = false,
                      Integer jwksCachingTtlInMinutes = null,
