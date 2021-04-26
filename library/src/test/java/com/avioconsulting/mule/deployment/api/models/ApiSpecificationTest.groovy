@@ -17,8 +17,6 @@ class ApiSpecificationTest {
         // assert
         assertThat result.name,
                    is(equalTo('Product API'))
-        assertThat result.apiMajorVersion,
-                   is(equalTo('v1'))
         assertThat result.exchangeAssetId,
                    is(equalTo('product-api'))
         assertThat result.mainRamlFile,
@@ -35,8 +33,6 @@ class ApiSpecificationTest {
         // assert
         assertThat result.name,
                    is(equalTo('SystemStuff API'))
-        assertThat result.apiMajorVersion,
-                   is(equalTo('v1'))
         assertThat result.exchangeAssetId,
                    is(equalTo('systemstuff-api'))
         assertThat result.mainRamlFile,
@@ -49,15 +45,12 @@ class ApiSpecificationTest {
 
         // act
         def result = new ApiSpecification('SystemStuff API',
-                                          'v2',
                                           'hello.raml',
                                           'nope')
 
         // assert
         assertThat result.name,
                    is(equalTo('SystemStuff API'))
-        assertThat result.apiMajorVersion,
-                   is(equalTo('v2'))
         assertThat result.exchangeAssetId,
                    is(equalTo('nope'))
         assertThat result.mainRamlFile,

@@ -6,6 +6,7 @@ import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
+import com.avioconsulting.mule.deployment.internal.models.ApiSpecificationRamlSelected
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpDelete
@@ -179,14 +180,11 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
         }.fileName
     }
 
-    def pushToExchange(ApiSpecification apiSpec,
+    def pushToExchange(ApiSpecificationRamlSelected apiSpec,
                        String projectId,
-                       List<RamlFile> ramlFiles,
                        String appVersion) {
-        def mainRamlFile = getMainRamlFile(apiSpec,
-                                           ramlFiles)
         def requestPayload = [
-                main      : mainRamlFile,
+                main      : apiSpec.mainRamlFile,
                 apiVersion: apiSpec.apiMajorVersion,
                 version   : appVersion,
                 assetId   : apiSpec.exchangeAssetId,
@@ -208,14 +206,15 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
     def synchronizeDesignCenterFromApp(ApiSpecification apiSpec,
                                        FileBasedAppDeploymentRequest appFileInfo) {
         def ramlFiles = getRamlFilesFromApp(appFileInfo)
-        synchronizeDesignCenter(apiSpec,
+        def resolved = resolveSpec(apiSpec,
+                                   ramlFiles)
+        synchronizeDesignCenter(resolved,
                                 ramlFiles,
                                 appFileInfo.appVersion)
     }
 
-    def synchronizeDesignCenter(ApiSpecification apiSpec,
-                                List<RamlFile> ramlFiles,
-                                String appVersion) {
+    ApiSpecificationRamlSelected resolveSpec(ApiSpecification apiSpec,
+                                             List<RamlFile> ramlFiles) {
         if (ramlFiles.empty) {
             logger.println 'No RAML files in project, therefore nothing to sync'
             return
@@ -225,6 +224,14 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
         if (!ramlFiles.any { file -> file.fileName == mainRamlFile }) {
             throw new Exception("You specified '${mainRamlFile}' as your main RAML file but it does not exist in your application!")
         }
+        ApiSpecificationRamlSelected.createFromDslModel(apiSpec,
+                                                        mainRamlFile,
+                                                        'v1')
+    }
+
+    def synchronizeDesignCenter(ApiSpecificationRamlSelected apiSpec,
+                                List<RamlFile> ramlFiles,
+                                String appVersion) {
         def projectId = getDesignCenterProjectId(apiSpec.name)
         def withLock = { Closure closure ->
             new DesignCenterLock(clientWrapper,
@@ -247,7 +254,6 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                 withLock {
                     pushToExchange(apiSpec,
                                    projectId,
-                                   ramlFiles,
                                    appVersion)
                 }
             } else {
@@ -273,7 +279,6 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                                         changes)
                 pushToExchange(apiSpec,
                                projectId,
-                               ramlFiles,
                                appVersion)
             }
         }

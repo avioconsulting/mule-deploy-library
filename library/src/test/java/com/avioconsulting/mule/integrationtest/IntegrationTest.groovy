@@ -22,6 +22,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.core.config.Configurator
+import org.junit.Assume
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Ignore
@@ -53,6 +54,8 @@ class IntegrationTest implements MavenInvoke {
 
     @BeforeClass
     static void setup() {
+        Assume.assumeTrue('skip it',
+                          System.getProperty('skip.integration.test') == null)
         buildApp()
         // cut down on the unit test noise here
         Configurator.setLevel('org.apache.http.wire',

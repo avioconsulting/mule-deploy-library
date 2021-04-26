@@ -165,7 +165,6 @@ class DeployerTest {
                                                     'new-app-mule3',
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
-                                           'v1',
                                            'main.raml',
                                            'the-asset-id',
                                            'https://foo')
@@ -246,7 +245,6 @@ class DeployerTest {
                                                     'new-app-mule4',
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
-                                           'v1',
                                            'main.raml',
                                            'the-asset-id',
                                            'https://foo')
