@@ -1,13 +1,13 @@
 package com.avioconsulting.mule.deployment.dsl
 
-import com.avioconsulting.mule.deployment.api.models.ApiSpecification
+
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.dsl.policies.PolicyListContext
 
 class MuleDeployContext extends BaseContext {
     String version
-    private ApiSpecContext apiSpecification = new ApiSpecContext()
+    private ApiSpecListContext apiSpecifications = new ApiSpecListContext()
     private PolicyListContext policies = new PolicyListContext()
     private CloudhubContext cloudHubApplication = new CloudhubContext()
     private OnPremContext onPremApplication = new OnPremContext()
@@ -29,12 +29,12 @@ class MuleDeployContext extends BaseContext {
         hasFieldBeenSet('onPremApplication')
     }
 
-    private ApiSpecification createApiSpec() {
-        hasFieldBeenSet('apiSpecification') ? apiSpecification.createRequest() : null
-    }
-
     private List<Features> obtainFeatures() {
         hasFieldBeenSet('enabledFeatures') ? enabledFeatures.createFeatureList() : [Features.All]
+    }
+
+    void apiSpecification(Closure closure) {
+        apiSpecifications.apiSpecification(closure)
     }
 
     static def removeFeature(Features feature,
@@ -65,7 +65,7 @@ class MuleDeployContext extends BaseContext {
                 cloudHubApplication.createDeploymentRequest() :
                 onPremApplication.createDeploymentRequest()
         return new DeploymentPackage(deploymentRequest,
-                                     createApiSpec(),
+                                     apiSpecifications.createApiSpecList(),
                                      policyList,
                                      features)
     }

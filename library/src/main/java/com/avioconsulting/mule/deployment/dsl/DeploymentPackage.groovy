@@ -9,7 +9,7 @@ import groovy.transform.Canonical
 @Canonical
 class DeploymentPackage {
     FileBasedAppDeploymentRequest deploymentRequest
-    ApiSpecification apiSpecification
+    List<ApiSpecification> apiSpecifications
     List<Policy> desiredPolicies
     List<Features> enabledFeatures
 }
