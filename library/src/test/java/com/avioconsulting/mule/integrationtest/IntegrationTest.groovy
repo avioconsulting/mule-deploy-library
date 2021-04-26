@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.core.config.Configurator
 import org.junit.Before
 import org.junit.BeforeClass
+import org.junit.Ignore
 import org.junit.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
@@ -31,6 +32,7 @@ import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 import static org.junit.Assume.assumeTrue
 
+@Ignore
 class IntegrationTest implements MavenInvoke {
     private static final String AVIO_SANDBOX_BIZ_GROUP_NAME = 'AVIO Sandbox'
     private static final String ANYPOINT_USERNAME = System.getProperty('anypoint.username')

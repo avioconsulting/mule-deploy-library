@@ -31,12 +31,12 @@ class PolicyContext extends BaseContext {
                    pathListing)
     }
 
-    def methodMissing(String name, def args) {
+    def invokeMethod(String name, def args) {
         if (name == 'paths') {
             pathsCalled = true
         }
-        super.methodMissing(name,
-                            args)
+        super.invokeMethod(name,
+                           args)
     }
 
     @Override

@@ -74,7 +74,7 @@ class MuleDeployContext extends BaseContext {
         if (version != '1.0') {
             throw new Exception("Only version 1.0 of the DSL is supported and you are using ${version}")
         }
-        super.methodMissing('version',
+        super.invokeMethod('version',
                             version)
     }
 
