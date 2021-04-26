@@ -24,8 +24,6 @@ class ApiSpecContextTest {
         request.with {
             assertThat it.name,
                        is(equalTo('Foo Bar'))
-            assertThat it.apiMajorVersion,
-                       is(equalTo('v1'))
             assertThat it.mainRamlFile,
                        is(nullValue())
             assertThat it.exchangeAssetId,
@@ -42,7 +40,6 @@ class ApiSpecContextTest {
         def closure = {
             name 'Foo Bar'
             exchangeAssetId 'the-asset-id'
-            apiMajorVersion 'v2'
             mainRamlFile 'foo.raml'
             endpoint 'https://foo'
         }
@@ -56,8 +53,6 @@ class ApiSpecContextTest {
         request.with {
             assertThat it.name,
                        is(equalTo('Foo Bar'))
-            assertThat it.apiMajorVersion,
-                       is(equalTo('v2'))
             assertThat it.mainRamlFile,
                        is(equalTo('foo.raml'))
             assertThat it.exchangeAssetId,

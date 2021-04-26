@@ -60,8 +60,8 @@ class MuleDeployContextTest {
         // assert
         assertThat deploymentPackage.deploymentRequest,
                    is(instanceOf(CloudhubDeploymentRequest))
-        assertThat deploymentPackage.apiSpecification,
-                   is(notNullValue())
+        assertThat deploymentPackage.apiSpecifications.size(),
+                   is(not(0))
         assertThat deploymentPackage.desiredPolicies.size(),
                    is(equalTo(1))
         assertThat deploymentPackage.enabledFeatures,
@@ -101,8 +101,8 @@ class MuleDeployContextTest {
         // assert
         assertThat deploymentPackage.deploymentRequest,
                    is(instanceOf(OnPremDeploymentRequest))
-        assertThat deploymentPackage.apiSpecification,
-                   is(notNullValue())
+        assertThat deploymentPackage.apiSpecifications.size(),
+                   is(not(0))
         assertThat deploymentPackage.desiredPolicies.size(),
                    is(equalTo(1))
         assertThat deploymentPackage.enabledFeatures,
@@ -239,8 +239,8 @@ class MuleDeployContextTest {
         def deploymentPackage = context.createDeploymentPackage()
 
         // assert
-        assertThat deploymentPackage.apiSpecification,
-                   is(nullValue())
+        assertThat deploymentPackage.apiSpecifications.size(),
+                   is(equalTo(0))
         assertThat 'Lack of policy section should remove policy sync from features',
                    deploymentPackage.enabledFeatures,
                    is(equalTo([
