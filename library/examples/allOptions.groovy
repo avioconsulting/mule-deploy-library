@@ -6,7 +6,6 @@ muleDeploy {
         name 'Design Center Project Name'
         // everything else in this closure is optional
         exchangeAssetId 'the-asset-id'
-        apiMajorVersion 'v1'
         mainRamlFile 'stuff.raml'
         endpoint 'https://foobar'
     }

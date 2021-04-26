@@ -111,7 +111,6 @@ contributor([closureScopeContext]) {
     if (call) {
         #stringParam('name')
         #stringParam('exchangeAssetId')
-        #stringParam('apiMajorVersion')
         #stringParam('mainRamlFile')
         #stringParam('endpoint')
     }
