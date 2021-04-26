@@ -27,7 +27,7 @@ class PathContext {
         methods << httpMethod
     }
 
-    def methodMissing(String name, def args) {
+    def invokeMethod(String name, def args) {
         switch (name) {
             case HttpMethod.simpleName:
                 return new LowerCaseEnumWrapper(HttpMethod)
