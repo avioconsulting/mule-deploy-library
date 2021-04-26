@@ -22,7 +22,7 @@ class JwtPolicyTest {
         assertThat model.assetId,
                    is(equalTo('jwt-validation'))
         assertThat model.version,
-                   is(equalTo('1.1.2'))
+                   is(equalTo('1.1.4'))
         assertThat model.policyConfiguration,
                    is(equalTo([
                            jwtOrigin             : 'httpBearerAuthenticationHeader',
@@ -32,7 +32,7 @@ class JwtPolicyTest {
                            signingKeyLength      : 256,
                            jwtKeyOrigin          : 'jwks',
                            jwksUrl               : 'https://foo',
-                           jwksServiceTimeToLive : 60,
+                           jwksServiceTimeToLive : 1440,
                            skipClientIdValidation: false,
                            clientIdExpression    : '#[vars.claimSet.client_id]',
                            validateAudClaim      : true,
@@ -90,7 +90,7 @@ class JwtPolicyTest {
         assertThat model.assetId,
                    is(equalTo('jwt-validation'))
         assertThat model.version,
-                   is(equalTo('1.1.2'))
+                   is(equalTo('1.1.4'))
         assertThat model.policyConfiguration,
                    is(equalTo([
                            jwtOrigin             : 'httpBearerAuthenticationHeader',
@@ -100,7 +100,7 @@ class JwtPolicyTest {
                            signingKeyLength      : 256,
                            jwtKeyOrigin          : 'jwks',
                            jwksUrl               : 'https://foo',
-                           jwksServiceTimeToLive : 60,
+                           jwksServiceTimeToLive : 1440,
                            skipClientIdValidation: false,
                            clientIdExpression    : '#[vars.claimSet.client_id]',
                            validateAudClaim      : true,
@@ -143,7 +143,7 @@ class JwtPolicyTest {
         assertThat model.assetId,
                    is(equalTo('jwt-validation'))
         assertThat model.version,
-                   is(equalTo('1.1.2'))
+                   is(equalTo('1.1.4'))
         assertThat model.policyConfiguration,
                    is(equalTo([
                            jwtOrigin             : 'httpBearerAuthenticationHeader',

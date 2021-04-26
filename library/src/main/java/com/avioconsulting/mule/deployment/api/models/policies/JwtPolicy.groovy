@@ -23,14 +23,16 @@ class JwtPolicy extends MulesoftPolicy {
               Integer jwksCachingTtlInMinutes = null,
               String version = null) {
         super('jwt-validation',
-              version ?: '1.1.2',
+              version ?: '1.1.4',
               getConfig(jwksUrl,
                         expectedAudience,
                         expectedIssuer,
                         skipClientIdEnforcement,
                         clientIdExpression ?: '#[vars.claimSet.client_id]',
                         customClaimValidations,
-                        jwksCachingTtlInMinutes ?: 60),
+                        // 24 hours recommended by Microsoft at https://docs.microsoft.com/en-us/azure/active-directory/develop/active-directory-signing-key-rollover
+                        // https://developer.okta.com/docs/concepts/key-rotation/ - Okta rotates 4 times a year so this is probably reasonable for that system too
+                        jwksCachingTtlInMinutes ?: 1440),
               policyPathApplications)
     }
 
