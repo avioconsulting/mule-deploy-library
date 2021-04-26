@@ -18,6 +18,12 @@ class ApiSpecification {
      * the first RAML round at the "root" of your 'api' directory.
      */
     final String mainRamlFile
+
+    /**
+     * e.g. v1 or v2. this is optional, will be assumed to be v1 by default
+     */
+    final String apiMajorVersion
+
     /**
      * The endpoint to show in the API Manager definition.
      */
@@ -31,6 +37,7 @@ class ApiSpecification {
                      String exchangeAssetId = null,
                      String endpoint = null) {
         this.name = name
+        assert false : 'Derive the main RAML file from here'
         this.mainRamlFile = mainRamlFile
         this.exchangeAssetId = exchangeAssetId ?: name.toLowerCase().replace(' ',
                                                                              '-')
