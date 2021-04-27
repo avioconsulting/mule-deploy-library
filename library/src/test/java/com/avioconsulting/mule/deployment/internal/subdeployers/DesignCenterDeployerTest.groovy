@@ -634,7 +634,8 @@ class DesignCenterDeployerTest extends BaseTest {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
+        def apiSpec = new ApiSpecification('Hello API',
+                                           [])
 
         // act
         deployer.synchronizeDesignCenter(apiSpec,
