@@ -3,6 +3,7 @@ package com.avioconsulting.mule.deployment.api.models
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import org.junit.Test
 
+import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
@@ -168,6 +169,23 @@ class ApiSpecificationTest {
                    is(equalTo('nope'))
         assertThat result.mainRamlFile,
                    is(equalTo('stuff-v1.raml'))
+    }
+
+    @Test
+    void not_found() {
+        // arrange
+
+        // act
+        def exception = shouldFail {
+            new ApiSpecification('SystemStuff API',
+                                 simpleRamlFiles,
+                                 'oops.raml',
+                                 'nope')
+        }
+
+        // assert
+        assertThat exception.message,
+                   is(containsString("You specified 'oops.raml' as your main RAML file but it does not exist in your application!"))
     }
 
     @Test

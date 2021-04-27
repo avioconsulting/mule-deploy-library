@@ -59,6 +59,9 @@ class ApiSpecification {
         def mainFile = ramlFiles.find { f ->
             f.fileName == mainRamlFile
         }
+        if (!mainFile) {
+            throw new Exception("You specified '${mainRamlFile}' as your main RAML file but it does not exist in your application!")
+        }
         def ramlModel = builder.buildApi(mainFile.contents,
                                          '.')
         if (ramlModel.hasErrors()) {
