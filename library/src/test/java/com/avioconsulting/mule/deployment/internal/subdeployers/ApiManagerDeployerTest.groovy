@@ -12,6 +12,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -33,6 +34,16 @@ class ApiManagerDeployerTest extends BaseTest {
                                           environmentLocator,
                                           new TestConsoleLogger(),
                                           dryRunMode)
+    }
+
+    @Test
+    void multiple_versions() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
     }
 
     @Test
