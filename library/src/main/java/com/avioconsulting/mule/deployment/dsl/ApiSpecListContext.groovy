@@ -7,9 +7,17 @@ class ApiSpecListContext {
     private List<ApiSpecContext> apiSpecContexts = []
 
     List<ApiSpecification> createApiSpecList(List<RamlFile> ramlFiles) {
-        apiSpecContexts.collect { ctx ->
+        def specs = apiSpecContexts.collect { ctx ->
             ctx.createRequest(ramlFiles)
         }
+        if (specs.size() > 1) {
+            specs.each { spec ->
+                if (spec.autoDiscoveryPropertyName == 'auto-discovery.api-id') {
+                    throw new Exception("If you have multiple API specs, you must specify `autoDiscoveryPropertyName` for all of them!")
+                }
+            }
+        }
+        specs
     }
 
     void apiSpecification(Closure closure) {

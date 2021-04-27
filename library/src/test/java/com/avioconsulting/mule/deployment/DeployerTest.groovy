@@ -8,6 +8,7 @@ import com.avioconsulting.mule.deployment.internal.models.ApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
 import com.avioconsulting.mule.deployment.internal.subdeployers.*
 import groovy.transform.Canonical
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -461,5 +462,15 @@ class DeployerTest {
         assertThat 'no feature supplied',
                    apiSyncs.size(),
                    is(equalTo(0))
+    }
+
+    @Test
+    void multiple_api_specs() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
     }
 }

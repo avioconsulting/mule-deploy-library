@@ -4,6 +4,7 @@ import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import org.junit.Test
 
+import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
@@ -40,7 +41,7 @@ class ApiSpecListContextTest {
     }
 
     @Test
-    void list_multiple() {
+    void list_multiple_missing_auto_disc() {
         // arrange
         def context = new ApiSpecListContext()
         def closure = {
@@ -49,6 +50,33 @@ class ApiSpecListContextTest {
             }
             apiSpecification {
                 name 'Mule Deploy Design Center Test Project'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def exception = shouldFail {
+            context.createApiSpecList(simpleRamlFiles)
+        }
+
+        // assert
+        assertThat exception.message,
+                   is(containsString('If you have multiple API specs, you must specify `autoDiscoveryPropertyName` for all of them!'))
+    }
+
+    @Test
+    void list_multiple() {
+        // arrange
+        def context = new ApiSpecListContext()
+        def closure = {
+            apiSpecification {
+                name 'Mule Deploy Design Center Test Project'
+                autoDiscoveryPropertyName 'prop1'
+            }
+            apiSpecification {
+                name 'Mule Deploy Design Center Test Project'
+                autoDiscoveryPropertyName 'prop2'
             }
         }
         closure.delegate = context
