@@ -9,14 +9,14 @@ interface IDeployer {
     def deployApplication(FileBasedAppDeploymentRequest appDeploymentRequest)
 
     def deployApplication(FileBasedAppDeploymentRequest appDeploymentRequest,
-                          ApiSpecification apiSpecification)
+                          List<ApiSpecification> apiSpecifications)
 
     def deployApplication(FileBasedAppDeploymentRequest appDeploymentRequest,
-                          ApiSpecification apiSpecification,
+                          List<ApiSpecification> apiSpecifications,
                           List<Policy> desiredPolicies)
 
     def deployApplication(FileBasedAppDeploymentRequest appDeploymentRequest,
-                          ApiSpecification apiSpecification,
+                          List<ApiSpecification> apiSpecifications,
                           List<Policy> desiredPolicies,
                           List<Features> enabledFeatures)
 }
