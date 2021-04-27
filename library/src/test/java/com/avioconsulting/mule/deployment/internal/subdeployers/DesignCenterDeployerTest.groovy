@@ -10,7 +10,6 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
-import org.apache.commons.io.FileUtils
 import org.junit.Before
 import org.junit.Test
 
@@ -578,13 +577,19 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
+        def file1RamlContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
         def files = [
                 new RamlFile('file1.raml',
-                             'the contents'),
+                             file1RamlContents),
                 new RamlFile('file2.raml',
                              'the contents2')
         ]
+        def apiSpec = new ApiSpecification('Hello API',
+                                           files)
 
         // act
         deployer.synchronizeDesignCenter(apiSpec,
@@ -675,13 +680,19 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
+        def file1RamlContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
         def files = [
                 new RamlFile('file1.raml',
-                             'the contents'),
+                             file1RamlContents),
                 new RamlFile('file2.raml',
                              'the contents2')
         ]
+        def apiSpec = new ApiSpecification('Hello API',
+                                           files)
 
         // act
         deployer.synchronizeDesignCenter(apiSpec,
@@ -805,6 +816,11 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
         def filesUploaded = false
         def exchangePushed = false
         def locked = false
+        def file1RamlContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
         withHttpServer { HttpServerRequest request ->
             if (mockAuthenticationOk(request)) {
                 return
@@ -837,7 +853,7 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
             if (mockGetExistingFiles(request,
                                      'abcd',
                                      [
-                                             'file1.raml': 'the contents',
+                                             'file1.raml': file1RamlContents,
                                              'file2.raml': 'the contents2'
                                      ])) {
                 return
@@ -860,13 +876,14 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
         def files = [
                 new RamlFile('file1.raml',
-                             'the contents'),
+                             file1RamlContents),
                 new RamlFile('file2.raml',
                              'the contents2')
         ]
+        def apiSpec = new ApiSpecification('Hello API',
+                                           files)
 
         // act
         deployer.synchronizeDesignCenter(apiSpec,
@@ -1005,37 +1022,13 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
-        def tempDir = new File('target/temp')
-        def tempAppDirectory = new File(tempDir,
-                                        'designcenterapp')
-        tempAppDirectory.deleteDir()
-        tempAppDirectory.mkdirs()
-        def apiDirectory = new File(tempAppDirectory,
-                                    'api')
-        def file = new File(apiDirectory,
-                            'stuff.yaml')
-        FileUtils.touch(file)
-        file.text = 'howdy2'
-        def folder = new File(apiDirectory,
-                              'folder')
-        file = new File(folder,
-                        'lib.yaml')
-        FileUtils.touch(file)
-        file.text = 'howdy1'
-        def exchangeModules = new File(apiDirectory,
-                                       'exchange_modules')
-        file = new File(exchangeModules,
-                        'junk')
-        FileUtils.touch(file)
-        FileUtils.touch(new File(apiDirectory,
-                                 'exchange.json'))
-        def appInfo = buildZip(tempDir,
-                               tempAppDirectory)
+        def request = buildFullApp()
+        def apiSpec = new ApiSpecification('Hello API',
+                                           request.ramlFilesFromApp)
 
         // act
         deployer.synchronizeDesignCenterFromApp(apiSpec,
-                                                appInfo)
+                                                request)
 
         // assert
         assertThat filesUploaded,
