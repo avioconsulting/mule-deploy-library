@@ -113,6 +113,7 @@ contributor([closureScopeContext]) {
         #stringParam('exchangeAssetId')
         #stringParam('mainRamlFile')
         #stringParam('endpoint')
+        #stringParam('autoDiscoveryPropertyName')
     }
     call = enclosingCall('policies')
     if (call) {

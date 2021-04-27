@@ -33,6 +33,12 @@ class ApiSpecification {
      */
     final String endpoint
 
+    /**
+     * The application property that will be set by the deployer (after upserting the API definition) so that
+     * the app's autodiscovery element knows what the API ID is. Defaults to 'auto-discovery.api-id'
+     */
+    final String autoDiscoveryPropertyName
+
     /***
      * Standard request - see properties for parameter details
      */
@@ -40,7 +46,9 @@ class ApiSpecification {
                      List<RamlFile> ramlFiles,
                      String mainRamlFile = null,
                      String exchangeAssetId = null,
-                     String endpoint = null) {
+                     String endpoint = null,
+                     String autoDiscoveryPropertyName = null) {
+        this.autoDiscoveryPropertyName = autoDiscoveryPropertyName ?: 'auto-discovery.api-id'
         this.name = name
         this.mainRamlFile = mainRamlFile ?: findMainRamlFile(ramlFiles)
         // SOAP will not have a main RAML file, just use v1 in that case

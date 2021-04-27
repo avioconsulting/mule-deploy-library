@@ -37,6 +37,8 @@ class ApiSpecContextTest {
                        is(equalTo('foo-bar'))
             assertThat it.endpoint,
                        is(nullValue())
+            assertThat it.autoDiscoveryPropertyName,
+                       is(equalTo('auto-discovery.api-id'))
         }
     }
 
@@ -59,6 +61,7 @@ class ApiSpecContextTest {
             exchangeAssetId 'the-asset-id'
             mainRamlFile 'foo.raml'
             endpoint 'https://foo'
+            autoDiscoveryPropertyName 'the.auto.disc'
         }
         closure.delegate = context
         closure.call()
@@ -76,6 +79,8 @@ class ApiSpecContextTest {
                        is(equalTo('the-asset-id'))
             assertThat it.endpoint,
                        is(equalTo('https://foo'))
+            assertThat it.autoDiscoveryPropertyName,
+                       is(equalTo('the.auto.disc'))
         }
     }
 
