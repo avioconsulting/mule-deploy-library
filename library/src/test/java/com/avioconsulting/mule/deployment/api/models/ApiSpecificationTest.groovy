@@ -24,8 +24,9 @@ class ApiSpecificationTest {
 
         // act
         def result = new ApiSpecification('Product API',
-                                          null,
-                                          simpleRamlFiles)
+                                          simpleRamlFiles,
+                                          null
+        )
 
         // assert
         assertThat result.name,
@@ -49,8 +50,9 @@ class ApiSpecificationTest {
 
         // act
         def result = new ApiSpecification('Product API',
-                                          'stuff-v1.raml',
-                                          files)
+                                          files,
+                                          'stuff-v1.raml'
+        )
 
         // assert
         assertThat result.name,
@@ -81,8 +83,9 @@ class ApiSpecificationTest {
 
         // act
         def result = new ApiSpecification('Product API',
-                                          'stuff-v1.raml',
-                                          files)
+                                          files,
+                                          'stuff-v1.raml'
+        )
 
         // assert
         assertThat result.name,
@@ -114,8 +117,9 @@ class ApiSpecificationTest {
 
         // act
         def result = new ApiSpecification('Product API',
-                                          'stuff-v1.raml',
-                                          files)
+                                          files,
+                                          'stuff-v1.raml'
+        )
 
         // assert
         assertThat result.name,
@@ -134,8 +138,9 @@ class ApiSpecificationTest {
 
         // act
         def result = new ApiSpecification('SystemStuff API',
-                                          null,
-                                          simpleRamlFiles)
+                                          simpleRamlFiles,
+                                          null
+        )
 
         // assert
         assertThat result.name,
@@ -154,8 +159,9 @@ class ApiSpecificationTest {
 
         // act
         def result = new ApiSpecification('SystemStuff API',
-                                          'stuff-v1.raml',
                                           simpleRamlFiles,
+                                          'stuff-v1.raml'
+                                          ,
                                           'nope')
 
         // assert
@@ -165,5 +171,15 @@ class ApiSpecificationTest {
                    is(equalTo('nope'))
         assertThat result.mainRamlFile,
                    is(equalTo('stuff-v1.raml'))
+    }
+
+    @Test
+    void not_apikit() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
     }
 }

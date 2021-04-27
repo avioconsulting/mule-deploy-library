@@ -3,6 +3,7 @@ package com.avioconsulting.mule.deployment.dsl
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.internal.AppBuilding
 import org.junit.Before
 import org.junit.Test
 
@@ -11,7 +12,7 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
 // optimizing refs would prevent us from testing DSL resolution
-class MuleDeployContextTest {
+class MuleDeployContextTest implements AppBuilding {
     private MuleDeployContext context
     private Map params
 
@@ -24,6 +25,7 @@ class MuleDeployContextTest {
     @Test
     void cloudhub() {
         // arrange
+        def tempRequest = buildFullApp()
         def closure = {
             version '1.0'
 
@@ -42,7 +44,7 @@ class MuleDeployContextTest {
                 workerSpecs {
                     muleVersion '4.2.2'
                 }
-                file 'path/to/file.jar'
+                file tempRequest.file.path
                 cryptoKey 'theKey'
                 autoDiscovery {
                     clientId 'the_client_id'
@@ -73,6 +75,7 @@ class MuleDeployContextTest {
     @Test
     void on_prem() {
         // arrange
+        def tempRequest = buildFullApp()
         def closure = {
             version '1.0'
 
@@ -88,7 +91,7 @@ class MuleDeployContextTest {
                 environment 'DEV'
                 applicationName 'the-app'
                 appVersion '1.2.3'
-                file 'path/to/file.jar'
+                file tempRequest.file.path
                 targetServerOrClusterName 'theServer'
             }
         }
@@ -221,6 +224,7 @@ class MuleDeployContextTest {
     @Test
     void optional_stuff() {
         // arrange
+        def tempRequest = buildFullApp()
         def closure = {
             version '1.0'
 
@@ -228,7 +232,7 @@ class MuleDeployContextTest {
                 environment 'DEV'
                 applicationName 'the-app'
                 appVersion '1.2.3'
-                file 'path/to/file.jar'
+                file tempRequest.file.path
                 targetServerOrClusterName 'theServer'
             }
         }
@@ -253,6 +257,7 @@ class MuleDeployContextTest {
     @Test
     void specify_features() {
         // arrange
+        def tempRequest = buildFullApp()
         def closure = {
             version '1.0'
 
@@ -269,7 +274,7 @@ class MuleDeployContextTest {
                 environment 'DEV'
                 applicationName 'the-app'
                 appVersion '1.2.3'
-                file 'path/to/file.jar'
+                file tempRequest.file.path
                 targetServerOrClusterName 'theServer'
             }
         }
@@ -290,6 +295,7 @@ class MuleDeployContextTest {
     @Test
     void specify_features_with_policy_section_omitted() {
         // arrange
+        def tempRequest = buildFullApp()
         def closure = {
             version '1.0'
 
@@ -307,7 +313,7 @@ class MuleDeployContextTest {
                 environment 'DEV'
                 applicationName 'the-app'
                 appVersion '1.2.3'
-                file 'path/to/file.jar'
+                file tempRequest.file.path
                 targetServerOrClusterName 'theServer'
             }
         }
@@ -329,6 +335,7 @@ class MuleDeployContextTest {
     @Test
     void empty_policies() {
         // arrange
+        def tempRequest = buildFullApp()
         def closure = {
             version '1.0'
 
@@ -342,7 +349,7 @@ class MuleDeployContextTest {
                 environment 'DEV'
                 applicationName 'the-app'
                 appVersion '1.2.3'
-                file 'path/to/file.jar'
+                file tempRequest.file.path
                 targetServerOrClusterName 'theServer'
             }
         }

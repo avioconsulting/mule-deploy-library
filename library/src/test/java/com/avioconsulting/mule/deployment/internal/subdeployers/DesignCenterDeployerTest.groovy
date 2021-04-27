@@ -4,7 +4,6 @@ import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
-import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -31,109 +30,6 @@ class DesignCenterDeployerTest extends BaseTest {
                                             new TestConsoleLogger(),
                                             dryRunMode,
                                             environmentLocator)
-    }
-
-    @Test
-    void getRamlFilesFromApp_is_apikit() {
-        // arrange
-        def tempDir = new File('target/temp')
-        def tempAppDirectory = new File(tempDir,
-                                        'designcenterapp')
-        tempAppDirectory.deleteDir()
-        tempAppDirectory.mkdirs()
-        def apiDirectory = new File(tempAppDirectory,
-                                    'api')
-        def file = new File(apiDirectory,
-                            'stuff.yaml')
-        FileUtils.touch(file)
-        file.text = 'howdy2'
-        def folder = new File(apiDirectory,
-                              'folder')
-        file = new File(folder,
-                        'lib.yaml')
-        FileUtils.touch(file)
-        file.text = 'howdy1'
-        def exchangeModules = new File(apiDirectory,
-                                       'exchange_modules')
-        file = new File(exchangeModules,
-                        'junk')
-        FileUtils.touch(file)
-        def exchangeChildDirectory = new File(exchangeModules,
-                                              'subdir')
-        file = new File(exchangeChildDirectory,
-                        'junk')
-        FileUtils.touch(file)
-        FileUtils.touch(new File(apiDirectory,
-                                 'exchange.json'))
-        def request = buildZip(tempDir,
-                               tempAppDirectory)
-
-        // act
-        def result = request.getRamlFilesFromApp()
-                .sort { item -> item.fileName } // consistent for test
-
-        // assert
-        assertThat result,
-                   is(equalTo([
-                           new RamlFile('folder/lib.yaml',
-                                        'howdy1'),
-                           new RamlFile('stuff.yaml',
-                                        'howdy2')
-                   ]))
-    }
-
-    private static FileBasedAppDeploymentRequest buildZip(File tempDir,
-                                                          File tempAppDirectory) {
-        def antBuilder = new AntBuilder()
-        def zipFile = new File(tempDir,
-                               'designcenterapp.zip')
-        FileUtils.deleteQuietly(zipFile)
-        antBuilder.zip(destfile: zipFile,
-                       basedir: tempAppDirectory)
-        new FileBasedAppDeploymentRequest() {
-            @Override
-            File getFile() {
-                zipFile
-            }
-
-            @Override
-            def setAutoDiscoveryId(String autoDiscoveryId) {
-                return null
-            }
-
-            @Override
-            String getAppVersion() {
-                '1.2.3'
-            }
-
-            @Override
-            String getEnvironment() {
-                'DEV'
-            }
-        }
-    }
-
-    @Test
-    void getRamlFilesFromApp_is_not_apikit() {
-        // arrange
-        def tempDir = new File('target/temp')
-        def tempAppDirectory = new File(tempDir,
-                                        'designcenterapp')
-        tempAppDirectory.deleteDir()
-        tempAppDirectory.mkdirs()
-        def file = new File(tempAppDirectory,
-                            'stuff.xml')
-        FileUtils.touch(file)
-        file.text = '<hi/>'
-        def request = buildZip(tempDir,
-                               tempAppDirectory)
-
-        // act
-        def result = request.getRamlFilesFromApp()
-
-        // assert
-        assertThat result,
-                   is(equalTo([]))
     }
 
     @Test

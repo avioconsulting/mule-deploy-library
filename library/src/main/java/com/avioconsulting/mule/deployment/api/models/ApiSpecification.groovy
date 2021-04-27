@@ -37,8 +37,8 @@ class ApiSpecification {
      * Standard request - see properties for parameter details
      */
     ApiSpecification(String name,
-                     String mainRamlFile,
                      List<RamlFile> ramlFiles,
+                     String mainRamlFile = null,
                      String exchangeAssetId = null,
                      String endpoint = null) {
         this.name = name
@@ -48,18 +48,6 @@ class ApiSpecification {
         this.exchangeAssetId = exchangeAssetId ?: name.toLowerCase().replace(' ',
                                                                              '-')
         this.endpoint = endpoint
-    }
-
-    ApiSpecification(String name,
-                     FileBasedAppDeploymentRequest request,
-                     String mainRamlFile = null,
-                     String exchangeAssetId = null,
-                     String endpoint = null) {
-        this(name,
-             mainRamlFile,
-             request.ramlFilesFromApp,
-             exchangeAssetId,
-             endpoint)
     }
 
     private static String getApiVersion(String mainRamlFile,

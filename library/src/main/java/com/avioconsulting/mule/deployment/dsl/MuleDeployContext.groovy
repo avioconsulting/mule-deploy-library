@@ -65,7 +65,7 @@ class MuleDeployContext extends BaseContext {
                 cloudHubApplication.createDeploymentRequest() :
                 onPremApplication.createDeploymentRequest()
         return new DeploymentPackage(deploymentRequest,
-                                     apiSpecifications.createApiSpecList(),
+                                     apiSpecifications.createApiSpecList(deploymentRequest.ramlFilesFromApp),
                                      policyList,
                                      features)
     }

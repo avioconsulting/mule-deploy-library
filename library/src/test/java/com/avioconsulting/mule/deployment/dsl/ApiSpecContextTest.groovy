@@ -1,5 +1,6 @@
 package com.avioconsulting.mule.deployment.dsl
 
+import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -10,6 +11,12 @@ class ApiSpecContextTest {
     @Test
     void required_only() {
         // arrange
+        def simpleRamlFiles = [
+                new RamlFile('stuff-v1.raml',
+                             ['#%RAML 1.0',
+                              'title: stuff',
+                              'version: v1'].join('\n'))
+        ]
         def context = new ApiSpecContext()
         def closure = {
             name 'Foo Bar'
@@ -18,14 +25,14 @@ class ApiSpecContextTest {
         closure.call()
 
         // act
-        def request = context.createRequest()
+        def request = context.createRequest(simpleRamlFiles)
 
         // assert
         request.with {
             assertThat it.name,
                        is(equalTo('Foo Bar'))
             assertThat it.mainRamlFile,
-                       is(nullValue())
+                       is(equalTo('stuff-v1.raml'))
             assertThat it.exchangeAssetId,
                        is(equalTo('foo-bar'))
             assertThat it.endpoint,
@@ -36,6 +43,16 @@ class ApiSpecContextTest {
     @Test
     void includes_optional() {
         // arrange
+        def simpleRamlFiles = [
+                new RamlFile('stuff-v1.raml',
+                             ['#%RAML 1.0',
+                              'title: stuff',
+                              'version: v1'].join('\n')),
+                new RamlFile('foo.raml',
+                             ['#%RAML 1.0',
+                              'title: other stuff',
+                              'version: v2'].join('\n'))
+        ]
         def context = new ApiSpecContext()
         def closure = {
             name 'Foo Bar'
@@ -47,7 +64,7 @@ class ApiSpecContextTest {
         closure.call()
 
         // act
-        def request = context.createRequest()
+        def request = context.createRequest(simpleRamlFiles)
 
         // assert
         request.with {
