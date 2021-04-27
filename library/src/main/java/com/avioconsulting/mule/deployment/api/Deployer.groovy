@@ -102,7 +102,7 @@ class Deployer implements IDeployer {
      * @param enabledFeatures Which features of this tool to turn on. All by default.
      */
     def deployApplication(FileBasedAppDeploymentRequest appDeploymentRequest,
-                          ApiSpecification apiSpecification = null,
+                          List<ApiSpecification> apiSpecifications = null,
                           List<Policy> desiredPolicies = [],
                           List<Features> enabledFeatures = [Features.All]) {
         stepNumber = 0
@@ -116,7 +116,7 @@ class Deployer implements IDeployer {
             deployer = onPremDeployer
             description = 'On-prem app deployment'
         }
-        performCommonDeploymentTasks(apiSpecification,
+        performCommonDeploymentTasks(apiSpecifications,
                                      desiredPolicies,
                                      appDeploymentRequest,
                                      appDeploymentRequest.environment,
@@ -157,7 +157,7 @@ class Deployer implements IDeployer {
         enabled ? null : "Feature ${feature} was not supplied"
     }
 
-    private def performCommonDeploymentTasks(ApiSpecification apiSpecification,
+    private def performCommonDeploymentTasks(List<ApiSpecification> apiSpecifications,
                                              List<Policy> desiredPolicies,
                                              FileBasedAppDeploymentRequest appDeploymentRequest,
                                              String environment,
@@ -168,8 +168,8 @@ class Deployer implements IDeployer {
                                  feature)
         }
         String skipReason
-        if (!apiSpecification) {
-            skipReason = "no API spec was provided"
+        if (!apiSpecifications) {
+            skipReason = "no API spec(s) were provided"
         } else if (!this.environmentsToDoDesignCenterDeploymentOn.contains(environment)) {
             skipReason = "Deploying to '${environment}', only ${this.environmentsToDoDesignCenterDeploymentOn} triggers Design Center deploys"
         } else {
@@ -180,8 +180,8 @@ class Deployer implements IDeployer {
             designCenterDeployer.synchronizeDesignCenterFromApp(apiSpecification,
                                                                 appDeploymentRequest)
         }
-        if (!apiSpecification) {
-            skipReason = "no API spec was provided"
+        if (!apiSpecifications) {
+            skipReason = "no API spec(s) were provided"
         } else {
             skipReason = isFeatureDisabled(Features.ApiManagerDefinitions)
         }
