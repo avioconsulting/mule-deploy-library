@@ -96,9 +96,4 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
                                this.file.name)
                 .build()
     }
-
-    @Override
-    def setAutoDiscoveryId(String autoDiscoveryId) {
-        appProperties['auto-discovery.api-id'] = autoDiscoveryId
-    }
 }

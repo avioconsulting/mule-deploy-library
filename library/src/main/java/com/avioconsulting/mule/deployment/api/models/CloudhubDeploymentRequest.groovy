@@ -175,9 +175,4 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
     String getCloudhubAppInfoAsJson() {
         JsonOutput.toJson(cloudhubAppInfo)
     }
-
-    @Override
-    def setAutoDiscoveryId(String autoDiscoveryId) {
-        this.cloudhubAppProperties.apiAutoDiscoveryId = autoDiscoveryId
-    }
 }

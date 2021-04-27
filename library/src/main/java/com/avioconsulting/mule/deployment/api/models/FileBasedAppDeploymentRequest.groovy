@@ -9,6 +9,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 abstract class FileBasedAppDeploymentRequest {
+    protected final Map<String, String> autoDiscoveries = [:]
+
     static final List<String> IGNORE_DC_FILES = [
             'exchange_modules', // we don't deal with Exchange dependencies
             '.gitignore',
@@ -61,7 +63,10 @@ abstract class FileBasedAppDeploymentRequest {
 
     abstract File getFile()
 
-    abstract def setAutoDiscoveryId(String autoDiscoveryId)
+    def setAutoDiscoveryId(String propertyName,
+                           String autoDiscoveryId) {
+        this.autoDiscoveries[propertyName] = autoDiscoveryId
+    }
 
     abstract String getAppVersion()
 

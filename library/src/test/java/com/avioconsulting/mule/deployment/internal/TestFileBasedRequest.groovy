@@ -15,11 +15,6 @@ class TestFileBasedRequest extends FileBasedAppDeploymentRequest {
     }
 
     @Override
-    def setAutoDiscoveryId(String autoDiscoveryId) {
-        return null
-    }
-
-    @Override
     String getAppVersion() {
         '1.2.3'
     }
