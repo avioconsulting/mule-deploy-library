@@ -914,6 +914,11 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
         def filesUploaded = false
         def exchangePushed = false
         def locked = false
+        def file1RamlContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
         withHttpServer { HttpServerRequest request ->
             if (mockAuthenticationOk(request)) {
                 return
@@ -946,7 +951,7 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
             if (mockGetExistingFiles(request,
                                      'abcd',
                                      [
-                                             'file1.raml': 'the contents',
+                                             'file1.raml': file1RamlContents,
                                              'file2.raml': 'the contents2'
                                      ])) {
                 return
@@ -956,13 +961,14 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
         def files = [
                 new RamlFile('file1.raml',
-                             'the contents'),
+                             file1RamlContents),
                 new RamlFile('file2.raml',
                              'the contents updated')
         ]
+        def apiSpec = new ApiSpecification('Hello API',
+                                           files)
 
         // act
         deployer.synchronizeDesignCenter(apiSpec,
