@@ -341,7 +341,7 @@ class DesignCenterDeployerTest extends BaseTest {
     }
 
     @Test
-    void pushToExchange_no_main_raml_file_specified() {
+    void pushToExchange() {
         // arrange
         String anypointOrgId = null
         String url = null
@@ -364,20 +364,25 @@ class DesignCenterDeployerTest extends BaseTest {
                 end()
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
+        def file1RamlContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
         def files = [
                 new RamlFile('folder/file3.raml',
                              'the contents3'),
                 new RamlFile('file1.raml',
-                             'the contents'),
+                             file1RamlContents),
                 new RamlFile('file2.raml',
                              'the contents2')
         ]
+        def apiSpec = new ApiSpecification('Hello API',
+                                           files)
 
         // act
         deployer.pushToExchange(apiSpec,
                                 'ourprojectId',
-                                files,
                                 '1.2.3')
 
         // assert
@@ -393,70 +398,6 @@ class DesignCenterDeployerTest extends BaseTest {
         assertThat sentPayload,
                    is(equalTo([
                            main      : 'file1.raml',
-                           apiVersion: 'v1',
-                           version   : '1.2.3',
-                           assetId   : 'hello-api',
-                           name      : 'Hello API',
-                           groupId   : 'the-org-id',
-                           classifier: 'raml'
-                   ]))
-    }
-
-    @Test
-    void pushToExchange_main_raml_file_specified() {
-        // arrange
-        String anypointOrgId = null
-        String url = null
-        String method = null
-        String ownerGuid = null
-        Map sentPayload = null
-        withHttpServer { HttpServerRequest request ->
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            anypointOrgId = request.getHeader('X-ORGANIZATION-ID')
-            url = request.uri()
-            method = request.method().toString()
-            ownerGuid = request.getHeader('X-OWNER-ID')
-            request.bodyHandler { body ->
-                sentPayload = new JsonSlurper().parseText(body.toString()) as Map
-            }
-            request.response().with {
-                statusCode = 204
-                end()
-            }
-        }
-        def apiSpec = new ApiSpecification('Hello API',
-                                           'v1',
-                                           'file2.raml')
-        def files = [
-                new RamlFile('folder/file3.raml',
-                             'the contents3'),
-                new RamlFile('file1.raml',
-                             'the contents'),
-                new RamlFile('file2.raml',
-                             'the contents2')
-        ]
-
-        // act
-        deployer.pushToExchange(apiSpec,
-                                'ourprojectId',
-                                files,
-                                '1.2.3')
-
-        // assert
-        assertThat method,
-                   is(equalTo('POST'))
-        assertThat url,
-                   is(equalTo('/designcenter/api-designer/projects/ourprojectId/branches/master/publish/exchange'))
-        assertThat anypointOrgId,
-                   is(equalTo('the-org-id'))
-        assertThat 'Design center needs this',
-                   ownerGuid,
-                   is(equalTo('the_id'))
-        assertThat sentPayload,
-                   is(equalTo([
-                           main      : 'file2.raml',
                            apiVersion: 'v1',
                            version   : '1.2.3',
                            assetId   : 'hello-api',
@@ -788,6 +729,11 @@ class DesignCenterDeployerTest extends BaseTest {
         def filesUploaded = false
         def exchangePushed = false
         def locked = false
+        def file1RamlContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
         withHttpServer { HttpServerRequest request ->
             if (mockAuthenticationOk(request)) {
                 return
@@ -820,7 +766,7 @@ class DesignCenterDeployerTest extends BaseTest {
             if (mockGetExistingFiles(request,
                                      'abcd',
                                      [
-                                             'file1.raml': 'the contents',
+                                             'file1.raml': file1RamlContents,
                                              'file2.raml': 'the contents2'
                                      ])) {
                 return
@@ -852,13 +798,14 @@ class DesignCenterDeployerTest extends BaseTest {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
         def files = [
                 new RamlFile('file1.raml',
-                             'the contents'),
+                             file1RamlContents),
                 new RamlFile('file2.raml',
                              'the contents2')
         ]
+        def apiSpec = new ApiSpecification('Hello API',
+                                           files)
 
         // act
         deployer.synchronizeDesignCenter(apiSpec,
