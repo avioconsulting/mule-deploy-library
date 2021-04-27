@@ -43,12 +43,17 @@ class FileBasedAppDeploymentRequestTest implements AppBuilding {
                 .sort { item -> item.fileName } // consistent for test
 
         // assert
+        def expectedStuffContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
         assertThat result,
                    is(equalTo([
                            new RamlFile('folder/lib.yaml',
                                         'howdy1'),
                            new RamlFile('stuff.yaml',
-                                        'howdy2')
+                                        expectedStuffContents)
                    ]))
     }
 }
