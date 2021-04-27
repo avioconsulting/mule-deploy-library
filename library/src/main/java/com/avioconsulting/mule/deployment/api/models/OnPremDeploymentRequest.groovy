@@ -61,7 +61,7 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
         def map = [
                 'mule.agent.application.properties.service': [
                         applicationName: appName,
-                        properties     : appProperties
+                        properties     : appProperties + this.autoDiscoveries
                 ]
         ]
         JsonOutput.toJson(map)

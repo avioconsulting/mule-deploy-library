@@ -141,6 +141,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
     Map<String, String> getCloudhubAppInfo() {
         def props = new ObjectMapper().convertValue(this.cloudhubAppProperties,
                                                     Map)
+        props += this.autoDiscoveries
         def result = [
                 // CloudHub's API calls the Mule application the 'domain'
                 domain                   : normalizedAppName,

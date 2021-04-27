@@ -113,7 +113,9 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theSecret',
                                                     'client',
                                                     'new-app',
-                                                    '1.2.3',)
+                                                    '1.2.3')
+        request.setAutoDiscoveryId('the.auto.disc.prop',
+                                   '1234')
 
         // act
         deployer.deploy(request)
@@ -156,7 +158,8 @@ class CloudHubDeployerTest extends BaseTest {
                                    env                              : 'dev',
                                    'crypto.key'                     : 'theKey',
                                    'anypoint.platform.client_id'    : 'theClientId',
-                                   'anypoint.platform.client_secret': 'theSecret'
+                                   'anypoint.platform.client_secret': 'theSecret',
+                                   'the.auto.disc.prop'             : '1234'
                            ]
                    ]))
         assertThat rawBody,
