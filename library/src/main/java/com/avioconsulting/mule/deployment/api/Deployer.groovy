@@ -175,36 +175,39 @@ class Deployer implements IDeployer {
         } else {
             skipReason = isFeatureDisabled(Features.DesignCenterSync)
         }
-        executeStep('Design Center Deployment',
-                    skipReason) {
-            designCenterDeployer.synchronizeDesignCenterFromApp(apiSpecification,
-                                                                appDeploymentRequest)
-        }
-        if (!apiSpecifications) {
-            skipReason = "no API spec(s) were provided"
-        } else {
-            skipReason = isFeatureDisabled(Features.ApiManagerDefinitions)
-        }
-        ExistingApiSpec existingApiManagerDefinition = executeStep('API Manager Definition',
-                                                                   skipReason) {
-            def isMule4 = deployer.isMule4Request(appDeploymentRequest)
-            def internalSpec = new ApiSpec(apiSpecification.exchangeAssetId,
-                                           apiSpecification.endpoint,
-                                           environment,
-                                           isMule4)
-            apiManagerDeployer.synchronizeApiDefinition(internalSpec,
-                                                        appDeploymentRequest.appVersion)
-        } as ExistingApiSpec
-        if (existingApiManagerDefinition) {
-            appDeploymentRequest.autoDiscoveryId = existingApiManagerDefinition.id
-            skipReason = isFeatureDisabled(Features.PolicySync)
-        } else {
-            skipReason = 'API Sync was disabled so policy is too'
-        }
-        executeStep('Policy Sync',
-                    skipReason) {
-            policyDeployer.synchronizePolicies(existingApiManagerDefinition,
-                                               desiredPolicies)
+        apiSpecifications.each { apiSpecification ->
+            executeStep("Design Center Deployment - ${apiSpecification.name}",
+                        skipReason) {
+                designCenterDeployer.synchronizeDesignCenterFromApp(apiSpecification,
+                                                                    appDeploymentRequest)
+            }
+            if (!apiSpecifications) {
+                skipReason = "no API spec(s) were provided"
+            } else {
+                skipReason = isFeatureDisabled(Features.ApiManagerDefinitions)
+            }
+            ExistingApiSpec existingApiManagerDefinition = executeStep("API Manager Definition - ${apiSpecification.name}",
+                                                                       skipReason) {
+                def isMule4 = deployer.isMule4Request(appDeploymentRequest)
+                def internalSpec = new ApiSpec(apiSpecification.exchangeAssetId,
+                                               apiSpecification.endpoint,
+                                               environment,
+                                               isMule4)
+                apiManagerDeployer.synchronizeApiDefinition(internalSpec,
+                                                            appDeploymentRequest.appVersion)
+            } as ExistingApiSpec
+            if (existingApiManagerDefinition) {
+                appDeploymentRequest.setAutoDiscoveryId(apiSpecification.autoDiscoveryPropertyName,
+                                                        existingApiManagerDefinition.id)
+                skipReason = isFeatureDisabled(Features.PolicySync)
+            } else {
+                skipReason = 'API Sync was disabled so policy is too'
+            }
+            executeStep("Policy Sync - ${apiSpecification.name}",
+                        skipReason) {
+                policyDeployer.synchronizePolicies(existingApiManagerDefinition,
+                                                   desiredPolicies)
+            }
         }
     }
 }
