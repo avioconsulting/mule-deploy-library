@@ -602,31 +602,6 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
     }
 
     @Test
-    void synchronizeDesignCenter_main_raml_does_not_exist() {
-        // arrange
-        def apiSpec = new ApiSpecification('Hello API',
-                                           'v1',
-                                           'wrong.raml')
-        def files = [
-                new RamlFile('file1.raml',
-                             'the contents'),
-                new RamlFile('file2.raml',
-                             'the contents2')
-        ]
-
-        // act
-        def exception = shouldFail {
-            deployer.synchronizeDesignCenter(apiSpec,
-                                             files,
-                                             '1.2.3')
-        }
-
-        // assert
-        assertThat exception.message,
-                   is(containsString("You specified 'wrong.raml' as your main RAML file but it does not exist in your application!"))
-    }
-
-    @Test
     void synchronizeDesignCenter_no_raml_files() {
         // arrange
         withHttpServer { HttpServerRequest request ->
