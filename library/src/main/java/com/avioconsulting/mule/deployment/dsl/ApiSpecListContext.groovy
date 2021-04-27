@@ -1,11 +1,12 @@
 package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
+import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 
 class ApiSpecListContext {
     private List<ApiSpecification> apiSpecs = []
 
-    List<ApiSpecification> createApiSpecList() {
+    List<ApiSpecification> createApiSpecList(FileBasedAppDeploymentRequest request) {
         apiSpecs
     }
 

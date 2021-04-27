@@ -1,17 +1,19 @@
 package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
+import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 
 class ApiSpecContext extends BaseContext {
     String name, exchangeAssetId, mainRamlFile, endpoint
 
-    ApiSpecification createRequest() {
+    ApiSpecification createRequest(FileBasedAppDeploymentRequest request) {
         def errors = findErrors()
         if (errors.any()) {
             def errorList = errors.join('\n')
             throw new Exception("Your API spec is not complete. The following errors exist:\n${errorList}")
         }
         new ApiSpecification(this.name,
+                             request,
                              this.mainRamlFile,
                              this.exchangeAssetId,
                              this.endpoint)

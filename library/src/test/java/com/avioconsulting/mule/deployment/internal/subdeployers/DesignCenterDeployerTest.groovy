@@ -69,7 +69,7 @@ class DesignCenterDeployerTest extends BaseTest {
                                tempAppDirectory)
 
         // act
-        def result = deployer.getRamlFilesFromApp(request)
+        def result = request.getRamlFilesFromApp()
                 .sort { item -> item.fileName } // consistent for test
 
         // assert
@@ -129,7 +129,7 @@ class DesignCenterDeployerTest extends BaseTest {
                                tempAppDirectory)
 
         // act
-        def result = deployer.getRamlFilesFromApp(request)
+        def result = request.getRamlFilesFromApp()
 
         // assert
         assertThat result,

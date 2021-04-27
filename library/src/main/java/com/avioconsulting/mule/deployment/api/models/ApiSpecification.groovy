@@ -1,5 +1,9 @@
 package com.avioconsulting.mule.deployment.api.models
 
+import com.avioconsulting.mule.deployment.internal.EnsureWeCloseRamlLoader
+import com.avioconsulting.mule.deployment.internal.models.RamlFile
+import org.raml.v2.api.RamlModelBuilder
+
 class ApiSpecification {
     /***
      * The name of your Design Center project and also the desired API definition name
@@ -33,14 +37,51 @@ class ApiSpecification {
      * Standard request - see properties for parameter details
      */
     ApiSpecification(String name,
-                     String mainRamlFile = null,
+                     String mainRamlFile,
+                     List<RamlFile> ramlFiles,
                      String exchangeAssetId = null,
                      String endpoint = null) {
         this.name = name
-        assert false : 'Derive the main RAML file from here'
-        this.mainRamlFile = mainRamlFile
+        this.mainRamlFile = mainRamlFile ?: findMainRamlFile(ramlFiles)
+        this.apiMajorVersion = getApiVersion(this.mainRamlFile,
+                                             ramlFiles)
         this.exchangeAssetId = exchangeAssetId ?: name.toLowerCase().replace(' ',
                                                                              '-')
         this.endpoint = endpoint
+    }
+
+    ApiSpecification(String name,
+                     FileBasedAppDeploymentRequest request,
+                     String mainRamlFile = null,
+                     String exchangeAssetId = null,
+                     String endpoint = null) {
+        this(name,
+             mainRamlFile,
+             request.ramlFilesFromApp,
+             exchangeAssetId,
+             endpoint)
+    }
+
+    private static String getApiVersion(String mainRamlFile,
+                                        List<RamlFile> ramlFiles) {
+        // see EnsureWeCloseLoader for why we do this
+        def resourceLoader = new EnsureWeCloseRamlLoader(ramlFiles)
+        def builder = new RamlModelBuilder(resourceLoader)
+        def mainFile = ramlFiles.find { f ->
+            f.fileName == mainRamlFile
+        }
+        def ramlModel = builder.buildApi(mainFile.contents,
+                                         '.')
+        if (ramlModel.hasErrors()) {
+            throw new Exception("RAML ${mainRamlFile} is invalid. ${ramlModel.validationResults}")
+        }
+        def version = ramlModel.apiV10.version()
+        version?.value() ?: 'v1'
+    }
+
+    private static String findMainRamlFile(List<RamlFile> ramlFiles) {
+        ramlFiles.find { ramlFile ->
+            new File(ramlFile.fileName).parentFile == null
+        }.fileName
     }
 }
