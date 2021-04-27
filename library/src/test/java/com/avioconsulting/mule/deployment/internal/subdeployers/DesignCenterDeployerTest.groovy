@@ -4,6 +4,7 @@ import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
+import com.avioconsulting.mule.deployment.internal.AppBuilding
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -17,7 +18,7 @@ import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-class DesignCenterDeployerTest extends BaseTest {
+class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
     private DesignCenterDeployer deployer
 
     @Before
@@ -1111,33 +1112,9 @@ class DesignCenterDeployerTest extends BaseTest {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
-        def tempDir = new File('target/temp')
-        def tempAppDirectory = new File(tempDir,
-                                        'designcenterapp')
-        tempAppDirectory.deleteDir()
-        tempAppDirectory.mkdirs()
-        def apiDirectory = new File(tempAppDirectory,
-                                    'api')
-        def file = new File(apiDirectory,
-                            'stuff.yaml')
-        FileUtils.touch(file)
-        file.text = 'howdy2'
-        def folder = new File(apiDirectory,
-                              'folder')
-        file = new File(folder,
-                        'lib.yaml')
-        FileUtils.touch(file)
-        file.text = 'howdy1'
-        def exchangeModules = new File(apiDirectory,
-                                       'exchange_modules')
-        file = new File(exchangeModules,
-                        'junk')
-        FileUtils.touch(file)
-        FileUtils.touch(new File(apiDirectory,
-                                 'exchange.json'))
-        def appInfo = buildZip(tempDir,
-                               tempAppDirectory)
+        def appInfo = buildFullApp()
+        def apiSpec = new ApiSpecification('Hello API',
+                                           appInfo.ramlFilesFromApp)
 
         // act
         deployer.synchronizeDesignCenterFromApp(apiSpec,
