@@ -43,8 +43,9 @@ class ApiSpecification {
                      String endpoint = null) {
         this.name = name
         this.mainRamlFile = mainRamlFile ?: findMainRamlFile(ramlFiles)
-        this.apiMajorVersion = getApiVersion(this.mainRamlFile,
-                                             ramlFiles)
+        // SOAP will not have a main RAML file, just use v1 in that case
+        this.apiMajorVersion = this.mainRamlFile ? getApiVersion(this.mainRamlFile,
+                                                                 ramlFiles) : 'v1'
         this.exchangeAssetId = exchangeAssetId ?: name.toLowerCase().replace(' ',
                                                                              '-')
         this.endpoint = endpoint
@@ -70,6 +71,6 @@ class ApiSpecification {
     private static String findMainRamlFile(List<RamlFile> ramlFiles) {
         ramlFiles.find { ramlFile ->
             new File(ramlFile.fileName).parentFile == null
-        }.fileName
+        }?.fileName
     }
 }

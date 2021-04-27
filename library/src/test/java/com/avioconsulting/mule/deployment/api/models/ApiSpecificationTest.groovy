@@ -1,12 +1,10 @@
 package com.avioconsulting.mule.deployment.api.models
 
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
-import org.junit.Assert
 import org.junit.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.Matchers.equalTo
-import static org.hamcrest.Matchers.is
+import static org.hamcrest.Matchers.*
 
 class ApiSpecificationTest {
     private static List<RamlFile> getSimpleRamlFiles() {
@@ -160,8 +158,7 @@ class ApiSpecificationTest {
         // act
         def result = new ApiSpecification('SystemStuff API',
                                           simpleRamlFiles,
-                                          'stuff-v1.raml'
-                                          ,
+                                          'stuff-v1.raml',
                                           'nope')
 
         // assert
@@ -178,8 +175,17 @@ class ApiSpecificationTest {
         // arrange
 
         // act
+        def result = new ApiSpecification('SystemStuff SOAP API',
+                                          [],
+                                          null,
+                                          'nope')
 
         // assert
-        Assert.fail("write it")
+        assertThat result.name,
+                   is(equalTo('SystemStuff SOAP API'))
+        assertThat result.exchangeAssetId,
+                   is(equalTo('nope'))
+        assertThat result.mainRamlFile,
+                   is(nullValue())
     }
 }
