@@ -887,14 +887,15 @@ class ApiManagerDeployerTest extends BaseTest {
                     created = true
                     statusCode = 200
                     response = [
-                            id           : 123,
-                            endpoint     : [
+                            id            : 123,
+                            endpoint      : [
                                     uri                : 'https://some.endpoint',
                                     muleVersion4OrAbove: true
                             ],
-                            assetId      : 'the-asset-id',
-                            assetVersion : '1.2.3',
-                            instanceLabel: 'DEV - Automated'
+                            assetId       : 'the-asset-id',
+                            assetVersion  : '1.2.3',
+                            productVersion: 'v1',
+                            instanceLabel : 'DEV - Automated'
                     ]
                 } else {
                     statusCode = 500
@@ -906,6 +907,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -959,14 +961,15 @@ class ApiManagerDeployerTest extends BaseTest {
                 } else if (uri == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234' && request.method() == HttpMethod.GET) {
                     statusCode = 200
                     response = [
-                            id           : 1234,
-                            endpoint     : [
+                            id            : 1234,
+                            endpoint      : [
                                     uri                : 'https://some.endpoint',
                                     muleVersion4OrAbove: false
                             ],
-                            assetId      : 'the-asset-id',
-                            assetVersion : '1.0.202010213',
-                            instanceLabel: 'DEV - Automated'
+                            assetId       : 'the-asset-id',
+                            assetVersion  : '1.0.202010213',
+                            productVersion: 'v1',
+                            instanceLabel : 'DEV - Automated'
                     ]
                 } else if (uri == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis?assetId=the-asset-id') {
                     statusCode = 200
@@ -1008,6 +1011,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                false)
 
         // act
@@ -1065,14 +1069,15 @@ class ApiManagerDeployerTest extends BaseTest {
                 } else if (uri == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234' && request.method() == HttpMethod.GET) {
                     statusCode = 200
                     response = [
-                            id           : 1234,
-                            endpoint     : [
+                            id            : 1234,
+                            endpoint      : [
                                     uri                : 'https://some.endpoint',
                                     muleVersion4OrAbove: false
                             ],
-                            assetId      : 'the-asset-id',
-                            assetVersion : '1.0.202010213',
-                            instanceLabel: 'DEV - Automated'
+                            assetId       : 'the-asset-id',
+                            assetVersion  : '1.0.202010213',
+                            productVersion: 'v1',
+                            instanceLabel : 'DEV - Automated'
                     ]
                 } else if (uri == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis?assetId=the-asset-id') {
                     statusCode = 200
@@ -1114,6 +1119,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                false)
 
         // act
@@ -1171,14 +1177,15 @@ class ApiManagerDeployerTest extends BaseTest {
                 } else if (uri == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234' && request.method() == HttpMethod.GET) {
                     statusCode = 200
                     response = [
-                            id           : 1234,
-                            endpoint     : [
+                            id            : 1234,
+                            endpoint      : [
                                     uri                : 'https://some.endpoint',
                                     muleVersion4OrAbove: false
                             ],
-                            assetId      : 'the-asset-id',
-                            assetVersion : '1.0.202010213',
-                            instanceLabel: 'DEV - Automated'
+                            assetId       : 'the-asset-id',
+                            assetVersion  : '1.0.202010213',
+                            productVersion: 'v1',
+                            instanceLabel : 'DEV - Automated'
                     ]
                 } else if (uri == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis?assetId=the-asset-id') {
                     statusCode = 200
@@ -1220,6 +1227,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -1284,14 +1292,15 @@ class ApiManagerDeployerTest extends BaseTest {
                     created = true
                     statusCode = 200
                     response = [
-                            id           : 123,
-                            endpoint     : [
+                            id            : 123,
+                            endpoint      : [
                                     uri                : 'https://some.endpoint',
                                     muleVersion4OrAbove: true
                             ],
-                            assetId      : 'the-asset-id',
-                            assetVersion : '1.2.3',
-                            instanceLabel: 'DEV - Automated'
+                            assetId       : 'the-asset-id',
+                            assetVersion  : '1.2.3',
+                            productVersion: 'v1',
+                            instanceLabel : 'DEV - Automated'
                     ]
                 } else {
                     statusCode = 500
@@ -1303,6 +1312,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act

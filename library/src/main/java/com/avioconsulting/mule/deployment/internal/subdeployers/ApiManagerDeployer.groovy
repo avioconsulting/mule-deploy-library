@@ -58,6 +58,7 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
                                                         resolvedApiSpec.exchangeAssetVersion,
                                                         resolvedApiSpec.endpoint,
                                                         resolvedApiSpec.environment,
+                                                        resolvedApiSpec.apiMajorVersion,
                                                         resolvedApiSpec.isMule4OrAbove)
                 updateApiDefinition(newDefinition)
                 return newDefinition
@@ -71,6 +72,7 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
                                        resolvedApiSpec.exchangeAssetVersion,
                                        resolvedApiSpec.endpoint,
                                        resolvedApiSpec.environment,
+                                       resolvedApiSpec.apiMajorVersion,
                                        resolvedApiSpec.isMule4OrAbove)
         }
         logger.println 'API definition does not yet exist, will create'
