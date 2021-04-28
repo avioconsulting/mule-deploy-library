@@ -269,6 +269,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                false)
 
         // act
@@ -304,6 +305,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                false)
 
         // act
@@ -315,7 +317,7 @@ class ApiManagerDeployerTest extends BaseTest {
     }
 
     @Test
-    void getExistingApiDefinition_found() {
+    void getExistingApiDefinition_found_only_1_version_available() {
         // arrange
         withHttpServer { HttpServerRequest request ->
             if (mockAuthenticationOk(request)) {
@@ -339,6 +341,7 @@ class ApiManagerDeployerTest extends BaseTest {
                             ],
                             assetId       : 'the-asset-id',
                             assetVersion  : '1.2.3',
+                            productVersion: 'v1',
                             instanceLabel : 'DEV - Automated',
                             // should not disrupt anything
                             unmapped_field: 'hi'
@@ -368,6 +371,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                false)
 
         // act
@@ -380,6 +384,7 @@ class ApiManagerDeployerTest extends BaseTest {
                                                   '1.2.3',
                                                   'https://some.endpoint',
                                                   'DEV',
+                                                  'v1',
                                                   false)))
     }
 
