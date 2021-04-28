@@ -47,15 +47,15 @@ abstract class BaseMojo extends AbstractMojo {
                 scriptBaseClass = MuleDeployScript.name
                 it
             }
-            def shell = new GroovyShell(this.class.classLoader,
-                                        compilerConfig)
             // in case they specify additional runtime settings not in source control via -D maven command line args
             def binding = new Binding()
             def wrapper = getParamsWrapper()
             logger.println "Will resolve `params` in DSL using: ${wrapper.allProperties}"
             binding.setVariable('params',
                                 wrapper)
-            shell.context = binding
+            def shell = new GroovyShell(this.class.classLoader,
+                                        binding,
+                                        compilerConfig)
             // last line of MuleDeployScript.muleDeploy method returns this
             def context = shell.evaluate(groovyFile) as MuleDeployContext
             return context.createDeploymentPackage()
