@@ -420,6 +420,7 @@ class ApiManagerDeployerTest extends BaseTest {
                                                        '1.3.3',
                                                        'https://some.endpoint',
                                                        'DEV',
+                                                       'v1',
                                                        false)
 
 
@@ -492,6 +493,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -535,6 +537,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -546,6 +549,16 @@ class ApiManagerDeployerTest extends BaseTest {
         // assert
         assertThat exception.message,
                    is(containsString('Expected to find an asset version <= our app version of 1.0.202010213 but did not! Asset versions found in Exchange were []'))
+    }
+
+    @Test
+    void resolveAssetVersion_v1_there_but_not_v2() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
     }
 
     @Test
@@ -572,6 +585,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -584,6 +598,7 @@ class ApiManagerDeployerTest extends BaseTest {
                                                   ApiManagerDeployer.DRY_RUN_API_ID,
                                                   'https://some.endpoint',
                                                   'DEV',
+                                                  'v1',
                                                   true)))
     }
 
@@ -625,6 +640,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -637,6 +653,7 @@ class ApiManagerDeployerTest extends BaseTest {
                                                   '1.0.201910213',
                                                   'https://some.endpoint',
                                                   'DEV',
+                                                  'v1',
                                                   true)))
     }
 
@@ -678,6 +695,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -690,6 +708,7 @@ class ApiManagerDeployerTest extends BaseTest {
                                                   '1.0.202010213',
                                                   'https://some.endpoint',
                                                   'DEV',
+                                                  'v1',
                                                   true)))
     }
 
@@ -737,6 +756,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -749,6 +769,7 @@ class ApiManagerDeployerTest extends BaseTest {
                                                   '1.0.202010203',
                                                   'https://some.endpoint',
                                                   'DEV',
+                                                  'v1',
                                                   true)))
     }
 
@@ -796,6 +817,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
