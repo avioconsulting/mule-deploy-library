@@ -193,7 +193,8 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
             logger.println('In dry-run mode and Exchange push has not yet occurred (could not find asset) so using placeholder')
             chosenAssetVersion = DRY_RUN_API_ID
         } else {
-            chosenAssetVersion = pickVersion(appVersion,
+            chosenAssetVersion = pickVersion(apiManagerDefinition.apiMajorVersion,
+                                             appVersion,
                                              assets)
         }
         logger.println("Identified asset version ${chosenAssetVersion}")
@@ -210,18 +211,24 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
                     null)
     }
 
-    private static String pickVersion(String appVersion,
+    private static String pickVersion(String apiMajorVersion,
+                                      String appVersion,
                                       List<GetAssetsQuery.Asset> assets) {
+        // apiMajorVersion starts with v
+        def majorApiVersionNumber = apiMajorVersion.replaceAll(/v(\d+)/) { it ->
+            // the numbers after v
+            it[1]
+        } as int
         def parsedVersions = assets.collect { asset ->
             getVersion(asset.version)
         }
         def appVersionParsed = getVersion(appVersion)
         def result = parsedVersions.sort().reverse().find { version ->
-            version <= appVersionParsed
+            version.majorVersion == majorApiVersionNumber && version <= appVersionParsed
         }
         if (!result) {
             def availableVersions = assets.collect { a -> a.version }
-            throw new Exception("Expected to find an asset version <= our app version of ${appVersion} but did not! Asset versions found in Exchange were ${availableVersions}")
+            throw new Exception("Expected to find a ${apiMajorVersion} asset version <= our app version of ${appVersion} but did not! Asset versions found in Exchange were ${availableVersions}")
         }
         return result
     }

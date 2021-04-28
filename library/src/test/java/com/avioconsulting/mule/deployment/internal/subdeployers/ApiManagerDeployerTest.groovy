@@ -558,11 +558,63 @@ class ApiManagerDeployerTest extends BaseTest {
 
         // assert
         assertThat exception.message,
-                   is(containsString('Expected to find an asset version <= our app version of 1.0.202010213 but did not! Asset versions found in Exchange were []'))
+                   is(containsString('Expected to find a v1 asset version <= our app version of 1.0.202010213 but did not! Asset versions found in Exchange were []'))
     }
 
     @Test
     void resolveAssetVersion_v1_there_but_not_v2() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def response = [
+                        data: [
+                                assets: [
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '1.0.201910193'
+
+                                        ],
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '1.0.201910213'
+
+                                        ]
+                                ]
+                        ]
+                ]
+                end(JsonOutput.toJson(response))
+            }
+        }
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               'v2',
+                                               true)
+
+        // act
+        def exception = shouldFail {
+            deployer.resolveAssetVersion(desiredApiDefinition,
+                                         '2.0.202010213')
+        }
+
+        // assert
+        assertThat exception.message,
+                   is(containsString('Expected to find a v2 asset version <= our app version of 2.0.202010213 but did not! Asset versions found in Exchange were [1.0.201910193, 1.0.201910213]'))
+    }
+
+    @Test
+    void resolveAssetVersion_both_versions_exist_v1_being_deployed_with_2_0_app_version() {
         // arrange
 
         // act
@@ -633,6 +685,12 @@ class ApiManagerDeployerTest extends BaseTest {
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
                                                 version     : '1.0.201910193'
+
+                                        ],
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '2.0.201910313'
 
                                         ],
                                         [
@@ -838,7 +896,7 @@ class ApiManagerDeployerTest extends BaseTest {
 
         // assert
         assertThat exception.message,
-                   is(containsString('Expected to find an asset version <= our app version of 1.0.202010213 but did not! Asset versions found in Exchange were [1.0.202510193, 1.0.202510203, 1.0.202511213]'))
+                   is(containsString('Expected to find a v1 asset version <= our app version of 1.0.202010213 but did not! Asset versions found in Exchange were [1.0.202510193, 1.0.202510203, 1.0.202511213]'))
     }
 
     @Test
