@@ -37,16 +37,6 @@ class ApiManagerDeployerTest extends BaseTest {
     }
 
     @Test
-    void multiple_versions() {
-        // arrange
-
-        // act
-
-        // assert
-        Assert.fail("write it")
-    }
-
-    @Test
     void createApiDefinition() {
         // arrange
         String url = null
@@ -314,6 +304,26 @@ class ApiManagerDeployerTest extends BaseTest {
         // assert
         assertThat response,
                    is(nullValue())
+    }
+
+    @Test
+    void getExistingApiDefinition_multiple_versions_available_success() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
+    }
+
+    @Test
+    void getExistingApiDefinition_multiple_versions_available_not_found() {
+        // arrange
+
+        // act
+
+        // assert
+        Assert.fail("write it")
     }
 
     @Test
