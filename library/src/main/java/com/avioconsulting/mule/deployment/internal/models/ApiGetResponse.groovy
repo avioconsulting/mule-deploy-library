@@ -6,6 +6,6 @@ import groovy.transform.Immutable
 @Immutable
 @JsonIgnoreProperties(ignoreUnknown = true)
 class ApiGetResponse {
-    String id, instanceLabel, assetId, assetVersion
+    String id, instanceLabel, assetId, assetVersion, productVersion
     ApiGetEndpointInfo endpoint
 }

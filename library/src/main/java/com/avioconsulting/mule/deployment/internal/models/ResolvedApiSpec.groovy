@@ -10,11 +10,13 @@ class ResolvedApiSpec extends ApiSpec {
                     String exchangeAssetVersion,
                     String endpoint,
                     String environment,
+                    String apiMajorVersion,
                     boolean isMule4OrAbove,
                     String instanceLabel = null) {
         super(exchangeAssetId,
               endpoint,
               environment,
+              apiMajorVersion,
               isMule4OrAbove,
               instanceLabel)
         this.exchangeAssetVersion = exchangeAssetVersion
@@ -25,6 +27,7 @@ class ResolvedApiSpec extends ApiSpec {
         super(spec.exchangeAssetId,
               spec.endpoint,
               spec.environment,
+              spec.apiMajorVersion,
               spec.isMule4OrAbove,
               spec.instanceLabel)
         this.exchangeAssetVersion = exchangeAssetVersion

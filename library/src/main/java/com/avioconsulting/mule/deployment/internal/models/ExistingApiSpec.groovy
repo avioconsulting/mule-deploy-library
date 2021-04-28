@@ -11,11 +11,13 @@ class ExistingApiSpec extends ResolvedApiSpec {
                     String exchangeAssetVersion,
                     String endpoint,
                     String environment,
+                    String apiMajorVersion,
                     boolean isMule4OrAbove) {
         super(exchangeAssetId,
               exchangeAssetVersion,
               endpoint,
               environment,
+              apiMajorVersion,
               isMule4OrAbove)
         this.id = id
     }
@@ -27,6 +29,7 @@ class ExistingApiSpec extends ResolvedApiSpec {
               getResponse.endpoint.uri,
               // we want the label, not the GUID
               environment,
+              getResponse.productVersion,
               getResponse.endpoint.muleVersion4OrAbove,
               getResponse.instanceLabel)
         this.id = getResponse.id

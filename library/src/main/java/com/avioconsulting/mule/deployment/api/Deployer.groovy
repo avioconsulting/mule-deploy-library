@@ -192,6 +192,7 @@ class Deployer implements IDeployer {
                 def internalSpec = new ApiSpec(apiSpecification.exchangeAssetId,
                                                apiSpecification.endpoint,
                                                environment,
+                                               apiSpecification.apiMajorVersion,
                                                isMule4)
                 apiManagerDeployer.synchronizeApiDefinition(internalSpec,
                                                             appDeploymentRequest.appVersion)
