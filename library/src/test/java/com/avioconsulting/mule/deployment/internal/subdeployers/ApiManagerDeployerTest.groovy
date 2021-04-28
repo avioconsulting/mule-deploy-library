@@ -71,14 +71,15 @@ class ApiManagerDeployerTest extends BaseTest {
                 putHeader('Content-Type',
                           'application/json')
                 end(JsonOutput.toJson([
-                        id           : 123,
-                        endpoint     : [
+                        id            : 123,
+                        endpoint      : [
                                 uri                : 'https://some.endpoint',
                                 muleVersion4OrAbove: true
                         ],
-                        assetId      : 'the-asset-id',
-                        assetVersion : '1.2.3',
-                        instanceLabel: 'DEV - Automated'
+                        assetId       : 'the-asset-id',
+                        assetVersion  : '1.2.3',
+                        productVersion: 'v1',
+                        instanceLabel : 'DEV - Automated'
                 ]))
             }
         }
@@ -86,6 +87,7 @@ class ApiManagerDeployerTest extends BaseTest {
                                                        '1.2.3',
                                                        'https://some.endpoint',
                                                        'DEV',
+                                                       'v1',
                                                        true)
 
         // act
@@ -97,6 +99,7 @@ class ApiManagerDeployerTest extends BaseTest {
                                            '1.2.3',
                                            'https://some.endpoint',
                                            'DEV',
+                                           'v1',
                                            true)
         assertThat result,
                    is(equalTo(expected))
