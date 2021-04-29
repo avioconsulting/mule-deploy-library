@@ -6,5 +6,5 @@ import groovy.transform.Immutable
 @Immutable
 @JsonIgnoreProperties(ignoreUnknown = true)
 class ApiQueryResponse {
-    String id, instanceLabel
+    String id, instanceLabel, productVersion
 }

@@ -180,11 +180,13 @@ class ApiManagerDeployerTest extends BaseTest {
         // arrange
         def responses = [
                 new ApiQueryResponse('1234',
-                                     'does not matter')
+                                     'does not matter',
+                                     'v1')
         ]
 
         // act
         def result = deployer.chooseApiDefinition('the label',
+                                                  'v1',
                                                   responses)
 
         // assert
@@ -197,13 +199,16 @@ class ApiManagerDeployerTest extends BaseTest {
         // arrange
         def responses = [
                 new ApiQueryResponse('1234',
-                                     'does not matter'),
+                                     'does not matter',
+                                     'v1'),
                 new ApiQueryResponse('4567',
-                                     'the label')
+                                     'the label',
+                                     'v1')
         ]
 
         // act
         def result = deployer.chooseApiDefinition('the label',
+                                                  'v1',
                                                   responses)
 
         // assert
@@ -216,18 +221,65 @@ class ApiManagerDeployerTest extends BaseTest {
         // arrange
         def responses = [
                 new ApiQueryResponse('1234',
-                                     'does not matter'),
+                                     'does not matter',
+                                     'v1'),
                 new ApiQueryResponse('4567',
-                                     'does not matter 2')
+                                     'does not matter 2',
+                                     'v1')
         ]
 
         // act
         def result = deployer.chooseApiDefinition('the label',
+                                                  'v1',
                                                   responses)
 
         // assert
         assertThat result,
                    is(equalTo(responses[0]))
+    }
+
+    @Test
+    void chooseApiDefinition_multiple_versions_found() {
+        // arrange
+        def responses = [
+                new ApiQueryResponse('8989',
+                                     'the label',
+                                     'v2'),
+                new ApiQueryResponse('4567',
+                                     'the label',
+                                     'v1')
+        ]
+
+        // act
+        def result = deployer.chooseApiDefinition('the label',
+                                                  'v1',
+                                                  responses)
+
+        // assert
+        assertThat result,
+                   is(equalTo(responses[1]))
+    }
+
+    @Test
+    void chooseApiDefinition_multiple_versions_not_found() {
+        // arrange
+        def responses = [
+                new ApiQueryResponse('8989',
+                                     'the label',
+                                     'v2'),
+                new ApiQueryResponse('4567',
+                                     'the label',
+                                     'v2')
+        ]
+
+        // act
+        def result = deployer.chooseApiDefinition('the label',
+                                                  'v1',
+                                                  responses)
+
+        // assert
+        assertThat result,
+                   is(nullValue())
     }
 
     @Test
@@ -307,26 +359,6 @@ class ApiManagerDeployerTest extends BaseTest {
     }
 
     @Test
-    void getExistingApiDefinition_multiple_versions_available_success() {
-        // arrange
-
-        // act
-
-        // assert
-        Assert.fail("write it")
-    }
-
-    @Test
-    void getExistingApiDefinition_multiple_versions_available_not_found() {
-        // arrange
-
-        // act
-
-        // assert
-        Assert.fail("write it")
-    }
-
-    @Test
     void getExistingApiDefinition_found_only_1_version_available() {
         // arrange
         withHttpServer { HttpServerRequest request ->
@@ -359,7 +391,8 @@ class ApiManagerDeployerTest extends BaseTest {
                 } else {
                     // should not disrupt anything
                     def queryResponse = new ObjectMapper().convertValue(new ApiQueryResponse('1234',
-                                                                                             'does not matter'),
+                                                                                             'does not matter',
+                                                                                             'v1'),
                                                                         Map)
                     queryResponse['unmapped_field_2'] = 'hi'
                     responseMap = [
@@ -396,6 +429,54 @@ class ApiManagerDeployerTest extends BaseTest {
                                                   'DEV',
                                                   'v1',
                                                   false)))
+    }
+
+    @Test
+    void getExistingApiDefinition_only_different_versions_exist() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def queryResponse = new ObjectMapper().convertValue(new ApiQueryResponse('1234',
+                                                                                         'does not matter',
+                                                                                         'v1'),
+                                                                    Map)
+                queryResponse['unmapped_field_2'] = 'hi'
+                def responseMap = [
+                        total           : 1,
+                        unmapped_field_3: 'hi',
+                        assets          : [
+                                [
+                                        apis            : [
+                                                queryResponse
+                                        ],
+                                        unmapped_field_4: 'hi'
+                                ]
+                        ]
+                ]
+                end(new ObjectMapper().writeValueAsString(responseMap))
+            }
+        }
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               'v2',
+                                               false)
+
+        // act
+        def response = deployer.getExistingApiDefinition(desiredApiDefinition)
+
+        // assert
+        assertThat response,
+                   is(nullValue())
     }
 
     @Test
@@ -1098,7 +1179,8 @@ class ApiManagerDeployerTest extends BaseTest {
                                     [
                                             apis: [
                                                     new ApiQueryResponse('1234',
-                                                                         'does not matter')
+                                                                         'does not matter',
+                                                                         'v1')
                                             ]
                                     ]
                             ]
@@ -1206,7 +1288,8 @@ class ApiManagerDeployerTest extends BaseTest {
                                     [
                                             apis: [
                                                     new ApiQueryResponse('1234',
-                                                                         'does not matter')
+                                                                         'does not matter',
+                                                                         'v1')
                                             ]
                                     ]
                             ]
@@ -1314,7 +1397,8 @@ class ApiManagerDeployerTest extends BaseTest {
                                     [
                                             apis: [
                                                     new ApiQueryResponse('1234',
-                                                                         'does not matter')
+                                                                         'does not matter',
+                                                                         'v1')
                                             ]
                                     ]
                             ]

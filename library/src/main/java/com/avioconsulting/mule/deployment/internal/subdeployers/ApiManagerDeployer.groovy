@@ -80,18 +80,22 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
     }
 
     private ApiQueryResponse chooseApiDefinition(String instanceLabel,
+                                                 String majorApiVersion,
                                                  List<ApiQueryResponse> responses) {
-        if (responses.size() == 1) {
-            return responses[0]
+        def responsesForThisVersion = responses.findAll { r ->
+            r.productVersion == majorApiVersion
         }
-        def matchViaLabel = responses.find { r ->
+        if (responsesForThisVersion.size() == 1) {
+            return responsesForThisVersion[0]
+        }
+        def matchViaLabel = responsesForThisVersion.find { r ->
             r.instanceLabel == instanceLabel
         }
         if (matchViaLabel) {
             return matchViaLabel
         }
         logger.println "There were multiple API definitions for this Exchange asset and none of them were labeled with '${instanceLabel}' so using the first one"
-        responses[0]
+        responsesForThisVersion[0]
     }
 
     private ExistingApiSpec getExistingApiDefinition(ApiSpec desiredApiManagerDefinition) {
@@ -111,7 +115,11 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
         }
         def allApis = queryResponses.assets.collectMany { a -> a.apis }
         def correctQueryResponse = chooseApiDefinition(desiredApiManagerDefinition.instanceLabel,
+                                                       desiredApiManagerDefinition.apiMajorVersion,
                                                        allApis)
+        if (correctQueryResponse == null) {
+            return null
+        }
         println "Identified API ID ${correctQueryResponse.id}, now retrieving details"
         request = new HttpGet(getApiManagerUrl("/${correctQueryResponse.id}",
                                                environment))
