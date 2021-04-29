@@ -211,20 +211,34 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
                     null)
     }
 
-    private static String pickVersion(String apiMajorVersion,
-                                      String appVersion,
-                                      List<GetAssetsQuery.Asset> assets) {
+    private String pickVersion(String apiMajorVersion,
+                               String appVersion,
+                               List<GetAssetsQuery.Asset> assets) {
+        def parsedVersions = assets.findAll { asset ->
+            asset.versionGroup == apiMajorVersion
+        }.collect { asset ->
+            getVersion(asset.version)
+        }
+        def appVersionParsed = getVersion(appVersion)
         // apiMajorVersion starts with v
         def majorApiVersionNumber = apiMajorVersion.replaceAll(/v(\d+)/) { it ->
             // the numbers after v
             it[1]
         } as int
-        def parsedVersions = assets.collect { asset ->
-            getVersion(asset.version)
+        if (majorApiVersionNumber != appVersionParsed.majorVersion) {
+            // our app, even if supporting 2 API versions, can only have a single app (think Runtime Manager)
+            // version. therefore we have to use a "hypothetical" 1.x.x app version as our baseline if we
+            // are looking for a v1 API Exchange asset
+            appVersionParsed = new Version(majorApiVersionNumber,
+                                           appVersionParsed.minorVersion,
+                                           appVersionParsed.patchLevel,
+                                           null)
+            logger.println("Our app (${appVersion}) is supporting multiple API definitions but we are currently managing a lower major version of the API Definition, ${apiMajorVersion}. Therefore we will look for the latest Exchange asset version <= ${appVersionParsed}")
+        } else {
+            logger.println("Looking for latest Exchange asset version <= app version of ${appVersionParsed}")
         }
-        def appVersionParsed = getVersion(appVersion)
         def result = parsedVersions.sort().reverse().find { version ->
-            version.majorVersion == majorApiVersionNumber && version <= appVersionParsed
+            version <= appVersionParsed
         }
         if (!result) {
             def availableVersions = assets.collect { a -> a.version }

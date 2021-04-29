@@ -618,11 +618,70 @@ class ApiManagerDeployerTest extends BaseTest {
     @Test
     void resolveAssetVersion_both_versions_exist_v1_being_deployed_with_2_0_app_version() {
         // arrange
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def response = [
+                        data: [
+                                assets: [
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '1.0.201910193',
+                                                versionGroup: 'v1'
+
+                                        ],
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '1.0.202010213',
+                                                versionGroup: 'v1'
+                                        ],
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '1.0.202110213',
+                                                versionGroup: 'v1'
+                                        ],
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '2.0.201911213',
+                                                versionGroup: 'v2'
+                                        ]
+                                ]
+                        ]
+                ]
+                end(JsonOutput.toJson(response))
+            }
+        }
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               'v1',
+                                               true)
 
         // act
+        def result = deployer.resolveAssetVersion(desiredApiDefinition,
+                                                  '2.0.202010213')
 
         // assert
-        Assert.fail("write it")
+        assertThat '1.0.202010213 is the latest v1 version <= to our app version',
+                   result,
+                   is(equalTo(new ResolvedApiSpec('the-asset-id',
+                                                  '1.0.202010213',
+                                                  'https://some.endpoint',
+                                                  'DEV',
+                                                  'v1',
+                                                  true)))
     }
 
     @Test
