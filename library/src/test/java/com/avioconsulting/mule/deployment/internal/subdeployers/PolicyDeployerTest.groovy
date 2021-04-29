@@ -104,6 +104,7 @@ class PolicyDeployerTest extends BaseTest {
                                           '1.2.3',
                                           'https://foo',
                                           'DEV',
+                                          'v1',
                                           true)
 
         // act
@@ -179,6 +180,7 @@ class PolicyDeployerTest extends BaseTest {
                                           '1.2.3',
                                           'https://foo',
                                           'DEV',
+                                          'v1',
                                           true)
 
         // act
@@ -245,6 +247,7 @@ class PolicyDeployerTest extends BaseTest {
                                           '1.2.3',
                                           'https://foo',
                                           'DEV',
+                                          'v1',
                                           true)
 
         // act
@@ -299,6 +302,7 @@ class PolicyDeployerTest extends BaseTest {
                                           '1.2.3',
                                           'https://foo',
                                           'DEV',
+                                          'v1',
                                           true)
         def policy = new Policy('openidconnect-access-token-enforcement',
                                 '1.2.0',
@@ -367,6 +371,7 @@ class PolicyDeployerTest extends BaseTest {
                                           '1.2.3',
                                           'https://foo',
                                           'DEV',
+                                          'v1',
                                           true)
         def policy = new Policy('openidconnect-access-token-enforcement',
                                 '1.2.0',
@@ -421,6 +426,7 @@ class PolicyDeployerTest extends BaseTest {
                                           '1.2.3',
                                           'https://foo',
                                           'DEV',
+                                          'v1',
                                           true)
         def policy = new ExistingPolicy('openidconnect-access-token-enforcement',
                                         '1.2.0',
@@ -505,6 +511,7 @@ class PolicyDeployerTest extends BaseTest {
                                           '1.2.3',
                                           'https://foo',
                                           'DEV',
+                                          'v1',
                                           true)
         def policies = [
                 new Policy('openidconnect-access-token-enforcement',
@@ -561,6 +568,7 @@ class PolicyDeployerTest extends BaseTest {
                                           '1.2.3',
                                           'https://foo',
                                           'DEV',
+                                          'v1',
                                           true)
         def policies = [
                 new Policy('openidconnect-access-token-enforcement',
@@ -616,6 +624,7 @@ class PolicyDeployerTest extends BaseTest {
                                           '1.2.3',
                                           'https://foo',
                                           'DEV',
+                                          'v1',
                                           true)
         def policies = [
                 new Policy('openidconnect-access-token-enforcement',
@@ -678,6 +687,7 @@ class PolicyDeployerTest extends BaseTest {
                                           '1.2.3',
                                           'https://foo',
                                           'DEV',
+                                          'v1',
                                           true)
         def policies = [
                 new Policy('openidconnect-access-token-enforcement',
@@ -736,6 +746,7 @@ class PolicyDeployerTest extends BaseTest {
                                           '1.2.3',
                                           'https://foo',
                                           'DEV',
+                                          'v1',
                                           true)
         def policies = [
                 new Policy('openidconnect-access-token-enforcement',
@@ -792,6 +803,7 @@ class PolicyDeployerTest extends BaseTest {
                                           '1.2.3',
                                           'https://foo',
                                           'DEV',
+                                          'v1',
                                           true)
         def policies = [
                 new Policy('openidconnect-access-token-enforcement',
