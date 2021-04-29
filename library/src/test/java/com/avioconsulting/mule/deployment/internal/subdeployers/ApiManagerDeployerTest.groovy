@@ -485,14 +485,15 @@ class ApiManagerDeployerTest extends BaseTest {
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.201910193'
+                                                version     : '1.0.201910193',
+                                                versionGroup: 'v1'
 
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.201910213'
-
+                                                version     : '1.0.201910213',
+                                                versionGroup: 'v1'
                                         ]
                                 ]
                         ]
@@ -519,7 +520,7 @@ class ApiManagerDeployerTest extends BaseTest {
                    is(equalTo('Bearer the token'))
         assertThat sentPayload,
                    is(equalTo([
-                           query    : 'query GetAssets($asset_id: String!, $group_id: String!) { assets(asset: {groupId: $group_id, assetId: $asset_id}) { __typename assetId version } }',
+                           query    : 'query GetAssets($asset_id: String!, $group_id: String!) { assets(asset: {groupId: $group_id, assetId: $asset_id}) { __typename assetId version versionGroup } }',
                            variables: '{"asset_id":"the-asset-id","group_id":"the-org-id"}'
                    ]))
     }
@@ -581,14 +582,15 @@ class ApiManagerDeployerTest extends BaseTest {
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.201910193'
+                                                version     : '1.0.201910193',
+                                                versionGroup: 'v1'
 
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.201910213'
-
+                                                version     : '1.0.201910213',
+                                                versionGroup: 'v1'
                                         ]
                                 ]
                         ]
@@ -684,20 +686,20 @@ class ApiManagerDeployerTest extends BaseTest {
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.201910193'
-
+                                                version     : '1.0.201910193',
+                                                versionGroup: 'v1'
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '2.0.201910313'
-
+                                                version     : '2.0.201910313',
+                                                versionGroup: 'v2'
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.201910213'
-
+                                                version     : '1.0.201910213',
+                                                versionGroup: 'v1'
                                         ]
                                 ]
                         ]
@@ -745,14 +747,14 @@ class ApiManagerDeployerTest extends BaseTest {
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.202010213'
-
+                                                version     : '1.0.202010213',
+                                                versionGroup: 'v1'
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.201910193'
-
+                                                version     : '1.0.201910193',
+                                                versionGroup: 'v1'
                                         ]
                                 ]
                         ]
@@ -800,20 +802,20 @@ class ApiManagerDeployerTest extends BaseTest {
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.201910193'
-
+                                                version     : '1.0.201910193',
+                                                versionGroup: 'v1'
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.202010203'
-
+                                                version     : '1.0.202010203',
+                                                versionGroup: 'v1'
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.202011213'
-
+                                                version     : '1.0.202011213',
+                                                versionGroup: 'v1'
                                         ]
                                 ]
                         ]
@@ -861,20 +863,20 @@ class ApiManagerDeployerTest extends BaseTest {
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.202510193'
-
+                                                version     : '1.0.202510193',
+                                                versionGroup: 'v1'
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.202510203'
-
+                                                version     : '1.0.202510203',
+                                                versionGroup: 'v1'
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.202511213'
-
+                                                version     : '1.0.202511213',
+                                                versionGroup: 'v1'
                                         ]
                                 ]
                         ]
@@ -923,14 +925,14 @@ class ApiManagerDeployerTest extends BaseTest {
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.201910193'
-
+                                                    version     : '1.0.201910193',
+                                                    versionGroup: 'v1'
                                             ],
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.202010213'
-
+                                                    version     : '1.0.202010213',
+                                                    versionGroup: 'v1'
                                             ]
                                     ]
                             ]
@@ -1004,14 +1006,14 @@ class ApiManagerDeployerTest extends BaseTest {
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.201910193'
-
+                                                    version     : '1.0.201910193',
+                                                    versionGroup: 'v1'
                                             ],
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.202010213'
-
+                                                    version     : '1.0.202010213',
+                                                    versionGroup: 'v1'
                                             ]
                                     ]
                             ]
@@ -1112,14 +1114,14 @@ class ApiManagerDeployerTest extends BaseTest {
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.201910193'
-
+                                                    version     : '1.0.201910193',
+                                                    versionGroup: 'v1'
                                             ],
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.202010213'
-
+                                                    version     : '1.0.202010213',
+                                                    versionGroup: 'v1'
                                             ]
                                     ]
                             ]
@@ -1220,14 +1222,14 @@ class ApiManagerDeployerTest extends BaseTest {
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.201910193'
-
+                                                    version     : '1.0.201910193',
+                                                    versionGroup: 'v1'
                                             ],
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.202010213'
-
+                                                    version     : '1.0.202010213',
+                                                    versionGroup: 'v1'
                                             ]
                                     ]
                             ]
@@ -1328,14 +1330,14 @@ class ApiManagerDeployerTest extends BaseTest {
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.201910193'
-
+                                                    version     : '1.0.201910193',
+                                                    versionGroup: 'v1'
                                             ],
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.202010213'
-
+                                                    version     : '1.0.202010213',
+                                                    versionGroup: 'v1'
                                             ]
                                     ]
                             ]
