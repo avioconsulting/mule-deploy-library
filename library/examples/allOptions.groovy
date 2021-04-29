@@ -1,13 +1,27 @@
 muleDeploy {
     // version of the tool
     version '1.0'
-
+    
+    // was able to keep publishing from 2 branches
+    // Can we publish 3.0.1 to the v2 asset? NO, you cannot
+    // Separate DC project to same exchange asset, works OK
     apiSpecification {
-        name 'Design Center Project Name'
+        name 'Design Center Project Name v1'
+        branchName 'v1'
         // everything else in this closure is optional
         exchangeAssetId 'the-asset-id'
         mainRamlFile 'stuff.raml'
         endpoint 'https://foobar'
+        autoDiscoveryPropertyName 'the.id.for.1'
+    }
+
+    apiSpecification {
+        name 'Design Center Project Name v2'
+        // everything else in this closure is optional
+        exchangeAssetId 'the-asset-id'
+        mainRamlFile 'stuff-v2.raml'
+        endpoint 'https://foobar'
+        autoDiscoveryPropertyName 'the.id.for.2'
     }
 
     policies {
