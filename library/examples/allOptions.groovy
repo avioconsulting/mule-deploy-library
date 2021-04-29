@@ -1,7 +1,7 @@
 muleDeploy {
     // version of the tool
     version '1.0'
-    
+
     // was able to keep publishing from 2 branches
     // Can we publish 3.0.1 to the v2 asset? NO, you cannot
     // Separate DC project to same exchange asset, works OK

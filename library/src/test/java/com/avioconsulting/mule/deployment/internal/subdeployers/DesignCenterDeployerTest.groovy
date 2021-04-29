@@ -407,6 +407,74 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
                    ]))
     }
 
+    @Test
+    void pushToExchange_old_version_alongside_new() {
+        // arrange
+        String anypointOrgId = null
+        String url = null
+        String method = null
+        String ownerGuid = null
+        Map sentPayload = null
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            anypointOrgId = request.getHeader('X-ORGANIZATION-ID')
+            url = request.uri()
+            method = request.method().toString()
+            ownerGuid = request.getHeader('X-OWNER-ID')
+            request.bodyHandler { body ->
+                sentPayload = new JsonSlurper().parseText(body.toString()) as Map
+            }
+            request.response().with {
+                statusCode = 204
+                end()
+            }
+        }
+        def file1RamlContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
+        def files = [
+                new RamlFile('folder/file3.raml',
+                             'the contents3'),
+                new RamlFile('file1.raml',
+                             file1RamlContents),
+                new RamlFile('file2.raml',
+                             'the contents2')
+        ]
+        def apiSpec = new ApiSpecification('Hello API',
+                                           files)
+
+        // act
+        // a 2.x.x deploy of the v1 definition sitting alongside the v2 definition
+        deployer.pushToExchange(apiSpec,
+                                'ourprojectId',
+                                '2.0.1')
+
+        // assert
+        assertThat method,
+                   is(equalTo('POST'))
+        assertThat url,
+                   is(equalTo('/designcenter/api-designer/projects/ourprojectId/branches/master/publish/exchange'))
+        assertThat anypointOrgId,
+                   is(equalTo('the-org-id'))
+        assertThat 'Design center needs this',
+                   ownerGuid,
+                   is(equalTo('the_id'))
+        assertThat sentPayload,
+                   is(equalTo([
+                           main      : 'file1.raml',
+                           apiVersion: 'v1',
+                           version   : '1.0.1',
+                           assetId   : 'hello-api',
+                           name      : 'Hello API',
+                           groupId   : 'the-org-id',
+                           classifier: 'raml'
+                   ]))
+    }
+
     static def mockDesignCenterProjectId(HttpServerRequest request,
                                          String projectName,
                                          String projectId) {
