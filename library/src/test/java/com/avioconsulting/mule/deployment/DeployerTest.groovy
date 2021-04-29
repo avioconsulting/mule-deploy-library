@@ -104,6 +104,7 @@ class DeployerTest {
                                                '1.2.3',
                                                'https://foo',
                                                'DEV',
+                                               'v1',
                                                true)
                 }
         ] as IApiManagerDeployer
