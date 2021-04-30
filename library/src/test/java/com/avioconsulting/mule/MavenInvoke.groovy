@@ -26,7 +26,7 @@ trait MavenInvoke {
 
     static def buildApp(String muleVersion = '4.3.0') {
         def pomFile = getProjectDir('mule4_project')
-        def appVersion = '2.2.8'
+        def appVersion = '2.2.9'
         pomFile.text = pomFile.text.replaceAll(/<app.runtime>\S+<\/app.runtime>/,
                                                "<app.runtime>${muleVersion}</app.runtime>")
                 .replaceAll(/<version>replaceme<\/version>/,

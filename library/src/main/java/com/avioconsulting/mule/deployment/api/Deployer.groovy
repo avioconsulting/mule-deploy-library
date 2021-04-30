@@ -177,7 +177,8 @@ class Deployer implements IDeployer {
             skipReason = isFeatureDisabled(Features.DesignCenterSync)
         }
         apiSpecifications.each { apiSpecification ->
-            executeStep("Design Center Deployment - ${apiSpecification.name}",
+            def apiHeader = "${apiSpecification.name}/branch ${apiSpecification.designCenterBranchName}"
+            executeStep("Design Center Deployment - ${apiHeader}",
                         skipReason) {
                 designCenterDeployer.synchronizeDesignCenterFromApp(apiSpecification,
                                                                     appDeploymentRequest)
@@ -187,7 +188,7 @@ class Deployer implements IDeployer {
             } else {
                 skipReason = isFeatureDisabled(Features.ApiManagerDefinitions)
             }
-            ExistingApiSpec existingApiManagerDefinition = executeStep("API Manager Definition - ${apiSpecification.name}",
+            ExistingApiSpec existingApiManagerDefinition = executeStep("API Manager Definition - ${apiHeader}",
                                                                        skipReason) {
                 def isMule4 = deployer.isMule4Request(appDeploymentRequest)
                 def internalSpec = new ApiSpec(apiSpecification.exchangeAssetId,
@@ -205,7 +206,7 @@ class Deployer implements IDeployer {
             } else {
                 skipReason = 'API Sync was disabled so policy is too'
             }
-            executeStep("Policy Sync - ${apiSpecification.name}",
+            executeStep("Policy Sync - ${apiHeader}",
                         skipReason) {
                 policyDeployer.synchronizePolicies(existingApiManagerDefinition,
                                                    desiredPolicies)
