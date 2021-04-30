@@ -7,6 +7,7 @@ import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentReque
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
+import com.fasterxml.jackson.core.Version
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
@@ -135,9 +136,20 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
     def pushToExchange(ApiSpecification apiSpec,
                        String projectId,
                        String appVersion) {
+        def apiMajorVersion = apiSpec.apiMajorVersion
+        def majorVersionNumber = getMajorVersionNumber(apiMajorVersion)
+        def parsedAppVersion = parseVersion(appVersion)
+        if (parsedAppVersion.majorVersion != majorVersionNumber) {
+            def newAppVersion = new Version(majorVersionNumber,
+                                            parsedAppVersion.minorVersion,
+                                            parsedAppVersion.patchLevel,
+                                            null).toString()
+            logger.println "Since app is supporting multiple API specs and this push is for ${apiMajorVersion}, using ${newAppVersion} instead of ${appVersion} because Exchange will reject otherwise."
+            appVersion = newAppVersion
+        }
         def requestPayload = [
                 main      : apiSpec.mainRamlFile,
-                apiVersion: apiSpec.apiMajorVersion,
+                apiVersion: apiMajorVersion,
                 version   : appVersion,
                 assetId   : apiSpec.exchangeAssetId,
                 name      : apiSpec.name,

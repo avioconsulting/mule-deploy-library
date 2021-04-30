@@ -210,29 +210,16 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
                             chosenAssetVersion)
     }
 
-    private static Version getVersion(String version) {
-        def split = version.split('\\.')
-        assert split.size() == 3: "Expected version ${version} to have only 3 parts!"
-        new Version(Integer.parseInt(split[0]),
-                    Integer.parseInt(split[1]),
-                    Integer.parseInt(split[2]),
-                    null)
-    }
-
     private String pickVersion(String apiMajorVersion,
                                String appVersion,
                                List<GetAssetsQuery.Asset> assets) {
         def parsedVersions = assets.findAll { asset ->
             asset.versionGroup == apiMajorVersion
         }.collect { asset ->
-            getVersion(asset.version)
+            parseVersion(asset.version)
         }
-        def appVersionParsed = getVersion(appVersion)
-        // apiMajorVersion starts with v
-        def majorApiVersionNumber = apiMajorVersion.replaceAll(/v(\d+)/) { it ->
-            // the numbers after v
-            it[1]
-        } as int
+        def appVersionParsed = parseVersion(appVersion)
+        def majorApiVersionNumber = getMajorVersionNumber(apiMajorVersion)
         if (majorApiVersionNumber != appVersionParsed.majorVersion) {
             // our app, even if supporting 2 API versions, can only have a single app (think Runtime Manager)
             // version. therefore we have to use a "hypothetical" 1.x.x app version as our baseline if we
