@@ -172,7 +172,8 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
         }
 
         // act
-        def result = deployer.getExistingDesignCenterFiles('ourprojectId')
+        def result = deployer.getExistingDesignCenterFiles('ourprojectId',
+                                                           'somebranch')
 
         // assert
         assertThat result,
@@ -184,9 +185,9 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
                    ]))
         assertThat urls,
                    is(equalTo([
-                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files',
-                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/stuff.raml',
-                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/examples%2Ffoo.raml'
+                           '/designcenter/api-designer/projects/ourprojectId/branches/somebranch/files',
+                           '/designcenter/api-designer/projects/ourprojectId/branches/somebranch/files/stuff.raml',
+                           '/designcenter/api-designer/projects/ourprojectId/branches/somebranch/files/examples%2Ffoo.raml'
                    ]))
         assertThat anypointOrgId,
                    is(equalTo('the-org-id'))
@@ -218,6 +219,7 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
 
         // act
         deployer.deleteDesignCenterFiles('ourprojectId',
+                                         'somebranch',
                                          [
                                                  new RamlFile('file1',
                                                               'blah'),
@@ -235,8 +237,8 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
                    is(equalTo('the_id'))
         assertThat urls,
                    is(equalTo([
-                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/file1',
-                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/file2'
+                           '/designcenter/api-designer/projects/ourprojectId/branches/somebranch/files/file1',
+                           '/designcenter/api-designer/projects/ourprojectId/branches/somebranch/files/file2'
                    ]))
     }
 
@@ -263,6 +265,7 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
 
         // act
         deployer.deleteDesignCenterFiles('ourprojectId',
+                                         'somebranch',
                                          [
                                                  new RamlFile('subdir/file1',
                                                               'blah')
@@ -278,7 +281,7 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
                    is(equalTo('the_id'))
         assertThat urls,
                    is(equalTo([
-                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/subdir%2Ffile1'
+                           '/designcenter/api-designer/projects/ourprojectId/branches/somebranch/files/subdir%2Ffile1'
                    ]))
     }
 
@@ -315,13 +318,14 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
 
         // act
         deployer.uploadDesignCenterFiles('ourprojectId',
+                                         'somebranch',
                                          files)
 
         // assert
         assertThat method,
                    is(equalTo('POST'))
         assertThat url,
-                   is(equalTo('/designcenter/api-designer/projects/ourprojectId/branches/master/save?commit=true&message=fromAPI'))
+                   is(equalTo('/designcenter/api-designer/projects/ourprojectId/branches/somebranch/save?commit=true&message=fromAPI'))
         assertThat anypointOrgId,
                    is(equalTo('the-org-id'))
         assertThat 'Design center needs this',

@@ -63,18 +63,20 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
     }
 
     def deleteDesignCenterFiles(String projectId,
+                                String branch,
                                 List<RamlFile> files) {
         files.each { ramlFile ->
             def file = ramlFile.fileName
             logger.println("Removing unused file from Design Center: ${file}")
             // subdirectories in filename do not go in RESTful URL
             def urlEncodedFileName = URLEncoder.encode(file)
-            executeDesignCenterRequest(new HttpDelete("${getFilesUrl(projectId)}/${urlEncodedFileName}"),
+            executeDesignCenterRequest(new HttpDelete("${getFilesUrl(projectId, branch)}/${urlEncodedFileName}"),
                                        "Removing file ${file}")
         }
     }
 
     def uploadDesignCenterFiles(String projectId,
+                                String branch,
                                 List<RamlFile> files) {
         logger.println("Uploading files: ${files.collect { f -> f.fileName }} to Design Center")
         def requestPayload = files.collect { file ->
@@ -83,7 +85,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                     content: file.contents
             ]
         }
-        def request = new HttpPost("${getMasterUrl(projectId)}/save?commit=true&message=fromAPI").with {
+        def request = new HttpPost("${getBranchUrl(projectId, branch)}/save?commit=true&message=fromAPI").with {
             setEntity(new StringEntity(JsonOutput.toJson(requestPayload),
                                        ContentType.APPLICATION_JSON))
             it
@@ -92,13 +94,16 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                                    'Uploading design center files')
     }
 
-    def getMasterUrl(String projectId) {
-        getMasterUrl(clientWrapper,
-                     projectId)
+    def getBranchUrl(String projectId,
+                     String branch) {
+        getBranchUrl(clientWrapper,
+                     projectId,
+                     branch)
     }
 
-    private def getFilesUrl(String projectId) {
-        "${getMasterUrl(projectId)}/files"
+    private def getFilesUrl(String projectId,
+                            String branch) {
+        "${getBranchUrl(projectId, branch)}/files"
     }
 
     def executeDesignCenterRequest(HttpUriRequest request,
@@ -110,9 +115,11 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                                    resultHandler)
     }
 
-    List<RamlFile> getExistingDesignCenterFiles(String projectId) {
+    List<RamlFile> getExistingDesignCenterFiles(String projectId,
+                                                String branch) {
         logger.println('Fetching list of existing Design Center RAML files')
-        def url = getFilesUrl(projectId)
+        def url = getFilesUrl(projectId,
+                              branch)
         def request = new HttpGet(url)
         executeDesignCenterRequest(request,
                                    'Fetching project files') { List<Map> results ->
@@ -136,6 +143,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
     def pushToExchange(ApiSpecification apiSpec,
                        String projectId,
                        String appVersion) {
+        assert false: 'what branch?'
         def apiMajorVersion = apiSpec.apiMajorVersion
         def majorVersionNumber = getMajorVersionNumber(apiMajorVersion)
         def parsedAppVersion = parseVersion(appVersion)
@@ -182,14 +190,17 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
             return
         }
         def projectId = getDesignCenterProjectId(apiSpec.name)
+        def branchName = apiSpec.designCenterBranchName
         def withLock = { Closure closure ->
             new DesignCenterLock(clientWrapper,
                                  logger,
-                                 projectId).withCloseable {
+                                 projectId,
+                                 branchName).withCloseable {
                 closure()
             }
         }
-        def existingFiles = getExistingDesignCenterFiles(projectId)
+        def existingFiles = getExistingDesignCenterFiles(projectId,
+                                                         branchName)
         def changes = ramlFiles - existingFiles
         if (changes.empty) {
             logger.println('New RAML contents match the old contents, will not update Design Center')
@@ -220,11 +231,13 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
             withLock {
                 if (noLongerExist.any()) {
                     deleteDesignCenterFiles(projectId,
+                                            branchName,
                                             noLongerExist)
                 } else {
                     logger.println('No existing files to delete')
                 }
                 uploadDesignCenterFiles(projectId,
+                                        branchName,
                                         changes)
                 pushToExchange(apiSpec,
                                projectId,
