@@ -11,10 +11,14 @@ class ApiSpecListContext {
             ctx.createRequest(ramlFiles)
         }
         if (specs.size() > 1) {
-            specs.each { spec ->
-                if (spec.autoDiscoveryPropertyName == 'auto-discovery.api-id') {
-                    throw new Exception("If you have multiple API specs, you must specify `autoDiscoveryPropertyName` for all of them!")
-                }
+            def projectNames = specs.collect { s -> s.name }
+            def branchNames = specs.collect { s -> s.designCenterBranchName }
+            if (projectNames.size() != projectNames.unique().size() && branchNames.size() != branchNames.unique().size()) {
+                throw new Exception('You either need separate design center project names for v1 and v2 OR you need different designCenterBranchNames')
+            }
+            def autoDiscNames = specs.collect {s -> s.autoDiscoveryPropertyName}
+            if (autoDiscNames.size() != autoDiscNames.unique().size()) {
+                throw new Exception("If you have multiple API specs, you must specify a unique `autoDiscoveryPropertyName` for all of them!")
             }
         }
         specs

@@ -4,7 +4,7 @@ import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
 
 class ApiSpecContext extends BaseContext {
-    String name, exchangeAssetId, mainRamlFile, endpoint, autoDiscoveryPropertyName
+    String name, exchangeAssetId, mainRamlFile, endpoint, autoDiscoveryPropertyName, designCenterBranchName
 
     ApiSpecification createRequest(List<RamlFile> ramlFiles) {
         def errors = findErrors()
@@ -17,11 +17,12 @@ class ApiSpecContext extends BaseContext {
                              this.mainRamlFile,
                              this.exchangeAssetId,
                              this.endpoint,
-                             this.autoDiscoveryPropertyName)
+                             this.autoDiscoveryPropertyName,
+                             this.designCenterBranchName)
     }
 
     @Override
     List<String> findOptionalProperties() {
-        ['exchangeAssetId', 'mainRamlFile', 'endpoint', 'autoDiscoveryPropertyName']
+        ['exchangeAssetId', 'mainRamlFile', 'endpoint', 'autoDiscoveryPropertyName', 'designCenterBranchName']
     }
 }

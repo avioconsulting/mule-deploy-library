@@ -114,6 +114,7 @@ contributor([closureScopeContext]) {
         #stringParam('mainRamlFile')
         #stringParam('endpoint')
         #stringParam('autoDiscoveryPropertyName')
+        #stringParam('designCenterBranchName')
     }
     call = enclosingCall('policies')
     if (call) {

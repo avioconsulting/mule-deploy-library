@@ -39,6 +39,8 @@ class ApiSpecContextTest {
                        is(nullValue())
             assertThat it.autoDiscoveryPropertyName,
                        is(equalTo('auto-discovery.api-id'))
+            assertThat it.designCenterBranchName,
+                       is(equalTo('master'))
         }
     }
 
@@ -62,6 +64,7 @@ class ApiSpecContextTest {
             mainRamlFile 'foo.raml'
             endpoint 'https://foo'
             autoDiscoveryPropertyName 'the.auto.disc'
+            designCenterBranchName 'theBranch'
         }
         closure.delegate = context
         closure.call()
@@ -81,6 +84,8 @@ class ApiSpecContextTest {
                        is(equalTo('https://foo'))
             assertThat it.autoDiscoveryPropertyName,
                        is(equalTo('the.auto.disc'))
+            assertThat it.designCenterBranchName,
+                       is(equalTo('theBranch'))
         }
     }
 

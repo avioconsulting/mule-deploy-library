@@ -39,6 +39,11 @@ class ApiSpecification {
      */
     final String autoDiscoveryPropertyName
 
+    /**
+     * Which design center branch should be updated from app (and published to Exchange). Default is master.
+     */
+    final String designCenterBranchName
+
     /***
      * Standard request - see properties for parameter details
      */
@@ -47,7 +52,8 @@ class ApiSpecification {
                      String mainRamlFile = null,
                      String exchangeAssetId = null,
                      String endpoint = null,
-                     String autoDiscoveryPropertyName = null) {
+                     String autoDiscoveryPropertyName = null,
+                     String designCenterBranchName = null) {
         this.autoDiscoveryPropertyName = autoDiscoveryPropertyName ?: 'auto-discovery.api-id'
         this.name = name
         this.mainRamlFile = mainRamlFile ?: findMainRamlFile(ramlFiles)
@@ -57,6 +63,7 @@ class ApiSpecification {
         this.exchangeAssetId = exchangeAssetId ?: name.toLowerCase().replace(' ',
                                                                              '-')
         this.endpoint = endpoint
+        this.designCenterBranchName = designCenterBranchName ?: 'master'
     }
 
     private static String getApiVersion(String mainRamlFile,

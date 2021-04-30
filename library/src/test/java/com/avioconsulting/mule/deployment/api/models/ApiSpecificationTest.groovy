@@ -24,8 +24,7 @@ class ApiSpecificationTest {
         // act
         def result = new ApiSpecification('Product API',
                                           simpleRamlFiles,
-                                          null
-        )
+                                          null)
 
         // assert
         assertThat result.name,
@@ -36,6 +35,8 @@ class ApiSpecificationTest {
                    is(equalTo('stuff-v1.raml'))
         assertThat result.apiMajorVersion,
                    is(equalTo('v1'))
+        assertThat result.designCenterBranchName,
+                   is(equalTo('master'))
     }
 
     @Test
@@ -160,7 +161,10 @@ class ApiSpecificationTest {
         def result = new ApiSpecification('SystemStuff API',
                                           simpleRamlFiles,
                                           'stuff-v1.raml',
-                                          'nope')
+                                          'nope',
+                                          'http://nope',
+                                          'prop',
+                                          'someOtherBranch')
 
         // assert
         assertThat result.name,
@@ -169,6 +173,10 @@ class ApiSpecificationTest {
                    is(equalTo('nope'))
         assertThat result.mainRamlFile,
                    is(equalTo('stuff-v1.raml'))
+        assertThat result.autoDiscoveryPropertyName,
+                   is(equalTo('prop'))
+        assertThat result.designCenterBranchName,
+                   is(equalTo('someOtherBranch'))
     }
 
     @Test
