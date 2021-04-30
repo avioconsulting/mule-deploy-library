@@ -5,7 +5,7 @@
 
 	<groupId>f2ea2cb4-c600-4bb5-88e8-e952ff5591ee</groupId>
 	<artifactId>mule-deploy-lib-v4-test-app</artifactId>
-    <version>1.0.0</version>
+    <version>replaceme</version>
     <packaging>mule-application</packaging>
 
 	<name>mule-deploy-lib-v4-test-app</name>

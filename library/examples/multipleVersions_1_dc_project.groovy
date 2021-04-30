@@ -10,8 +10,6 @@ muleDeploy {
     apiSpecification {
         // assumes there are 2 Design Center projects, 1 for V1, 1 for V2
         name 'Design Center Project Name'
-        // asset ID needs to be specified in both since we're using the same asset (mult. major versions)
-        exchangeAssetId 'the-asset-id'
         // the "v1" RAML file
         mainRamlFile 'stuff.raml'
         // will use this branch for v1 and the other apiSpecification entry will use master (default)
@@ -20,8 +18,6 @@ muleDeploy {
 
     apiSpecification {
         name 'Design Center Project Name'
-        // asset ID needs to be specified in both since we're using the same asset (mult. major versions)
-        exchangeAssetId 'the-asset-id'
         // the "v2" RAML file
         mainRamlFile 'stuff-v2.raml'
     }
