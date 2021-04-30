@@ -407,7 +407,11 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
                            assetId   : 'hello-api',
                            name      : 'Hello API',
                            groupId   : 'the-org-id',
-                           classifier: 'raml'
+                           classifier: 'raml',
+                           metadata  : [
+                                   branchId : 'master',
+                                   projectId: 'ourprojectId'
+                           ]
                    ]))
     }
 
@@ -475,7 +479,11 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
                            assetId   : 'hello-api',
                            name      : 'Hello API',
                            groupId   : 'the-org-id',
-                           classifier: 'raml'
+                           classifier: 'raml',
+                           metadata  : [
+                                   branchId : 'master',
+                                   projectId: 'ourprojectId'
+                           ]
                    ]))
     }
 

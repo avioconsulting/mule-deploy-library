@@ -143,7 +143,6 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
     def pushToExchange(ApiSpecification apiSpec,
                        String projectId,
                        String appVersion) {
-        assert false: 'what branch?'
         def apiMajorVersion = apiSpec.apiMajorVersion
         def majorVersionNumber = getMajorVersionNumber(apiMajorVersion)
         def parsedAppVersion = parseVersion(appVersion)
@@ -155,6 +154,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
             logger.println "Since app is supporting multiple API specs and this push is for ${apiMajorVersion}, using ${newAppVersion} instead of ${appVersion} because Exchange will reject otherwise."
             appVersion = newAppVersion
         }
+        def branchName = apiSpec.designCenterBranchName
         def requestPayload = [
                 main      : apiSpec.mainRamlFile,
                 apiVersion: apiMajorVersion,
@@ -162,11 +162,15 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                 assetId   : apiSpec.exchangeAssetId,
                 name      : apiSpec.name,
                 groupId   : clientWrapper.anypointOrganizationId,
-                classifier: 'raml'
+                classifier: 'raml',
+                metadata  : [
+                        branchId : branchName,
+                        projectId: projectId
+                ]
         ]
         def requestJson = JsonOutput.toJson(requestPayload)
         logger.println "Pushing to Exchange with payload ${JsonOutput.prettyPrint(requestJson)}"
-        def request = new HttpPost("${getMasterUrl(projectId)}/publish/exchange").with {
+        def request = new HttpPost("${getBranchUrl(projectId, branchName)}/publish/exchange").with {
             setEntity(new StringEntity(requestJson,
                                        ContentType.APPLICATION_JSON))
             it
