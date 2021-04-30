@@ -9,7 +9,6 @@ import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import com.avioconsulting.mule.deployment.internal.subdeployers.*
 import groovy.transform.Canonical
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -152,7 +151,7 @@ class DeployerTest {
         // act
         def exception = shouldFail {
             deployer.deployApplication(request,
-                                       [apiSpec])
+                                       new ApiSpecificationList([apiSpec]))
         }
 
         // assert
@@ -185,7 +184,7 @@ class DeployerTest {
 
         // act
         deployer.deployApplication(request,
-                                   [apiSpec],
+                                   new ApiSpecificationList([apiSpec]),
                                    [
                                            new Policy('openidconnect-access-token-enforcement',
                                                       '1.2.0',
@@ -266,7 +265,7 @@ class DeployerTest {
 
         // act
         deployer.deployApplication(request,
-                                   [apiSpec])
+                                   new ApiSpecificationList([apiSpec]))
 
         // assert
         assertThat apiSyncs.size(),
@@ -301,7 +300,7 @@ class DeployerTest {
 
         // act
         deployer.deployApplication(request,
-                                   [apiSpec])
+                                   new ApiSpecificationList([apiSpec]))
 
         // assert
         assertThat deployedChApps.size(),
@@ -325,7 +324,7 @@ class DeployerTest {
 
         // act
         deployer.deployApplication(request,
-                                   [apiSpec])
+                                   new ApiSpecificationList([apiSpec]))
 
         // assert
         assertThat deployedOnPremApps.size(),
@@ -356,7 +355,7 @@ class DeployerTest {
 
         // act
         deployer.deployApplication(request,
-                                   [apiSpec])
+                                   new ApiSpecificationList([apiSpec]))
 
         // assert
         assertThat deployedOnPremApps.size(),
@@ -431,7 +430,7 @@ class DeployerTest {
 
         // act
         deployer.deployApplication(request,
-                                   [apiSpec],
+                                   new ApiSpecificationList(new ApiSpecificationList([apiSpec])),
                                    null,
                                    [Features.DesignCenterSync])
 
@@ -468,7 +467,7 @@ class DeployerTest {
 
         // act
         deployer.deployApplication(request,
-                                   [apiSpec],
+                                   new ApiSpecificationList([apiSpec]),
                                    null,
                                    [Features.AppDeployment])
 
@@ -509,11 +508,15 @@ class DeployerTest {
                               'version: v2'].join('\n'))
         ]
         def apiSpec2 = new ApiSpecification('Hello API v2',
-                                            spec2Files)
+                                            spec2Files,
+                                            null,
+                                            null,
+                                            null,
+                                            'otherProp')
 
         // act
         deployer.deployApplication(request,
-                                   [apiSpec1, apiSpec2])
+                                   new ApiSpecificationList([apiSpec1, apiSpec2]))
 
         // assert
         assertThat apiSyncs.size(),

@@ -2,6 +2,7 @@ package com.avioconsulting.mule.deployment.api
 
 
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
+import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
@@ -102,7 +103,7 @@ class Deployer implements IDeployer {
      * @param enabledFeatures Which features of this tool to turn on. All by default.
      */
     def deployApplication(FileBasedAppDeploymentRequest appDeploymentRequest,
-                          List<ApiSpecification> apiSpecifications = null,
+                          ApiSpecificationList apiSpecifications = null,
                           List<Policy> desiredPolicies = [],
                           List<Features> enabledFeatures = [Features.All]) {
         stepNumber = 0
@@ -157,7 +158,7 @@ class Deployer implements IDeployer {
         enabled ? null : "Feature ${feature} was not supplied"
     }
 
-    private def performCommonDeploymentTasks(List<ApiSpecification> apiSpecifications,
+    private def performCommonDeploymentTasks(ApiSpecificationList apiSpecifications,
                                              List<Policy> desiredPolicies,
                                              FileBasedAppDeploymentRequest appDeploymentRequest,
                                              String environment,
