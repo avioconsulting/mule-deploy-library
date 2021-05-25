@@ -181,14 +181,16 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
 
     def synchronizeDesignCenterFromApp(ApiSpecification apiSpec,
                                        FileBasedAppDeploymentRequest appFileInfo) {
+        def ramlFilesFromApp = appFileInfo.getRamlFilesFromApp(apiSpec.sourceDirectory)
         synchronizeDesignCenter(apiSpec,
-                                appFileInfo.ramlFilesFromApp,
+                                ramlFilesFromApp,
                                 appFileInfo.appVersion)
     }
 
     def synchronizeDesignCenter(ApiSpecification apiSpec,
                                 List<RamlFile> ramlFiles,
                                 String appVersion) {
+        logger.println "Using directory ${apiSpec.sourceDirectory} inside app JAR"
         if (ramlFiles.empty) {
             logger.println 'No RAML files in project, therefore nothing to sync'
             return
@@ -206,7 +208,10 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
         def existingFiles = getExistingDesignCenterFiles(projectId,
                                                          branchName)
         def changes = ramlFiles - existingFiles
-        if (changes.empty) {
+        def noLongerExist = existingFiles.findAll { file ->
+            !ramlFiles.any { toBeFile -> file.fileName == toBeFile.fileName }
+        }
+        if (changes.empty && noLongerExist.empty) {
             logger.println('New RAML contents match the old contents, will not update Design Center')
             def assets = getExchangeAssets(apiSpec.exchangeAssetId)
             if (assets.empty) {
@@ -229,9 +234,6 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                 return
             }
             logger.println('RAML quantity/contents have changed, will update Design Center')
-            def noLongerExist = existingFiles.findAll { file ->
-                !ramlFiles.any { toBeFile -> file.fileName == toBeFile.fileName }
-            }
             withLock {
                 if (noLongerExist.any()) {
                     deleteDesignCenterFiles(projectId,
@@ -240,9 +242,11 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                 } else {
                     logger.println('No existing files to delete')
                 }
-                uploadDesignCenterFiles(projectId,
-                                        branchName,
-                                        changes)
+                if (changes.any()) {
+                    uploadDesignCenterFiles(projectId,
+                                            branchName,
+                                            changes)
+                }
                 pushToExchange(apiSpec,
                                projectId,
                                appVersion)

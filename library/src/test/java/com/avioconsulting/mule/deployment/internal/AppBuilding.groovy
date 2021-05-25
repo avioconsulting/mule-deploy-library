@@ -13,7 +13,7 @@ trait AppBuilding {
         def apiDirectory = new File(tempAppDirectory,
                                     'api')
         def file = new File(apiDirectory,
-                            'stuff.yaml')
+                            'stuff.raml')
         FileUtils.touch(file)
         file.text = [
                 '#%RAML 1.0',
@@ -38,6 +38,16 @@ trait AppBuilding {
         FileUtils.touch(file)
         FileUtils.touch(new File(apiDirectory,
                                  'exchange.json'))
+        apiDirectory = new File(tempAppDirectory,
+                                'api2')
+        file = new File(apiDirectory,
+                        'stuff-v2.raml')
+        FileUtils.touch(file)
+        file.text = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v2'
+        ].join('\n')
         buildZip(tempDir,
                  tempAppDirectory)
     }

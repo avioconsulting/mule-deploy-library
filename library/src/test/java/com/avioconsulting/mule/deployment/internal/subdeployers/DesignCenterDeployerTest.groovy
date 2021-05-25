@@ -713,6 +713,11 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
         def exchangePushed = false
         def locked = false
         def deleted = false
+        def file1RamlContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
         withHttpServer { HttpServerRequest request ->
             if (mockAuthenticationOk(request)) {
                 return
@@ -745,6 +750,7 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
             if (mockGetExistingFiles(request,
                                      'abcd',
                                      [
+                                             'file1.raml'             : file1RamlContents,
                                              'file_to_be_deleted.raml': 'the contents'
                                      ])) {
                 return
@@ -760,16 +766,10 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def file1RamlContents = [
-                '#%RAML 1.0',
-                'title: stuff',
-                'version: v1'
-        ].join('\n')
+
         def files = [
                 new RamlFile('file1.raml',
-                             file1RamlContents),
-                new RamlFile('file2.raml',
-                             'the contents2')
+                             file1RamlContents)
         ]
         def apiSpec = new ApiSpecification('Hello API',
                                            files)
@@ -781,7 +781,7 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
 
         // assert
         assertThat filesUploaded,
-                   is(equalTo(true))
+                   is(equalTo(false))
         assertThat exchangePushed,
                    is(equalTo(true))
         assertThat 'We should always unlock if we lock',
@@ -1104,7 +1104,7 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
         }
         def request = buildFullApp()
         def apiSpec = new ApiSpecification('Hello API',
-                                           request.ramlFilesFromApp)
+                                           request.getRamlFilesFromApp('/api'))
 
         // act
         deployer.synchronizeDesignCenterFromApp(apiSpec,
@@ -1168,7 +1168,7 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
         }
         def appInfo = buildFullApp()
         def apiSpec = new ApiSpecification('Hello API',
-                                           appInfo.ramlFilesFromApp)
+                                           appInfo.getRamlFilesFromApp('/api'))
 
         // act
         deployer.synchronizeDesignCenterFromApp(apiSpec,

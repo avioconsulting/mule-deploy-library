@@ -26,7 +26,7 @@ class FileBasedAppDeploymentRequestTest implements AppBuilding {
                                tempAppDirectory)
 
         // act
-        def result = request.getRamlFilesFromApp()
+        def result = request.getRamlFilesFromApp('/api')
 
         // assert
         assertThat result,
@@ -39,7 +39,7 @@ class FileBasedAppDeploymentRequestTest implements AppBuilding {
         def request = buildFullApp()
 
         // act
-        def result = request.getRamlFilesFromApp()
+        def result = request.getRamlFilesFromApp('/api')
                 .sort { item -> item.fileName } // consistent for test
 
         // assert
@@ -52,8 +52,25 @@ class FileBasedAppDeploymentRequestTest implements AppBuilding {
                    is(equalTo([
                            new RamlFile('folder/lib.yaml',
                                         'howdy1'),
-                           new RamlFile('stuff.yaml',
+                           new RamlFile('stuff.raml',
                                         expectedStuffContents)
+                   ]))
+    }
+
+    @Test
+    void getRamlFilesFromApp_directory_specified() {
+        // arrange
+        def request = buildFullApp()
+
+        // act
+        def result = request.getRamlFilesFromApp('/api/folder')
+                .sort { item -> item.fileName } // consistent for test
+
+        // assert
+        assertThat result,
+                   is(equalTo([
+                           new RamlFile('lib.yaml',
+                                        'howdy1')
                    ]))
     }
 }
