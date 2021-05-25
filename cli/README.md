@@ -12,9 +12,19 @@ It's highly recommended that you at least use the Maven plugin for validation (s
 
 Now you'll want to create your DSL file. You can use the GDSL file from this project to help IntelliJ with syntax completion.
 
-See `examples/mule4_project/muleDeploy.groovy` as an example. This file is intended to be in source control. Obviously do not commit secrets to source control.
+See `examples/mule4_project/muleDeploy.groovy` under the `maven-plugin` directory as an example. This file is intended to be in source control. Obviously do not commit secrets to source control.
 
 Things like crypto keys, client secrets, and environments will need to use `params` so that the CI/CD system can choose what to use. The Maven plugin and DSL will take care of dropping in `-DmuleDeploy.someProp=someValue` such that `params.someProp` evaluates to `someValue`.
+
+## Versioning
+
+This framework supports "v2" of API definitions in 3 different ways.
+
+1. Entirely separate app for "v2". In this case, the deploy tool doesn't even need to know about it because it's a new application in every way.
+2. 2 different branches in the same Design Center project. Each branch is fed from a different `api` directory in your app and each branch is pushed to a different "major version" of the same Exchange asset.
+3. 2 different Design Center projects. Each project is fed from a different `api` directory in your app and each project is pushed to a different "major version" of the same Exchange asset.
+
+Option 2 is probably the preferred route for most use cases. Both options 2 and 3 will require that you specify which `sourceDirectory` to use and supply unique `autoDiscoveryPropertyName` values. See the 2 multipleVersions example files in `library/examples` to see how to do this.
 
 ## User/service account access
 

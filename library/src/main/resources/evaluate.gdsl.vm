@@ -115,6 +115,7 @@ contributor([closureScopeContext]) {
         #stringParam('endpoint')
         #stringParam('autoDiscoveryPropertyName')
         #stringParam('designCenterBranchName')
+        #stringParam('sourceDirectory')
     }
     call = enclosingCall('policies')
     if (call) {
