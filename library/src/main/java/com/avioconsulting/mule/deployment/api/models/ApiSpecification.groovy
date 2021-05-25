@@ -63,19 +63,26 @@ class ApiSpecification {
                      String sourceDirectory = null) {
         this.autoDiscoveryPropertyName = autoDiscoveryPropertyName ?: 'auto-discovery.api-id'
         this.name = name
+        sourceDirectory = getSourceDirectoryOrDefault(sourceDirectory)
         this.mainRamlFile = mainRamlFile ?: findMainRamlFile(ramlFiles)
         // SOAP will not have a main RAML file, just use v1 in that case
         this.apiMajorVersion = this.mainRamlFile ? getApiVersion(this.mainRamlFile,
-                                                                 ramlFiles) : 'v1'
+                                                                 ramlFiles,
+                                                                 sourceDirectory) : 'v1'
         this.exchangeAssetId = exchangeAssetId ?: name.toLowerCase().replace(' ',
                                                                              '-')
         this.endpoint = endpoint
         this.designCenterBranchName = designCenterBranchName ?: 'master'
-        this.sourceDirectory = sourceDirectory ?: '/api'
+        this.sourceDirectory = sourceDirectory
+    }
+
+    static String getSourceDirectoryOrDefault(String sourceDirectory) {
+        sourceDirectory ?: '/api'
     }
 
     private static String getApiVersion(String mainRamlFile,
-                                        List<RamlFile> ramlFiles) {
+                                        List<RamlFile> ramlFiles,
+                                        String sourceDirectory) {
         // see EnsureWeCloseLoader for why we do this
         def resourceLoader = new EnsureWeCloseRamlLoader(ramlFiles)
         def builder = new RamlModelBuilder(resourceLoader)
@@ -83,7 +90,7 @@ class ApiSpecification {
             f.fileName == mainRamlFile
         }
         if (!mainFile) {
-            throw new Exception("You specified '${mainRamlFile}' as your main RAML file but it does not exist in your application!")
+            throw new Exception("You specified '${mainRamlFile}' as your main RAML file but it does not exist in your application under ${sourceDirectory}!")
         }
         def ramlModel = builder.buildApi(mainFile.contents,
                                          '.')

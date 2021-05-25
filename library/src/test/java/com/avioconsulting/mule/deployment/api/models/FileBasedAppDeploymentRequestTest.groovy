@@ -52,7 +52,7 @@ class FileBasedAppDeploymentRequestTest implements AppBuilding {
                    is(equalTo([
                            new RamlFile('folder/lib.yaml',
                                         'howdy1'),
-                           new RamlFile('stuff.yaml',
+                           new RamlFile('stuff.raml',
                                         expectedStuffContents)
                    ]))
     }
