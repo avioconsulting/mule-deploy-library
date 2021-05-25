@@ -46,10 +46,10 @@ class CloudhubContextTest implements MavenInvoke {
             assertThat request.appName,
                        is(equalTo('mule-deploy-lib-v4-test-app'))
             assertThat appVersion,
-                       is(equalTo('1.0.0'))
+                       is(equalTo('2.2.9'))
             workerSpecRequest.with {
                 assertThat muleVersion,
-                           is(equalTo('4.1.4'))
+                           is(equalTo('4.3.0'))
                 assertThat usePersistentQueues,
                            is(equalTo(false))
                 assertThat awsRegion,
@@ -98,7 +98,7 @@ class CloudhubContextTest implements MavenInvoke {
         request.with {
             workerSpecRequest.with {
                 assertThat muleVersion,
-                           is(equalTo('4.1.4'))
+                           is(equalTo('4.3.0'))
                 assertThat usePersistentQueues,
                            is(equalTo(false))
                 assertThat updateId,

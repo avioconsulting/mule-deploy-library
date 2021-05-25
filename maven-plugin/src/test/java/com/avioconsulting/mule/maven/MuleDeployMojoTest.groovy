@@ -10,6 +10,7 @@ import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.ArtifactHandler
 import org.apache.maven.project.MavenProject
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -17,8 +18,13 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
 @SuppressWarnings(value = ['GroovyVariableNotAssigned', 'GroovyAccessibility'])
-class MuleDeployMojoTest {
+class MuleDeployMojoTest implements MavenInvoke {
     def logger = new TestLogger()
+
+    @BeforeClass
+    static void setupApp() {
+        buildApp()
+    }
 
     @Before
     void cleanup() {
@@ -34,7 +40,7 @@ class MuleDeployMojoTest {
         List<String> actualEnvs
         def mockDeployer = [
                 deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
-                                     ApiSpecification apiSpecification,
+                                     ApiSpecificationList apiSpecification,
                                      List<Policy> desiredPolicies,
                                      List<Features> enabledFeatures ->
                 }
@@ -63,7 +69,7 @@ muleDeploy {
         environment 'DEV'
         applicationName 'the-app'
         appVersion '1.2.3'
-        file 'path/to/file.jar'
+        file '${builtFile}'
         targetServerOrClusterName 'theServer'
     }
 }
@@ -121,11 +127,11 @@ muleDeploy {
     void runs() {
         // arrange
         FileBasedAppDeploymentRequest actualApp
-        ApiSpecification actualApiSpec
+        ApiSpecificationList actualApiSpec
         List<Features> actualFeatures
         def mockDeployer = [
                 deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
-                                     ApiSpecification apiSpecification,
+                                     ApiSpecificationList apiSpecification,
                                      List<Policy> desiredPolicies,
                                      List<Features> enabledFeatures ->
                     actualApp = appDeploymentRequest
@@ -151,7 +157,7 @@ muleDeploy {
         environment 'DEV'
         applicationName 'the-app'
         appVersion '1.2.3'
-        file 'path/to/file.jar'
+        file '${builtFile}'
         targetServerOrClusterName 'theServer'
     }
 }
@@ -167,7 +173,7 @@ muleDeploy {
                    actualFeatures,
                    is(equalTo([Features.AppDeployment, Features.DesignCenterSync, Features.ApiManagerDefinitions]))
         assertThat actualApiSpec,
-                   is(nullValue())
+                   is(equalTo([]))
         assert actualApp instanceof OnPremDeploymentRequest
         actualApp.with {
             assertThat it.appName,
@@ -183,7 +189,7 @@ muleDeploy {
         def deployed = false
         def mockDeployer = [
                 deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
-                                     ApiSpecification apiSpecification,
+                                     ApiSpecificationList apiSpecification,
                                      List<Policy> desiredPolicies,
                                      List<Features> enabledFeatures ->
                     deployed = true
@@ -207,7 +213,7 @@ muleDeploy {
         environment 'DEV'
         applicationName 'the-app'
         appVersion '1.2.3'
-        file 'path/to/file.jar'
+        file '${builtFile}'
         targetServerOrClusterName 'theServer'
     }
 }
@@ -231,7 +237,7 @@ muleDeploy {
         def deployed = false
         def mockDeployer = [
                 deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
-                                     ApiSpecification apiSpecification,
+                                     ApiSpecificationList apiSpecification,
                                      List<Policy> desiredPolicies,
                                      List<Features> enabledFeatures ->
                     deployed = true
@@ -255,7 +261,7 @@ muleDeploy {
         environment 'DEV'
         applicationName 'the-app'
         appVersion '1.2.3'
-        file 'path/to/file.jar'
+        file '${builtFile}'
         targetServerOrClusterName 'theServer'
     }
 }
@@ -285,7 +291,7 @@ muleDeploy {
         FileBasedAppDeploymentRequest actualApp
         def mockDeployer = [
                 deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
-                                     ApiSpecification apiSpecification,
+                                     ApiSpecificationList apiSpecification,
                                      List<Policy> desiredPolicies,
                                      List<Features> enabledFeatures ->
                     actualApp = appDeploymentRequest
@@ -333,7 +339,7 @@ muleDeploy {
                                                 'jar',
                                                 'mule-application',
                                                 handler).with {
-                                it.setFile(new File('foo.jar'))
+                                it.setFile(builtFile)
                                 it
                             }
                     ]
@@ -357,7 +363,7 @@ muleDeploy {
             assertThat environment,
                        is(equalTo('foobar'))
             assertThat file.name,
-                       is(equalTo('foo.jar'))
+                       is(equalTo('mule-deploy-lib-v4-test-app-2.2.9-mule-application.jar'))
             assertThat workerSpecRequest.muleVersion,
                        is(equalTo('4.1.5'))
         }
@@ -368,7 +374,7 @@ muleDeploy {
         // arrange
         def mockDeployer = [
                 deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
-                                     ApiSpecification apiSpecification,
+                                     ApiSpecificationList apiSpecification,
                                      List<Policy> desiredPolicies,
                                      List<Features> enabledFeatures ->
                 }
@@ -391,7 +397,7 @@ muleDeploy {
         environment 'DEV'
         applicationName 'the-app'
         appVersion '1.2.3'
-        file 'path/to/file.jar'
+        file '${builtFile}'
         targetServerOrClusterName 'theServer'
     }
 }
@@ -419,7 +425,7 @@ muleDeploy {
         // arrange
         def mockDeployer = [
                 deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
-                                     ApiSpecification apiSpecification,
+                                     ApiSpecificationList apiSpecification,
                                      List<Policy> desiredPolicies,
                                      List<Features> enabledFeatures ->
                     throw new Exception('some deployment problem')
@@ -443,7 +449,7 @@ muleDeploy {
         environment 'DEV'
         applicationName 'the-app'
         appVersion '1.2.3'
-        file 'path/to/file.jar'
+        file '${builtFile}'
         targetServerOrClusterName 'theServer'
     }
 }

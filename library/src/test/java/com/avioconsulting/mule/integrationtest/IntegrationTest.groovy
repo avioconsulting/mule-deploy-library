@@ -5,6 +5,7 @@ import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.Deployer
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
+import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
@@ -22,6 +23,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.core.config.Configurator
+import org.junit.Assume
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Ignore
@@ -53,6 +55,8 @@ class IntegrationTest implements MavenInvoke {
 
     @BeforeClass
     static void setup() {
+        Assume.assumeTrue('skip it',
+                          System.getProperty('skip.integration.test') == null)
         buildApp()
         // cut down on the unit test noise here
         Configurator.setLevel('org.apache.http.wire',
@@ -165,12 +169,25 @@ class IntegrationTest implements MavenInvoke {
     @Test
     void cloudhub() {
         // arrange
-        def apiSpec = new ApiSpecification('Mule Deploy Design Center Test Project')
+        def apiSpec1 = new ApiSpecification('Mule Deploy Design Center Test Project',
+                                           cloudhubDeploymentRequest.ramlFilesFromApp,
+                                            'mule-deploy-design-center-test-project-v2.raml',
+                                            null,
+                                            null,
+                                            'auto.disc.1')
+
+        def apiSpec2 = new ApiSpecification('Mule Deploy Design Center Test Project',
+                                            cloudhubDeploymentRequest.ramlFilesFromApp,
+                                            'mule-deploy-design-center-test-project.raml',
+                                            null,
+                                            null,
+                                            'auto.disc.prop.1',
+                                            'v1')
 
         // act
         try {
             overallDeployer.deployApplication(cloudhubDeploymentRequest,
-                                              apiSpec,
+                                              new ApiSpecificationList([apiSpec1, apiSpec2]),
                                               [
                                                       new MulesoftPolicy('http-basic-authentication',
                                                                          '1.2.1',
@@ -247,11 +264,12 @@ class IntegrationTest implements MavenInvoke {
         if (deleteResult == 404) {
             println 'Existing app does not exist, no problem'
         }
-        def apiSpec = new ApiSpecification('Mule Deploy Design Center Test Project')
+        def apiSpec = new ApiSpecification('Mule Deploy Design Center Test Project',
+                                           onPremDeploymentRequest.ramlFilesFromApp)
 
         // act
         overallDeployer.deployApplication(onPremDeploymentRequest,
-                                          apiSpec,
+                                          new ApiSpecificationList([apiSpec]),
                                           [
                                                   new MulesoftPolicy('http-basic-authentication',
                                                                      '1.2.1',

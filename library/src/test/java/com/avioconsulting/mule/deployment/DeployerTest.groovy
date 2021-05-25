@@ -6,6 +6,7 @@ import com.avioconsulting.mule.deployment.api.models.*
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.internal.models.ApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
+import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import com.avioconsulting.mule.deployment.internal.subdeployers.*
 import groovy.transform.Canonical
 import org.junit.Before
@@ -56,6 +57,15 @@ class DeployerTest {
         setupDeployer(DryRunMode.Run)
     }
 
+    private static List<RamlFile> getSimpleRamlFiles() {
+        [
+                new RamlFile('stuff-v1.raml',
+                             ['#%RAML 1.0',
+                              'title: stuff',
+                              'version: v1'].join('\n'))
+        ]
+    }
+
     def setupDeployer(DryRunMode dryRunMode) {
         def mockCloudHubDeployer = [
                 deploy        : { CloudhubDeploymentRequest request ->
@@ -93,6 +103,7 @@ class DeployerTest {
                                                '1.2.3',
                                                'https://foo',
                                                'DEV',
+                                               'v1',
                                                true)
                 }
         ] as IApiManagerDeployer
@@ -134,12 +145,13 @@ class DeployerTest {
                                                     'client',
                                                     'new-app',
                                                     '1.2.3',)
-        def apiSpec = new ApiSpecification('Hello API')
+        def apiSpec = new ApiSpecification('Hello API',
+                                           simpleRamlFiles)
 
         // act
         def exception = shouldFail {
             deployer.deployApplication(request,
-                                       apiSpec)
+                                       new ApiSpecificationList([apiSpec]))
         }
 
         // assert
@@ -165,14 +177,14 @@ class DeployerTest {
                                                     'new-app-mule3',
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
-                                           'v1',
-                                           'main.raml',
+                                           simpleRamlFiles,
+                                           null,
                                            'the-asset-id',
                                            'https://foo')
 
         // act
         deployer.deployApplication(request,
-                                   apiSpec,
+                                   new ApiSpecificationList([apiSpec]),
                                    [
                                            new Policy('openidconnect-access-token-enforcement',
                                                       '1.2.0',
@@ -246,14 +258,14 @@ class DeployerTest {
                                                     'new-app-mule4',
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
-                                           'v1',
-                                           'main.raml',
+                                           simpleRamlFiles,
+                                           null,
                                            'the-asset-id',
                                            'https://foo')
 
         // act
         deployer.deployApplication(request,
-                                   apiSpec)
+                                   new ApiSpecificationList([apiSpec]))
 
         // assert
         assertThat apiSyncs.size(),
@@ -283,11 +295,12 @@ class DeployerTest {
                                                     'client',
                                                     'new-app',
                                                     '1.2.3')
-        def apiSpec = new ApiSpecification('Hello API')
+        def apiSpec = new ApiSpecification('Hello API',
+                                           simpleRamlFiles)
 
         // act
         deployer.deployApplication(request,
-                                   apiSpec)
+                                   new ApiSpecificationList([apiSpec]))
 
         // assert
         assertThat deployedChApps.size(),
@@ -301,7 +314,8 @@ class DeployerTest {
     void deployApplication_onprem_mule3() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
-        def apiSpec = new ApiSpecification('Hello API')
+        def apiSpec = new ApiSpecification('Hello API',
+                                           simpleRamlFiles)
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
@@ -310,7 +324,7 @@ class DeployerTest {
 
         // act
         deployer.deployApplication(request,
-                                   apiSpec)
+                                   new ApiSpecificationList([apiSpec]))
 
         // assert
         assertThat deployedOnPremApps.size(),
@@ -331,7 +345,8 @@ class DeployerTest {
     void deployApplication_onprem_mule4() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
-        def apiSpec = new ApiSpecification('Hello API')
+        def apiSpec = new ApiSpecification('Hello API',
+                                           simpleRamlFiles)
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
@@ -340,7 +355,7 @@ class DeployerTest {
 
         // act
         deployer.deployApplication(request,
-                                   apiSpec)
+                                   new ApiSpecificationList([apiSpec]))
 
         // assert
         assertThat deployedOnPremApps.size(),
@@ -410,11 +425,12 @@ class DeployerTest {
                                                     'client',
                                                     'new-app',
                                                     '1.2.3')
-        def apiSpec = new ApiSpecification('Hello API')
+        def apiSpec = new ApiSpecification('Hello API',
+                                           simpleRamlFiles)
 
         // act
         deployer.deployApplication(request,
-                                   apiSpec,
+                                   new ApiSpecificationList(new ApiSpecificationList([apiSpec])),
                                    null,
                                    [Features.DesignCenterSync])
 
@@ -446,11 +462,12 @@ class DeployerTest {
                                                     'client',
                                                     'new-app',
                                                     '1.2.3')
-        def apiSpec = new ApiSpecification('Hello API')
+        def apiSpec = new ApiSpecification('Hello API',
+                                           simpleRamlFiles)
 
         // act
         deployer.deployApplication(request,
-                                   apiSpec,
+                                   new ApiSpecificationList([apiSpec]),
                                    null,
                                    [Features.AppDeployment])
 
@@ -463,5 +480,52 @@ class DeployerTest {
         assertThat 'no feature supplied',
                    apiSyncs.size(),
                    is(equalTo(0))
+    }
+
+    @Test
+    void multiple_api_specs() {
+        // arrange
+        def file = new File('src/test/resources/some_file.txt')
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    new CloudhubWorkerSpecRequest('4.2.2',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client',
+                                                    'new-app-mule4',
+                                                    '1.2.3')
+        def apiSpec1 = new ApiSpecification('Hello API v1',
+                                            simpleRamlFiles)
+        def spec2Files = [
+                new RamlFile('stuff-v2.raml',
+                             ['#%RAML 1.0',
+                              'title: stuff',
+                              'version: v2'].join('\n'))
+        ]
+        def apiSpec2 = new ApiSpecification('Hello API v2',
+                                            spec2Files,
+                                            null,
+                                            null,
+                                            null,
+                                            'otherProp')
+
+        // act
+        deployer.deployApplication(request,
+                                   new ApiSpecificationList([apiSpec1, apiSpec2]))
+
+        // assert
+        assertThat apiSyncs.size(),
+                   is(equalTo(2))
+        apiSyncs[0].with {
+            it.apiSpec.with {
+                assertThat it.isMule4OrAbove,
+                           is(equalTo(true))
+            }
+        }
     }
 }

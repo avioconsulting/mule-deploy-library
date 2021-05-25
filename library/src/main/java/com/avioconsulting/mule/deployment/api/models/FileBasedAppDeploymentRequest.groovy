@@ -1,5 +1,6 @@
 package com.avioconsulting.mule.deployment.api.models
 
+import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import groovy.xml.XmlSlurper
 import groovy.xml.slurpersupport.NodeChild
 
@@ -8,6 +9,26 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 abstract class FileBasedAppDeploymentRequest {
+    protected final Map<String, String> autoDiscoveries = [:]
+
+    static final List<String> IGNORE_DC_FILES = [
+            'exchange_modules', // we don't deal with Exchange dependencies
+            '.gitignore',
+            'exchange.json', // see above
+            '.designer.json'
+    ]
+
+    static boolean isIgnored(Path something) {
+        def parent = something.parent
+        if (parent) {
+            if (IGNORE_DC_FILES.contains(parent.toString())) {
+                return true
+            }
+            return isIgnored(parent)
+        }
+        return IGNORE_DC_FILES.contains(something.toString())
+    }
+
     @Lazy
     protected PomInfo parsedPomProperties = {
         def zipOrJarPath = getFile().toPath()
@@ -42,9 +63,31 @@ abstract class FileBasedAppDeploymentRequest {
 
     abstract File getFile()
 
-    abstract def setAutoDiscoveryId(String autoDiscoveryId)
+    def setAutoDiscoveryId(String propertyName,
+                           String autoDiscoveryId) {
+        this.autoDiscoveries[propertyName] = autoDiscoveryId
+    }
 
     abstract String getAppVersion()
 
     abstract String getEnvironment()
+
+    List<RamlFile> getRamlFilesFromApp() {
+        return FileSystems.newFileSystem(file.toPath(),
+                                         null).withCloseable { fs ->
+            def apiPath = fs.getPath('/api')
+            if (!Files.exists(apiPath)) {
+                return []
+            }
+            Files.walk(apiPath).findAll { p ->
+                def relativeToApiDirectory = apiPath.relativize(p)
+                !Files.isDirectory(p) &&
+                        !isIgnored(relativeToApiDirectory)
+            }.collect { p ->
+                def relativeToApiDirectory = apiPath.relativize(p)
+                new RamlFile(relativeToApiDirectory.toString(),
+                             p.text)
+            }
+        }
+    }
 }

@@ -61,7 +61,7 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
         def map = [
                 'mule.agent.application.properties.service': [
                         applicationName: appName,
-                        properties     : appProperties
+                        properties     : appProperties + this.autoDiscoveries
                 ]
         ]
         JsonOutput.toJson(map)
@@ -95,10 +95,5 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
                                ContentType.APPLICATION_OCTET_STREAM,
                                this.file.name)
                 .build()
-    }
-
-    @Override
-    def setAutoDiscoveryId(String autoDiscoveryId) {
-        appProperties['auto-discovery.api-id'] = autoDiscoveryId
     }
 }

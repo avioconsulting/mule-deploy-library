@@ -4,13 +4,12 @@ import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
-import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.internal.AppBuilding
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
-import org.apache.commons.io.FileUtils
 import org.junit.Before
 import org.junit.Test
 
@@ -18,7 +17,7 @@ import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-class DesignCenterDeployerTest extends BaseTest {
+class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
     private DesignCenterDeployer deployer
 
     @Before
@@ -31,109 +30,6 @@ class DesignCenterDeployerTest extends BaseTest {
                                             new TestConsoleLogger(),
                                             dryRunMode,
                                             environmentLocator)
-    }
-
-    @Test
-    void getRamlFilesFromApp_is_apikit() {
-        // arrange
-        def tempDir = new File('target/temp')
-        def tempAppDirectory = new File(tempDir,
-                                        'designcenterapp')
-        tempAppDirectory.deleteDir()
-        tempAppDirectory.mkdirs()
-        def apiDirectory = new File(tempAppDirectory,
-                                    'api')
-        def file = new File(apiDirectory,
-                            'stuff.yaml')
-        FileUtils.touch(file)
-        file.text = 'howdy2'
-        def folder = new File(apiDirectory,
-                              'folder')
-        file = new File(folder,
-                        'lib.yaml')
-        FileUtils.touch(file)
-        file.text = 'howdy1'
-        def exchangeModules = new File(apiDirectory,
-                                       'exchange_modules')
-        file = new File(exchangeModules,
-                        'junk')
-        FileUtils.touch(file)
-        def exchangeChildDirectory = new File(exchangeModules,
-                                              'subdir')
-        file = new File(exchangeChildDirectory,
-                        'junk')
-        FileUtils.touch(file)
-        FileUtils.touch(new File(apiDirectory,
-                                 'exchange.json'))
-        def request = buildZip(tempDir,
-                               tempAppDirectory)
-
-        // act
-        def result = deployer.getRamlFilesFromApp(request)
-                .sort { item -> item.fileName } // consistent for test
-
-        // assert
-        assertThat result,
-                   is(equalTo([
-                           new RamlFile('folder/lib.yaml',
-                                        'howdy1'),
-                           new RamlFile('stuff.yaml',
-                                        'howdy2')
-                   ]))
-    }
-
-    private static FileBasedAppDeploymentRequest buildZip(File tempDir,
-                                                          File tempAppDirectory) {
-        def antBuilder = new AntBuilder()
-        def zipFile = new File(tempDir,
-                               'designcenterapp.zip')
-        FileUtils.deleteQuietly(zipFile)
-        antBuilder.zip(destfile: zipFile,
-                       basedir: tempAppDirectory)
-        new FileBasedAppDeploymentRequest() {
-            @Override
-            File getFile() {
-                zipFile
-            }
-
-            @Override
-            def setAutoDiscoveryId(String autoDiscoveryId) {
-                return null
-            }
-
-            @Override
-            String getAppVersion() {
-                '1.2.3'
-            }
-
-            @Override
-            String getEnvironment() {
-                'DEV'
-            }
-        }
-    }
-
-    @Test
-    void getRamlFilesFromApp_is_not_apikit() {
-        // arrange
-        def tempDir = new File('target/temp')
-        def tempAppDirectory = new File(tempDir,
-                                        'designcenterapp')
-        tempAppDirectory.deleteDir()
-        tempAppDirectory.mkdirs()
-        def file = new File(tempAppDirectory,
-                            'stuff.xml')
-        FileUtils.touch(file)
-        file.text = '<hi/>'
-        def request = buildZip(tempDir,
-                               tempAppDirectory)
-
-        // act
-        def result = deployer.getRamlFilesFromApp(request)
-
-        // assert
-        assertThat result,
-                   is(equalTo([]))
     }
 
     @Test
@@ -276,7 +172,8 @@ class DesignCenterDeployerTest extends BaseTest {
         }
 
         // act
-        def result = deployer.getExistingDesignCenterFiles('ourprojectId')
+        def result = deployer.getExistingDesignCenterFiles('ourprojectId',
+                                                           'somebranch')
 
         // assert
         assertThat result,
@@ -288,9 +185,9 @@ class DesignCenterDeployerTest extends BaseTest {
                    ]))
         assertThat urls,
                    is(equalTo([
-                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files',
-                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/stuff.raml',
-                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/examples%2Ffoo.raml'
+                           '/designcenter/api-designer/projects/ourprojectId/branches/somebranch/files',
+                           '/designcenter/api-designer/projects/ourprojectId/branches/somebranch/files/stuff.raml',
+                           '/designcenter/api-designer/projects/ourprojectId/branches/somebranch/files/examples%2Ffoo.raml'
                    ]))
         assertThat anypointOrgId,
                    is(equalTo('the-org-id'))
@@ -322,6 +219,7 @@ class DesignCenterDeployerTest extends BaseTest {
 
         // act
         deployer.deleteDesignCenterFiles('ourprojectId',
+                                         'somebranch',
                                          [
                                                  new RamlFile('file1',
                                                               'blah'),
@@ -339,8 +237,8 @@ class DesignCenterDeployerTest extends BaseTest {
                    is(equalTo('the_id'))
         assertThat urls,
                    is(equalTo([
-                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/file1',
-                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/file2'
+                           '/designcenter/api-designer/projects/ourprojectId/branches/somebranch/files/file1',
+                           '/designcenter/api-designer/projects/ourprojectId/branches/somebranch/files/file2'
                    ]))
     }
 
@@ -367,6 +265,7 @@ class DesignCenterDeployerTest extends BaseTest {
 
         // act
         deployer.deleteDesignCenterFiles('ourprojectId',
+                                         'somebranch',
                                          [
                                                  new RamlFile('subdir/file1',
                                                               'blah')
@@ -382,7 +281,7 @@ class DesignCenterDeployerTest extends BaseTest {
                    is(equalTo('the_id'))
         assertThat urls,
                    is(equalTo([
-                           '/designcenter/api-designer/projects/ourprojectId/branches/master/files/subdir%2Ffile1'
+                           '/designcenter/api-designer/projects/ourprojectId/branches/somebranch/files/subdir%2Ffile1'
                    ]))
     }
 
@@ -419,13 +318,14 @@ class DesignCenterDeployerTest extends BaseTest {
 
         // act
         deployer.uploadDesignCenterFiles('ourprojectId',
+                                         'somebranch',
                                          files)
 
         // assert
         assertThat method,
                    is(equalTo('POST'))
         assertThat url,
-                   is(equalTo('/designcenter/api-designer/projects/ourprojectId/branches/master/save?commit=true&message=fromAPI'))
+                   is(equalTo('/designcenter/api-designer/projects/ourprojectId/branches/somebranch/save?commit=true&message=fromAPI'))
         assertThat anypointOrgId,
                    is(equalTo('the-org-id'))
         assertThat 'Design center needs this',
@@ -445,7 +345,7 @@ class DesignCenterDeployerTest extends BaseTest {
     }
 
     @Test
-    void pushToExchange_no_main_raml_file_specified() {
+    void pushToExchange() {
         // arrange
         String anypointOrgId = null
         String url = null
@@ -468,20 +368,25 @@ class DesignCenterDeployerTest extends BaseTest {
                 end()
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
+        def file1RamlContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
         def files = [
                 new RamlFile('folder/file3.raml',
                              'the contents3'),
                 new RamlFile('file1.raml',
-                             'the contents'),
+                             file1RamlContents),
                 new RamlFile('file2.raml',
                              'the contents2')
         ]
+        def apiSpec = new ApiSpecification('Hello API',
+                                           files)
 
         // act
         deployer.pushToExchange(apiSpec,
                                 'ourprojectId',
-                                files,
                                 '1.2.3')
 
         // assert
@@ -502,12 +407,16 @@ class DesignCenterDeployerTest extends BaseTest {
                            assetId   : 'hello-api',
                            name      : 'Hello API',
                            groupId   : 'the-org-id',
-                           classifier: 'raml'
+                           classifier: 'raml',
+                           metadata  : [
+                                   branchId : 'master',
+                                   projectId: 'ourprojectId'
+                           ]
                    ]))
     }
 
     @Test
-    void pushToExchange_main_raml_file_specified() {
+    void pushToExchange_old_version_alongside_new() {
         // arrange
         String anypointOrgId = null
         String url = null
@@ -530,23 +439,27 @@ class DesignCenterDeployerTest extends BaseTest {
                 end()
             }
         }
-        def apiSpec = new ApiSpecification('Hello API',
-                                           'v1',
-                                           'file2.raml')
+        def file1RamlContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
         def files = [
                 new RamlFile('folder/file3.raml',
                              'the contents3'),
                 new RamlFile('file1.raml',
-                             'the contents'),
+                             file1RamlContents),
                 new RamlFile('file2.raml',
                              'the contents2')
         ]
+        def apiSpec = new ApiSpecification('Hello API',
+                                           files)
 
         // act
+        // a 2.x.x deploy of the v1 definition sitting alongside the v2 definition
         deployer.pushToExchange(apiSpec,
                                 'ourprojectId',
-                                files,
-                                '1.2.3')
+                                '2.0.1')
 
         // assert
         assertThat method,
@@ -560,13 +473,17 @@ class DesignCenterDeployerTest extends BaseTest {
                    is(equalTo('the_id'))
         assertThat sentPayload,
                    is(equalTo([
-                           main      : 'file2.raml',
+                           main      : 'file1.raml',
                            apiVersion: 'v1',
-                           version   : '1.2.3',
+                           version   : '1.0.1',
                            assetId   : 'hello-api',
                            name      : 'Hello API',
                            groupId   : 'the-org-id',
-                           classifier: 'raml'
+                           classifier: 'raml',
+                           metadata  : [
+                                   branchId : 'master',
+                                   projectId: 'ourprojectId'
+                           ]
                    ]))
     }
 
@@ -740,13 +657,19 @@ class DesignCenterDeployerTest extends BaseTest {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
+        def file1RamlContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
         def files = [
                 new RamlFile('file1.raml',
-                             'the contents'),
+                             file1RamlContents),
                 new RamlFile('file2.raml',
                              'the contents2')
         ]
+        def apiSpec = new ApiSpecification('Hello API',
+                                           files)
 
         // act
         deployer.synchronizeDesignCenter(apiSpec,
@@ -764,31 +687,6 @@ class DesignCenterDeployerTest extends BaseTest {
     }
 
     @Test
-    void synchronizeDesignCenter_main_raml_does_not_exist() {
-        // arrange
-        def apiSpec = new ApiSpecification('Hello API',
-                                           'v1',
-                                           'wrong.raml')
-        def files = [
-                new RamlFile('file1.raml',
-                             'the contents'),
-                new RamlFile('file2.raml',
-                             'the contents2')
-        ]
-
-        // act
-        def exception = shouldFail {
-            deployer.synchronizeDesignCenter(apiSpec,
-                                             files,
-                                             '1.2.3')
-        }
-
-        // assert
-        assertThat exception.message,
-                   is(containsString("You specified 'wrong.raml' as your main RAML file but it does not exist in your application!"))
-    }
-
-    @Test
     void synchronizeDesignCenter_no_raml_files() {
         // arrange
         withHttpServer { HttpServerRequest request ->
@@ -797,7 +695,8 @@ class DesignCenterDeployerTest extends BaseTest {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
+        def apiSpec = new ApiSpecification('Hello API',
+                                           [])
 
         // act
         deployer.synchronizeDesignCenter(apiSpec,
@@ -861,13 +760,19 @@ class DesignCenterDeployerTest extends BaseTest {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
+        def file1RamlContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
         def files = [
                 new RamlFile('file1.raml',
-                             'the contents'),
+                             file1RamlContents),
                 new RamlFile('file2.raml',
                              'the contents2')
         ]
+        def apiSpec = new ApiSpecification('Hello API',
+                                           files)
 
         // act
         deployer.synchronizeDesignCenter(apiSpec,
@@ -892,6 +797,11 @@ class DesignCenterDeployerTest extends BaseTest {
         def filesUploaded = false
         def exchangePushed = false
         def locked = false
+        def file1RamlContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
         withHttpServer { HttpServerRequest request ->
             if (mockAuthenticationOk(request)) {
                 return
@@ -924,7 +834,7 @@ class DesignCenterDeployerTest extends BaseTest {
             if (mockGetExistingFiles(request,
                                      'abcd',
                                      [
-                                             'file1.raml': 'the contents',
+                                             'file1.raml': file1RamlContents,
                                              'file2.raml': 'the contents2'
                                      ])) {
                 return
@@ -941,8 +851,8 @@ class DesignCenterDeployerTest extends BaseTest {
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.201910193'
-
+                                                    version     : '1.0.201910193',
+                                                    versionGroup: 'v1'
                                             ]
                                     ]
                             ]
@@ -956,13 +866,14 @@ class DesignCenterDeployerTest extends BaseTest {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
         def files = [
                 new RamlFile('file1.raml',
-                             'the contents'),
+                             file1RamlContents),
                 new RamlFile('file2.raml',
                              'the contents2')
         ]
+        def apiSpec = new ApiSpecification('Hello API',
+                                           files)
 
         // act
         deployer.synchronizeDesignCenter(apiSpec,
@@ -985,6 +896,11 @@ class DesignCenterDeployerTest extends BaseTest {
         def filesUploaded = false
         def exchangePushed = false
         def locked = false
+        def file1RamlContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
         withHttpServer { HttpServerRequest request ->
             if (mockAuthenticationOk(request)) {
                 return
@@ -1017,7 +933,7 @@ class DesignCenterDeployerTest extends BaseTest {
             if (mockGetExistingFiles(request,
                                      'abcd',
                                      [
-                                             'file1.raml': 'the contents',
+                                             'file1.raml': file1RamlContents,
                                              'file2.raml': 'the contents2'
                                      ])) {
                 return
@@ -1040,13 +956,14 @@ class DesignCenterDeployerTest extends BaseTest {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
         def files = [
                 new RamlFile('file1.raml',
-                             'the contents'),
+                             file1RamlContents),
                 new RamlFile('file2.raml',
                              'the contents2')
         ]
+        def apiSpec = new ApiSpecification('Hello API',
+                                           files)
 
         // act
         deployer.synchronizeDesignCenter(apiSpec,
@@ -1069,6 +986,11 @@ class DesignCenterDeployerTest extends BaseTest {
         def filesUploaded = false
         def exchangePushed = false
         def locked = false
+        def file1RamlContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
         withHttpServer { HttpServerRequest request ->
             if (mockAuthenticationOk(request)) {
                 return
@@ -1101,7 +1023,7 @@ class DesignCenterDeployerTest extends BaseTest {
             if (mockGetExistingFiles(request,
                                      'abcd',
                                      [
-                                             'file1.raml': 'the contents',
+                                             'file1.raml': file1RamlContents,
                                              'file2.raml': 'the contents2'
                                      ])) {
                 return
@@ -1111,13 +1033,14 @@ class DesignCenterDeployerTest extends BaseTest {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
         def files = [
                 new RamlFile('file1.raml',
-                             'the contents'),
+                             file1RamlContents),
                 new RamlFile('file2.raml',
                              'the contents updated')
         ]
+        def apiSpec = new ApiSpecification('Hello API',
+                                           files)
 
         // act
         deployer.synchronizeDesignCenter(apiSpec,
@@ -1179,37 +1102,13 @@ class DesignCenterDeployerTest extends BaseTest {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
-        def tempDir = new File('target/temp')
-        def tempAppDirectory = new File(tempDir,
-                                        'designcenterapp')
-        tempAppDirectory.deleteDir()
-        tempAppDirectory.mkdirs()
-        def apiDirectory = new File(tempAppDirectory,
-                                    'api')
-        def file = new File(apiDirectory,
-                            'stuff.yaml')
-        FileUtils.touch(file)
-        file.text = 'howdy2'
-        def folder = new File(apiDirectory,
-                              'folder')
-        file = new File(folder,
-                        'lib.yaml')
-        FileUtils.touch(file)
-        file.text = 'howdy1'
-        def exchangeModules = new File(apiDirectory,
-                                       'exchange_modules')
-        file = new File(exchangeModules,
-                        'junk')
-        FileUtils.touch(file)
-        FileUtils.touch(new File(apiDirectory,
-                                 'exchange.json'))
-        def appInfo = buildZip(tempDir,
-                               tempAppDirectory)
+        def request = buildFullApp()
+        def apiSpec = new ApiSpecification('Hello API',
+                                           request.ramlFilesFromApp)
 
         // act
         deployer.synchronizeDesignCenterFromApp(apiSpec,
-                                                appInfo)
+                                                request)
 
         // assert
         assertThat filesUploaded,
@@ -1267,33 +1166,9 @@ class DesignCenterDeployerTest extends BaseTest {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def apiSpec = new ApiSpecification('Hello API')
-        def tempDir = new File('target/temp')
-        def tempAppDirectory = new File(tempDir,
-                                        'designcenterapp')
-        tempAppDirectory.deleteDir()
-        tempAppDirectory.mkdirs()
-        def apiDirectory = new File(tempAppDirectory,
-                                    'api')
-        def file = new File(apiDirectory,
-                            'stuff.yaml')
-        FileUtils.touch(file)
-        file.text = 'howdy2'
-        def folder = new File(apiDirectory,
-                              'folder')
-        file = new File(folder,
-                        'lib.yaml')
-        FileUtils.touch(file)
-        file.text = 'howdy1'
-        def exchangeModules = new File(apiDirectory,
-                                       'exchange_modules')
-        file = new File(exchangeModules,
-                        'junk')
-        FileUtils.touch(file)
-        FileUtils.touch(new File(apiDirectory,
-                                 'exchange.json'))
-        def appInfo = buildZip(tempDir,
-                               tempAppDirectory)
+        def appInfo = buildFullApp()
+        def apiSpec = new ApiSpecification('Hello API',
+                                           appInfo.ramlFilesFromApp)
 
         // act
         deployer.synchronizeDesignCenterFromApp(apiSpec,

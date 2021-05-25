@@ -2,6 +2,7 @@ package com.avioconsulting.mule.deployment.api
 
 
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
+import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
@@ -102,7 +103,7 @@ class Deployer implements IDeployer {
      * @param enabledFeatures Which features of this tool to turn on. All by default.
      */
     def deployApplication(FileBasedAppDeploymentRequest appDeploymentRequest,
-                          ApiSpecification apiSpecification = null,
+                          ApiSpecificationList apiSpecifications = null,
                           List<Policy> desiredPolicies = [],
                           List<Features> enabledFeatures = [Features.All]) {
         stepNumber = 0
@@ -116,7 +117,7 @@ class Deployer implements IDeployer {
             deployer = onPremDeployer
             description = 'On-prem app deployment'
         }
-        performCommonDeploymentTasks(apiSpecification,
+        performCommonDeploymentTasks(apiSpecifications,
                                      desiredPolicies,
                                      appDeploymentRequest,
                                      appDeploymentRequest.environment,
@@ -157,7 +158,7 @@ class Deployer implements IDeployer {
         enabled ? null : "Feature ${feature} was not supplied"
     }
 
-    private def performCommonDeploymentTasks(ApiSpecification apiSpecification,
+    private def performCommonDeploymentTasks(ApiSpecificationList apiSpecifications,
                                              List<Policy> desiredPolicies,
                                              FileBasedAppDeploymentRequest appDeploymentRequest,
                                              String environment,
@@ -168,43 +169,48 @@ class Deployer implements IDeployer {
                                  feature)
         }
         String skipReason
-        if (!apiSpecification) {
-            skipReason = "no API spec was provided"
+        if (!apiSpecifications) {
+            skipReason = "no API spec(s) were provided"
         } else if (!this.environmentsToDoDesignCenterDeploymentOn.contains(environment)) {
             skipReason = "Deploying to '${environment}', only ${this.environmentsToDoDesignCenterDeploymentOn} triggers Design Center deploys"
         } else {
             skipReason = isFeatureDisabled(Features.DesignCenterSync)
         }
-        executeStep('Design Center Deployment',
-                    skipReason) {
-            designCenterDeployer.synchronizeDesignCenterFromApp(apiSpecification,
-                                                                appDeploymentRequest)
-        }
-        if (!apiSpecification) {
-            skipReason = "no API spec was provided"
-        } else {
-            skipReason = isFeatureDisabled(Features.ApiManagerDefinitions)
-        }
-        ExistingApiSpec existingApiManagerDefinition = executeStep('API Manager Definition',
-                                                                   skipReason) {
-            def isMule4 = deployer.isMule4Request(appDeploymentRequest)
-            def internalSpec = new ApiSpec(apiSpecification.exchangeAssetId,
-                                           apiSpecification.endpoint,
-                                           environment,
-                                           isMule4)
-            apiManagerDeployer.synchronizeApiDefinition(internalSpec,
-                                                        appDeploymentRequest.appVersion)
-        } as ExistingApiSpec
-        if (existingApiManagerDefinition) {
-            appDeploymentRequest.autoDiscoveryId = existingApiManagerDefinition.id
-            skipReason = isFeatureDisabled(Features.PolicySync)
-        } else {
-            skipReason = 'API Sync was disabled so policy is too'
-        }
-        executeStep('Policy Sync',
-                    skipReason) {
-            policyDeployer.synchronizePolicies(existingApiManagerDefinition,
-                                               desiredPolicies)
+        apiSpecifications.each { apiSpecification ->
+            def apiHeader = "${apiSpecification.name}/branch ${apiSpecification.designCenterBranchName}"
+            executeStep("Design Center Deployment - ${apiHeader}",
+                        skipReason) {
+                designCenterDeployer.synchronizeDesignCenterFromApp(apiSpecification,
+                                                                    appDeploymentRequest)
+            }
+            if (!apiSpecifications) {
+                skipReason = "no API spec(s) were provided"
+            } else {
+                skipReason = isFeatureDisabled(Features.ApiManagerDefinitions)
+            }
+            ExistingApiSpec existingApiManagerDefinition = executeStep("API Manager Definition - ${apiHeader}",
+                                                                       skipReason) {
+                def isMule4 = deployer.isMule4Request(appDeploymentRequest)
+                def internalSpec = new ApiSpec(apiSpecification.exchangeAssetId,
+                                               apiSpecification.endpoint,
+                                               environment,
+                                               apiSpecification.apiMajorVersion,
+                                               isMule4)
+                apiManagerDeployer.synchronizeApiDefinition(internalSpec,
+                                                            appDeploymentRequest.appVersion)
+            } as ExistingApiSpec
+            if (existingApiManagerDefinition) {
+                appDeploymentRequest.setAutoDiscoveryId(apiSpecification.autoDiscoveryPropertyName,
+                                                        existingApiManagerDefinition.id)
+                skipReason = isFeatureDisabled(Features.PolicySync)
+            } else {
+                skipReason = 'API Sync was disabled so policy is too'
+            }
+            executeStep("Policy Sync - ${apiHeader}",
+                        skipReason) {
+                policyDeployer.synchronizePolicies(existingApiManagerDefinition,
+                                                   desiredPolicies)
+            }
         }
     }
 }

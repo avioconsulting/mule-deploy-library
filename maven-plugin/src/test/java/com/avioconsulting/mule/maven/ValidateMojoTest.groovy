@@ -4,14 +4,20 @@ import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.ArtifactHandler
 import org.apache.maven.project.MavenProject
 import org.junit.Before
+import org.junit.BeforeClass
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-class ValidateMojoTest {
+class ValidateMojoTest implements MavenInvoke {
     def logger = new TestLogger()
+
+    @BeforeClass
+    static void setupApp() {
+        buildApp()
+    }
 
     @Before
     void cleanup() {
@@ -59,7 +65,7 @@ muleDeploy {
         environment 'DEV'
         applicationName 'the-app'
         appVersion '1.2.3'
-        file 'path/to/file.jar'
+        file '${builtFile}'
         targetServerOrClusterName 'theServer'
     }
 }
@@ -85,7 +91,7 @@ muleDeploy {
         d
         applicationName 'the-app'
         appVersion '1.2.3'
-        file 'path/to/file.jar'
+        file '${builtFile}'
         targetServerOrClusterName 'theServer'
     }
 }
@@ -128,7 +134,7 @@ muleDeploy {
         environment params.env
         applicationName 'the-app'
         appVersion versionsForEnvironments[params.env]
-        file 'path/to/file.jar'
+        file '${builtFile}'
         targetServerOrClusterName serverForEnvironments[params.env]
     }
 }

@@ -58,6 +58,7 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
                                                         resolvedApiSpec.exchangeAssetVersion,
                                                         resolvedApiSpec.endpoint,
                                                         resolvedApiSpec.environment,
+                                                        resolvedApiSpec.apiMajorVersion,
                                                         resolvedApiSpec.isMule4OrAbove)
                 updateApiDefinition(newDefinition)
                 return newDefinition
@@ -71,6 +72,7 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
                                        resolvedApiSpec.exchangeAssetVersion,
                                        resolvedApiSpec.endpoint,
                                        resolvedApiSpec.environment,
+                                       resolvedApiSpec.apiMajorVersion,
                                        resolvedApiSpec.isMule4OrAbove)
         }
         logger.println 'API definition does not yet exist, will create'
@@ -78,18 +80,22 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
     }
 
     private ApiQueryResponse chooseApiDefinition(String instanceLabel,
+                                                 String majorApiVersion,
                                                  List<ApiQueryResponse> responses) {
-        if (responses.size() == 1) {
-            return responses[0]
+        def responsesForThisVersion = responses.findAll { r ->
+            r.productVersion == majorApiVersion
         }
-        def matchViaLabel = responses.find { r ->
+        if (responsesForThisVersion.size() == 1) {
+            return responsesForThisVersion[0]
+        }
+        def matchViaLabel = responsesForThisVersion.find { r ->
             r.instanceLabel == instanceLabel
         }
         if (matchViaLabel) {
             return matchViaLabel
         }
         logger.println "There were multiple API definitions for this Exchange asset and none of them were labeled with '${instanceLabel}' so using the first one"
-        responses[0]
+        responsesForThisVersion[0]
     }
 
     private ExistingApiSpec getExistingApiDefinition(ApiSpec desiredApiManagerDefinition) {
@@ -109,7 +115,11 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
         }
         def allApis = queryResponses.assets.collectMany { a -> a.apis }
         def correctQueryResponse = chooseApiDefinition(desiredApiManagerDefinition.instanceLabel,
+                                                       desiredApiManagerDefinition.apiMajorVersion,
                                                        allApis)
+        if (correctQueryResponse == null) {
+            return null
+        }
         println "Identified API ID ${correctQueryResponse.id}, now retrieving details"
         request = new HttpGet(getApiManagerUrl("/${correctQueryResponse.id}",
                                                environment))
@@ -191,7 +201,8 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
             logger.println('In dry-run mode and Exchange push has not yet occurred (could not find asset) so using placeholder')
             chosenAssetVersion = DRY_RUN_API_ID
         } else {
-            chosenAssetVersion = pickVersion(appVersion,
+            chosenAssetVersion = pickVersion(apiManagerDefinition.apiMajorVersion,
+                                             appVersion,
                                              assets)
         }
         logger.println("Identified asset version ${chosenAssetVersion}")
@@ -199,27 +210,34 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
                             chosenAssetVersion)
     }
 
-    private static Version getVersion(String version) {
-        def split = version.split('\\.')
-        assert split.size() == 3: "Expected version ${version} to have only 3 parts!"
-        new Version(Integer.parseInt(split[0]),
-                    Integer.parseInt(split[1]),
-                    Integer.parseInt(split[2]),
-                    null)
-    }
-
-    private static String pickVersion(String appVersion,
-                                      List<GetAssetsQuery.Asset> assets) {
-        def parsedVersions = assets.collect { asset ->
-            getVersion(asset.version)
+    private String pickVersion(String apiMajorVersion,
+                               String appVersion,
+                               List<GetAssetsQuery.Asset> assets) {
+        def parsedVersions = assets.findAll { asset ->
+            asset.versionGroup == apiMajorVersion
+        }.collect { asset ->
+            parseVersion(asset.version)
         }
-        def appVersionParsed = getVersion(appVersion)
+        def appVersionParsed = parseVersion(appVersion)
+        def majorApiVersionNumber = getMajorVersionNumber(apiMajorVersion)
+        if (majorApiVersionNumber != appVersionParsed.majorVersion) {
+            // our app, even if supporting 2 API versions, can only have a single app (think Runtime Manager)
+            // version. therefore we have to use a "hypothetical" 1.x.x app version as our baseline if we
+            // are looking for a v1 API Exchange asset
+            appVersionParsed = new Version(majorApiVersionNumber,
+                                           appVersionParsed.minorVersion,
+                                           appVersionParsed.patchLevel,
+                                           null)
+            logger.println("Our app (${appVersion}) is supporting multiple API definitions but we are currently managing a lower major version of the API Definition, ${apiMajorVersion}. Therefore we will look for the latest Exchange asset version <= ${appVersionParsed}")
+        } else {
+            logger.println("Looking for latest Exchange asset version <= app version of ${appVersionParsed}")
+        }
         def result = parsedVersions.sort().reverse().find { version ->
             version <= appVersionParsed
         }
         if (!result) {
             def availableVersions = assets.collect { a -> a.version }
-            throw new Exception("Expected to find an asset version <= our app version of ${appVersion} but did not! Asset versions found in Exchange were ${availableVersions}")
+            throw new Exception("Expected to find a ${apiMajorVersion} asset version <= our app version of ${appVersion} but did not! Asset versions found in Exchange were ${availableVersions}")
         }
         return result
     }

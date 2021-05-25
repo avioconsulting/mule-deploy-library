@@ -12,6 +12,7 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -60,14 +61,15 @@ class ApiManagerDeployerTest extends BaseTest {
                 putHeader('Content-Type',
                           'application/json')
                 end(JsonOutput.toJson([
-                        id           : 123,
-                        endpoint     : [
+                        id            : 123,
+                        endpoint      : [
                                 uri                : 'https://some.endpoint',
                                 muleVersion4OrAbove: true
                         ],
-                        assetId      : 'the-asset-id',
-                        assetVersion : '1.2.3',
-                        instanceLabel: 'DEV - Automated'
+                        assetId       : 'the-asset-id',
+                        assetVersion  : '1.2.3',
+                        productVersion: 'v1',
+                        instanceLabel : 'DEV - Automated'
                 ]))
             }
         }
@@ -75,6 +77,7 @@ class ApiManagerDeployerTest extends BaseTest {
                                                        '1.2.3',
                                                        'https://some.endpoint',
                                                        'DEV',
+                                                       'v1',
                                                        true)
 
         // act
@@ -86,6 +89,7 @@ class ApiManagerDeployerTest extends BaseTest {
                                            '1.2.3',
                                            'https://some.endpoint',
                                            'DEV',
+                                           'v1',
                                            true)
         assertThat result,
                    is(equalTo(expected))
@@ -131,14 +135,15 @@ class ApiManagerDeployerTest extends BaseTest {
                 putHeader('Content-Type',
                           'application/json')
                 end(JsonOutput.toJson([
-                        id           : 123,
-                        endpoint     : [
+                        id            : 123,
+                        endpoint      : [
                                 uri                : 'https://some.endpoint',
                                 muleVersion4OrAbove: false
                         ],
-                        assetId      : 'the-asset-id',
-                        assetVersion : '1.2.3',
-                        instanceLabel: 'DEV - Automated'
+                        assetId       : 'the-asset-id',
+                        assetVersion  : '1.2.3',
+                        productVersion: 'v1',
+                        instanceLabel : 'DEV - Automated'
                 ]))
             }
         }
@@ -146,6 +151,7 @@ class ApiManagerDeployerTest extends BaseTest {
                                                        '1.2.3',
                                                        'https://some.endpoint',
                                                        'DEV',
+                                                       'v1',
                                                        false)
 
         // act
@@ -174,11 +180,13 @@ class ApiManagerDeployerTest extends BaseTest {
         // arrange
         def responses = [
                 new ApiQueryResponse('1234',
-                                     'does not matter')
+                                     'does not matter',
+                                     'v1')
         ]
 
         // act
         def result = deployer.chooseApiDefinition('the label',
+                                                  'v1',
                                                   responses)
 
         // assert
@@ -191,13 +199,16 @@ class ApiManagerDeployerTest extends BaseTest {
         // arrange
         def responses = [
                 new ApiQueryResponse('1234',
-                                     'does not matter'),
+                                     'does not matter',
+                                     'v1'),
                 new ApiQueryResponse('4567',
-                                     'the label')
+                                     'the label',
+                                     'v1')
         ]
 
         // act
         def result = deployer.chooseApiDefinition('the label',
+                                                  'v1',
                                                   responses)
 
         // assert
@@ -210,18 +221,65 @@ class ApiManagerDeployerTest extends BaseTest {
         // arrange
         def responses = [
                 new ApiQueryResponse('1234',
-                                     'does not matter'),
+                                     'does not matter',
+                                     'v1'),
                 new ApiQueryResponse('4567',
-                                     'does not matter 2')
+                                     'does not matter 2',
+                                     'v1')
         ]
 
         // act
         def result = deployer.chooseApiDefinition('the label',
+                                                  'v1',
                                                   responses)
 
         // assert
         assertThat result,
                    is(equalTo(responses[0]))
+    }
+
+    @Test
+    void chooseApiDefinition_multiple_versions_found() {
+        // arrange
+        def responses = [
+                new ApiQueryResponse('8989',
+                                     'the label',
+                                     'v2'),
+                new ApiQueryResponse('4567',
+                                     'the label',
+                                     'v1')
+        ]
+
+        // act
+        def result = deployer.chooseApiDefinition('the label',
+                                                  'v1',
+                                                  responses)
+
+        // assert
+        assertThat result,
+                   is(equalTo(responses[1]))
+    }
+
+    @Test
+    void chooseApiDefinition_multiple_versions_not_found() {
+        // arrange
+        def responses = [
+                new ApiQueryResponse('8989',
+                                     'the label',
+                                     'v2'),
+                new ApiQueryResponse('4567',
+                                     'the label',
+                                     'v2')
+        ]
+
+        // act
+        def result = deployer.chooseApiDefinition('the label',
+                                                  'v1',
+                                                  responses)
+
+        // assert
+        assertThat result,
+                   is(nullValue())
     }
 
     @Test
@@ -253,6 +311,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                false)
 
         // act
@@ -288,6 +347,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                false)
 
         // act
@@ -299,7 +359,7 @@ class ApiManagerDeployerTest extends BaseTest {
     }
 
     @Test
-    void getExistingApiDefinition_found() {
+    void getExistingApiDefinition_found_only_1_version_available() {
         // arrange
         withHttpServer { HttpServerRequest request ->
             if (mockAuthenticationOk(request)) {
@@ -323,6 +383,7 @@ class ApiManagerDeployerTest extends BaseTest {
                             ],
                             assetId       : 'the-asset-id',
                             assetVersion  : '1.2.3',
+                            productVersion: 'v1',
                             instanceLabel : 'DEV - Automated',
                             // should not disrupt anything
                             unmapped_field: 'hi'
@@ -330,7 +391,8 @@ class ApiManagerDeployerTest extends BaseTest {
                 } else {
                     // should not disrupt anything
                     def queryResponse = new ObjectMapper().convertValue(new ApiQueryResponse('1234',
-                                                                                             'does not matter'),
+                                                                                             'does not matter',
+                                                                                             'v1'),
                                                                         Map)
                     queryResponse['unmapped_field_2'] = 'hi'
                     responseMap = [
@@ -352,6 +414,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                false)
 
         // act
@@ -364,7 +427,56 @@ class ApiManagerDeployerTest extends BaseTest {
                                                   '1.2.3',
                                                   'https://some.endpoint',
                                                   'DEV',
+                                                  'v1',
                                                   false)))
+    }
+
+    @Test
+    void getExistingApiDefinition_only_different_versions_exist() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def queryResponse = new ObjectMapper().convertValue(new ApiQueryResponse('1234',
+                                                                                         'does not matter',
+                                                                                         'v1'),
+                                                                    Map)
+                queryResponse['unmapped_field_2'] = 'hi'
+                def responseMap = [
+                        total           : 1,
+                        unmapped_field_3: 'hi',
+                        assets          : [
+                                [
+                                        apis            : [
+                                                queryResponse
+                                        ],
+                                        unmapped_field_4: 'hi'
+                                ]
+                        ]
+                ]
+                end(new ObjectMapper().writeValueAsString(responseMap))
+            }
+        }
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               'v2',
+                                               false)
+
+        // act
+        def response = deployer.getExistingApiDefinition(desiredApiDefinition)
+
+        // assert
+        assertThat response,
+                   is(nullValue())
     }
 
     @Test
@@ -399,6 +511,7 @@ class ApiManagerDeployerTest extends BaseTest {
                                                        '1.3.3',
                                                        'https://some.endpoint',
                                                        'DEV',
+                                                       'v1',
                                                        false)
 
 
@@ -453,14 +566,15 @@ class ApiManagerDeployerTest extends BaseTest {
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.201910193'
+                                                version     : '1.0.201910193',
+                                                versionGroup: 'v1'
 
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.201910213'
-
+                                                version     : '1.0.201910213',
+                                                versionGroup: 'v1'
                                         ]
                                 ]
                         ]
@@ -471,6 +585,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -486,7 +601,7 @@ class ApiManagerDeployerTest extends BaseTest {
                    is(equalTo('Bearer the token'))
         assertThat sentPayload,
                    is(equalTo([
-                           query    : 'query GetAssets($asset_id: String!, $group_id: String!) { assets(asset: {groupId: $group_id, assetId: $asset_id}) { __typename assetId version } }',
+                           query    : 'query GetAssets($asset_id: String!, $group_id: String!) { assets(asset: {groupId: $group_id, assetId: $asset_id}) { __typename assetId version versionGroup } }',
                            variables: '{"asset_id":"the-asset-id","group_id":"the-org-id"}'
                    ]))
     }
@@ -514,6 +629,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -524,7 +640,129 @@ class ApiManagerDeployerTest extends BaseTest {
 
         // assert
         assertThat exception.message,
-                   is(containsString('Expected to find an asset version <= our app version of 1.0.202010213 but did not! Asset versions found in Exchange were []'))
+                   is(containsString('Expected to find a v1 asset version <= our app version of 1.0.202010213 but did not! Asset versions found in Exchange were []'))
+    }
+
+    @Test
+    void resolveAssetVersion_v1_there_but_not_v2() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def response = [
+                        data: [
+                                assets: [
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '1.0.201910193',
+                                                versionGroup: 'v1'
+
+                                        ],
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '1.0.201910213',
+                                                versionGroup: 'v1'
+                                        ]
+                                ]
+                        ]
+                ]
+                end(JsonOutput.toJson(response))
+            }
+        }
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               'v2',
+                                               true)
+
+        // act
+        def exception = shouldFail {
+            deployer.resolveAssetVersion(desiredApiDefinition,
+                                         '2.0.202010213')
+        }
+
+        // assert
+        assertThat exception.message,
+                   is(containsString('Expected to find a v2 asset version <= our app version of 2.0.202010213 but did not! Asset versions found in Exchange were [1.0.201910193, 1.0.201910213]'))
+    }
+
+    @Test
+    void resolveAssetVersion_both_versions_exist_v1_being_deployed_with_2_0_app_version() {
+        // arrange
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                          'application/json')
+                def response = [
+                        data: [
+                                assets: [
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '1.0.201910193',
+                                                versionGroup: 'v1'
+
+                                        ],
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '1.0.202010213',
+                                                versionGroup: 'v1'
+                                        ],
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '1.0.202110213',
+                                                versionGroup: 'v1'
+                                        ],
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '2.0.201911213',
+                                                versionGroup: 'v2'
+                                        ]
+                                ]
+                        ]
+                ]
+                end(JsonOutput.toJson(response))
+            }
+        }
+        def desiredApiDefinition = new ApiSpec('the-asset-id',
+                                               'https://some.endpoint',
+                                               'DEV',
+                                               'v1',
+                                               true)
+
+        // act
+        def result = deployer.resolveAssetVersion(desiredApiDefinition,
+                                                  '2.0.202010213')
+
+        // assert
+        assertThat '1.0.202010213 is the latest v1 version <= to our app version',
+                   result,
+                   is(equalTo(new ResolvedApiSpec('the-asset-id',
+                                                  '1.0.202010213',
+                                                  'https://some.endpoint',
+                                                  'DEV',
+                                                  'v1',
+                                                  true)))
     }
 
     @Test
@@ -551,6 +789,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -563,6 +802,7 @@ class ApiManagerDeployerTest extends BaseTest {
                                                   ApiManagerDeployer.DRY_RUN_API_ID,
                                                   'https://some.endpoint',
                                                   'DEV',
+                                                  'v1',
                                                   true)))
     }
 
@@ -586,14 +826,20 @@ class ApiManagerDeployerTest extends BaseTest {
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.201910193'
-
+                                                version     : '1.0.201910193',
+                                                versionGroup: 'v1'
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.201910213'
-
+                                                version     : '2.0.201910313',
+                                                versionGroup: 'v2'
+                                        ],
+                                        [
+                                                '__typename': 'Asset',
+                                                assetId     : 'foo',
+                                                version     : '1.0.201910213',
+                                                versionGroup: 'v1'
                                         ]
                                 ]
                         ]
@@ -604,6 +850,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -616,6 +863,7 @@ class ApiManagerDeployerTest extends BaseTest {
                                                   '1.0.201910213',
                                                   'https://some.endpoint',
                                                   'DEV',
+                                                  'v1',
                                                   true)))
     }
 
@@ -639,14 +887,14 @@ class ApiManagerDeployerTest extends BaseTest {
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.202010213'
-
+                                                version     : '1.0.202010213',
+                                                versionGroup: 'v1'
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.201910193'
-
+                                                version     : '1.0.201910193',
+                                                versionGroup: 'v1'
                                         ]
                                 ]
                         ]
@@ -657,6 +905,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -669,6 +918,7 @@ class ApiManagerDeployerTest extends BaseTest {
                                                   '1.0.202010213',
                                                   'https://some.endpoint',
                                                   'DEV',
+                                                  'v1',
                                                   true)))
     }
 
@@ -692,20 +942,20 @@ class ApiManagerDeployerTest extends BaseTest {
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.201910193'
-
+                                                version     : '1.0.201910193',
+                                                versionGroup: 'v1'
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.202010203'
-
+                                                version     : '1.0.202010203',
+                                                versionGroup: 'v1'
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.202011213'
-
+                                                version     : '1.0.202011213',
+                                                versionGroup: 'v1'
                                         ]
                                 ]
                         ]
@@ -716,6 +966,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -728,6 +979,7 @@ class ApiManagerDeployerTest extends BaseTest {
                                                   '1.0.202010203',
                                                   'https://some.endpoint',
                                                   'DEV',
+                                                  'v1',
                                                   true)))
     }
 
@@ -751,20 +1003,20 @@ class ApiManagerDeployerTest extends BaseTest {
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.202510193'
-
+                                                version     : '1.0.202510193',
+                                                versionGroup: 'v1'
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.202510203'
-
+                                                version     : '1.0.202510203',
+                                                versionGroup: 'v1'
                                         ],
                                         [
                                                 '__typename': 'Asset',
                                                 assetId     : 'foo',
-                                                version     : '1.0.202511213'
-
+                                                version     : '1.0.202511213',
+                                                versionGroup: 'v1'
                                         ]
                                 ]
                         ]
@@ -775,6 +1027,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -785,7 +1038,7 @@ class ApiManagerDeployerTest extends BaseTest {
 
         // assert
         assertThat exception.message,
-                   is(containsString('Expected to find an asset version <= our app version of 1.0.202010213 but did not! Asset versions found in Exchange were [1.0.202510193, 1.0.202510203, 1.0.202511213]'))
+                   is(containsString('Expected to find a v1 asset version <= our app version of 1.0.202010213 but did not! Asset versions found in Exchange were [1.0.202510193, 1.0.202510203, 1.0.202511213]'))
     }
 
     @Test
@@ -812,14 +1065,14 @@ class ApiManagerDeployerTest extends BaseTest {
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.201910193'
-
+                                                    version     : '1.0.201910193',
+                                                    versionGroup: 'v1'
                                             ],
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.202010213'
-
+                                                    version     : '1.0.202010213',
+                                                    versionGroup: 'v1'
                                             ]
                                     ]
                             ]
@@ -834,14 +1087,15 @@ class ApiManagerDeployerTest extends BaseTest {
                     created = true
                     statusCode = 200
                     response = [
-                            id           : 123,
-                            endpoint     : [
+                            id            : 123,
+                            endpoint      : [
                                     uri                : 'https://some.endpoint',
                                     muleVersion4OrAbove: true
                             ],
-                            assetId      : 'the-asset-id',
-                            assetVersion : '1.2.3',
-                            instanceLabel: 'DEV - Automated'
+                            assetId       : 'the-asset-id',
+                            assetVersion  : '1.2.3',
+                            productVersion: 'v1',
+                            instanceLabel : 'DEV - Automated'
                     ]
                 } else {
                     statusCode = 500
@@ -853,6 +1107,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -891,14 +1146,14 @@ class ApiManagerDeployerTest extends BaseTest {
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.201910193'
-
+                                                    version     : '1.0.201910193',
+                                                    versionGroup: 'v1'
                                             ],
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.202010213'
-
+                                                    version     : '1.0.202010213',
+                                                    versionGroup: 'v1'
                                             ]
                                     ]
                             ]
@@ -906,14 +1161,15 @@ class ApiManagerDeployerTest extends BaseTest {
                 } else if (uri == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234' && request.method() == HttpMethod.GET) {
                     statusCode = 200
                     response = [
-                            id           : 1234,
-                            endpoint     : [
+                            id            : 1234,
+                            endpoint      : [
                                     uri                : 'https://some.endpoint',
                                     muleVersion4OrAbove: false
                             ],
-                            assetId      : 'the-asset-id',
-                            assetVersion : '1.0.202010213',
-                            instanceLabel: 'DEV - Automated'
+                            assetId       : 'the-asset-id',
+                            assetVersion  : '1.0.202010213',
+                            productVersion: 'v1',
+                            instanceLabel : 'DEV - Automated'
                     ]
                 } else if (uri == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis?assetId=the-asset-id') {
                     statusCode = 200
@@ -923,7 +1179,8 @@ class ApiManagerDeployerTest extends BaseTest {
                                     [
                                             apis: [
                                                     new ApiQueryResponse('1234',
-                                                                         'does not matter')
+                                                                         'does not matter',
+                                                                         'v1')
                                             ]
                                     ]
                             ]
@@ -955,6 +1212,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                false)
 
         // act
@@ -997,14 +1255,14 @@ class ApiManagerDeployerTest extends BaseTest {
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.201910193'
-
+                                                    version     : '1.0.201910193',
+                                                    versionGroup: 'v1'
                                             ],
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.202010213'
-
+                                                    version     : '1.0.202010213',
+                                                    versionGroup: 'v1'
                                             ]
                                     ]
                             ]
@@ -1012,14 +1270,15 @@ class ApiManagerDeployerTest extends BaseTest {
                 } else if (uri == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234' && request.method() == HttpMethod.GET) {
                     statusCode = 200
                     response = [
-                            id           : 1234,
-                            endpoint     : [
+                            id            : 1234,
+                            endpoint      : [
                                     uri                : 'https://some.endpoint',
                                     muleVersion4OrAbove: false
                             ],
-                            assetId      : 'the-asset-id',
-                            assetVersion : '1.0.202010213',
-                            instanceLabel: 'DEV - Automated'
+                            assetId       : 'the-asset-id',
+                            assetVersion  : '1.0.202010213',
+                            productVersion: 'v1',
+                            instanceLabel : 'DEV - Automated'
                     ]
                 } else if (uri == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis?assetId=the-asset-id') {
                     statusCode = 200
@@ -1029,7 +1288,8 @@ class ApiManagerDeployerTest extends BaseTest {
                                     [
                                             apis: [
                                                     new ApiQueryResponse('1234',
-                                                                         'does not matter')
+                                                                         'does not matter',
+                                                                         'v1')
                                             ]
                                     ]
                             ]
@@ -1061,6 +1321,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                false)
 
         // act
@@ -1103,14 +1364,14 @@ class ApiManagerDeployerTest extends BaseTest {
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.201910193'
-
+                                                    version     : '1.0.201910193',
+                                                    versionGroup: 'v1'
                                             ],
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.202010213'
-
+                                                    version     : '1.0.202010213',
+                                                    versionGroup: 'v1'
                                             ]
                                     ]
                             ]
@@ -1118,14 +1379,15 @@ class ApiManagerDeployerTest extends BaseTest {
                 } else if (uri == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234' && request.method() == HttpMethod.GET) {
                     statusCode = 200
                     response = [
-                            id           : 1234,
-                            endpoint     : [
+                            id            : 1234,
+                            endpoint      : [
                                     uri                : 'https://some.endpoint',
                                     muleVersion4OrAbove: false
                             ],
-                            assetId      : 'the-asset-id',
-                            assetVersion : '1.0.202010213',
-                            instanceLabel: 'DEV - Automated'
+                            assetId       : 'the-asset-id',
+                            assetVersion  : '1.0.202010213',
+                            productVersion: 'v1',
+                            instanceLabel : 'DEV - Automated'
                     ]
                 } else if (uri == '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis?assetId=the-asset-id') {
                     statusCode = 200
@@ -1135,7 +1397,8 @@ class ApiManagerDeployerTest extends BaseTest {
                                     [
                                             apis: [
                                                     new ApiQueryResponse('1234',
-                                                                         'does not matter')
+                                                                         'does not matter',
+                                                                         'v1')
                                             ]
                                     ]
                             ]
@@ -1167,6 +1430,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act
@@ -1209,14 +1473,14 @@ class ApiManagerDeployerTest extends BaseTest {
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.201910193'
-
+                                                    version     : '1.0.201910193',
+                                                    versionGroup: 'v1'
                                             ],
                                             [
                                                     '__typename': 'Asset',
                                                     assetId     : 'foo',
-                                                    version     : '1.0.202010213'
-
+                                                    version     : '1.0.202010213',
+                                                    versionGroup: 'v1'
                                             ]
                                     ]
                             ]
@@ -1231,14 +1495,15 @@ class ApiManagerDeployerTest extends BaseTest {
                     created = true
                     statusCode = 200
                     response = [
-                            id           : 123,
-                            endpoint     : [
+                            id            : 123,
+                            endpoint      : [
                                     uri                : 'https://some.endpoint',
                                     muleVersion4OrAbove: true
                             ],
-                            assetId      : 'the-asset-id',
-                            assetVersion : '1.2.3',
-                            instanceLabel: 'DEV - Automated'
+                            assetId       : 'the-asset-id',
+                            assetVersion  : '1.2.3',
+                            productVersion: 'v1',
+                            instanceLabel : 'DEV - Automated'
                     ]
                 } else {
                     statusCode = 500
@@ -1250,6 +1515,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def desiredApiDefinition = new ApiSpec('the-asset-id',
                                                'https://some.endpoint',
                                                'DEV',
+                                               'v1',
                                                true)
 
         // act

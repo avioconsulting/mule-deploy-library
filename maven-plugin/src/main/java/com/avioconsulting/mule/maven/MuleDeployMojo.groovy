@@ -42,7 +42,7 @@ class MuleDeployMojo extends BaseMojo {
                                               this.environmentsToDoDesignCenterDeploymentOn)
         try {
             deployer.deployApplication(deploymentPackage.deploymentRequest,
-                                       deploymentPackage.apiSpecification,
+                                       deploymentPackage.apiSpecifications,
                                        deploymentPackage.desiredPolicies,
                                        deploymentPackage.enabledFeatures)
         }

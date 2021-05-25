@@ -539,7 +539,8 @@ class OnPremDeployerTest extends BaseTest {
                                                   file,
                                                   'new-app',
                                                   '1.2.3')
-        request.setAutoDiscoveryId('1234')
+        request.setAutoDiscoveryId('the.auto.disc.prop',
+                                   '1234')
 
         // act
         deployer.deploy(request)
@@ -551,7 +552,7 @@ class OnPremDeployerTest extends BaseTest {
                            'mule.agent.application.properties.service': [
                                    applicationName: 'new-app',
                                    properties     : [
-                                           'auto-discovery.api-id': '1234'
+                                           'the.auto.disc.prop': '1234'
                                    ]
                            ]
                    ]))

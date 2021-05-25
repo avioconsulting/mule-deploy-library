@@ -6,7 +6,7 @@ import groovy.transform.Canonical
 
 @Canonical
 @JsonInclude(JsonInclude.Include.NON_NULL)
-class CloudhubAppProperties extends BaseAppProperties {
+class CloudhubAppProperties {
     String env
     @JsonProperty('crypto.key')
     String cryptoKey

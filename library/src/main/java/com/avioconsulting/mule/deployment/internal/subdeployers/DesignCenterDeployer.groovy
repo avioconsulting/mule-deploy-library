@@ -7,6 +7,7 @@ import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentReque
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
+import com.fasterxml.jackson.core.Version
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
@@ -15,19 +16,9 @@ import org.apache.http.client.methods.HttpUriRequest
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.nio.file.Path
-
 class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCenterDeployer, ApiManagerFunctionality {
     private final HttpClientWrapper clientWrapper
     private final ILogger logger
-    private static final List<String> IGNORE_DC_FILES = [
-            'exchange_modules', // we don't deal with Exchange dependencies
-            '.gitignore',
-            'exchange.json', // see above
-            '.designer.json'
-    ]
     private final DryRunMode dryRunMode
     private final EnvironmentLocator environmentLocator
 
@@ -72,18 +63,20 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
     }
 
     def deleteDesignCenterFiles(String projectId,
+                                String branch,
                                 List<RamlFile> files) {
         files.each { ramlFile ->
             def file = ramlFile.fileName
             logger.println("Removing unused file from Design Center: ${file}")
             // subdirectories in filename do not go in RESTful URL
             def urlEncodedFileName = URLEncoder.encode(file)
-            executeDesignCenterRequest(new HttpDelete("${getFilesUrl(projectId)}/${urlEncodedFileName}"),
+            executeDesignCenterRequest(new HttpDelete("${getFilesUrl(projectId, branch)}/${urlEncodedFileName}"),
                                        "Removing file ${file}")
         }
     }
 
     def uploadDesignCenterFiles(String projectId,
+                                String branch,
                                 List<RamlFile> files) {
         logger.println("Uploading files: ${files.collect { f -> f.fileName }} to Design Center")
         def requestPayload = files.collect { file ->
@@ -92,7 +85,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                     content: file.contents
             ]
         }
-        def request = new HttpPost("${getMasterUrl(projectId)}/save?commit=true&message=fromAPI").with {
+        def request = new HttpPost("${getBranchUrl(projectId, branch)}/save?commit=true&message=fromAPI").with {
             setEntity(new StringEntity(JsonOutput.toJson(requestPayload),
                                        ContentType.APPLICATION_JSON))
             it
@@ -101,13 +94,16 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                                    'Uploading design center files')
     }
 
-    def getMasterUrl(String projectId) {
-        getMasterUrl(clientWrapper,
-                     projectId)
+    def getBranchUrl(String projectId,
+                     String branch) {
+        getBranchUrl(clientWrapper,
+                     projectId,
+                     branch)
     }
 
-    private def getFilesUrl(String projectId) {
-        "${getMasterUrl(projectId)}/files"
+    private def getFilesUrl(String projectId,
+                            String branch) {
+        "${getBranchUrl(projectId, branch)}/files"
     }
 
     def executeDesignCenterRequest(HttpUriRequest request,
@@ -119,26 +115,17 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                                    resultHandler)
     }
 
-    private static boolean isIgnored(Path something) {
-        def parent = something.parent
-        if (parent) {
-            if (IGNORE_DC_FILES.contains(parent.toString())) {
-                return true
-            }
-            return isIgnored(parent)
-        }
-        return IGNORE_DC_FILES.contains(something.toString())
-    }
-
-    List<RamlFile> getExistingDesignCenterFiles(String projectId) {
+    List<RamlFile> getExistingDesignCenterFiles(String projectId,
+                                                String branch) {
         logger.println('Fetching list of existing Design Center RAML files')
-        def url = getFilesUrl(projectId)
+        def url = getFilesUrl(projectId,
+                              branch)
         def request = new HttpGet(url)
         executeDesignCenterRequest(request,
                                    'Fetching project files') { List<Map> results ->
             def filesWeCareAbout = results.findAll { result ->
                 def asFile = new File(result.path)
-                result.type != 'FOLDER' && !isIgnored(asFile.toPath())
+                result.type != 'FOLDER' && !FileBasedAppDeploymentRequest.isIgnored(asFile.toPath())
             }
             return filesWeCareAbout.collect { result ->
                 def filePath = result.path
@@ -153,50 +140,37 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
         }
     }
 
-    List<RamlFile> getRamlFilesFromApp(FileBasedAppDeploymentRequest deploymentRequest) {
-        return FileSystems.newFileSystem(deploymentRequest.file.toPath(),
-                                         null).withCloseable { fs ->
-            def apiPath = fs.getPath('/api')
-            if (!Files.exists(apiPath)) {
-                return []
-            }
-            Files.walk(apiPath).findAll { p ->
-                def relativeToApiDirectory = apiPath.relativize(p)
-                !Files.isDirectory(p) &&
-                        !isIgnored(relativeToApiDirectory)
-            }.collect { p ->
-                def relativeToApiDirectory = apiPath.relativize(p)
-                new RamlFile(relativeToApiDirectory.toString(),
-                             p.text)
-            }
-        }
-    }
-
-    private static String getMainRamlFile(ApiSpecification apiSpec,
-                                          List<RamlFile> ramlFiles) {
-        apiSpec.mainRamlFile ?: ramlFiles.find { ramlFile ->
-            new File(ramlFile.fileName).parentFile == null
-        }.fileName
-    }
-
     def pushToExchange(ApiSpecification apiSpec,
                        String projectId,
-                       List<RamlFile> ramlFiles,
                        String appVersion) {
-        def mainRamlFile = getMainRamlFile(apiSpec,
-                                           ramlFiles)
+        def apiMajorVersion = apiSpec.apiMajorVersion
+        def majorVersionNumber = getMajorVersionNumber(apiMajorVersion)
+        def parsedAppVersion = parseVersion(appVersion)
+        if (parsedAppVersion.majorVersion != majorVersionNumber) {
+            def newAppVersion = new Version(majorVersionNumber,
+                                            parsedAppVersion.minorVersion,
+                                            parsedAppVersion.patchLevel,
+                                            null).toString()
+            logger.println "Since app is supporting multiple API specs and this push is for ${apiMajorVersion}, using ${newAppVersion} instead of ${appVersion} because Exchange will reject otherwise."
+            appVersion = newAppVersion
+        }
+        def branchName = apiSpec.designCenterBranchName
         def requestPayload = [
-                main      : mainRamlFile,
-                apiVersion: apiSpec.apiMajorVersion,
+                main      : apiSpec.mainRamlFile,
+                apiVersion: apiMajorVersion,
                 version   : appVersion,
                 assetId   : apiSpec.exchangeAssetId,
                 name      : apiSpec.name,
                 groupId   : clientWrapper.anypointOrganizationId,
-                classifier: 'raml'
+                classifier: 'raml',
+                metadata  : [
+                        branchId : branchName,
+                        projectId: projectId
+                ]
         ]
         def requestJson = JsonOutput.toJson(requestPayload)
         logger.println "Pushing to Exchange with payload ${JsonOutput.prettyPrint(requestJson)}"
-        def request = new HttpPost("${getMasterUrl(projectId)}/publish/exchange").with {
+        def request = new HttpPost("${getBranchUrl(projectId, branchName)}/publish/exchange").with {
             setEntity(new StringEntity(requestJson,
                                        ContentType.APPLICATION_JSON))
             it
@@ -207,9 +181,8 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
 
     def synchronizeDesignCenterFromApp(ApiSpecification apiSpec,
                                        FileBasedAppDeploymentRequest appFileInfo) {
-        def ramlFiles = getRamlFilesFromApp(appFileInfo)
         synchronizeDesignCenter(apiSpec,
-                                ramlFiles,
+                                appFileInfo.ramlFilesFromApp,
                                 appFileInfo.appVersion)
     }
 
@@ -220,20 +193,18 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
             logger.println 'No RAML files in project, therefore nothing to sync'
             return
         }
-        def mainRamlFile = getMainRamlFile(apiSpec,
-                                           ramlFiles)
-        if (!ramlFiles.any { file -> file.fileName == mainRamlFile }) {
-            throw new Exception("You specified '${mainRamlFile}' as your main RAML file but it does not exist in your application!")
-        }
         def projectId = getDesignCenterProjectId(apiSpec.name)
+        def branchName = apiSpec.designCenterBranchName
         def withLock = { Closure closure ->
             new DesignCenterLock(clientWrapper,
                                  logger,
-                                 projectId).withCloseable {
+                                 projectId,
+                                 branchName).withCloseable {
                 closure()
             }
         }
-        def existingFiles = getExistingDesignCenterFiles(projectId)
+        def existingFiles = getExistingDesignCenterFiles(projectId,
+                                                         branchName)
         def changes = ramlFiles - existingFiles
         if (changes.empty) {
             logger.println('New RAML contents match the old contents, will not update Design Center')
@@ -247,7 +218,6 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
                 withLock {
                     pushToExchange(apiSpec,
                                    projectId,
-                                   ramlFiles,
                                    appVersion)
                 }
             } else {
@@ -265,15 +235,16 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
             withLock {
                 if (noLongerExist.any()) {
                     deleteDesignCenterFiles(projectId,
+                                            branchName,
                                             noLongerExist)
                 } else {
                     logger.println('No existing files to delete')
                 }
                 uploadDesignCenterFiles(projectId,
+                                        branchName,
                                         changes)
                 pushToExchange(apiSpec,
                                projectId,
-                               ramlFiles,
                                appVersion)
             }
         }

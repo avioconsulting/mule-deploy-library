@@ -38,7 +38,7 @@ class OnPremContextTest implements MavenInvoke {
             assertThat appName,
                        is(equalTo('mule-deploy-lib-v4-test-app'))
             assertThat appVersion,
-                       is(equalTo('1.0.0'))
+                       is(equalTo('2.2.9'))
             assertThat file,
                        is(equalTo(builtFile))
             assertThat targetServerOrClusterName,

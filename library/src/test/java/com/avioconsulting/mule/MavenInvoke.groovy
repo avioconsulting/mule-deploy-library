@@ -24,17 +24,20 @@ trait MavenInvoke {
                               appVersion)
     }
 
-    static def buildApp(String muleVersion = '4.1.4') {
+    static def buildApp(String muleVersion = '4.3.0') {
         def pomFile = getProjectDir('mule4_project')
+        def appVersion = '2.2.9'
         pomFile.text = pomFile.text.replaceAll(/<app.runtime>\S+<\/app.runtime>/,
                                                "<app.runtime>${muleVersion}</app.runtime>")
+                .replaceAll(/<version>replaceme<\/version>/,
+                            "<version>${appVersion}</version>")
         projectDirectory = pomFile.parentFile
         def targetDir = new File(projectDirectory,
                                  'target')
         builtFile = new File(targetDir,
                              getFileName('mule-deploy-lib-v4-test-app',
-                                         '1.0.0',
-                                         '4.2.2'))
+                                         appVersion,
+                                         muleVersion))
         def mavenInvokeRequest = new DefaultInvocationRequest().with {
             setGoals(['clean', 'package'])
             setPomFile(pomFile)

@@ -62,10 +62,10 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
             assertThat normalizedAppName,
                        is(equalTo('client-mule-deploy-lib-v4-test-app-dev'))
             assertThat appVersion,
-                       is(equalTo('1.0.0'))
+                       is(equalTo('2.2.9'))
             assertThat 'app.runtime in the POM',
                        workerSpecRequest.muleVersion,
-                       is(equalTo('4.1.4'))
+                       is(equalTo('4.3.0'))
         }
     }
 
@@ -142,7 +142,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                    is(equalTo([
                            domain                   : 'client-mule-deploy-lib-v4-test-app-dev',
                            muleVersion              : [
-                                   version: '4.1.4'
+                                   version: '4.3.0'
                            ],
                            monitoringAutoRestart    : true,
                            workers                  : [
@@ -190,7 +190,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                    is(equalTo([
                            domain                   : 'client-mule-deploy-lib-v4-test-app-dev',
                            muleVersion              : [
-                                   version: '4.1.4'
+                                   version: '4.3.0'
                            ],
                            region                   : 'us-east-1',
                            monitoringAutoRestart    : true,
@@ -239,7 +239,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                    is(equalTo([
                            domain                   : 'client-mule-deploy-lib-v4-test-app-dev',
                            muleVersion              : [
-                                   version: '4.1.4'
+                                   version: '4.3.0'
                            ],
                            region                   : 'us-east-1',
                            monitoringAutoRestart    : true,
@@ -291,7 +291,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                    is(equalTo([
                            domain                   : 'client-mule-deploy-lib-v4-test-app-dev',
                            muleVersion              : [
-                                   version: '4.1.4'
+                                   version: '4.3.0'
                            ],
                            monitoringAutoRestart    : true,
                            workers                  : [
@@ -339,7 +339,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                    is(equalTo([
                            domain                   : 'client-mule-deploy-lib-v4-test-app-dev',
                            muleVersion              : [
-                                   version: '4.1.4'
+                                   version: '4.3.0'
                            ],
                            monitoringAutoRestart    : true,
                            workers                  : [
@@ -391,7 +391,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                    is(equalTo([
                            domain                   : 'client-mule-deploy-lib-v4-test-app-dev',
                            muleVersion              : [
-                                   version: '4.1.4'
+                                   version: '4.3.0'
                            ],
                            monitoringAutoRestart    : true,
                            workers                  : [
@@ -490,7 +490,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                    is(equalTo([
                            domain                   : 'client-mule-deploy-lib-v4-test-app-dev',
                            muleVersion              : [
-                                   version : '4.1.4',
+                                   version : '4.3.0',
                                    updateId: 'abcdefg'
                            ],
                            monitoringAutoRestart    : true,

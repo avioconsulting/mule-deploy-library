@@ -6,5 +6,6 @@ query GetAssets ($asset_id: String!, $group_id: String!) {
         __typename
         assetId
         version
+        versionGroup
     }
 }

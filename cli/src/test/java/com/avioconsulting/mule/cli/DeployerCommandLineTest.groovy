@@ -7,6 +7,7 @@ import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.api.models.*
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import org.apache.commons.io.FileUtils
+import org.junit.BeforeClass
 import org.junit.Test
 import picocli.CommandLine
 
@@ -14,7 +15,12 @@ import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-class DeployerCommandLineTest {
+class DeployerCommandLineTest implements MavenInvoke {
+    @BeforeClass
+    static void setupApp() {
+        buildApp()
+    }
+
     DeployerCommandLine executeCommandLine(IDeployerFactory mockDeployerFactory,
                                            String groovyFileText,
                                            String user = 'our user',
@@ -59,11 +65,11 @@ class DeployerCommandLineTest {
     void runs() {
         // arrange
         FileBasedAppDeploymentRequest actualApp
-        ApiSpecification actualApiSpec
+        ApiSpecificationList actualApiSpec
         List<Features> actualFeatures
         def mockDeployer = [
                 deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
-                                     ApiSpecification apiSpecification,
+                                     ApiSpecificationList apiSpecification,
                                      List<Policy> desiredPolicies,
                                      List<Features> enabledFeatures ->
                     actualApp = appDeploymentRequest
@@ -89,7 +95,7 @@ muleDeploy {
         environment 'DEV'
         applicationName 'the-app'
         appVersion '1.2.3'
-        file 'path/to/file.jar'
+        file '${builtFile}'
         targetServerOrClusterName 'theServer'
     }
 }
@@ -104,7 +110,7 @@ muleDeploy {
                    actualFeatures,
                    is(equalTo([Features.AppDeployment, Features.DesignCenterSync, Features.ApiManagerDefinitions]))
         assertThat actualApiSpec,
-                   is(nullValue())
+                   is(equalTo([]))
         assert actualApp instanceof OnPremDeploymentRequest
         actualApp.with {
             assertThat it.appName,
@@ -120,7 +126,7 @@ muleDeploy {
         def deployed = false
         def mockDeployer = [
                 deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
-                                     ApiSpecification apiSpecification,
+                                     ApiSpecificationList apiSpecification,
                                      List<Policy> desiredPolicies,
                                      List<Features> enabledFeatures ->
                     deployed = true
@@ -144,7 +150,7 @@ muleDeploy {
         environment 'DEV'
         applicationName 'the-app'
         appVersion '1.2.3'
-        file 'path/to/file.jar'
+        file '${builtFile}'
         targetServerOrClusterName 'theServer'
     }
 }
@@ -167,7 +173,7 @@ muleDeploy {
         FileBasedAppDeploymentRequest actualApp
         def mockDeployer = [
                 deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
-                                     ApiSpecification apiSpecification,
+                                     ApiSpecificationList apiSpecification,
                                      List<Policy> desiredPolicies,
                                      List<Features> enabledFeatures ->
                     actualApp = appDeploymentRequest
@@ -194,7 +200,7 @@ muleDeploy {
         workerSpecs {
             muleVersion params.env == 'DEV' ? '4.2.2' : '4.1.5'
         }
-        file 'path/to/file.jar'
+        file '${builtFile}'
         cryptoKey 'theKey'
         autoDiscovery {
             clientId 'the_client_id'
@@ -285,7 +291,7 @@ muleDeploy {
         environment 'DEV'
         applicationName 'the-app'
         appVersion '1.2.3'
-        file 'path/to/file.jar'
+        file '${builtFile}'
         targetServerOrClusterName 'theServer'
     }
 }

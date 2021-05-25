@@ -8,19 +8,21 @@ class DesignCenterLock implements Closeable, DesignCenterHttpFunctionality {
     private final HttpClientWrapper clientWrapper
     private final ILogger logger
     private final String projectId
-    private final String masterUrl
+    private final String branchUrl
 
     DesignCenterLock(HttpClientWrapper clientWrapper,
                      ILogger logger,
-                     String projectId) {
+                     String projectId,
+                     String branch) {
         this.projectId = projectId
         this.logger = logger
         this.clientWrapper = clientWrapper
-        masterUrl = getMasterUrl(clientWrapper,
-                                 projectId)
+        this.branchUrl = getBranchUrl(clientWrapper,
+                                      projectId,
+                                      branch)
         logger.println 'Acquiring Design Center Lock'
         executeDesignCenterRequest(clientWrapper,
-                                   new HttpPost("${masterUrl}/acquireLock"),
+                                   new HttpPost("${branchUrl}/acquireLock"),
                                    'Acquire design center lock')
     }
 
@@ -28,7 +30,7 @@ class DesignCenterLock implements Closeable, DesignCenterHttpFunctionality {
     void close() throws IOException {
         logger.println 'Releasing Design Center Lock'
         executeDesignCenterRequest(clientWrapper,
-                                   new HttpPost("${masterUrl}/releaseLock"),
+                                   new HttpPost("${branchUrl}/releaseLock"),
                                    'Release design center lock')
     }
 }
