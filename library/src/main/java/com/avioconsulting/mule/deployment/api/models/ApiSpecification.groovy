@@ -45,6 +45,12 @@ class ApiSpecification {
     final String designCenterBranchName
 
     /***
+     * Which source directory in your app code should be used to sync to Design Center? By default
+     * this is the 'api' directory which ends up inside the JAR from being in src/main/resources.
+     */
+    final String sourceDirectory
+
+    /***
      * Standard request - see properties for parameter details
      */
     ApiSpecification(String name,
@@ -53,7 +59,8 @@ class ApiSpecification {
                      String exchangeAssetId = null,
                      String endpoint = null,
                      String autoDiscoveryPropertyName = null,
-                     String designCenterBranchName = null) {
+                     String designCenterBranchName = null,
+                     String sourceDirectory = null) {
         this.autoDiscoveryPropertyName = autoDiscoveryPropertyName ?: 'auto-discovery.api-id'
         this.name = name
         this.mainRamlFile = mainRamlFile ?: findMainRamlFile(ramlFiles)
@@ -64,6 +71,7 @@ class ApiSpecification {
                                                                              '-')
         this.endpoint = endpoint
         this.designCenterBranchName = designCenterBranchName ?: 'master'
+        this.sourceDirectory = sourceDirectory ?: 'api'
     }
 
     private static String getApiVersion(String mainRamlFile,
