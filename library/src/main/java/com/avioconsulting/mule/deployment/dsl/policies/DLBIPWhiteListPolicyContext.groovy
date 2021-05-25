@@ -26,7 +26,7 @@ class DLBIPWhiteListPolicyContext extends BaseContext {
                                  pathListing)
     }
 
-    def methodMissing(String name, def args) {
+    def invokeMethod(String name, def args) {
         if (name == 'paths') {
             pathsCalled = true
         }
@@ -34,8 +34,8 @@ class DLBIPWhiteListPolicyContext extends BaseContext {
             ipsToAllow << args[0]
             return
         }
-        super.methodMissing(name,
-                            args)
+        super.invokeMethod(name,
+                           args)
     }
 
     def ipToAllow(String ip) {

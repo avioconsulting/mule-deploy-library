@@ -18,7 +18,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <groovy.compiler.version>2.4.15</groovy.compiler.version>
+        <groovy.compiler.version>3.0.7</groovy.compiler.version>
     </properties>
 
     <distributionManagement>
@@ -86,7 +86,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.1</version>
+                <version>3.8.1</version>
                 <configuration>
                     <compilerId>groovy-eclipse-compiler</compilerId>
                 </configuration>
@@ -94,12 +94,12 @@
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-eclipse-compiler</artifactId>
-                        <version>3.0.0-01</version>
+                        <version>3.7.0</version>
                     </dependency>
                     <dependency>
                         <groupId>org.codehaus.groovy</groupId>
                         <artifactId>groovy-eclipse-batch</artifactId>
-                        <version>${groovy.compiler.version}-02</version>
+                        <version>${groovy.compiler.version}-03</version>
                     </dependency>
                 </dependencies>
             </plugin>
@@ -114,7 +114,7 @@
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
-            <artifactId>groovy-all</artifactId>
+            <artifactId>groovy</artifactId>
             <version>${groovy.compiler.version}</version>
         </dependency>
         <dependency>
@@ -134,6 +134,12 @@
             <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-test</artifactId>
+            <version>${groovy.compiler.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <repositories>
@@ -151,7 +157,7 @@
             <id>groovy</id>
             <name>Groovy</name>
             <layout>default</layout>
-            <url>https://dl.bintray.com/groovy/maven/</url>
+            <url>https://groovy.jfrog.io/artifactory/libs-release-local</url>
             <snapshots>
 
             </snapshots>

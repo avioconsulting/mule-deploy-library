@@ -33,12 +33,12 @@ class JwtPolicyBasicContext extends BaseContext {
                       version)
     }
 
-    def methodMissing(String name, def args) {
+    def invokeMethod(String name, def args) {
         if (name == 'paths') {
             pathsCalled = true
         }
-        super.methodMissing(name,
-                            args)
+        super.invokeMethod(name,
+                           args)
     }
 
     def skipClientIdEnforcement() {

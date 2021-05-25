@@ -22,7 +22,7 @@ abstract class BaseContext {
         }.sort().collect { error -> "- ${error} missing" }
     }
 
-    def methodMissing(String name, def args) {
+    def invokeMethod(String name, def args) {
         def isField = this.class.declaredFields.find { f -> f.name == name }
         if (!this.getProperties().containsKey(name) && !isField) {
             throw new MissingMethodException(name,
