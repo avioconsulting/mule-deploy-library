@@ -12,6 +12,8 @@ class ApiSpecContext extends BaseContext {
             def errorList = errors.join('\n')
             throw new Exception("Your API spec is not complete. The following errors exist:\n${errorList}")
         }
+        // This might sort of be a circular/weird dependency between ApiSpecification and FileBasedAppDeploymentRequest
+        // but not sure of the best way to handle this
         def sourceDirectory = ApiSpecification.getSourceDirectoryOrDefault(this.sourceDirectory)
         def ramlFiles = request.getRamlFilesFromApp(sourceDirectory)
         new ApiSpecification(this.name,

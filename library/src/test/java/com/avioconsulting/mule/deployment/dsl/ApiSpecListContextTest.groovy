@@ -1,26 +1,18 @@
 package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
-import com.avioconsulting.mule.deployment.internal.models.RamlFile
+import com.avioconsulting.mule.deployment.internal.AppBuilding
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-class ApiSpecListContextTest {
-    private static List<RamlFile> getSimpleRamlFiles() {
-        [
-                new RamlFile('stuff-v1.raml',
-                             ['#%RAML 1.0',
-                              'title: stuff',
-                              'version: v1'].join('\n'))
-        ]
-    }
-
+class ApiSpecListContextTest implements AppBuilding {
     @Test
     void list_single() {
         // arrange
+        def appRequest = buildFullApp()
         def context = new ApiSpecListContext()
         def closure = {
             apiSpecification {
@@ -31,7 +23,7 @@ class ApiSpecListContextTest {
         closure.call()
 
         // act
-        def result = context.createApiSpecList(simpleRamlFiles)
+        def result = context.createApiSpecList(appRequest)
 
         // assert
         assertThat result.size(),
@@ -43,6 +35,7 @@ class ApiSpecListContextTest {
     @Test
     void list_multiple_missing_auto_disc() {
         // arrange
+        def appRequest = buildFullApp()
         def context = new ApiSpecListContext()
         def closure = {
             apiSpecification {
@@ -57,7 +50,7 @@ class ApiSpecListContextTest {
 
         // act
         def exception = shouldFail {
-            context.createApiSpecList(simpleRamlFiles)
+            context.createApiSpecList(appRequest)
         }
 
         // assert
@@ -68,6 +61,7 @@ class ApiSpecListContextTest {
     @Test
     void list_multiple_missing_auto_disc_unique_props() {
         // arrange
+        def appRequest = buildFullApp()
         def context = new ApiSpecListContext()
         def closure = {
             apiSpecification {
@@ -84,7 +78,7 @@ class ApiSpecListContextTest {
 
         // act
         def exception = shouldFail {
-            context.createApiSpecList(simpleRamlFiles)
+            context.createApiSpecList(appRequest)
         }
 
         // assert
@@ -95,6 +89,7 @@ class ApiSpecListContextTest {
     @Test
     void list_multiple_same_name_missing_branch() {
         // arrange
+        def appRequest = buildFullApp()
         def context = new ApiSpecListContext()
         def closure = {
             apiSpecification {
@@ -111,7 +106,7 @@ class ApiSpecListContextTest {
 
         // act
         def exception = shouldFail {
-            context.createApiSpecList(simpleRamlFiles)
+            context.createApiSpecList(appRequest)
         }
 
         // assert
@@ -120,8 +115,9 @@ class ApiSpecListContextTest {
     }
 
     @Test
-    void list_multiple_different_names_ok() {
+    void list_multiple_different_project_names_missing_source_directory() {
         // arrange
+        def appRequest = buildFullApp()
         def context = new ApiSpecListContext()
         def closure = {
             apiSpecification {
@@ -137,7 +133,37 @@ class ApiSpecListContextTest {
         closure.call()
 
         // act
-        def result = context.createApiSpecList(simpleRamlFiles)
+        def exception = shouldFail {
+            context.createApiSpecList(appRequest)
+        }
+
+        // assert
+        assertThat exception.message,
+                   is(containsString('If you sync to 2 Design Center Projects, you need to specify different sourceDirectory values'))
+    }
+
+
+    @Test
+    void list_multiple_different_project_names_ok() {
+        // arrange
+        def appRequest = buildFullApp()
+        def context = new ApiSpecListContext()
+        def closure = {
+            apiSpecification {
+                name 'Mule Deploy Design Center Test Project'
+                autoDiscoveryPropertyName 'prop1'
+                sourceDirectory '/api_v1'
+            }
+            apiSpecification {
+                name 'Mule Deploy Design Center Test Project v2'
+                autoDiscoveryPropertyName 'prop2'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def result = context.createApiSpecList(appRequest)
 
         // assert
         assertThat result.size(),
@@ -149,8 +175,9 @@ class ApiSpecListContextTest {
     }
 
     @Test
-    void list_multiple_different_branches_ok() {
+    void list_multiple_different_branches_missing_source_directory() {
         // arrange
+        def appRequest = buildFullApp()
         def context = new ApiSpecListContext()
         def closure = {
             apiSpecification {
@@ -167,7 +194,37 @@ class ApiSpecListContextTest {
         closure.call()
 
         // act
-        def result = context.createApiSpecList(simpleRamlFiles)
+        def exception = shouldFail {
+            context.createApiSpecList(appRequest)
+        }
+
+        // assert
+        assertThat exception.message,
+                   is(containsString('If you sync to 2 Design Center branches, you need to specify different sourceDirectory values'))
+    }
+
+    @Test
+    void list_multiple_different_branches_ok() {
+        // arrange
+        def appRequest = buildFullApp()
+        def context = new ApiSpecListContext()
+        def closure = {
+            apiSpecification {
+                name 'Mule Deploy Design Center Test Project'
+                autoDiscoveryPropertyName 'prop1'
+            }
+            apiSpecification {
+                name 'Mule Deploy Design Center Test Project'
+                autoDiscoveryPropertyName 'prop2'
+                designCenterBranchName 'v1'
+                sourceDirectory '/api_v1'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def result = context.createApiSpecList(appRequest)
 
         // assert
         assertThat result.size(),
