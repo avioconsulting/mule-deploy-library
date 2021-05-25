@@ -190,6 +190,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
     def synchronizeDesignCenter(ApiSpecification apiSpec,
                                 List<RamlFile> ramlFiles,
                                 String appVersion) {
+        logger.println "Using directory ${apiSpec.sourceDirectory} inside app JAR"
         if (ramlFiles.empty) {
             logger.println 'No RAML files in project, therefore nothing to sync'
             return
