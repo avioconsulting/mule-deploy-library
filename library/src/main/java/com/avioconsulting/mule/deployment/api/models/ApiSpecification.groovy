@@ -46,7 +46,7 @@ class ApiSpecification {
 
     /***
      * Which source directory in your app code should be used to sync to Design Center? By default
-     * this is the 'api' directory which ends up inside the JAR from being in src/main/resources.
+     * this is the '/api' directory which ends up inside the JAR from being in src/main/resources.
      */
     final String sourceDirectory
 
@@ -71,7 +71,7 @@ class ApiSpecification {
                                                                              '-')
         this.endpoint = endpoint
         this.designCenterBranchName = designCenterBranchName ?: 'master'
-        this.sourceDirectory = sourceDirectory ?: 'api'
+        this.sourceDirectory = sourceDirectory ?: '/api'
     }
 
     private static String getApiVersion(String mainRamlFile,

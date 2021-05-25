@@ -1,15 +1,14 @@
 package com.avioconsulting.mule.deployment.dsl
 
-
 import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
-import com.avioconsulting.mule.deployment.internal.models.RamlFile
+import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 
 class ApiSpecListContext {
     private List<ApiSpecContext> apiSpecContexts = []
 
-    ApiSpecificationList createApiSpecList(List<RamlFile> ramlFiles) {
+    ApiSpecificationList createApiSpecList(FileBasedAppDeploymentRequest request) {
         def specs = apiSpecContexts.collect { ctx ->
-            ctx.createRequest(ramlFiles)
+            ctx.createRequest(request)
         }
         new ApiSpecificationList(specs)
     }
