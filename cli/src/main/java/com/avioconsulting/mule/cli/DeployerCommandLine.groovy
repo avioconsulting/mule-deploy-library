@@ -73,7 +73,7 @@ class DeployerCommandLine implements Callable<Integer> {
         logger.println 'Beginning deployment'
         try {
             deployer.deployApplication(deploymentPackage.deploymentRequest,
-                                       deploymentPackage.apiSpecification,
+                                       deploymentPackage.apiSpecifications,
                                        deploymentPackage.desiredPolicies,
                                        deploymentPackage.enabledFeatures)
             logger.println 'Deployment completed'
