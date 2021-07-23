@@ -3,7 +3,7 @@ package com.avioconsulting.mule.deployment.dsl
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 
 class CloudhubContext extends BaseContext {
-    String environment, applicationName, appVersion, file, cryptoKey, cloudHubAppPrefix
+    String environment, applicationName, appVersion, file, cryptoKey, cloudHubAppPrefix, cloudHubAppSuffix
     boolean analyticsAgentEnabled
     private WorkerSpecContext workerSpecs = new WorkerSpecContext()
     private AutodiscoveryContext autoDiscovery = new AutodiscoveryContext()
@@ -27,6 +27,7 @@ class CloudhubContext extends BaseContext {
                                       autoDiscovery.clientId,
                                       autoDiscovery.clientSecret,
                                       this.cloudHubAppPrefix,
+                                      this.cloudHubAppSuffix,
                                       this.applicationName,
                                       this.appVersion,
                                       this.appProperties,

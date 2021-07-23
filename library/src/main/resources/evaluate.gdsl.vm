@@ -94,6 +94,7 @@ contributor([closureScopeContext]) {
         #boolParam('analyticsAgentEnabled')
         #closureParam('autoDiscovery')
         #stringParam('cloudHubAppPrefix')
+        #stringParam('cloudHubAppSuffix')
         #mapParam('appProperties')
         #mapParam('otherCloudHubProperties')
     }
