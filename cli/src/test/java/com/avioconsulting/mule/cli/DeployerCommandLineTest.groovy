@@ -207,6 +207,7 @@ muleDeploy {
             clientSecret 'the_client_secret'
         }
         cloudHubAppPrefix 'AVI'
+        cloudHubAppSuffix 'DEV'
     }
 }
 """
