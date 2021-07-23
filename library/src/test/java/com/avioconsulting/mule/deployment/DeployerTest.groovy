@@ -143,6 +143,7 @@ class DeployerTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3',)
         def apiSpec = new ApiSpecification('Hello API',
@@ -174,6 +175,7 @@ class DeployerTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app-mule3',
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
@@ -255,6 +257,7 @@ class DeployerTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app-mule4',
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
@@ -293,6 +296,7 @@ class DeployerTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
@@ -387,6 +391,7 @@ class DeployerTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -423,6 +428,7 @@ class DeployerTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
@@ -460,6 +466,7 @@ class DeployerTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
@@ -497,6 +504,7 @@ class DeployerTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app-mule4',
                                                     '1.2.3')
         def apiSpec1 = new ApiSpecification('Hello API v1',

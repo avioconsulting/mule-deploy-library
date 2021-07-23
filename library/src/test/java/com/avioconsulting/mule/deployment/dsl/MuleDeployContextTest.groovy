@@ -51,6 +51,7 @@ class MuleDeployContextTest implements AppBuilding {
                     clientSecret 'the_client_secret'
                 }
                 cloudHubAppPrefix 'AVI'
+                cloudHubAppSuffix 'DEV'
             }
         }
         closure.delegate = context

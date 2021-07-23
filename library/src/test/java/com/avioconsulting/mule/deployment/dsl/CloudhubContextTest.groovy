@@ -32,6 +32,7 @@ class CloudhubContextTest implements MavenInvoke {
                 clientSecret 'the_client_secret'
             }
             cloudHubAppPrefix 'AVI'
+            cloudHubAppSuffix 'DEV'
         }
         closure.delegate = context
 
@@ -71,6 +72,8 @@ class CloudhubContextTest implements MavenInvoke {
                        is(equalTo('the_client_secret'))
             assertThat cloudHubAppPrefix,
                        is(equalTo('AVI'))
+            assertThat cloudHubAppSuffix,
+                    is(equalTo('DEV'))
         }
     }
 
@@ -87,6 +90,7 @@ class CloudhubContextTest implements MavenInvoke {
                 clientSecret 'the_client_secret'
             }
             cloudHubAppPrefix 'AVI'
+            cloudHubAppSuffix 'DEV'
         }
         closure.delegate = context
 
@@ -146,6 +150,7 @@ class CloudhubContextTest implements MavenInvoke {
                 clientSecret 'the_client_secret'
             }
             cloudHubAppPrefix 'AVI'
+            cloudHubAppSuffix 'DEV'
             // optional from here on out
             appProperties([
                     someProp: 'someValue'
@@ -200,6 +205,8 @@ class CloudhubContextTest implements MavenInvoke {
                        is(equalTo('the_client_secret'))
             assertThat cloudHubAppPrefix,
                        is(equalTo('AVI'))
+            assertThat cloudHubAppSuffix,
+                    is(equalTo('DEV'))
             assertThat appProperties,
                        is(equalTo([
                                someProp: 'someValue'
@@ -233,6 +240,7 @@ class CloudhubContextTest implements MavenInvoke {
                 clientSecret 'the_client_secret'
             }
             cloudHubAppPrefix 'AVI'
+            cloudHubAppSuffix 'DEV'
         }
         closure.delegate = context
 
@@ -274,6 +282,7 @@ class CloudhubContextTest implements MavenInvoke {
         assertThat exception.message,
                    is(equalTo("""Your deployment request is not complete. The following errors exist:
 - cloudHubAppPrefix missing
+- cloudHubAppSuffix missing
 - cryptoKey missing
 - environment missing
 - file missing
@@ -300,6 +309,7 @@ class CloudhubContextTest implements MavenInvoke {
                 clientSecret 'the_client_secret'
             }
             cloudHubAppPrefix 'AVI'
+            cloudHubAppSuffix 'DEV'
         }
         closure.delegate = context
 

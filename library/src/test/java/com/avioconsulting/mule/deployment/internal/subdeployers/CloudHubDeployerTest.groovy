@@ -112,6 +112,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
         request.setAutoDiscoveryId('the.auto.disc.prop',
@@ -217,6 +218,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -301,6 +303,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -349,6 +352,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -395,6 +399,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -443,6 +448,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -506,6 +512,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -569,6 +576,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -635,6 +643,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -731,6 +740,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -779,6 +789,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -837,6 +848,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -883,6 +895,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -937,6 +950,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -990,6 +1004,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3',)
         // act
@@ -1086,6 +1101,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -1112,6 +1128,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
