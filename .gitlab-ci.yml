@@ -58,4 +58,4 @@ deploy:jdk8:
     - 'mvn $MAVEN_CLI_OPTS deploy -s ci_settings.xml'
   only:
     - gd_master
-    - release.*
+    - /release.*/
