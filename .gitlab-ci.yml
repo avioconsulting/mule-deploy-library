@@ -39,7 +39,7 @@ cache:
   script:
     - 'ARTIFACT_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.1:evaluate -Dexpression=project.version -q -DforceStdout)'
     - 'echo $ARTIFACT_VERSION-${CI_COMMIT_SHORT_SHA}'
-    - 'mvn versions:set -DnewVersion=$ARTIFACT_VERSION-${CI_COMMIT_SHORT_SHA}'
+    - 'mvn versions:set -DnewVersion=$ARTIFACT_VERSION-${CI_COMMIT_SHORT_SHA} -DprocessAllModules=true'
     - 'mvn $MAVEN_CLI_OPTS verify'
   except:
     variables:
@@ -61,7 +61,7 @@ deploy:jdk8:
       fi
     - 'ARTIFACT_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.1:evaluate -Dexpression=project.version -q -DforceStdout)'
     - 'echo $ARTIFACT_VERSION-${CI_COMMIT_SHORT_SHA}'
-    - 'mvn versions:set -DnewVersion=$ARTIFACT_VERSION-${CI_COMMIT_SHORT_SHA}'
+    - 'mvn versions:set -DnewVersion=$ARTIFACT_VERSION-${CI_COMMIT_SHORT_SHA} -DprocessAllModules=true'
     - 'mvn $MAVEN_CLI_OPTS deploy -s ci_settings.xml'
   only:
     - gd_master
