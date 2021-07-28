@@ -2,15 +2,9 @@
           xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd">
     <servers>
         <server>
-            <id>gitlab-maven</id>
-            <configuration>
-                <httpHeaders>
-                    <property>
-                        <name>Job-Token</name>
-                        <value>${env.CI_JOB_TOKEN}</value>
-                    </property>
-                </httpHeaders>
-            </configuration>
+            <id>anypoint-exchange</id>
+            <username>anypoint-cicd</username>
+            <password>${ANYPOINT_DEPLOYMENT_SECRET}</password>
         </server>
     </servers>
 </settings>
