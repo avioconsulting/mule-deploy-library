@@ -9,6 +9,7 @@ import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.ArtifactHandler
 import org.apache.maven.project.MavenProject
+import org.hamcrest.MatcherAssert
 import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
@@ -87,11 +88,11 @@ muleDeploy {
         mojo.execute()
 
         // assert
-        assertThat actualUser,
+        MatcherAssert.assertThat actualUser,
                    is(equalTo('the user'))
-        assertThat actualPass,
+        MatcherAssert.assertThat actualPass,
                    is(equalTo('the pass'))
-        assertThat actualOrg,
+        MatcherAssert.assertThat actualOrg,
                    is(equalTo('the org'))
         assertThat actualDryRunMode,
                    is(equalTo(DryRunMode.OnlineValidate))
@@ -279,7 +280,7 @@ muleDeploy {
         // assert
         assertThat deployed,
                    is(equalTo(false))
-        assertThat exception.message,
+        MatcherAssert.assertThat exception.message,
                    is(containsString('In order to OnlineValidate, credentials must be supplied via the anypointUsername <config> item/anypoint.username property and the anypointPassword <config> item/anypoint.password property'))
     }
 
@@ -325,6 +326,7 @@ muleDeploy {
             clientSecret 'the_client_secret'
         }
         cloudHubAppPrefix 'AVI'
+        cloudHubAppSuffix 'DEV'
     }
 }
 """
@@ -412,11 +414,11 @@ muleDeploy {
         }
 
         // assert
-        assertThat exception.message,
+        MatcherAssert.assertThat exception.message,
                    is(containsString('Unable to process DSL'))
         assertThat logger.errors.size(),
                    is(equalTo(1))
-        assertThat logger.errors[0],
+        MatcherAssert.assertThat logger.errors[0],
                    is(containsString('Unable to process DSL because class java.io.FileNotFoundException'))
     }
 
@@ -463,11 +465,11 @@ muleDeploy {
         }
 
         // assert
-        assertThat exception.message,
+        MatcherAssert.assertThat exception.message,
                    is(containsString('Unable to perform deployment'))
         assertThat logger.errors.size(),
                    is(equalTo(1))
-        assertThat logger.errors[0],
+        MatcherAssert.assertThat logger.errors[0],
                    is(equalTo('Unable to perform deployment because class java.lang.Exception some deployment problem'))
     }
 }

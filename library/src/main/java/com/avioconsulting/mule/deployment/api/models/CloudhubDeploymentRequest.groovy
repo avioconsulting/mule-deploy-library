@@ -45,6 +45,11 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     final String cloudHubAppPrefix
     /**
+     * Your "DNS suffix" for Cloudhub app uniqueness, usually a 3 letter environment ID to ensure app uniqueness.
+     */
+    final String cloudHubAppSuffix
+    /**
+    /**
      * Mule app property overrides (the stuff in the properties tab)
      */
     final Map<String, String> appProperties
@@ -80,7 +85,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                               String anypointClientId,
                               String anypointClientSecret,
                               String cloudHubAppPrefix,
-                              String cloudHubAppSuffix,
+                              String cloudHubAppSuffix = null,
                               String appName = null,
                               String appVersion = null,
                               Map<String, String> appProperties = [:],
@@ -104,12 +109,18 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
         this.anypointClientId = anypointClientId
         this.anypointClientSecret = anypointClientSecret
         this.cloudHubAppPrefix = cloudHubAppPrefix
+        this.cloudHubAppSuffix = cloudHubAppSuffix
         this.appProperties = appProperties
         this.otherCloudHubProperties = otherCloudHubProperties
         if (this.appName.contains(' ')) {
             throw new Exception("Runtime Manager does not like spaces in app names and you specified '${this.appName}'!")
         }
-        def newAppName = "${cloudHubAppPrefix}-${this.appName}-${cloudHubAppSuffix}"
+        def newAppName
+        if (cloudHubAppSuffix != null) {
+            newAppName = "${cloudHubAppPrefix}-${this.appName}-${cloudHubAppSuffix}"
+        } else {
+            newAppName = "${cloudHubAppPrefix}-${this.appName}-${environment}"
+        }
         def appNameLowerCase = newAppName.toLowerCase()
         if (appNameLowerCase != newAppName) {
             newAppName = appNameLowerCase

@@ -15,6 +15,7 @@ import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
+import org.hamcrest.MatcherAssert
 import org.junit.Before
 import org.junit.Test
 
@@ -112,6 +113,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'suf',
                                                     'new-app',
                                                     '1.2.3')
         request.setAutoDiscoveryId('the.auto.disc.prop',
@@ -121,19 +123,19 @@ class CloudHubDeployerTest extends BaseTest {
         deployer.deploy(request)
 
         // assert
-        assertThat url,
+        MatcherAssert.assertThat url,
                    is(equalTo('/cloudhub/api/v2/applications'))
-        assertThat method,
+        MatcherAssert.assertThat method,
                    is(equalTo('POST'))
-        assertThat authToken,
+        MatcherAssert.assertThat authToken,
                    is(equalTo('Bearer the token'))
-        assertThat envId,
+        MatcherAssert.assertThat envId,
                    is(equalTo('def456'))
-        assertThat orgId,
+        MatcherAssert.assertThat orgId,
                    is(equalTo('the-org-id'))
         assertThat sentFormAttributes.names().toList().sort(),
                    is(equalTo(['appInfoJson', 'autoStart']))
-        assertThat sentFormAttributes.get('autoStart'),
+        MatcherAssert.assertThat sentFormAttributes.get('autoStart'),
                    is(equalTo('true'))
         def map = new JsonSlurper().parseText(sentFormAttributes.get('appInfoJson'))
         assertThat map,
@@ -162,7 +164,7 @@ class CloudHubDeployerTest extends BaseTest {
                                    'the.auto.disc.prop'             : '1234'
                            ]
                    ]))
-        assertThat rawBody,
+        MatcherAssert.assertThat rawBody,
                    is(containsString('Content-Disposition: form-data; name="file"; filename="some_file.txt"'))
     }
 
@@ -217,6 +219,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -224,19 +227,19 @@ class CloudHubDeployerTest extends BaseTest {
         deployer.deploy(request)
 
         // assert
-        assertThat url,
+        MatcherAssert.assertThat url,
                    is(equalTo('/cloudhub/api/v2/applications/client-new-app-dev'))
-        assertThat method,
+        MatcherAssert.assertThat method,
                    is(equalTo('PUT'))
-        assertThat authToken,
+        MatcherAssert.assertThat authToken,
                    is(equalTo('Bearer the token'))
-        assertThat envId,
+        MatcherAssert.assertThat envId,
                    is(equalTo('def456'))
-        assertThat orgId,
+        MatcherAssert.assertThat orgId,
                    is(equalTo('the-org-id'))
         assertThat sentFormAttributes.names().toList().sort(),
                    is(equalTo(['appInfoJson', 'autoStart']))
-        assertThat sentFormAttributes.get('autoStart'),
+        MatcherAssert.assertThat sentFormAttributes.get('autoStart'),
                    is(equalTo('true'))
         def map = new JsonSlurper().parseText(sentFormAttributes.get('appInfoJson'))
         assertThat map,
@@ -264,7 +267,7 @@ class CloudHubDeployerTest extends BaseTest {
                                    'anypoint.platform.client_secret': 'theSecret'
                            ]
                    ]))
-        assertThat rawBody,
+        MatcherAssert.assertThat rawBody,
                    is(containsString('Content-Disposition: form-data; name="file"; filename="some_file.txt"'))
     }
 
@@ -301,6 +304,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -310,7 +314,7 @@ class CloudHubDeployerTest extends BaseTest {
         }
 
         // assert
-        assertThat exception.message,
+        MatcherAssert.assertThat exception.message,
                    is(equalTo('Unable to deploy application, got an HTTP 500 with a response of \'{"message":"some message from CH"}\''))
     }
 
@@ -349,6 +353,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -395,6 +400,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -404,7 +410,7 @@ class CloudHubDeployerTest extends BaseTest {
         }
 
         // assert
-        assertThat exception.message,
+        MatcherAssert.assertThat exception.message,
                    is(containsString('Deployment failed on 1 or more workers. Please see logs and messages as to why app did not start'))
     }
 
@@ -443,6 +449,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -506,6 +513,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -569,6 +577,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -635,6 +644,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -731,6 +741,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -779,6 +790,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -837,6 +849,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -883,6 +896,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -894,7 +908,7 @@ class CloudHubDeployerTest extends BaseTest {
         // assert
         assertThat statusCheckCount,
                    is(equalTo(appStatusesWeWillReturn.size()))
-        assertThat exception.message,
+        MatcherAssert.assertThat exception.message,
                    is(equalTo('Deployment has not failed but app has not started after 10 tries!'))
     }
 
@@ -937,6 +951,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -948,7 +963,7 @@ class CloudHubDeployerTest extends BaseTest {
         // assert
         assertThat statusCheckCount,
                    is(equalTo(5))
-        assertThat exception.message,
+        MatcherAssert.assertThat exception.message,
                    is(equalTo('Deployment failed on 1 or more workers. Please see logs and messages as to why app did not start'))
     }
 
@@ -990,6 +1005,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3',)
         // act
@@ -1033,15 +1049,15 @@ class CloudHubDeployerTest extends BaseTest {
                               'theapp')
 
         // assert
-        assertThat url,
+        MatcherAssert.assertThat url,
                    is(equalTo('/cloudhub/api/v2/applications/theapp'))
-        assertThat method,
+        MatcherAssert.assertThat method,
                    is(equalTo('GET'))
-        assertThat authToken,
+        MatcherAssert.assertThat authToken,
                    is(equalTo('Bearer the token'))
-        assertThat envId,
+        MatcherAssert.assertThat envId,
                    is(equalTo('def456'))
-        assertThat orgId,
+        MatcherAssert.assertThat orgId,
                    is(equalTo('the-org-id'))
     }
 
@@ -1086,6 +1102,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -1112,6 +1129,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -1161,13 +1179,13 @@ class CloudHubDeployerTest extends BaseTest {
                                   'the-app')
 
         // assert
-        assertThat url,
+        MatcherAssert.assertThat url,
                    is(equalTo('/cloudhub/api/applications/the-app/status'))
-        assertThat method,
+        MatcherAssert.assertThat method,
                    is(equalTo('POST'))
-        assertThat authToken,
+        MatcherAssert.assertThat authToken,
                    is(equalTo('Bearer the token'))
-        assertThat envId,
+        MatcherAssert.assertThat envId,
                    is(equalTo('def456'))
         def map = new JsonSlurper().parseText(rawBody)
         assertThat map,
