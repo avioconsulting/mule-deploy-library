@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.avioconsulting.mule</groupId>
+    <groupId>18f791e7-7c11-43ea-b5e0-d90e55bd6225</groupId>
     <artifactId>mule-deploy-maven-plugin</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
+    <version>1.0.1</version>
     <packaging>maven-plugin</packaging>
     <name>Mule deployment Maven plugin</name>
     <description>Deploys Mule applications via Runtime Manager APIs</description>
@@ -23,6 +23,18 @@
 
     <repositories>
         <repository>
+            <id>maven-central</id>
+            <name>maven central</name>
+            <url>http://central.maven.org/maven2/</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
+            <id>mulesoft-releases</id>
+            <name>MuleSoft Releases Repository</name>
+            <url>https://repository.mulesoft.org/releases/</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
             <id>android</id>
             <url>https://dl.bintray.com/apollographql/android/</url>
             <snapshots>
@@ -30,18 +42,24 @@
             </snapshots>
         </repository>
         <repository>
-            <id>gitlab-maven</id>
-            <url>${env.CI_API_V4_URL}/projects/${env.CI_PROJECT_ID}/packages/maven</url>
+            <id>anypoint-exchange</id>
+            <name>Corporate Repository</name>
+            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/18f791e7-7c11-43ea-b5e0-d90e55bd6225/maven</url>
+            <layout>default</layout>
         </repository>
     </repositories>
     <distributionManagement>
         <repository>
-            <id>gitlab-maven</id>
-            <url>${CI_API_V4_URL}/projects/${env.CI_PROJECT_ID}/packages/maven</url>
+            <id>anypoint-exchange</id>
+            <name>Corporate Repository</name>
+            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/18f791e7-7c11-43ea-b5e0-d90e55bd6225/maven</url>
+            <layout>default</layout>
         </repository>
         <snapshotRepository>
-            <id>gitlab-maven</id>
-            <url>${CI_API_V4_URL}/projects/${env.CI_PROJECT_ID}/packages/maven</url>
+            <id>anypoint-exchange</id>
+            <name>Corporate Repository</name>
+            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/18f791e7-7c11-43ea-b5e0-d90e55bd6225/maven</url>
+            <layout>default</layout>
         </snapshotRepository>
     </distributionManagement>
 
@@ -124,7 +142,7 @@
             <version>${groovy.compiler.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.avioconsulting.mule</groupId>
+            <groupId>18f791e7-7c11-43ea-b5e0-d90e55bd6225</groupId>
             <artifactId>mule-deploy-library</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -162,6 +180,21 @@
             <url>https://groovy.jfrog.io/artifactory/libs-release-local</url>
             <snapshots>
 
+            </snapshots>
+        </pluginRepository>
+        <pluginRepository>
+            <id>maven-central</id>
+            <name>maven central</name>
+            <url>http://central.maven.org/maven2/</url>
+            <layout>default</layout>
+        </pluginRepository>
+        <pluginRepository>
+            <id>mulesoft-releases</id>
+            <name>mulesoft release repository</name>
+            <layout>default</layout>
+            <url>https://repository.mulesoft.org/releases/</url>
+            <snapshots>
+                <enabled>false</enabled>
             </snapshots>
         </pluginRepository>
     </pluginRepositories>

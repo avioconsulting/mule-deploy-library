@@ -22,6 +22,7 @@ variables:
   # `installAtEnd` and `deployAtEnd` are only effective with recent version of the corresponding plugins.
   MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"
 
+
 # This template uses jdk8 for verifying and deploying images
 image: maven:3.3.9-jdk-8
 
@@ -36,6 +37,9 @@ cache:
 .verify: &verify
   stage: test
   script:
+    - 'ARTIFACT_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.1:evaluate -Dexpression=project.version -q -DforceStdout)'
+    - 'echo $ARTIFACT_VERSION-${CI_COMMIT_SHORT_SHA}'
+    - 'mvn versions:set -DnewVersion=$ARTIFACT_VERSION-${CI_COMMIT_SHORT_SHA}'
     - 'mvn $MAVEN_CLI_OPTS verify'
   except:
     variables:
@@ -55,6 +59,9 @@ deploy:jdk8:
     - if [ ! -f ci_settings.xml ];
       then echo "CI settings missing\! If deploying to GitLab Maven Repository, please see https://docs.gitlab.com/ee/user/packages/maven_repository/index.html#create-maven-packages-with-gitlab-cicd for instructions.";
       fi
+    - 'ARTIFACT_VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.1:evaluate -Dexpression=project.version -q -DforceStdout)'
+    - 'echo $ARTIFACT_VERSION-${CI_COMMIT_SHORT_SHA}'
+    - 'mvn versions:set -DnewVersion=$ARTIFACT_VERSION-${CI_COMMIT_SHORT_SHA}'
     - 'mvn $MAVEN_CLI_OPTS deploy -s ci_settings.xml'
   only:
     - gd_master
