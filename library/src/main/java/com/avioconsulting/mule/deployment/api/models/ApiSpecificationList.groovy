@@ -12,6 +12,15 @@ class ApiSpecificationList extends ArrayList<ApiSpecification> {
             if (autoDiscNames.size() != autoDiscNames.unique().size()) {
                 throw new Exception("If you have multiple API specs, you must specify a unique `autoDiscoveryPropertyName` for all of them!")
             }
+            def sourceDirectories = candidates.collect { s -> s.sourceDirectory }
+            if (sourceDirectories.size() != sourceDirectories.unique().size()) {
+                def sameProject = projectNames.unique().size() == 1
+                if (sameProject) {
+                    throw new Exception('If you sync to 2 Design Center branches, you need to specify different sourceDirectory values')
+                } else {
+                    throw new Exception('If you sync to 2 Design Center Projects, you need to specify different sourceDirectory values')
+                }
+            }
         }
         super.addAll(candidates)
     }

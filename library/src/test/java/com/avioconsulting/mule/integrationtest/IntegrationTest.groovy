@@ -170,19 +170,22 @@ class IntegrationTest implements MavenInvoke {
     void cloudhub() {
         // arrange
         def apiSpec1 = new ApiSpecification('Mule Deploy Design Center Test Project',
-                                           cloudhubDeploymentRequest.ramlFilesFromApp,
+                                           cloudhubDeploymentRequest.getRamlFilesFromApp('/api'),
                                             'mule-deploy-design-center-test-project-v2.raml',
                                             null,
                                             null,
-                                            'auto.disc.1')
+                                            'auto.disc.1',
+                                            null,
+                                            '/api')
 
         def apiSpec2 = new ApiSpecification('Mule Deploy Design Center Test Project',
-                                            cloudhubDeploymentRequest.ramlFilesFromApp,
+                                            cloudhubDeploymentRequest.getRamlFilesFromApp('/api_v1'),
                                             'mule-deploy-design-center-test-project.raml',
                                             null,
                                             null,
                                             'auto.disc.prop.1',
-                                            'v1')
+                                            'v1',
+                                            '/api_v1')
 
         // act
         try {
@@ -265,7 +268,7 @@ class IntegrationTest implements MavenInvoke {
             println 'Existing app does not exist, no problem'
         }
         def apiSpec = new ApiSpecification('Mule Deploy Design Center Test Project',
-                                           onPremDeploymentRequest.ramlFilesFromApp)
+                                           onPremDeploymentRequest.getRamlFilesFromApp('/api'))
 
         // act
         overallDeployer.deployApplication(onPremDeploymentRequest,

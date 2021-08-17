@@ -512,7 +512,9 @@ class DeployerTest {
                                             null,
                                             null,
                                             null,
-                                            'otherProp')
+                                            'otherProp',
+                                            null,
+                                            '/api_v2')
 
         // act
         deployer.deployApplication(request,

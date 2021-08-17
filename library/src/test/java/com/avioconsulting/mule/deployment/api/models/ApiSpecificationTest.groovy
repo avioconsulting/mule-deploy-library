@@ -37,6 +37,8 @@ class ApiSpecificationTest {
                    is(equalTo('v1'))
         assertThat result.designCenterBranchName,
                    is(equalTo('master'))
+        assertThat result.sourceDirectory,
+                   is(equalTo('/api'))
     }
 
     @Test
@@ -164,7 +166,8 @@ class ApiSpecificationTest {
                                           'nope',
                                           'http://nope',
                                           'prop',
-                                          'someOtherBranch')
+                                          'someOtherBranch',
+                                          'api2')
 
         // assert
         assertThat result.name,
@@ -177,6 +180,8 @@ class ApiSpecificationTest {
                    is(equalTo('prop'))
         assertThat result.designCenterBranchName,
                    is(equalTo('someOtherBranch'))
+        assertThat result.sourceDirectory,
+                   is(equalTo('api2'))
     }
 
     @Test
@@ -193,7 +198,7 @@ class ApiSpecificationTest {
 
         // assert
         assertThat exception.message,
-                   is(containsString("You specified 'oops.raml' as your main RAML file but it does not exist in your application!"))
+                   is(containsString("You specified 'oops.raml' as your main RAML file but it does not exist in your application under /api!"))
     }
 
     @Test

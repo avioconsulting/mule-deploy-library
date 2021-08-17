@@ -72,10 +72,10 @@ abstract class FileBasedAppDeploymentRequest {
 
     abstract String getEnvironment()
 
-    List<RamlFile> getRamlFilesFromApp() {
+    List<RamlFile> getRamlFilesFromApp(String rootRamlDirectory) {
         return FileSystems.newFileSystem(file.toPath(),
                                          null).withCloseable { fs ->
-            def apiPath = fs.getPath('/api')
+            def apiPath = fs.getPath(rootRamlDirectory)
             if (!Files.exists(apiPath)) {
                 return []
             }
