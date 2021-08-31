@@ -216,11 +216,12 @@ class DeployerTest {
         }
         assertThat deployedChApps[0].cloudhubAppInfo.properties,
                    is(equalTo([
-                           env                              : 'dev',
-                           'auto-discovery.api-id'          : 'api1234',
-                           'crypto.key'                     : 'theKey',
-                           'anypoint.platform.client_id'    : 'theClientId',
-                           'anypoint.platform.client_secret': 'theSecret'
+                           env                                               : 'dev',
+                           'auto-discovery.api-id'                           : 'api1234',
+                           'crypto.key'                                      : 'theKey',
+                           'anypoint.platform.client_id'                     : 'theClientId',
+                           'anypoint.platform.client_secret'                 : 'theSecret',
+                           'anypoint.platform.config.analytics.agent.enabled': true
                    ]))
         assertThat designCenterSyncs.size(),
                    is(equalTo(1))
