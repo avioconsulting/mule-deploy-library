@@ -181,7 +181,10 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
 
     def synchronizeDesignCenterFromApp(ApiSpecification apiSpec,
                                        FileBasedAppDeploymentRequest appFileInfo) {
-        def ramlFilesFromApp = appFileInfo.getRamlFilesFromApp(apiSpec.sourceDirectory)
+        // For now this library ignores Exchange modules/does not try and maintain or sync them
+        // both the app and the remote/DC comparison should therefore exclude them
+        def ramlFilesFromApp = appFileInfo.getRamlFilesFromApp(apiSpec.sourceDirectory,
+                                                               true)
         synchronizeDesignCenter(apiSpec,
                                 ramlFilesFromApp,
                                 appFileInfo.appVersion)
