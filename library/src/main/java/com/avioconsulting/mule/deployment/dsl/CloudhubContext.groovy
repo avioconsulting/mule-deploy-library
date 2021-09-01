@@ -4,7 +4,8 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 
 class CloudhubContext extends BaseContext {
     String environment, applicationName, appVersion, file, cryptoKey, cloudHubAppPrefix
-    boolean analyticsAgentEnabled
+    // make API visualizer, etc. more easy by default
+    boolean analyticsAgentEnabled = true
     private WorkerSpecContext workerSpecs = new WorkerSpecContext()
     private AutodiscoveryContext autoDiscovery = new AutodiscoveryContext()
     Map<String, String> appProperties = [:]

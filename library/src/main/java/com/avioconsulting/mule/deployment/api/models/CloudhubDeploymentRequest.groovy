@@ -84,7 +84,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                               String appVersion = null,
                               Map<String, String> appProperties = [:],
                               Map<String, String> otherCloudHubProperties = [:],
-                              boolean analyticsAgentEnabled = false) {
+                              boolean analyticsAgentEnabled = true) {
         this.file = file
         this.environment = environment
         this.appName = appName ?: parsedPomProperties.artifactId

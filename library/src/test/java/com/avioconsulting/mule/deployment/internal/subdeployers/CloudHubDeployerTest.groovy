@@ -155,11 +155,12 @@ class CloudHubDeployerTest extends BaseTest {
                            loggingCustomLog4JEnabled: false,
                            persistentQueues         : false,
                            properties               : [
-                                   env                              : 'dev',
-                                   'crypto.key'                     : 'theKey',
-                                   'anypoint.platform.client_id'    : 'theClientId',
-                                   'anypoint.platform.client_secret': 'theSecret',
-                                   'the.auto.disc.prop'             : '1234'
+                                   env                                               : 'dev',
+                                   'crypto.key'                                      : 'theKey',
+                                   'anypoint.platform.client_id'                     : 'theClientId',
+                                   'anypoint.platform.client_secret'                 : 'theSecret',
+                                   'anypoint.platform.config.analytics.agent.enabled': true,
+                                   'the.auto.disc.prop'                              : '1234'
                            ]
                    ]))
         assertThat rawBody,
@@ -258,10 +259,11 @@ class CloudHubDeployerTest extends BaseTest {
                            loggingCustomLog4JEnabled: false,
                            persistentQueues         : false,
                            properties               : [
-                                   env                              : 'dev',
-                                   'crypto.key'                     : 'theKey',
-                                   'anypoint.platform.client_id'    : 'theClientId',
-                                   'anypoint.platform.client_secret': 'theSecret'
+                                   env                                               : 'dev',
+                                   'crypto.key'                                      : 'theKey',
+                                   'anypoint.platform.client_id'                     : 'theClientId',
+                                   'anypoint.platform.client_secret'                 : 'theSecret',
+                                   'anypoint.platform.config.analytics.agent.enabled': true
                            ]
                    ]))
         assertThat rawBody,

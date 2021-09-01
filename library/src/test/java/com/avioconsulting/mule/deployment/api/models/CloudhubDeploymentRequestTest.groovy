@@ -156,10 +156,11 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                            objectStoreV1            : false,
                            persistentQueues         : false,
                            properties               : [
-                                   env                              : 'dev',
-                                   'crypto.key'                     : 'theKey',
-                                   'anypoint.platform.client_id'    : 'theClientId',
-                                   'anypoint.platform.client_secret': 'theSecret'
+                                   env                                               : 'dev',
+                                   'crypto.key'                                      : 'theKey',
+                                   'anypoint.platform.client_id'                     : 'theClientId',
+                                   'anypoint.platform.client_secret'                 : 'theSecret',
+                                   'anypoint.platform.config.analytics.agent.enabled': true
                            ]
                    ]))
     }
@@ -205,12 +206,13 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                            objectStoreV1            : false,
                            persistentQueues         : false,
                            properties               : [
-                                   env                              : 'dev',
-                                   'crypto.key'                     : 'theKey',
-                                   'anypoint.platform.client_id'    : 'theClientId',
-                                   'anypoint.platform.client_secret': 'theSecret',
-                                   prop1                            : 'foo',
-                                   prop2                            : 'bar'
+                                   env                                               : 'dev',
+                                   'crypto.key'                                      : 'theKey',
+                                   'anypoint.platform.client_id'                     : 'theClientId',
+                                   'anypoint.platform.client_secret'                 : 'theSecret',
+                                   'anypoint.platform.config.analytics.agent.enabled': true,
+                                   prop1                                             : 'foo',
+                                   prop2                                             : 'bar'
                            ]
 
                    ]))
@@ -254,10 +256,11 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                            objectStoreV1            : false,
                            persistentQueues         : true,
                            properties               : [
-                                   env                              : 'dev',
-                                   'crypto.key'                     : 'theKey',
-                                   'anypoint.platform.client_id'    : 'theClientId',
-                                   'anypoint.platform.client_secret': 'theSecret'
+                                   env                                               : 'dev',
+                                   'crypto.key'                                      : 'theKey',
+                                   'anypoint.platform.client_id'                     : 'theClientId',
+                                   'anypoint.platform.client_secret'                 : 'theSecret',
+                                   'anypoint.platform.config.analytics.agent.enabled': true
                            ]
                    ]))
     }
@@ -305,10 +308,11 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                            objectStoreV1            : false,
                            persistentQueues         : true,
                            properties               : [
-                                   env                              : 'TST',
-                                   'crypto.key'                     : 'theKey',
-                                   'anypoint.platform.client_id'    : 'theClientId',
-                                   'anypoint.platform.client_secret': 'theSecret'
+                                   env                                               : 'TST',
+                                   'crypto.key'                                      : 'theKey',
+                                   'anypoint.platform.client_id'                     : 'theClientId',
+                                   'anypoint.platform.client_secret'                 : 'theSecret',
+                                   'anypoint.platform.config.analytics.agent.enabled': true
                            ]
                    ]))
     }
@@ -353,10 +357,11 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                            objectStoreV1            : false,
                            persistentQueues         : true,
                            properties               : [
-                                   env                              : 'dev',
-                                   'crypto.key'                     : 'theKey',
-                                   'anypoint.platform.client_id'    : 'theClientId',
-                                   'anypoint.platform.client_secret': 'theSecret'
+                                   env                                               : 'dev',
+                                   'crypto.key'                                      : 'theKey',
+                                   'anypoint.platform.client_id'                     : 'theClientId',
+                                   'anypoint.platform.client_secret'                 : 'theSecret',
+                                   'anypoint.platform.config.analytics.agent.enabled': true
                            ]
                    ]))
     }
@@ -405,12 +410,13 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                            objectStoreV1            : false,
                            persistentQueues         : true,
                            properties               : [
-                                   env                              : 'TST',
-                                   'crypto.key'                     : 'theKey',
-                                   'anypoint.platform.client_id'    : 'theClientId',
-                                   'anypoint.platform.client_secret': 'theSecret',
-                                   prop1                            : 'foo',
-                                   prop2                            : 'bar'
+                                   env                                               : 'TST',
+                                   'crypto.key'                                      : 'theKey',
+                                   'anypoint.platform.client_id'                     : 'theClientId',
+                                   'anypoint.platform.client_secret'                 : 'theSecret',
+                                   'anypoint.platform.config.analytics.agent.enabled': true,
+                                   prop1                                             : 'foo',
+                                   prop2                                             : 'bar'
                            ]
                    ]))
     }
@@ -450,10 +456,11 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                            objectStoreV1            : false,
                            persistentQueues         : false,
                            properties               : [
-                                   env                              : 'dev',
-                                   'crypto.key'                     : 'theKey',
-                                   'anypoint.platform.client_id'    : 'theClientId',
-                                   'anypoint.platform.client_secret': 'theSecret'
+                                   env                                               : 'dev',
+                                   'crypto.key'                                      : 'theKey',
+                                   'anypoint.platform.client_id'                     : 'theClientId',
+                                   'anypoint.platform.client_secret'                 : 'theSecret',
+                                   'anypoint.platform.config.analytics.agent.enabled': true
                            ]
 
                    ]))
@@ -481,7 +488,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     null,
                                                     [:],
                                                     [:],
-                                                    true)
+                                                    false)
         // act
         def appInfo = request.getCloudhubAppInfo()
 
@@ -505,11 +512,10 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                            objectStoreV1            : true,
                            persistentQueues         : false,
                            properties               : [
-                                   env                                               : 'dev',
-                                   'crypto.key'                                      : 'theKey',
-                                   'anypoint.platform.client_id'                     : 'theClientId',
-                                   'anypoint.platform.client_secret'                 : 'theSecret',
-                                   'anypoint.platform.config.analytics.agent.enabled': true
+                                   env                              : 'dev',
+                                   'crypto.key'                     : 'theKey',
+                                   'anypoint.platform.client_id'    : 'theClientId',
+                                   'anypoint.platform.client_secret': 'theSecret'
                            ]
                    ]))
     }
