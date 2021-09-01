@@ -4,11 +4,7 @@ import com.avioconsulting.mule.MavenInvoke
 import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.Deployer
 import com.avioconsulting.mule.deployment.api.DryRunMode
-import com.avioconsulting.mule.deployment.api.models.ApiSpecification
-import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
-import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
-import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
-import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.*
 import com.avioconsulting.mule.deployment.api.models.policies.MulesoftPolicy
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
@@ -23,11 +19,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.core.config.Configurator
-import org.junit.Assume
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.*
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
@@ -170,7 +162,8 @@ class IntegrationTest implements MavenInvoke {
     void cloudhub() {
         // arrange
         def apiSpec1 = new ApiSpecification('Mule Deploy Design Center Test Project',
-                                           cloudhubDeploymentRequest.getRamlFilesFromApp('/api'),
+                                           cloudhubDeploymentRequest.getRamlFilesFromApp('/api',
+                                                                                         true),
                                             'mule-deploy-design-center-test-project-v2.raml',
                                             null,
                                             null,
@@ -179,7 +172,8 @@ class IntegrationTest implements MavenInvoke {
                                             '/api')
 
         def apiSpec2 = new ApiSpecification('Mule Deploy Design Center Test Project',
-                                            cloudhubDeploymentRequest.getRamlFilesFromApp('/api_v1'),
+                                            cloudhubDeploymentRequest.getRamlFilesFromApp('/api_v1',
+                                                                                          true),
                                             'mule-deploy-design-center-test-project.raml',
                                             null,
                                             null,
@@ -268,7 +262,7 @@ class IntegrationTest implements MavenInvoke {
             println 'Existing app does not exist, no problem'
         }
         def apiSpec = new ApiSpecification('Mule Deploy Design Center Test Project',
-                                           onPremDeploymentRequest.getRamlFilesFromApp('/api'))
+                                           onPremDeploymentRequest.getRamlFilesFromApp('/api', true))
 
         // act
         overallDeployer.deployApplication(onPremDeploymentRequest,

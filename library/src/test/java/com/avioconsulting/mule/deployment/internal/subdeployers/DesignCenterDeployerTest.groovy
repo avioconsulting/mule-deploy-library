@@ -1104,7 +1104,8 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
         }
         def request = buildFullApp()
         def apiSpec = new ApiSpecification('Hello API',
-                                           request.getRamlFilesFromApp('/api'))
+                                           request.getRamlFilesFromApp('/api',
+                                                                       false))
 
         // act
         deployer.synchronizeDesignCenterFromApp(apiSpec,
@@ -1168,7 +1169,8 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
         }
         def appInfo = buildFullApp()
         def apiSpec = new ApiSpecification('Hello API',
-                                           appInfo.getRamlFilesFromApp('/api'))
+                                           appInfo.getRamlFilesFromApp('/api',
+                                                                       false))
 
         // act
         deployer.synchronizeDesignCenterFromApp(apiSpec,

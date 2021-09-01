@@ -15,7 +15,9 @@ class ApiSpecContext extends BaseContext {
         // This might sort of be a circular/weird dependency between ApiSpecification and FileBasedAppDeploymentRequest
         // but not sure of the best way to handle this
         def sourceDirectory = ApiSpecification.getSourceDirectoryOrDefault(this.sourceDirectory)
-        def ramlFiles = request.getRamlFilesFromApp(sourceDirectory)
+        // we cannot parse the RAML without included Exchange modules
+        def ramlFiles = request.getRamlFilesFromApp(sourceDirectory,
+                                                    false)
         new ApiSpecification(this.name,
                              ramlFiles,
                              this.mainRamlFile,
