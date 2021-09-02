@@ -17,6 +17,10 @@ class FromStringRamlResourceLoader implements ResourceLoader {
 
     @Override
     InputStream getResourceAsStream(String relativePath) {
+        // this.ramlFiles does not have leading slashes but RAML includes allow this
+        if (relativePath[0] == '/') {
+            relativePath = relativePath[1..-1]
+        }
         def file = ramlFiles.find { r ->
             r.fileName == relativePath
         }
