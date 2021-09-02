@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.api.models
 
-import com.avioconsulting.mule.deployment.internal.EnsureWeCloseRamlLoader
+import com.avioconsulting.mule.deployment.internal.FromStringRamlResourceLoader
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import org.mule.apikit.model.api.ApiReference
 import org.mule.parser.service.ParserService
@@ -91,7 +91,7 @@ class ApiSpecification {
             throw new Exception("You specified '${mainRamlFile}' as your main RAML file but it does not exist in your application under ${sourceDirectory}!")
         }
         // see EnsureWeCloseLoader for why we do this
-        def resourceLoader = new EnsureWeCloseRamlLoader(ramlFiles)
+        def resourceLoader = new FromStringRamlResourceLoader(ramlFiles)
         def parserService = new ParserService()
         def apiRef = ApiReference.create(mainFile.fileName,
                                          resourceLoader)
