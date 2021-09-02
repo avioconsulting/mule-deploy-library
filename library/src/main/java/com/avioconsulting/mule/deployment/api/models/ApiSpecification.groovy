@@ -90,7 +90,6 @@ class ApiSpecification {
         if (!mainFile) {
             throw new Exception("You specified '${mainRamlFile}' as your main RAML file but it does not exist in your application under ${sourceDirectory}!")
         }
-        // see EnsureWeCloseLoader for why we do this
         def resourceLoader = new FromStringRamlResourceLoader(ramlFiles)
         def parserService = new ParserService()
         def apiRef = ApiReference.create(mainFile.fileName,
