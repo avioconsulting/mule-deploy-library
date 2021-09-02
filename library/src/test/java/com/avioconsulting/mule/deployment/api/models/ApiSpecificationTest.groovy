@@ -108,13 +108,14 @@ class ApiSpecificationTest {
                              ['#%RAML 1.0',
                               'title: stuff',
                               'version: v1',
-                              'types:',
-                              ' Foo: !include something.raml'].join('\n')),
+                              'uses:',
+                              ' foo: something.raml'].join('\n')),
                 new RamlFile('something.raml',
-                             ['#%RAML 1.0 Type',
-                              'type: object',
-                              'properties:',
-                              ' foo: string'].join('\n'))
+                             ['#%RAML 1.0 Library',
+                              'types:',
+                              ' NullablePickedEnumStatus:',
+                              '  type: string|nil',
+                              '  enum: ["A","B","C",null]'].join('\n'))
         ]
 
         // act
