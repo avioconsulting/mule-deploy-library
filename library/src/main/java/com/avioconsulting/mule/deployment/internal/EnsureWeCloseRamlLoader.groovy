@@ -1,8 +1,7 @@
 package com.avioconsulting.mule.deployment.internal
 
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
-import org.raml.v2.api.loader.DefaultResourceLoader
-import org.raml.v2.api.loader.ResourceUriCallback
+import org.mule.apikit.loader.ResourceLoader
 
 /**
  * For some reason, the RAML parser does not close these InputStreams by default.
@@ -15,7 +14,7 @@ import org.raml.v2.api.loader.ResourceUriCallback
  * we parse the RAML. APIKit does a lot of complex stuff with this so it didn't
  * make sense to try and emulate exactly what it does.
  */
-class EnsureWeCloseRamlLoader extends DefaultResourceLoader {
+class EnsureWeCloseRamlLoader implements ResourceLoader {
     private final List<RamlFile> ramlFiles
 
     EnsureWeCloseRamlLoader(List<RamlFile> ramlFiles) {
@@ -23,9 +22,14 @@ class EnsureWeCloseRamlLoader extends DefaultResourceLoader {
     }
 
     @Override
-    InputStream fetchResource(String resourceName, ResourceUriCallback callback) {
+    URI getResource(String path) {
+        new URI(path)
+    }
+
+    @Override
+    InputStream getResourceAsStream(String relativePath) {
         def file = ramlFiles.find { r ->
-            r.fileName == resourceName
+            r.fileName == relativePath
         }
         if (!file) {
             return null
