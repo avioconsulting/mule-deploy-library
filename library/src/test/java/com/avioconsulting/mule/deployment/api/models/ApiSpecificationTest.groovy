@@ -108,13 +108,84 @@ class ApiSpecificationTest {
                              ['#%RAML 1.0',
                               'title: stuff',
                               'version: v1',
-                              'types:',
-                              ' Foo: !include something.raml'].join('\n')),
+                              'uses:',
+                              ' foo: something.raml'].join('\n')),
                 new RamlFile('something.raml',
-                             ['#%RAML 1.0 Type',
-                              'type: object',
-                              'properties:',
-                              ' foo: string'].join('\n'))
+                             ['#%RAML 1.0 Library',
+                              'types:',
+                              ' NullablePickedEnumStatus:',
+                              '  type: string|nil',
+                              '  enum: ["A","B","C",null]'].join('\n'))
+        ]
+
+        // act
+        def result = new ApiSpecification('Product API',
+                                          files,
+                                          'stuff-v1.raml'
+        )
+
+        // assert
+        assertThat result.name,
+                   is(equalTo('Product API'))
+        assertThat result.exchangeAssetId,
+                   is(equalTo('product-api'))
+        assertThat result.mainRamlFile,
+                   is(equalTo('stuff-v1.raml'))
+        assertThat result.apiMajorVersion,
+                   is(equalTo('v1'))
+    }
+
+    @Test
+    void raml_include_uses_root_directory_slash() {
+        // arrange
+        def files = [
+                new RamlFile('stuff-v1.raml',
+                             ['#%RAML 1.0',
+                              'title: stuff',
+                              'version: v1',
+                              'uses:',
+                              ' foo: /something.raml'].join('\n')),
+                new RamlFile('something.raml',
+                             ['#%RAML 1.0 Library',
+                              'types:',
+                              ' NullablePickedEnumStatus:',
+                              '  type: string|nil',
+                              '  enum: ["A","B","C",null]'].join('\n'))
+        ]
+
+        // act
+        def result = new ApiSpecification('Product API',
+                                          files,
+                                          'stuff-v1.raml'
+        )
+
+        // assert
+        assertThat result.name,
+                   is(equalTo('Product API'))
+        assertThat result.exchangeAssetId,
+                   is(equalTo('product-api'))
+        assertThat result.mainRamlFile,
+                   is(equalTo('stuff-v1.raml'))
+        assertThat result.apiMajorVersion,
+                   is(equalTo('v1'))
+    }
+
+    @Test
+    void raml_include_subdir() {
+        // arrange
+        def files = [
+                new RamlFile('stuff-v1.raml',
+                             ['#%RAML 1.0',
+                              'title: stuff',
+                              'version: v1',
+                              'uses:',
+                              ' foo: stuff/something.raml'].join('\n')),
+                new RamlFile('stuff/something.raml',
+                             ['#%RAML 1.0 Library',
+                              'types:',
+                              ' NullablePickedEnumStatus:',
+                              '  type: string|nil',
+                              '  enum: ["A","B","C",null]'].join('\n'))
         ]
 
         // act

@@ -265,9 +265,9 @@
             <version>${groovy.compiler.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.raml</groupId>
-            <artifactId>raml-parser-2</artifactId>
-            <version>1.0.48</version>
+            <groupId>org.mule.apikit</groupId>
+            <artifactId>parser-service</artifactId>
+            <version>2.1.2</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.groovy</groupId>
@@ -372,6 +372,12 @@
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
+        </repository>
+        <repository>
+            <id>mulesoft-releases</id>
+            <name>MuleSoft Releases Repository</name>
+            <url>https://repository.mulesoft.org/releases/</url>
+            <layout>default</layout>
         </repository>
     </repositories>
 
