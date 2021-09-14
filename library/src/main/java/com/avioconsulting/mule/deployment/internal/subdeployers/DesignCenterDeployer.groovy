@@ -146,11 +146,15 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
         def apiMajorVersion = apiSpec.apiMajorVersion
         def majorVersionNumber = getMajorVersionNumber(apiMajorVersion)
         def parsedAppVersion = parseVersion(appVersion)
+        String subVersion
         if (parsedAppVersion.majorVersion != majorVersionNumber) {
+            if(parsedAppVersion.toString().contains('-')) {
+                subVersion = parsedAppVersion.toString().split('\\-')[1]
+            }
             def newAppVersion = new Version(majorVersionNumber,
                                             parsedAppVersion.minorVersion,
                                             parsedAppVersion.patchLevel,
-                                            null).toString()
+                    subVersion).toString()
             logger.println "Since app is supporting multiple API specs and this push is for ${apiMajorVersion}, using ${newAppVersion} instead of ${appVersion} because Exchange will reject otherwise."
             appVersion = newAppVersion
         }

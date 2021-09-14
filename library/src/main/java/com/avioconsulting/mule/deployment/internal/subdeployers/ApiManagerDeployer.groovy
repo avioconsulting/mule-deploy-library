@@ -220,14 +220,18 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
         }
         def appVersionParsed = parseVersion(appVersion)
         def majorApiVersionNumber = getMajorVersionNumber(apiMajorVersion)
+        String subVersion
         if (majorApiVersionNumber != appVersionParsed.majorVersion) {
             // our app, even if supporting 2 API versions, can only have a single app (think Runtime Manager)
             // version. therefore we have to use a "hypothetical" 1.x.x app version as our baseline if we
             // are looking for a v1 API Exchange asset
+            if(appVersionParsed.toString().contains('-')) {
+                subVersion = appVersionParsed.toString().split('\\-')[1]
+            }
             appVersionParsed = new Version(majorApiVersionNumber,
                                            appVersionParsed.minorVersion,
                                            appVersionParsed.patchLevel,
-                                           null)
+                    subVersion)
             logger.println("Our app (${appVersion}) is supporting multiple API definitions but we are currently managing a lower major version of the API Definition, ${apiMajorVersion}. Therefore we will look for the latest Exchange asset version <= ${appVersionParsed}")
         } else {
             logger.println("Looking for latest Exchange asset version <= app version of ${appVersionParsed}")

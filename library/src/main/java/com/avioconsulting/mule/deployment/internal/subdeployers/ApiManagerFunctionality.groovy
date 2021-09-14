@@ -27,12 +27,17 @@ trait ApiManagerFunctionality {
     }
 
     Version parseVersion(String version) {
+        String subVersion
+        if(version.contains('-')) {
+            subVersion = version.split('\\-')[1]
+            version = version.split('\\-')[0]
+        }
         def split = version.split('\\.')
         assert split.size() == 3: "Expected version ${version} to have only 3 parts!"
         new Version(Integer.parseInt(split[0]),
                     Integer.parseInt(split[1]),
                     Integer.parseInt(split[2]),
-                    null)
+                subVersion)
     }
 
     String getApiManagerUrl(String restOfUrl,
