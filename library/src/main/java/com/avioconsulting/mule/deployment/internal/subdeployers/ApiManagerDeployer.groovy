@@ -237,12 +237,37 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
             logger.println("Looking for latest Exchange asset version <= app version of ${appVersionParsed}")
         }
         def result = parsedVersions.sort().reverse().find { version ->
-            version <= appVersionParsed
+            if(version.toString()==appVersionParsed.toString()){version.toString() == appVersionParsed.toString()}
+        }
+        if (!result) {
+            parsedVersions.each { version ->
+                if(parseVersion(version.toString().split('\\-')[0]) <= parseVersion(appVersionParsed.toString().split('\\-')[0])) {
+                    result = parseVersion(version.toString().split('\\-')[0])
+                }
+            }
         }
         if (!result) {
             def availableVersions = assets.collect { a -> a.version }
             throw new Exception("Expected to find a ${apiMajorVersion} asset version <= our app version of ${appVersion} but did not! Asset versions found in Exchange were ${availableVersions}")
         }
-        return result
+
+        def newSubVersion = []
+        if(parsedVersions != null && result != null){
+            parsedVersions.each {
+                val ->
+                    if((val.toString().contains('-')) && (val.toString().split('\\-')[0] == result.toString()) )
+                    {
+                        newSubVersion.add(Integer.valueOf(val.toString().split('\\-')[1]))
+                    }
+            }
+            newSubVersion = newSubVersion.sort().reverse()[0]
+        }
+        boolean checkInParsedVersions = false
+        parsedVersions.find { version ->
+            version == result.toString()+'-'+newSubVersion
+            checkInParsedVersions = true
+        }
+        if(newSubVersion != null && !result.toString().contains('-') && checkInParsedVersions) return result.toString()+'-'+newSubVersion
+        else return result
     }
 }
