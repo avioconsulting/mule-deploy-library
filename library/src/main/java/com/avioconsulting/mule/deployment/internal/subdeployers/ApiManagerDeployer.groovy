@@ -210,6 +210,13 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
                             chosenAssetVersion)
     }
 
+    /**
+     *
+     * @param apiMajorVersion - Major version/exchange version group for the API Version
+     * @param appVersion - Mule application version from the maven pom (Semver format + optional qualifier)
+     * @param assets - List of published exchange assets for the specified API
+     * @return - the greatest asset version less than or equal to our application verstion, or for the apiMajorVersion if it is different from the appVersion
+     */
     private String pickVersion(String apiMajorVersion,
                                String appVersion,
                                List<GetAssetsQuery.Asset> assets) {
@@ -220,54 +227,25 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
         }
         def appVersionParsed = parseVersion(appVersion)
         def majorApiVersionNumber = getMajorVersionNumber(apiMajorVersion)
-        String subVersion
         if (majorApiVersionNumber != appVersionParsed.majorVersion) {
             // our app, even if supporting 2 API versions, can only have a single app (think Runtime Manager)
             // version. therefore we have to use a "hypothetical" 1.x.x app version as our baseline if we
             // are looking for a v1 API Exchange asset
-            if(appVersionParsed.toString().contains('-')) {
-                subVersion = appVersionParsed.toString().split('\\-')[1]
-            }
             appVersionParsed = new Version(majorApiVersionNumber,
-                                           appVersionParsed.minorVersion,
-                                           appVersionParsed.patchLevel,
-                    subVersion)
+                    appVersionParsed.minorVersion,
+                    appVersionParsed.patchLevel,
+                    null)
             logger.println("Our app (${appVersion}) is supporting multiple API definitions but we are currently managing a lower major version of the API Definition, ${apiMajorVersion}. Therefore we will look for the latest Exchange asset version <= ${appVersionParsed}")
         } else {
             logger.println("Looking for latest Exchange asset version <= app version of ${appVersionParsed}")
         }
         def result = parsedVersions.sort().reverse().find { version ->
-            if(version.toString()==appVersionParsed.toString()){version.toString() == appVersionParsed.toString()}
-        }
-        if (!result) {
-            parsedVersions.each { version ->
-                if(parseVersion(version.toString().split('\\-')[0]) <= parseVersion(appVersionParsed.toString().split('\\-')[0])) {
-                    result = parseVersion(version.toString().split('\\-')[0])
-                }
-            }
+            version <= appVersionParsed
         }
         if (!result) {
             def availableVersions = assets.collect { a -> a.version }
             throw new Exception("Expected to find a ${apiMajorVersion} asset version <= our app version of ${appVersion} but did not! Asset versions found in Exchange were ${availableVersions}")
         }
-
-        def newSubVersion = []
-        if(parsedVersions != null && result != null){
-            parsedVersions.each {
-                val ->
-                    if((val.toString().contains('-')) && (val.toString().split('\\-')[0] == result.toString()) )
-                    {
-                        newSubVersion.add(Integer.valueOf(val.toString().split('\\-')[1]))
-                    }
-            }
-            newSubVersion = newSubVersion.sort().reverse()[0]
-        }
-        boolean checkInParsedVersions = false
-        parsedVersions.find { version ->
-            version == result.toString()+'-'+newSubVersion
-            checkInParsedVersions = true
-        }
-        if(newSubVersion != null && !result.toString().contains('-') && checkInParsedVersions) return result.toString()+'-'+newSubVersion
-        else return result
+        return result
     }
 }

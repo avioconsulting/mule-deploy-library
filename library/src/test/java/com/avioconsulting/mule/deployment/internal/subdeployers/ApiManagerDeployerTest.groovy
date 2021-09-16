@@ -8,6 +8,7 @@ import com.avioconsulting.mule.deployment.internal.models.ApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ResolvedApiSpec
 import com.avioconsulting.mule.deployment.internal.models.graphql.GetAssetsQuery
+import com.fasterxml.jackson.core.Version
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
@@ -20,6 +21,9 @@ import org.junit.Test
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertFalse
+import static org.junit.Assert.assertTrue
 
 @SuppressWarnings('GroovyAccessibility')
 class ApiManagerDeployerTest extends BaseTest {
@@ -924,68 +928,6 @@ class ApiManagerDeployerTest extends BaseTest {
     }
 
     @Test
-    void resolveAssetVersion_exact_match_our_app_version_with_subVersion() {
-        // arrange
-        withHttpServer { HttpServerRequest request ->
-            if (mockAuthenticationOk(request)) {
-                return
-            }
-            if (mockEnvironments(request)) {
-                return
-            }
-            request.response().with {
-                statusCode = 200
-                putHeader('Content-Type',
-                        'application/json')
-                def response = [
-                        data: [
-                                assets: [
-                                [
-                                        '__typename': 'Asset',
-                                        assetId     : 'foo',
-                                        version     : '1.0.0-1',
-                                        versionGroup: 'v1'
-                                ],
-                                [
-                                        '__typename': 'Asset',
-                                        assetId     : 'foo',
-                                        version     : '1.0.0-2',
-                                        versionGroup: 'v1'
-                                ],
-                                [
-                                        '__typename': 'Asset',
-                                        assetId     : 'foo',
-                                        version     : '2.0.0',
-                                        versionGroup: 'v2'
-                                ]
-                        ]
-                        ]
-                ]
-                end(JsonOutput.toJson(response))
-            }
-        }
-        def desiredApiDefinition = new ApiSpec('the-asset-id',
-                'https://some.endpoint',
-                'DEV',
-                'v1',
-                true)
-
-        // act
-        def result = deployer.resolveAssetVersion(desiredApiDefinition,
-                '1.0.0-2')
-
-        // assert
-        assertThat '1.0.0-2 is the latest v1 version <= to our app version',
-                result,
-                is(equalTo(new ResolvedApiSpec('the-asset-id',
-                        '1.0.0-2',
-                        'https://some.endpoint',
-                        'DEV',
-                        'v1',
-                        true)))
-    }
-
-    @Test
     void resolveAssetVersion_newer_versions_than_us_exist() {
         // arrange
         withHttpServer { HttpServerRequest request ->
@@ -1593,6 +1535,34 @@ class ApiManagerDeployerTest extends BaseTest {
     }
 
     @Test
+    void parseVersion_semVer() {
+        Version parsedVerison = deployer.parseVersion("1.0.0")
+        assertEquals(parsedVerison.getMajorVersion(), 1)
+        assertEquals(parsedVerison.getMinorVersion(), 0)
+        assertEquals(parsedVerison.getPatchLevel(), 0)
+        assertFalse(parsedVerison.isSnapshot())
+    }
+
+    @Test
+    void parseVersion_semVer_Snapshot() {
+        Version parsedVerison = deployer.parseVersion("1.0.0-SNAPSHOT")
+        assertEquals(parsedVerison.getMajorVersion(), 1)
+        assertEquals(parsedVerison.getMinorVersion(), 0)
+        assertEquals(parsedVerison.getPatchLevel(), 0)
+        assertTrue(parsedVerison.isSnapshot())
+    }
+
+    @Test
+    void parseVersion_semVer_Githash() {
+        Version parsedVerison = deployer.parseVersion("1.0.0-d574dad")
+        assertEquals(parsedVerison.getMajorVersion(), 1)
+        assertEquals(parsedVerison.getMinorVersion(), 0)
+        assertEquals(parsedVerison.getPatchLevel(), 0)
+        assertTrue(parsedVerison.isSnapshot())
+        assertEquals(parsedVerison.getQualifier(), 'd574dad')
+    }
+
+    @Test
     void pickVersion_with_subVersion(){
         List<GetAssetsQuery.Asset> assets =
          [
@@ -1624,14 +1594,14 @@ class ApiManagerDeployerTest extends BaseTest {
         def result = deployer.pickVersion('v1', '1.0.1-3', assets)
 
         // assert
-        assertThat 'Looking for latest Exchange asset version <= app version of 1.0.0-3',
+        assertThat 'Looking for latest Exchange asset version <= app version of 1.0.1-3',
                 result,
                 is(equalTo('1.0.1-1'))
 
     }
 
     @Test
-    void pickVersion_with_subVersion_s(){
+    void pickVersion_with_subVersion_withGreater(){
         List<GetAssetsQuery.Asset> assets =
                 [
                         [
@@ -1662,9 +1632,47 @@ class ApiManagerDeployerTest extends BaseTest {
         def result = deployer.pickVersion('v1', '1.0.0-19', assets)
 
         // assert
-        assertThat 'Looking for latest Exchange asset version <= app version of 1.0.0-17',
+        assertThat 'Looking for latest Exchange asset version <= app version of 1.0.0-19',
                 result,
                 is(equalTo('1.0.0-17'))
+
+    }
+
+    @Test
+    void pickVersion_with_subVersion_mismatch(){
+        List<GetAssetsQuery.Asset> assets =
+                [
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.0',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.0-2',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.0-5',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.1',
+                                versionGroup: 'v1'
+                        ]
+                ]
+        def result = deployer.pickVersion('v1', '1.0.0-19', assets)
+
+        // assert
+        assertThat 'Looking for latest Exchange asset version <= app version of 1.0.0-19',
+                result,
+                is(equalTo('1.0.0-5'))
 
     }
 
@@ -1752,7 +1760,7 @@ class ApiManagerDeployerTest extends BaseTest {
         def result = deployer.pickVersion('v1', '1.1.9', assets)
 
         // assert
-        assertThat 'Looking for latest Exchange asset version <= app version of 1.0.8',
+        assertThat 'Looking for latest Exchange asset version <= app version of 1.1.9',
                 result,
                 is(equalTo('1.1.7'))
 

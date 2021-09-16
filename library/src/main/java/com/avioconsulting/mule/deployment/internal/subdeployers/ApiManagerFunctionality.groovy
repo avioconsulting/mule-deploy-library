@@ -4,7 +4,7 @@ import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.graphql.GetAssetsQuery
-import com.fasterxml.jackson.core.Version
+import com.avioconsulting.mule.deployment.api.models.Version
 import groovy.json.JsonOutput
 import okio.Okio
 import org.apache.http.client.methods.HttpPost
@@ -27,17 +27,22 @@ trait ApiManagerFunctionality {
     }
 
     Version parseVersion(String version) {
-        String subVersion
+        String qualifier = null
+        String semVer
         if(version.contains('-')) {
-            subVersion = version.split('\\-')[1]
-            version = version.split('\\-')[0]
+            (semVer, qualifier) = version.split('-')
+        } else {
+            semVer = version
         }
-        def split = version.split('\\.')
-        assert split.size() == 3: "Expected version ${version} to have only 3 parts!"
+
+        def split = semVer.split('\\.')
+        assert split.size() == 3: "Expected version ${semVer} to have only 3 parts!"
         new Version(Integer.parseInt(split[0]),
                     Integer.parseInt(split[1]),
                     Integer.parseInt(split[2]),
-                subVersion)
+                    qualifier,
+            null,
+            null)
     }
 
     String getApiManagerUrl(String restOfUrl,
