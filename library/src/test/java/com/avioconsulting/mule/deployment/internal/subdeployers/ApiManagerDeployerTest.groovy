@@ -3,18 +3,17 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.DryRunMode
+import com.avioconsulting.mule.deployment.api.models.Version
 import com.avioconsulting.mule.deployment.internal.models.ApiQueryResponse
 import com.avioconsulting.mule.deployment.internal.models.ApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ResolvedApiSpec
 import com.avioconsulting.mule.deployment.internal.models.graphql.GetAssetsQuery
-import com.fasterxml.jackson.core.Version
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
@@ -1536,20 +1535,20 @@ class ApiManagerDeployerTest extends BaseTest {
 
     @Test
     void parseVersion_semVer() {
-        Version parsedVerison = deployer.parseVersion("1.0.0")
-        assertEquals(parsedVerison.getMajorVersion(), 1)
-        assertEquals(parsedVerison.getMinorVersion(), 0)
-        assertEquals(parsedVerison.getPatchLevel(), 0)
-        assertFalse(parsedVerison.isSnapshot())
+        Version parsedVersion = deployer.parseVersion("1.0.0")
+        assertEquals(parsedVersion.getMajorVersion(), 1)
+        assertEquals(parsedVersion.getMinorVersion(), 0)
+        assertEquals(parsedVersion.getPatchLevel(), 0)
+        assertFalse(parsedVersion.isSnapshot())
     }
 
     @Test
     void parseVersion_semVer_Snapshot() {
-        Version parsedVerison = deployer.parseVersion("1.0.0-SNAPSHOT")
-        assertEquals(parsedVerison.getMajorVersion(), 1)
-        assertEquals(parsedVerison.getMinorVersion(), 0)
-        assertEquals(parsedVerison.getPatchLevel(), 0)
-        assertTrue(parsedVerison.isSnapshot())
+        Version parsedVersion = deployer.parseVersion("1.0.0-SNAPSHOT")
+        assertEquals(parsedVersion.getMajorVersion(), 1)
+        assertEquals(parsedVersion.getMinorVersion(), 0)
+        assertEquals(parsedVersion.getPatchLevel(), 0)
+        assertTrue(parsedVersion.isSnapshot())
     }
 
     @Test
@@ -1563,7 +1562,7 @@ class ApiManagerDeployerTest extends BaseTest {
     }
 
     @Test
-    void pickVersion_with_subVersion(){
+    void pickVersion_with_qualifier(){
         List<GetAssetsQuery.Asset> assets =
          [
                 [
@@ -1591,17 +1590,17 @@ class ApiManagerDeployerTest extends BaseTest {
                         versionGroup: 'v1'
                 ]
         ]
-        def result = deployer.pickVersion('v1', '1.0.1-3', assets)
+        def result = deployer.pickVersion('v1', '1.0.0-3', assets)
 
         // assert
-        assertThat 'Looking for latest Exchange asset version <= app version of 1.0.1-3',
+        assertThat 'Looking for latest Exchange asset version <= app version of 1.0.0-3',
                 result,
-                is(equalTo('1.0.1-1'))
+                is(equalTo('1.0.0-3'))
 
     }
 
     @Test
-    void pickVersion_with_subVersion_withGreater(){
+    void pickVersion_with_qualifier_withGreater(){
         List<GetAssetsQuery.Asset> assets =
                 [
                         [
@@ -1639,7 +1638,7 @@ class ApiManagerDeployerTest extends BaseTest {
     }
 
     @Test
-    void pickVersion_with_subVersion_mismatch(){
+    void pickVersion_with_qualifier_mismatch(){
         List<GetAssetsQuery.Asset> assets =
                 [
                         [
@@ -1677,7 +1676,7 @@ class ApiManagerDeployerTest extends BaseTest {
     }
 
     @Test
-    void pickVersion_with_subVersion_not_found(){
+    void pickVersion_with_qualifier_not_found(){
         List<GetAssetsQuery.Asset> assets =
                 [
                         [
@@ -1767,7 +1766,7 @@ class ApiManagerDeployerTest extends BaseTest {
     }
 
     @Test
-    void pickVersion_subVersion_with_v1_majorVersion_and_v2_appVersion(){
+    void pickVersion_qualifier_with_v1_majorVersion_and_v2_appVersion(){
         List<GetAssetsQuery.Asset> assets =
                 [
                         [

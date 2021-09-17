@@ -2,11 +2,11 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.ILogger
+import com.avioconsulting.mule.deployment.api.models.Version
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.*
 import com.avioconsulting.mule.deployment.internal.models.graphql.GetAssetsQuery
-import com.fasterxml.jackson.core.Version
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpGet
@@ -234,7 +234,7 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
             appVersionParsed = new Version(majorApiVersionNumber,
                     appVersionParsed.minorVersion,
                     appVersionParsed.patchLevel,
-                    null)
+                    appVersionParsed.getQualifier(), null, null)
             logger.println("Our app (${appVersion}) is supporting multiple API definitions but we are currently managing a lower major version of the API Definition, ${apiMajorVersion}. Therefore we will look for the latest Exchange asset version <= ${appVersionParsed}")
         } else {
             logger.println("Looking for latest Exchange asset version <= app version of ${appVersionParsed}")
