@@ -3,22 +3,26 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.DryRunMode
+import com.avioconsulting.mule.deployment.api.models.Version
 import com.avioconsulting.mule.deployment.internal.models.ApiQueryResponse
 import com.avioconsulting.mule.deployment.internal.models.ApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ResolvedApiSpec
+import com.avioconsulting.mule.deployment.internal.models.graphql.GetAssetsQuery
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
-import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertFalse
+import static org.junit.Assert.assertTrue
 
 @SuppressWarnings('GroovyAccessibility')
 class ApiManagerDeployerTest extends BaseTest {
@@ -1527,5 +1531,263 @@ class ApiManagerDeployerTest extends BaseTest {
                    is(equalTo(false))
         assertThat result.id,
                    is(equalTo('******'))
+    }
+
+    @Test
+    void parseVersion_semVer() {
+        Version parsedVersion = deployer.parseVersion("1.0.0")
+        assertEquals(parsedVersion.getMajorVersion(), 1)
+        assertEquals(parsedVersion.getMinorVersion(), 0)
+        assertEquals(parsedVersion.getPatchLevel(), 0)
+        assertFalse(parsedVersion.isSnapshot())
+    }
+
+    @Test
+    void parseVersion_semVer_Snapshot() {
+        Version parsedVersion = deployer.parseVersion("1.0.0-SNAPSHOT")
+        assertEquals(parsedVersion.getMajorVersion(), 1)
+        assertEquals(parsedVersion.getMinorVersion(), 0)
+        assertEquals(parsedVersion.getPatchLevel(), 0)
+        assertTrue(parsedVersion.isSnapshot())
+    }
+
+    @Test
+    void parseVersion_semVer_Githash() {
+        Version parsedVerison = deployer.parseVersion("1.0.0-d574dad")
+        assertEquals(parsedVerison.getMajorVersion(), 1)
+        assertEquals(parsedVerison.getMinorVersion(), 0)
+        assertEquals(parsedVerison.getPatchLevel(), 0)
+        assertTrue(parsedVerison.isSnapshot())
+        assertEquals(parsedVerison.getQualifier(), 'd574dad')
+    }
+
+    @Test
+    void pickVersion_with_qualifier(){
+        List<GetAssetsQuery.Asset> assets =
+         [
+                [
+                        '__typename': 'Asset',
+                        assetId     : 'foo',
+                        version     : '1.0.0-1',
+                        versionGroup: 'v1'
+                ],
+                [
+                        '__typename': 'Asset',
+                        assetId     : 'foo',
+                        version     : '1.0.0-2',
+                        versionGroup: 'v1'
+                ],
+                [
+                        '__typename': 'Asset',
+                        assetId     : 'foo',
+                        version     : '1.0.0-3',
+                        versionGroup: 'v1'
+                ],
+                [
+                        '__typename': 'Asset',
+                        assetId     : 'foo',
+                        version     : '1.0.1-1',
+                        versionGroup: 'v1'
+                ]
+        ]
+        def result = deployer.pickVersion('v1', '1.0.0-3', assets)
+
+        // assert
+        assertThat 'Looking for latest Exchange asset version <= app version of 1.0.0-3',
+                result,
+                is(equalTo('1.0.0-3'))
+
+    }
+
+    @Test
+    void pickVersion_with_qualifier_withGreater(){
+        List<GetAssetsQuery.Asset> assets =
+                [
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.0-2',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.0-17',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.0-5',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.1-1',
+                                versionGroup: 'v1'
+                        ]
+                ]
+        def result = deployer.pickVersion('v1', '1.0.0-19', assets)
+
+        // assert
+        assertThat 'Looking for latest Exchange asset version <= app version of 1.0.0-19',
+                result,
+                is(equalTo('1.0.0-17'))
+
+    }
+
+    @Test
+    void pickVersion_with_qualifier_mismatch(){
+        List<GetAssetsQuery.Asset> assets =
+                [
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.0',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.0-2',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.0-5',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.1',
+                                versionGroup: 'v1'
+                        ]
+                ]
+        def result = deployer.pickVersion('v1', '1.0.0-19', assets)
+
+        // assert
+        assertThat 'Looking for latest Exchange asset version <= app version of 1.0.0-19',
+                result,
+                is(equalTo('1.0.0-5'))
+
+    }
+
+    @Test
+    void pickVersion_with_qualifier_not_found(){
+        List<GetAssetsQuery.Asset> assets =
+                [
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.0-1',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.0-2',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.0-3',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.1-1',
+                                versionGroup: 'v1'
+                        ]
+                ]
+
+        def exception = shouldFail {
+            deployer.pickVersion('v2', '2.0.0-3', assets)
+        }
+
+        // assert
+        assertThat exception.message,
+                is(containsString('Expected to find a v2 asset version <= our app version of 2.0.0-3 but did not! Asset versions found in Exchange were [1.0.0-1, 1.0.0-2, 1.0.0-3, 1.0.1-1]'))
+
+    }
+
+    @Test
+    void pickVersion_version(){
+        List<GetAssetsQuery.Asset> assets =
+                [
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.3',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.0',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.1',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.6',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.1.1',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.1.7',
+                                versionGroup: 'v1'
+                        ]
+                ]
+        def result = deployer.pickVersion('v1', '1.1.9', assets)
+
+        // assert
+        assertThat 'Looking for latest Exchange asset version <= app version of 1.1.9',
+                result,
+                is(equalTo('1.1.7'))
+
+    }
+
+    @Test
+    void pickVersion_qualifier_with_v1_majorVersion_and_v2_appVersion(){
+        List<GetAssetsQuery.Asset> assets =
+                [
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.0-1',
+                                versionGroup: 'v1'
+                        ],
+                        [
+                                '__typename': 'Asset',
+                                assetId     : 'foo',
+                                version     : '1.0.0-2',
+                                versionGroup: 'v1'
+                        ]
+                ]
+        def result = deployer.pickVersion('v1', '2.0.0-3', assets)
+
+        // assert
+        assertThat 'Looking for latest Exchange asset version <= app version of 1.0.0-2',
+                result,
+                is(equalTo('1.0.0-2'))
+
     }
 }
