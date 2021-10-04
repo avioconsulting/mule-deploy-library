@@ -542,4 +542,55 @@ class PolicyContextTest {
                                                                    ],
                                                                    '1.4.1')))
     }
+
+    @Test
+    void client_enforcement_client_Id_secret_minimum() {
+        // arrange
+        def context = new ClientEnforcementPolicyCustomContext()
+        def closure = {
+            clientSecretExpression "#[attributes.headers['client_secret']]"
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createPolicyModel()
+        // assert
+        assertThat request,
+                is(equalTo(new ClientEnforcementPolicyCustom()))
+    }
+
+    @Test
+    void client_enforcement_client_Id_secret_full() {
+        // arrange
+        def context = new ClientEnforcementPolicyCustomContext()
+        println(context)
+        def closure = {
+            version '1.4.1'
+            paths {
+                path {
+                    method HttpMethod().put
+                    regex '.*bar'
+                }
+            }
+            clientIdExpression "#[attributes.headers['client_id']]"
+            clientSecretExpression "#[attributes.headers['client_secret']]"
+
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createPolicyModel()
+
+        // assert
+        assertThat request,
+                is(equalTo(new ClientEnforcementPolicyCustom([
+                        new PolicyPathApplication([HttpMethod.PUT],
+                                '.*bar')
+                ],
+                        "#[attributes.headers['client_id']]",
+                        "#[attributes.headers['client_secret']]",
+                        '1.4.1')))
+    }
 }
