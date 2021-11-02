@@ -29,14 +29,13 @@ class CloudhubAppProperties {
         this.clientSecret = clientSecret
         this.analyticsEnabled = analyticsEnabled
         this.apiVisualizerLayer = {
-            if (appName.contains('prc')) {
-                return 'Process'
-            }
-            if (appName.contains('sys')) {
-                return 'System'
-            }
-            if (appName.contains('exp')) {
-                return 'Experience'
+            switch(appName) {
+                case ~/prc.*/:
+                    return 'Process'
+                case ~/sys.*/:
+                    return 'System'
+                case ~/exp.*/:
+                    return 'Experience'
             }
         }()
     }
