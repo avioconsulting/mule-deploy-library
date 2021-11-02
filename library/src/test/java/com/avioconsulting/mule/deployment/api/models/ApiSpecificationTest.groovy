@@ -278,7 +278,11 @@ class ApiSpecificationTest {
 
         // act
         def result = new ApiSpecification('SystemStuff SOAP API',
-                                          [],
+                                          [
+                                                  // SOAP projects will have WSDLs in here
+                                                  new RamlFile('stuff-v1.wsdl',
+                                                               ['<xml/>'].join('\n'))
+                                          ],
                                           null,
                                           'nope')
 
