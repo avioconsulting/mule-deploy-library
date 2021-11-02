@@ -39,6 +39,8 @@ class ApiSpecificationTest {
                    is(equalTo('master'))
         assertThat result.sourceDirectory,
                    is(equalTo('/api'))
+        assertThat result.soapApi,
+                   is(equalTo(false))
     }
 
     @Test
@@ -278,8 +280,7 @@ class ApiSpecificationTest {
 
         // act
         def result = new ApiSpecification('SystemStuff SOAP API',
-                                          [],
-                                          null,
+                                          'v1',
                                           'nope')
 
         // assert
@@ -289,5 +290,9 @@ class ApiSpecificationTest {
                    is(equalTo('nope'))
         assertThat result.mainRamlFile,
                    is(nullValue())
+        assertThat result.soapApi,
+                   is(equalTo(true))
+        assertThat result.apiMajorVersion,
+                   is(equalTo('v1'))
     }
 }

@@ -25,9 +25,14 @@ class ApiSpecification {
     final String mainRamlFile
 
     /**
-     * e.g. v1 or v2. this is optional, will be assumed to be v1 by default
+     * e.g. v1 or v2. this is optional, will be assumed to be v1 by default and it's
+     * derived from your RAML (opinionated deployment code) UNLESS you're using SOAP
+     * in which case you can manually provide it via the soapMajorApiVersion
+     * constructor parameter
      */
     final String apiMajorVersion
+
+    final boolean soapApi
 
     /**
      * The endpoint to show in the API Manager definition.
@@ -52,7 +57,8 @@ class ApiSpecification {
     final String sourceDirectory
 
     /***
-     * Standard request - see properties for parameter details
+     * Standard request - see properties for parameter details. If you have a SOAP
+     * endpoint, see the other constructor
      */
     ApiSpecification(String name,
                      List<RamlFile> ramlFiles,
@@ -75,6 +81,30 @@ class ApiSpecification {
         this.endpoint = endpoint
         this.designCenterBranchName = designCenterBranchName ?: 'master'
         this.sourceDirectory = sourceDirectory
+    }
+
+    /**
+     * Use for SOAP endpoints
+     * @param name
+     * @param soapMajorApiVersion
+     * @param exchangeAssetId
+     * @param endpoint
+     * @param autoDiscoveryPropertyName
+     */
+    ApiSpecification(String name,
+                     String soapMajorApiVersion,
+                     String exchangeAssetId = null,
+                     String endpoint = null,
+                     String autoDiscoveryPropertyName = null) {
+        this(name,
+             [],
+             null,
+             exchangeAssetId,
+             endpoint,
+             autoDiscoveryPropertyName)
+        this.apiMajorVersion = soapMajorApiVersion
+        this.soapApi = true
+        this.designCenterBranchName = null
     }
 
     static String getSourceDirectoryOrDefault(String sourceDirectory) {

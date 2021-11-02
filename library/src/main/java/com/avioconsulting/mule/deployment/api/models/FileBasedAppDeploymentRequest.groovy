@@ -85,6 +85,8 @@ abstract class FileBasedAppDeploymentRequest {
             if (!Files.exists(apiPath)) {
                 return []
             }
+            // we intentionally get everything, NOT just .raml files, in case the RAML references
+            // JSON examples, etc.
             Files.walk(apiPath).findAll { p ->
                 def relativeToApiDirectory = apiPath.relativize(p)
                 !Files.isDirectory(p) &&
