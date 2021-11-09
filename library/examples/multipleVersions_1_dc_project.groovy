@@ -8,7 +8,6 @@ muleDeploy {
     version '1.0'
 
     apiSpecification {
-        // assumes there are 2 Design Center projects, 1 for V1, 1 for V2
         name 'Design Center Project Name'
         // the "v1" RAML file
         mainRamlFile 'stuff.raml'
