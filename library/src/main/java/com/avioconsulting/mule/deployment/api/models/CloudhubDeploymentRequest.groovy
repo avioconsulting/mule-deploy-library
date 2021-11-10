@@ -114,7 +114,8 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
             newAppName = appNameLowerCase
         }
         normalizedAppName = newAppName
-        this.cloudhubAppProperties = new CloudhubAppProperties(environment.toLowerCase(),
+        this.cloudhubAppProperties = new CloudhubAppProperties(this.appName,
+                                                               environment.toLowerCase(),
                                                                cryptoKey,
                                                                anypointClientId,
                                                                anypointClientSecret,
