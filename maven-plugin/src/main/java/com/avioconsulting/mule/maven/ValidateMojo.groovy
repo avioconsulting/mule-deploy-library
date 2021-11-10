@@ -44,6 +44,8 @@ class ValidateMojo extends BaseMojo {
                     logger.println "Successfully processed ${groovyFile} through DSL"
                 }
                 catch (e) {
+                    def exception = e.cause ?: e
+                    logger.error("Unable to perform deployment because ${exception.class} ${exception.message}")
                     failed = true
                 }
             }
