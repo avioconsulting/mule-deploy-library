@@ -16,6 +16,7 @@ import org.junit.Test
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
+import static org.junit.Assert.assertEquals
 
 class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
     private DesignCenterDeployer deployer
@@ -342,6 +343,19 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
                                    content: 'the contents2'
                            ]
                    ]))
+    }
+
+    @Test
+    void testGetMajorVersionNumber() {
+        DesignCenterDeployer deployer = new DesignCenterDeployer(null, null, null, null)
+
+        assertEquals(1, deployer.getMajorVersionNumber("v1"))
+        assertEquals(1, deployer.getMajorVersionNumber("1"))
+        assertEquals(1, deployer.getMajorVersionNumber("v1.0"))
+        assertEquals(1, deployer.getMajorVersionNumber("1.0"))
+        assertEquals(1, deployer.getMajorVersionNumber("v1.0.0"))
+        assertEquals(1, deployer.getMajorVersionNumber("1.0.0"))
+        assertEquals(1, deployer.getMajorVersionNumber("v1.0.0-TEST"))
     }
 
     @Test

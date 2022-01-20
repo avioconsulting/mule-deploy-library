@@ -19,11 +19,13 @@ trait ApiManagerFunctionality {
     abstract ILogger getLogger()
 
     int getMajorVersionNumber(String majorVersionStringWithV) {
-        // apiMajorVersion starts with v
-        majorVersionStringWithV.replaceAll(/v(\d+)/) { it ->
-            // the numbers after v
-            it[1]
-        } as int
+        // Remove any leading characters before the digits
+        String version = majorVersionStringWithV.replaceAll("^\\D+", "")
+        if(version.indexOf('.') >= 0) {
+            version.subSequence(0, version.indexOf('.')) as int
+        } else {
+            return version as int
+        }
     }
 
     Version parseVersion(String version) {
