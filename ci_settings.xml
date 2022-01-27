@@ -3,8 +3,8 @@
     <servers>
         <server>
             <id>anypoint-exchange</id>
-            <username>anypoint-cicd</username>
-            <password>${ANYPOINT_DEPLOYMENT_SECRET}</password>
+            <username>sram_anypoint_cicd</username>
+            <password>${anypoint_cicd_password}</password>
         </server>
     </servers>
 </settings>
