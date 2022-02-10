@@ -10,6 +10,7 @@ import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import com.avioconsulting.mule.deployment.internal.subdeployers.*
 import groovy.transform.Canonical
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -491,6 +492,7 @@ class DeployerTest {
     }
 
     @Test
+    @Ignore
     void deployApplication_soap() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
