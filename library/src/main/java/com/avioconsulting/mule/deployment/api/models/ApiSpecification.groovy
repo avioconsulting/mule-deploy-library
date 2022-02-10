@@ -1,8 +1,9 @@
 package com.avioconsulting.mule.deployment.api.models
 
-import com.avioconsulting.mule.deployment.internal.EnsureWeCloseRamlLoader
+import com.avioconsulting.mule.deployment.internal.FromStringRamlResourceLoader
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
-import org.raml.v2.api.RamlModelBuilder
+import org.mule.apikit.model.api.ApiReference
+import org.mule.parser.service.ParserService
 
 class ApiSpecification {
     /***
@@ -24,9 +25,14 @@ class ApiSpecification {
     final String mainRamlFile
 
     /**
-     * e.g. v1 or v2. this is optional, will be assumed to be v1 by default
+     * e.g. v1 or v2. this is optional, will be assumed to be v1 by default and it's
+     * derived from your RAML (opinionated deployment code) UNLESS you're using SOAP
+     * in which case you can manually provide it via the soapMajorApiVersion
+     * constructor parameter
      */
     final String apiMajorVersion
+
+    final boolean soapApi
 
     /**
      * The endpoint to show in the API Manager definition.
@@ -51,7 +57,8 @@ class ApiSpecification {
     final String sourceDirectory
 
     /***
-     * Standard request - see properties for parameter details
+     * Standard request - see properties for parameter details. If you have a SOAP
+     * endpoint, see the other constructor
      */
     ApiSpecification(String name,
                      List<RamlFile> ramlFiles,
@@ -76,6 +83,30 @@ class ApiSpecification {
         this.sourceDirectory = sourceDirectory
     }
 
+    /**
+     * Use for SOAP endpoints
+     * @param name
+     * @param soapMajorApiVersion
+     * @param exchangeAssetId
+     * @param endpoint
+     * @param autoDiscoveryPropertyName
+     */
+    ApiSpecification(String name,
+                     String soapMajorApiVersion,
+                     String exchangeAssetId = null,
+                     String endpoint = null,
+                     String autoDiscoveryPropertyName = null) {
+        this(name,
+             [],
+             null,
+             exchangeAssetId,
+             endpoint,
+             autoDiscoveryPropertyName)
+        this.apiMajorVersion = soapMajorApiVersion
+        this.soapApi = true
+        this.designCenterBranchName = null
+    }
+
     static String getSourceDirectoryOrDefault(String sourceDirectory) {
         sourceDirectory ?: '/api'
     }
@@ -83,22 +114,22 @@ class ApiSpecification {
     private static String getApiVersion(String mainRamlFile,
                                         List<RamlFile> ramlFiles,
                                         String sourceDirectory) {
-        // see EnsureWeCloseLoader for why we do this
-        def resourceLoader = new EnsureWeCloseRamlLoader(ramlFiles)
-        def builder = new RamlModelBuilder(resourceLoader)
         def mainFile = ramlFiles.find { f ->
             f.fileName == mainRamlFile
         }
         if (!mainFile) {
             throw new Exception("You specified '${mainRamlFile}' as your main RAML file but it does not exist in your application under ${sourceDirectory}!")
         }
-        def ramlModel = builder.buildApi(mainFile.contents,
-                                         '.')
-        if (ramlModel.hasErrors()) {
-            throw new Exception("RAML ${mainRamlFile} is invalid. ${ramlModel.validationResults}")
+        def resourceLoader = new FromStringRamlResourceLoader(ramlFiles)
+        def parserService = new ParserService()
+        def apiRef = ApiReference.create(mainFile.fileName,
+                                         resourceLoader)
+        def parseResult = parserService.parse(apiRef)
+        if (!parseResult.success()) {
+            throw new Exception("RAML ${mainRamlFile} is invalid. ${parseResult.errors}")
         }
-        def version = ramlModel.apiV10.version()
-        version?.value() ?: 'v1'
+        def version = parseResult.get().version
+        version ?: 'v1'
     }
 
     private static String findMainRamlFile(List<RamlFile> ramlFiles) {

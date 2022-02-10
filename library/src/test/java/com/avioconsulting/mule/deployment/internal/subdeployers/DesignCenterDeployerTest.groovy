@@ -16,6 +16,7 @@ import org.junit.Test
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
+import static org.junit.Assert.assertEquals
 
 class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
     private DesignCenterDeployer deployer
@@ -345,6 +346,19 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
     }
 
     @Test
+    void testGetMajorVersionNumber() {
+        DesignCenterDeployer deployer = new DesignCenterDeployer(null, null, null, null)
+
+        assertEquals(1, deployer.getMajorVersionNumber("v1"))
+        assertEquals(1, deployer.getMajorVersionNumber("1"))
+        assertEquals(1, deployer.getMajorVersionNumber("v1.0"))
+        assertEquals(1, deployer.getMajorVersionNumber("1.0"))
+        assertEquals(1, deployer.getMajorVersionNumber("v1.0.0"))
+        assertEquals(1, deployer.getMajorVersionNumber("1.0.0"))
+        assertEquals(1, deployer.getMajorVersionNumber("v1.0.0-TEST"))
+    }
+
+    @Test
     void pushToExchange() {
         // arrange
         String anypointOrgId = null
@@ -413,6 +427,77 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
                                    projectId: 'ourprojectId'
                            ]
                    ]))
+    }
+
+    @Test
+    void pushToExchange_with_subVersion() {
+        // arrange
+        String anypointOrgId = null
+        String url = null
+        String method = null
+        String ownerGuid = null
+        Map sentPayload = null
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            anypointOrgId = request.getHeader('X-ORGANIZATION-ID')
+            url = request.uri()
+            method = request.method().toString()
+            ownerGuid = request.getHeader('X-OWNER-ID')
+            request.bodyHandler { body ->
+                sentPayload = new JsonSlurper().parseText(body.toString()) as Map
+            }
+            request.response().with {
+                statusCode = 204
+                end()
+            }
+        }
+        def file1RamlContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
+        def files = [
+                new RamlFile('folder/file3.raml',
+                        'the contents3'),
+                new RamlFile('file1.raml',
+                        file1RamlContents),
+                new RamlFile('file2.raml',
+                        'the contents2')
+        ]
+        def apiSpec = new ApiSpecification('Hello API',
+                files)
+
+        // act
+        deployer.pushToExchange(apiSpec,
+                'ourprojectId',
+                '1.0.0-1')
+
+        // assert
+        assertThat method,
+                is(equalTo('POST'))
+        assertThat url,
+                is(equalTo('/designcenter/api-designer/projects/ourprojectId/branches/master/publish/exchange'))
+        assertThat anypointOrgId,
+                is(equalTo('the-org-id'))
+        assertThat 'Design center needs this',
+                ownerGuid,
+                is(equalTo('the_id'))
+        assertThat sentPayload,
+                is(equalTo([
+                        main      : 'file1.raml',
+                        apiVersion: 'v1',
+                        version   : '1.0.0-1',
+                        assetId   : 'hello-api',
+                        name      : 'Hello API',
+                        groupId   : 'the-org-id',
+                        classifier: 'raml',
+                        metadata  : [
+                                branchId : 'master',
+                                projectId: 'ourprojectId'
+                        ]
+                ]))
     }
 
     @Test
@@ -1104,7 +1189,8 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
         }
         def request = buildFullApp()
         def apiSpec = new ApiSpecification('Hello API',
-                                           request.getRamlFilesFromApp('/api'))
+                                           request.getRamlFilesFromApp('/api',
+                                                                       false))
 
         // act
         deployer.synchronizeDesignCenterFromApp(apiSpec,
@@ -1168,7 +1254,8 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
         }
         def appInfo = buildFullApp()
         def apiSpec = new ApiSpecification('Hello API',
-                                           appInfo.getRamlFilesFromApp('/api'))
+                                           appInfo.getRamlFilesFromApp('/api',
+                                                                       false))
 
         // act
         deployer.synchronizeDesignCenterFromApp(apiSpec,

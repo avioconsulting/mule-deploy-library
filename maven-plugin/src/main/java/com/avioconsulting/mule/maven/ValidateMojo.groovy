@@ -44,6 +44,7 @@ class ValidateMojo extends BaseMojo {
                     logger.println "Successfully processed ${groovyFile} through DSL"
                 }
                 catch (e) {
+                    // already logged by processDsl
                     failed = true
                 }
             }

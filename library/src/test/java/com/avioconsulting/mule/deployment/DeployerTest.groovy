@@ -10,6 +10,7 @@ import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import com.avioconsulting.mule.deployment.internal.subdeployers.*
 import groovy.transform.Canonical
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -218,11 +219,12 @@ class DeployerTest {
         }
         assertThat deployedChApps[0].cloudhubAppInfo.properties,
                    is(equalTo([
-                           env                              : 'dev',
-                           'auto-discovery.api-id'          : 'api1234',
-                           'crypto.key'                     : 'theKey',
-                           'anypoint.platform.client_id'    : 'theClientId',
-                           'anypoint.platform.client_secret': 'theSecret'
+                           env                                               : 'dev',
+                           'auto-discovery.api-id'                           : 'api1234',
+                           'crypto.key'                                      : 'theKey',
+                           'anypoint.platform.client_id'                     : 'theClientId',
+                           'anypoint.platform.client_secret'                 : 'theSecret',
+                           'anypoint.platform.config.analytics.agent.enabled': true
                    ]))
         assertThat designCenterSyncs.size(),
                    is(equalTo(1))
@@ -486,6 +488,42 @@ class DeployerTest {
                    is(equalTo(0))
         assertThat 'no feature supplied',
                    apiSyncs.size(),
+                   is(equalTo(0))
+    }
+
+    @Test
+    @Ignore
+    void deployApplication_soap() {
+        // arrange
+        def file = new File('src/test/resources/some_file.txt')
+        def request = new CloudhubDeploymentRequest('DEV',
+                                                    new CloudhubWorkerSpecRequest('3.9.1',
+                                                                                  false,
+                                                                                  1,
+                                                                                  WorkerTypes.Micro,
+                                                                                  AwsRegions.UsEast1),
+                                                    file,
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    'client',
+                                                    'new-app',
+                                                    '1.2.3')
+        def apiSpec = new ApiSpecification('Hello SOAP API',
+                                           'v1')
+
+        // act
+        deployer.deployApplication(request,
+                                   new ApiSpecificationList([apiSpec]))
+
+        // assert
+        assertThat deployedChApps.size(),
+                   is(equalTo(1))
+        assertThat 'API sync should still happen',
+                   apiSyncs.size(),
+                   is(equalTo(1))
+        assertThat 'If a SOAP API is in use, we should not sync to DC',
+                   designCenterSyncs.size(),
                    is(equalTo(0))
     }
 

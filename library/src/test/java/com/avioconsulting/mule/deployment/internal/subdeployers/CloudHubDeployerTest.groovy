@@ -72,6 +72,7 @@ class CloudHubDeployerTest extends BaseTest {
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
             if (mockDeploymentAndXStatusChecks(request,
+                                               'client-sys-new-app-dev',
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null),
                                                new AppStatusPackage(AppStatus.Undeployed,
@@ -96,7 +97,7 @@ class CloudHubDeployerTest extends BaseTest {
                 request.bodyHandler { buffer ->
                     rawBody = buffer.toString()
                 }
-                def result = getAppDeployResponsePayload('new-app')
+                def result = getAppDeployResponsePayload('sys-new-app')
                 end(JsonOutput.toJson(result))
             }
         }
@@ -113,7 +114,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theSecret',
                                                     'client',
                                                     'DEV',
-                                                    'new-app',
+                                                    'sys-new-app',
                                                     '1.2.3')
         request.setAutoDiscoveryId('the.auto.disc.prop',
                                    '1234')
@@ -139,7 +140,7 @@ class CloudHubDeployerTest extends BaseTest {
         def map = new JsonSlurper().parseText(sentFormAttributes.get('appInfoJson'))
         assertThat map,
                    is(equalTo([
-                           domain                   : 'client-new-app-dev',
+                           domain                   : 'client-sys-new-app-dev',
                            muleVersion              : [
                                    version: '3.9.1'
                            ],
@@ -156,11 +157,13 @@ class CloudHubDeployerTest extends BaseTest {
                            loggingCustomLog4JEnabled: false,
                            persistentQueues         : false,
                            properties               : [
-                                   env                              : 'dev',
-                                   'crypto.key'                     : 'theKey',
-                                   'anypoint.platform.client_id'    : 'theClientId',
-                                   'anypoint.platform.client_secret': 'theSecret',
-                                   'the.auto.disc.prop'             : '1234'
+                                   env                                               : 'dev',
+                                   'crypto.key'                                      : 'theKey',
+                                   'anypoint.platform.client_id'                     : 'theClientId',
+                                   'anypoint.platform.client_secret'                 : 'theSecret',
+                                   'anypoint.platform.config.analytics.agent.enabled': true,
+                                   'anypoint.platform.visualizer.layer'              : 'System',
+                                   'the.auto.disc.prop'                              : '1234'
                            ]
                    ]))
         assertThat rawBody,
@@ -180,6 +183,7 @@ class CloudHubDeployerTest extends BaseTest {
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
             if (mockDeploymentAndXStatusChecks(request,
+                                               'client-new-app-dev',
                                                new AppStatusPackage(AppStatus.Started,
                                                                     null),
                                                new AppStatusPackage(AppStatus.Started,
@@ -260,10 +264,11 @@ class CloudHubDeployerTest extends BaseTest {
                            loggingCustomLog4JEnabled: false,
                            persistentQueues         : false,
                            properties               : [
-                                   env                              : 'dev',
-                                   'crypto.key'                     : 'theKey',
-                                   'anypoint.platform.client_id'    : 'theClientId',
-                                   'anypoint.platform.client_secret': 'theSecret'
+                                   env                                               : 'dev',
+                                   'crypto.key'                                      : 'theKey',
+                                   'anypoint.platform.client_id'                     : 'theClientId',
+                                   'anypoint.platform.client_secret'                 : 'theSecret',
+                                   'anypoint.platform.config.analytics.agent.enabled': true
                            ]
                    ]))
         assertThat rawBody,
@@ -275,6 +280,7 @@ class CloudHubDeployerTest extends BaseTest {
         // arrange
         withHttpServer { HttpServerRequest request ->
             if (mockDeploymentAndXStatusChecks(request,
+                                               'client-new-app-dev',
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null))) {
                 return
@@ -322,6 +328,7 @@ class CloudHubDeployerTest extends BaseTest {
         // arrange
         withHttpServer { HttpServerRequest request ->
             if (mockDeploymentAndXStatusChecks(request,
+                                               'client-new-app-dev',
                                                new AppStatusPackage(AppStatus.Started,
                                                                     null),
                                                new AppStatusPackage(AppStatus.Started,
@@ -352,7 +359,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
-                                                                    'DEV',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -369,6 +376,7 @@ class CloudHubDeployerTest extends BaseTest {
         // arrange
         withHttpServer { HttpServerRequest request ->
             if (mockDeploymentAndXStatusChecks(request,
+                                               'client-new-app-dev',
                                                new AppStatusPackage(AppStatus.Started,
                                                                     null),
                                                new AppStatusPackage(AppStatus.Started,
@@ -418,6 +426,7 @@ class CloudHubDeployerTest extends BaseTest {
         // arrange
         withHttpServer { HttpServerRequest request ->
             if (mockDeploymentAndXStatusChecks(request,
+                                               'client-new-app-dev',
                                                new AppStatusPackage(AppStatus.Started,
                                                                     DeploymentUpdateStatus.Failed),
                                                new AppStatusPackage(AppStatus.Started,
@@ -468,6 +477,7 @@ class CloudHubDeployerTest extends BaseTest {
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
             if (mockDeploymentAndXStatusChecks(request,
+                                               'client-new-app-dev',
                                                new AppStatusPackage(AppStatus.Undeployed,
                                                                     null),
                                                new AppStatusPackage(AppStatus.Undeployed,
@@ -532,6 +542,7 @@ class CloudHubDeployerTest extends BaseTest {
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
             if (mockDeploymentAndXStatusChecks(request,
+                                               'client-new-app-dev',
                                                new AppStatusPackage(AppStatus.Failed,
                                                                     null),
                                                new AppStatusPackage(AppStatus.Failed,
@@ -599,6 +610,7 @@ class CloudHubDeployerTest extends BaseTest {
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
             if (mockDeploymentAndXStatusChecks(request,
+                                               'client-new-app-dev',
                                                new AppStatusPackage(AppStatus.Failed,
                                                                     null),
                                                new AppStatusPackage(AppStatus.Failed,
@@ -661,6 +673,7 @@ class CloudHubDeployerTest extends BaseTest {
     }
 
     def mockDeploymentAndXStatusChecks(HttpServerRequest request,
+                                       String appName,
                                        AppStatusPackage... appStatuses) {
         def appStatusSize = appStatuses.size()
         assert statusCheckCount <= appStatusSize: "You've performed ${statusCheckCount} status checks but only supplied ${appStatusSize} to work with!"
@@ -671,7 +684,7 @@ class CloudHubDeployerTest extends BaseTest {
         if (mockEnvironments(request)) {
             return true
         }
-        if (uri.endsWith('applications/client-new-app-dev') && request.method().name() == 'GET') {
+        if (uri.endsWith("applications/${appName}") && request.method().name() == 'GET') {
             statusCheckCount++
             println "mock status invocation ${statusCheckCount}/${appStatusSize}"
             if (statusCheckCount <= appStatuses.length) {
@@ -687,7 +700,7 @@ class CloudHubDeployerTest extends BaseTest {
                         // deployment service returns this
                         statusCode = 200
                         result = [
-                                domain: 'client-new-app-dev',
+                                domain: appName,
                                 status: ReverseAppStatusMappings[status.appStatus]
                         ]
                         def deploymentUpdateStatusString = ReverseDeployUpdateStatusMappings[status.deploymentUpdateStatus]
@@ -708,6 +721,7 @@ class CloudHubDeployerTest extends BaseTest {
         // arrange
         withHttpServer { HttpServerRequest request ->
             if (mockDeploymentAndXStatusChecks(request,
+                                               'client-new-app-dev',
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null),
                                                new AppStatusPackage(AppStatus.Undeployed,
@@ -757,6 +771,7 @@ class CloudHubDeployerTest extends BaseTest {
         // arrange
         withHttpServer { HttpServerRequest request ->
             if (mockDeploymentAndXStatusChecks(request,
+                                               'client-new-app-dev',
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null),
                                                new AppStatusPackage(AppStatus.Deploying,
@@ -789,7 +804,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
-                                                                    'DEV',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -807,6 +822,7 @@ class CloudHubDeployerTest extends BaseTest {
         withHttpServer { HttpServerRequest request ->
             if (statusCheckCount != 2) {
                 if (mockDeploymentAndXStatusChecks(request,
+                                                   'client-new-app-dev',
                                                    new AppStatusPackage(AppStatus.NotFound,
                                                                         null),
                                                    new AppStatusPackage(AppStatus.Deploying,
@@ -870,6 +886,7 @@ class CloudHubDeployerTest extends BaseTest {
         }
         withHttpServer { HttpServerRequest request ->
             if (mockDeploymentAndXStatusChecks(request,
+                                               'client-new-app-dev',
                                                appStatusPackagesWeWillReturn.toArray(new AppStatusPackage[0]) as AppStatusPackage[])) {
                 return
             }
@@ -895,7 +912,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
-                                                                    'DEV',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -916,6 +933,7 @@ class CloudHubDeployerTest extends BaseTest {
         // arrange
         withHttpServer { HttpServerRequest request ->
             if (mockDeploymentAndXStatusChecks(request,
+                                               'client-new-app-dev',
                                                new AppStatusPackage(AppStatus.NotFound,
                                                                     null),
                                                new AppStatusPackage(AppStatus.Deploying,
@@ -973,6 +991,7 @@ class CloudHubDeployerTest extends BaseTest {
         def deployed = false
         withHttpServer { HttpServerRequest request ->
             if (mockDeploymentAndXStatusChecks(request,
+                                               'client-new-app-dev',
                                                new AppStatusPackage(AppStatus.Started,
                                                                     null),
                                                new AppStatusPackage(AppStatus.Started,

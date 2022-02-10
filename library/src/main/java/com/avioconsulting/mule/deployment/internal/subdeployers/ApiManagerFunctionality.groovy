@@ -4,7 +4,7 @@ import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.graphql.GetAssetsQuery
-import com.fasterxml.jackson.core.Version
+import com.avioconsulting.mule.deployment.api.models.Version
 import groovy.json.JsonOutput
 import okio.Okio
 import org.apache.http.client.methods.HttpPost
@@ -19,20 +19,32 @@ trait ApiManagerFunctionality {
     abstract ILogger getLogger()
 
     int getMajorVersionNumber(String majorVersionStringWithV) {
-        // apiMajorVersion starts with v
-        majorVersionStringWithV.replaceAll(/v(\d+)/) { it ->
-            // the numbers after v
-            it[1]
-        } as int
+        // Remove any leading characters before the digits
+        String version = majorVersionStringWithV.replaceAll("^\\D+", "")
+        if(version.indexOf('.') >= 0) {
+            version.subSequence(0, version.indexOf('.')) as int
+        } else {
+            return version as int
+        }
     }
 
     Version parseVersion(String version) {
-        def split = version.split('\\.')
-        assert split.size() == 3: "Expected version ${version} to have only 3 parts!"
+        String qualifier = null
+        String semVer
+        if(version.contains('-')) {
+            (semVer, qualifier) = version.split('-')
+        } else {
+            semVer = version
+        }
+
+        def split = semVer.split('\\.')
+        assert split.size() == 3: "Expected version ${semVer} to have only 3 parts!"
         new Version(Integer.parseInt(split[0]),
                     Integer.parseInt(split[1]),
                     Integer.parseInt(split[2]),
-                    null)
+                    qualifier,
+            null,
+            null)
     }
 
     String getApiManagerUrl(String restOfUrl,

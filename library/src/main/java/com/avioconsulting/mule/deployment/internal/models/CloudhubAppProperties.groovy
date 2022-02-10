@@ -2,18 +2,41 @@ package com.avioconsulting.mule.deployment.internal.models
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
-import groovy.transform.Canonical
 
-@Canonical
 @JsonInclude(JsonInclude.Include.NON_NULL)
 class CloudhubAppProperties {
-    String env
+    final String env
     @JsonProperty('crypto.key')
-    String cryptoKey
+    final String cryptoKey
     @JsonProperty('anypoint.platform.client_id')
-    String clientId
+    final String clientId
     @JsonProperty('anypoint.platform.client_secret')
-    String clientSecret
+    final String clientSecret
     @JsonProperty('anypoint.platform.config.analytics.agent.enabled')
-    Boolean analyticsEnabled
+    final Boolean analyticsEnabled
+    @JsonProperty('anypoint.platform.visualizer.layer')
+    final String apiVisualizerLayer
+
+    CloudhubAppProperties(String appName,
+                          String env,
+                          String cryptoKey,
+                          String clientId,
+                          String clientSecret,
+                          Boolean analyticsEnabled = null) {
+        this.env = env
+        this.cryptoKey = cryptoKey
+        this.clientId = clientId
+        this.clientSecret = clientSecret
+        this.analyticsEnabled = analyticsEnabled
+        this.apiVisualizerLayer = {
+            switch(appName) {
+                case ~/prc.*/:
+                    return 'Process'
+                case ~/sys.*/:
+                    return 'System'
+                case ~/exp.*/:
+                    return 'Experience'
+            }
+        }()
+    }
 }
