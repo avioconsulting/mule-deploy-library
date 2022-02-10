@@ -94,7 +94,8 @@ muleDeploy {
             staticIpEnabled true
             objectStoreV2Enabled false
         }
-        analyticsAgentEnabled true
+        // this is true by default so have to specify false to NOT set the property
+        analyticsAgentEnabled false
         file 'path/to/file.jar'
         cryptoKey 'theKey'
         autoDiscovery {

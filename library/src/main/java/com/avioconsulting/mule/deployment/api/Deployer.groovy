@@ -1,7 +1,6 @@
 package com.avioconsulting.mule.deployment.api
 
 
-import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
@@ -117,13 +116,16 @@ class Deployer implements IDeployer {
             deployer = onPremDeployer
             description = 'On-prem app deployment'
         }
-        performCommonDeploymentTasks(apiSpecifications,
+        def isSoapApi = apiSpecifications.any { spec -> spec.soapApi }
+        performCommonDeploymentTasks(isSoapApi,
+                                     apiSpecifications,
                                      desiredPolicies,
                                      appDeploymentRequest,
                                      appDeploymentRequest.environment,
                                      enabledFeatures,
                                      deployer)
-        def skipReason = getFeatureSkipReason(enabledFeatures,
+        def skipReason = getFeatureSkipReason(isSoapApi,
+                                              enabledFeatures,
                                               Features.AppDeployment)
         executeStep(description,
                     skipReason) {
@@ -152,20 +154,26 @@ class Deployer implements IDeployer {
         }
     }
 
-    private static String getFeatureSkipReason(List<Features> enabledFeatures,
+    private static String getFeatureSkipReason(boolean isSoapApi,
+                                               List<Features> enabledFeatures,
                                                Features feature) {
+        if (isSoapApi && feature == Features.DesignCenterSync) {
+            return 'DesignCenterSync disabled because a SOAP API is in use'
+        }
         def enabled = enabledFeatures.contains(Features.All) || enabledFeatures.contains(feature)
         enabled ? null : "Feature ${feature} was not supplied"
     }
 
-    private def performCommonDeploymentTasks(ApiSpecificationList apiSpecifications,
+    private def performCommonDeploymentTasks(boolean isSoapApi,
+                                             ApiSpecificationList apiSpecifications,
                                              List<Policy> desiredPolicies,
                                              FileBasedAppDeploymentRequest appDeploymentRequest,
                                              String environment,
                                              List<Features> enabledFeatures,
                                              ISubDeployer deployer) {
         def isFeatureDisabled = { Features feature ->
-            getFeatureSkipReason(enabledFeatures,
+            getFeatureSkipReason(isSoapApi,
+                                 enabledFeatures,
                                  feature)
         }
         String skipReason

@@ -117,6 +117,7 @@ contributor([closureScopeContext]) {
         #stringParam('autoDiscoveryPropertyName')
         #stringParam('designCenterBranchName')
         #stringParam('sourceDirectory')
+        #stringParam('soapEndpointWithVersion')
     }
     call = enclosingCall('policies')
     if (call) {

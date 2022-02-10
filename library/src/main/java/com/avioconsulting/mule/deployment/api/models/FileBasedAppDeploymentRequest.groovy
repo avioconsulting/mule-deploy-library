@@ -18,15 +18,20 @@ abstract class FileBasedAppDeploymentRequest {
             '.designer.json'
     ]
 
-    static boolean isIgnored(Path something) {
+    static List<String> IGNORE_DC_FILES_EXCEPT_EXCHANGE = IGNORE_DC_FILES - ['exchange_modules']
+
+    static boolean isIgnored(Path something,
+                             boolean ignoreExchange = true) {
         def parent = something.parent
+        def list = ignoreExchange ? IGNORE_DC_FILES : IGNORE_DC_FILES_EXCEPT_EXCHANGE
         if (parent) {
-            if (IGNORE_DC_FILES.contains(parent.toString())) {
+            if (list.contains(parent.toString())) {
                 return true
             }
-            return isIgnored(parent)
+            return isIgnored(parent,
+                             ignoreExchange)
         }
-        return IGNORE_DC_FILES.contains(something.toString())
+        return list.contains(something.toString())
     }
 
     @Lazy
@@ -72,17 +77,21 @@ abstract class FileBasedAppDeploymentRequest {
 
     abstract String getEnvironment()
 
-    List<RamlFile> getRamlFilesFromApp(String rootRamlDirectory) {
+    List<RamlFile> getRamlFilesFromApp(String rootRamlDirectory,
+                                       boolean ignoreExchange) {
         return FileSystems.newFileSystem(file.toPath(),
                                          null).withCloseable { fs ->
             def apiPath = fs.getPath(rootRamlDirectory)
             if (!Files.exists(apiPath)) {
                 return []
             }
+            // we intentionally get everything, NOT just .raml files, in case the RAML references
+            // JSON examples, etc.
             Files.walk(apiPath).findAll { p ->
                 def relativeToApiDirectory = apiPath.relativize(p)
                 !Files.isDirectory(p) &&
-                        !isIgnored(relativeToApiDirectory)
+                        !isIgnored(relativeToApiDirectory,
+                                   ignoreExchange)
             }.collect { p ->
                 def relativeToApiDirectory = apiPath.relativize(p)
                 new RamlFile(relativeToApiDirectory.toString(),

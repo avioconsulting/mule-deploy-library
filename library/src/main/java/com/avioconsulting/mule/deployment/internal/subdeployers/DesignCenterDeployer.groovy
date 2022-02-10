@@ -4,10 +4,10 @@ import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.Version
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
-import com.fasterxml.jackson.core.Version
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
@@ -150,7 +150,7 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
             def newAppVersion = new Version(majorVersionNumber,
                                             parsedAppVersion.minorVersion,
                                             parsedAppVersion.patchLevel,
-                                            null).toString()
+                    parsedAppVersion.qualifier, null, null).toString()
             logger.println "Since app is supporting multiple API specs and this push is for ${apiMajorVersion}, using ${newAppVersion} instead of ${appVersion} because Exchange will reject otherwise."
             appVersion = newAppVersion
         }
@@ -181,7 +181,10 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
 
     def synchronizeDesignCenterFromApp(ApiSpecification apiSpec,
                                        FileBasedAppDeploymentRequest appFileInfo) {
-        def ramlFilesFromApp = appFileInfo.getRamlFilesFromApp(apiSpec.sourceDirectory)
+        // For now this library ignores Exchange modules/does not try and maintain or sync them
+        // both the app and the remote/DC comparison should therefore exclude them
+        def ramlFilesFromApp = appFileInfo.getRamlFilesFromApp(apiSpec.sourceDirectory,
+                                                               true)
         synchronizeDesignCenter(apiSpec,
                                 ramlFilesFromApp,
                                 appFileInfo.appVersion)
