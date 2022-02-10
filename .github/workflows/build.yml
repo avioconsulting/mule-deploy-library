@@ -54,18 +54,18 @@ jobs:
           files: ./*/*/surefire-reports/*.xml
 
       - name: Publish package
-        if: github.event_name != 'pull_request'
+        if: ${{ github.event_name != 'pull_request' && github.ref == 'refs/heads/master' }}
         run: mvn --batch-mode deploy -DskipTests
         env:
           MAVEN_USERNAME: ${{ secrets.GIT_USER }}
           MAVEN_PASSWORD: ${{ secrets.GIT_TOKEN }}
 
       - name: Perform Release
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' }}
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master' }}
         run: echo "Releasing version ${{ steps.set-version.outputs.version }}"
 
       - name: Perform Release
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' }}
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' && github.ref == 'refs/heads/master' }}
         env:
           GIT_USER: ${{ secrets.GIT_USER }}
           GIT_PASSWORD: ${{ secrets.GIT_TOKEN }}
@@ -80,7 +80,7 @@ jobs:
           git push --follow-tags
       
       - name: Create Github Release
-        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request' }}
+        if: ${{ !contains(steps.set-version.outputs.version, 'SNAPSHOT') && github.event_name != 'pull_request'  && github.ref == 'refs/heads/master'}}
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}

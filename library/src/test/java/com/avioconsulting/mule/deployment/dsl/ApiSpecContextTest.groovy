@@ -40,6 +40,63 @@ class ApiSpecContextTest implements AppBuilding {
     }
 
     @Test
+    void soap() {
+        // arrange
+        def appRequest = buildFullApp()
+        def context = new ApiSpecContext()
+        def closure = {
+            name 'Foo Bar'
+            soapEndpointWithVersion 'v1'
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createRequest(appRequest)
+
+        // assert
+        request.with {
+            assertThat it.name,
+                       is(equalTo('Foo Bar'))
+            assertThat it.mainRamlFile,
+                       is(nullValue())
+            assertThat it.exchangeAssetId,
+                       is(equalTo('foo-bar'))
+            assertThat it.endpoint,
+                       is(nullValue())
+            assertThat it.autoDiscoveryPropertyName,
+                       is(equalTo('auto-discovery.api-id'))
+            assertThat it.designCenterBranchName,
+                       is(nullValue())
+            assertThat it.soapApi,
+                       is(equalTo(true))
+        }
+    }
+
+    @Test
+    void soap_and_rest() {
+        // arrange
+        def appRequest = buildFullApp()
+        def context = new ApiSpecContext()
+        def closure = {
+            name 'Foo Bar'
+            soapEndpointWithVersion 'v1'
+            designCenterBranchName ' stuff'
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def exception = shouldFail {
+            context.createRequest(appRequest)
+        }
+
+        // assert
+        assertThat exception.message,
+                   is(containsString('You used soapEndpointWithVersion but also supplied 1 or more of the following. These are not compatible! mainRamlFile, designCenterBranchName, sourceDirectory'))
+    }
+
+    @Test
     void includes_optional() {
         // arrange
         def appRequest = buildFullApp()

@@ -2,11 +2,11 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.ILogger
+import com.avioconsulting.mule.deployment.api.models.Version
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.*
 import com.avioconsulting.mule.deployment.internal.models.graphql.GetAssetsQuery
-import com.fasterxml.jackson.core.Version
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpGet
@@ -210,6 +210,13 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
                             chosenAssetVersion)
     }
 
+    /**
+     *
+     * @param apiMajorVersion - Major version/exchange version group for the API Version
+     * @param appVersion - Mule application version from the maven pom (Semver format + optional qualifier)
+     * @param assets - List of published exchange assets for the specified API
+     * @return - the greatest asset version less than or equal to our application verstion, or for the apiMajorVersion if it is different from the appVersion
+     */
     private String pickVersion(String apiMajorVersion,
                                String appVersion,
                                List<GetAssetsQuery.Asset> assets) {
@@ -225,9 +232,9 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
             // version. therefore we have to use a "hypothetical" 1.x.x app version as our baseline if we
             // are looking for a v1 API Exchange asset
             appVersionParsed = new Version(majorApiVersionNumber,
-                                           appVersionParsed.minorVersion,
-                                           appVersionParsed.patchLevel,
-                                           null)
+                    appVersionParsed.minorVersion,
+                    appVersionParsed.patchLevel,
+                    appVersionParsed.getQualifier(), null, null)
             logger.println("Our app (${appVersion}) is supporting multiple API definitions but we are currently managing a lower major version of the API Definition, ${apiMajorVersion}. Therefore we will look for the latest Exchange asset version <= ${appVersionParsed}")
         } else {
             logger.println("Looking for latest Exchange asset version <= app version of ${appVersionParsed}")

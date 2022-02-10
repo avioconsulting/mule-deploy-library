@@ -26,7 +26,8 @@ class FileBasedAppDeploymentRequestTest implements AppBuilding {
                                tempAppDirectory)
 
         // act
-        def result = request.getRamlFilesFromApp('/api')
+        def result = request.getRamlFilesFromApp('/api',
+                                                 true)
 
         // assert
         assertThat result,
@@ -39,7 +40,8 @@ class FileBasedAppDeploymentRequestTest implements AppBuilding {
         def request = buildFullApp()
 
         // act
-        def result = request.getRamlFilesFromApp('/api')
+        def result = request.getRamlFilesFromApp('/api',
+                                                 true)
                 .sort { item -> item.fileName } // consistent for test
 
         // assert
@@ -63,7 +65,8 @@ class FileBasedAppDeploymentRequestTest implements AppBuilding {
         def request = buildFullApp()
 
         // act
-        def result = request.getRamlFilesFromApp('/api/folder')
+        def result = request.getRamlFilesFromApp('/api/folder',
+                                                 true)
                 .sort { item -> item.fileName } // consistent for test
 
         // assert
@@ -71,6 +74,35 @@ class FileBasedAppDeploymentRequestTest implements AppBuilding {
                    is(equalTo([
                            new RamlFile('lib.yaml',
                                         'howdy1')
+                   ]))
+    }
+
+    @Test
+    void getRamlFilesFromApp_include_exchange() {
+        // arrange
+        def request = buildFullApp()
+
+        // act
+        def result = request.getRamlFilesFromApp('/api',
+                                                 false)
+                .sort { item -> item.fileName } // consistent for test
+
+        // assert
+        def expectedStuffContents = [
+                '#%RAML 1.0',
+                'title: stuff',
+                'version: v1'
+        ].join('\n')
+        assertThat result,
+                   is(equalTo([
+                           new RamlFile('exchange_modules/junk',
+                                        ''),
+                           new RamlFile('exchange_modules/subdir/junk',
+                                        ''),
+                           new RamlFile('folder/lib.yaml',
+                                        'howdy1'),
+                           new RamlFile('stuff.raml',
+                                        expectedStuffContents)
                    ]))
     }
 }

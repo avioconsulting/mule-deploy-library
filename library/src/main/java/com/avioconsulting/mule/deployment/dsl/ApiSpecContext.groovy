@@ -4,7 +4,7 @@ import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 
 class ApiSpecContext extends BaseContext {
-    String name, exchangeAssetId, mainRamlFile, endpoint, autoDiscoveryPropertyName, designCenterBranchName, sourceDirectory
+    String name, exchangeAssetId, mainRamlFile, endpoint, autoDiscoveryPropertyName, designCenterBranchName, sourceDirectory, soapEndpointWithVersion
 
     ApiSpecification createRequest(FileBasedAppDeploymentRequest request) {
         def errors = findErrors()
@@ -12,10 +12,30 @@ class ApiSpecContext extends BaseContext {
             def errorList = errors.join('\n')
             throw new Exception("Your API spec is not complete. The following errors exist:\n${errorList}")
         }
+        if (this.soapEndpointWithVersion) {
+            if (this.mainRamlFile || this.designCenterBranchName || this.sourceDirectory) {
+                throw new Exception('You used soapEndpointWithVersion but also supplied 1 or more of the following. These are not compatible! mainRamlFile, designCenterBranchName, sourceDirectory')
+            }
+            return createSoapSpec()
+        }
+        return createRestSpec(request)
+    }
+
+    private ApiSpecification createSoapSpec() {
+        return new ApiSpecification(this.name,
+                                    this.soapEndpointWithVersion,
+                                    this.exchangeAssetId,
+                                    this.endpoint,
+                                    this.autoDiscoveryPropertyName)
+    }
+
+    private ApiSpecification createRestSpec(FileBasedAppDeploymentRequest request) {
         // This might sort of be a circular/weird dependency between ApiSpecification and FileBasedAppDeploymentRequest
         // but not sure of the best way to handle this
         def sourceDirectory = ApiSpecification.getSourceDirectoryOrDefault(this.sourceDirectory)
-        def ramlFiles = request.getRamlFilesFromApp(sourceDirectory)
+        // we cannot parse the RAML without included Exchange modules
+        def ramlFiles = request.getRamlFilesFromApp(sourceDirectory,
+                                                    false)
         new ApiSpecification(this.name,
                              ramlFiles,
                              this.mainRamlFile,
@@ -28,6 +48,12 @@ class ApiSpecContext extends BaseContext {
 
     @Override
     List<String> findOptionalProperties() {
-        ['exchangeAssetId', 'mainRamlFile', 'endpoint', 'autoDiscoveryPropertyName', 'designCenterBranchName', 'sourceDirectory']
+        ['exchangeAssetId',
+         'mainRamlFile',
+         'endpoint',
+         'autoDiscoveryPropertyName',
+         'designCenterBranchName',
+         'sourceDirectory',
+         'soapEndpointWithVersion']
     }
 }
