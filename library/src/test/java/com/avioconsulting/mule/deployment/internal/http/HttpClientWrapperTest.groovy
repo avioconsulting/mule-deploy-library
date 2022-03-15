@@ -272,6 +272,8 @@ class HttpClientWrapperTest extends BaseTest {
         clientWrapper = new HttpClientWrapper("http://localhost:${httpServer.actualPort()}",
                                               'the user',
                                               'the password',
+                                              null,
+                                              null,
                                               new TestConsoleLogger())
         withHttpServer { HttpServerRequest request ->
             request.response().with {
@@ -321,6 +323,8 @@ class HttpClientWrapperTest extends BaseTest {
         clientWrapper = new HttpClientWrapper("http://localhost:${httpServer.actualPort()}",
                                               'the user',
                                               'the password',
+                                              null,
+                                              null,
                                               new TestConsoleLogger())
         withHttpServer { HttpServerRequest request ->
             request.response().with {
