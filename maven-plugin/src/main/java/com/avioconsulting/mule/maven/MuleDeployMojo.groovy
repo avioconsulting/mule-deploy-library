@@ -16,6 +16,10 @@ class MuleDeployMojo extends BaseMojo {
     private String anypointUsername
     @Parameter(property = 'anypoint.password')
     private String anypointPassword
+    @Parameter(property = 'anypoint.client-id')
+    private String anypointClientId
+    @Parameter(property = 'anypoint.client-secret')
+    private String anypointClientSecret
     @Parameter(property = 'anypoint.org.name')
     private String anypointOrganizationName
     @Parameter(defaultValue = 'DEV', property = 'design.center.deployments')
@@ -36,10 +40,15 @@ class MuleDeployMojo extends BaseMojo {
         logger.println 'Beginning deployment'
         def deployer = deployerFactory.create(this.anypointUsername,
                                               this.anypointPassword,
+                                              this.anypointClientId,
+                                              this.anypointClientSecret,
                                               logger,
                                               this.dryRunMode,
                                               this.anypointOrganizationName,
                                               this.environmentsToDoDesignCenterDeploymentOn)
+        if (this.anypointUsername != null && this.anypointPassword != null && this.anypointClientId != null && this.anypointClientSecret != null) {
+            throw new Exception("Either anypoint.username and anypoint.password or anypoint.client-id and anypoint.client-secret must be defined..")
+        }
         try {
             deployer.deployApplication(deploymentPackage.deploymentRequest,
                                        deploymentPackage.apiSpecifications,

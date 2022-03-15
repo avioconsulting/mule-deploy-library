@@ -21,10 +21,14 @@ import java.util.concurrent.Callable
 class DeployerCommandLine implements Callable<Integer> {
     @Parameters(index = '0', description = 'The path to your DSL file')
     private File groovyFile
-    @Option(names = ['-u', '--anypoint-username'], required = true)
+    @Option(names = ['-u', '--anypoint-username'])
     private String anypointUsername
-    @Option(names = ['-p', '--anypoint-password'], required = true)
+    @Option(names = ['-p', '--anypoint-password'])
     private String anypointPassword
+    @Option(names = ['-i', '--anypoint-client-id'])
+    private String anypointClientId
+    @Option(names = ['-s', '--anypoint-client-secret'])
+    private String anypointClientSecret
     @Option(names = ['-o', '--anypoint-org-name'],
             description = 'The org/business group to use. If you do not specify it, the default for your user will be used')
     private String anypointOrganizationName
@@ -62,10 +66,15 @@ class DeployerCommandLine implements Callable<Integer> {
         logger.println "Successfully processed ${groovyFile} through DSL"
         def deployer = deployerFactory.create(this.anypointUsername,
                                               this.anypointPassword,
+                                              this.anypointClientId,
+                                              this.anypointClientSecret,
                                               logger,
                                               this.dryRunMode,
                                               this.anypointOrganizationName,
                                               this.environmentsToDoDesignCenterDeploymentOn)
+        if (this.anypointUsername != null && this.anypointPassword != null && this.anypointClientId != null && this.anypointClientSecret != null) {
+            throw new Exception("Either --anypoint-username and --anypoint-password or --connected-app-client-id and --connected-app-client-secret must be defined.")
+        }
         if (this.dryRunMode == DryRunMode.OfflineValidate) {
             logger.println 'Offline validate was specified, so not deploying'
             return

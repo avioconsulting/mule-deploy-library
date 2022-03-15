@@ -19,6 +19,7 @@ import java.util.concurrent.CompletableFuture
 class BaseTest {
     protected HttpServer httpServer
     protected HttpClientWrapper clientWrapper
+    protected HttpClientWrapper clientWrapperConnectedApp
     protected EnvironmentLocator environmentLocator
     protected Handler<HttpServerRequest> closure
 
@@ -42,8 +43,17 @@ class BaseTest {
         clientWrapper = new HttpClientWrapper("http://localhost:${httpServer.actualPort()}",
                                               'the user',
                                               'the password',
+                                              null,
+                                              null,
                                               new TestConsoleLogger(),
                                               'the-org-name')
+        clientWrapperConnectedApp = new HttpClientWrapper("http://localhost:${httpServer.actualPort()}",
+                null,
+                null,
+                'the client',
+                'the secret',
+                new TestConsoleLogger(),
+                'the-org-name')
         environmentLocator = new EnvironmentLocator(clientWrapper,
                                                     new TestConsoleLogger())
     }
