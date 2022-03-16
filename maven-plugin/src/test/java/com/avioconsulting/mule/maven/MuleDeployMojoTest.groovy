@@ -48,6 +48,8 @@ class MuleDeployMojoTest implements MavenInvoke {
         def mock = [
                 create: { String username,
                           String password,
+                          String connectedAppId,
+                          String connectedAppSecret,
                           ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,
@@ -142,6 +144,8 @@ muleDeploy {
         def mock = [
                 create: { String username,
                           String password,
+                          String connectedAppId,
+                          String connectedAppSecret,
                           ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,
@@ -300,6 +304,8 @@ muleDeploy {
         def mock = [
                 create: { String username,
                           String password,
+                          String connectedAppId,
+                          String connectedAppSecret,
                           ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,
@@ -435,6 +441,8 @@ muleDeploy {
         def mock = [
                 create: { String username,
                           String password,
+                          String connectedAppId,
+                          String connectedAppSecret,
                           ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,

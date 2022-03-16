@@ -84,7 +84,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                               String anypointClientId,
                               String anypointClientSecret,
                               String cloudHubAppPrefix,
-                              String cloudHubAppSuffix,
+                              String cloudHubAppSuffix = null,
                               String appName = null,
                               String appVersion = null,
                               Map<String, String> appProperties = [:],
@@ -108,13 +108,16 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
         this.anypointClientId = anypointClientId
         this.anypointClientSecret = anypointClientSecret
         this.cloudHubAppPrefix = cloudHubAppPrefix
-        this.cloudHubAppSuffix = cloudHubAppSuffix
+        if (cloudHubAppSuffix != null)
+            this.cloudHubAppSuffix = cloudHubAppSuffix
+        else
+            this.cloudHubAppSuffix = environment
         this.appProperties = appProperties
         this.otherCloudHubProperties = otherCloudHubProperties
         if (this.appName.contains(' ')) {
             throw new Exception("Runtime Manager does not like spaces in app names and you specified '${this.appName}'!")
         }
-        def newAppName = "${cloudHubAppPrefix}-${this.appName}-${cloudHubAppSuffix}"
+        def newAppName = "${cloudHubAppPrefix}-${this.appName}-${this.cloudHubAppSuffix}"
         def appNameLowerCase = newAppName.toLowerCase()
         if (appNameLowerCase != newAppName) {
             newAppName = appNameLowerCase

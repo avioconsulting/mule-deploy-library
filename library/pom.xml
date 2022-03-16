@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>c18a7555-97b2-41a8-83fe-e38c21f78cdc</groupId>
     <artifactId>mule-deploy-library</artifactId>
-    <version>1.1.2</version>
+    <version>1.0.3</version>
     <packaging>jar</packaging>
     <name>Mule deployment library</name>
     <description>Deploys Mule applications via Runtime Manager APIs</description>
