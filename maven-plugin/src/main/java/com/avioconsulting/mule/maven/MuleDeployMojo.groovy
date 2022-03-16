@@ -28,7 +28,7 @@ class MuleDeployMojo extends BaseMojo {
 
     @Override
     void execute() throws MojoExecutionException, MojoFailureException {
-        if (dryRunMode != DryRunMode.OfflineValidate && !(anypointUsername || anypointPassword)) {
+        if (dryRunMode != DryRunMode.OfflineValidate && !(anypointUsername || anypointPassword || anypointConnectedAppId || anypointConnectedAppSecret)) {
             throw new Exception("In order to ${dryRunMode}, credentials must be supplied via the anypointUsername <config> item/anypoint.username property and the anypointPassword <config> item/anypoint.password property")
         }
         def deploymentPackage = processDsl()
@@ -47,7 +47,7 @@ class MuleDeployMojo extends BaseMojo {
                                               this.anypointOrganizationName,
                                               this.environmentsToDoDesignCenterDeploymentOn)
         if (this.anypointUsername == null && this.anypointPassword == null && this.anypointConnectedAppId == null && this.anypointConnectedAppSecret == null) {
-            throw new Exception("Either anypoint.username and anypoint.password or anypoint.connected-app-id and anypoint.connected-app-secret must be defined..")
+            throw new Exception("Either anypoint.username and anypoint.password or anypoint.connected-app-id and anypoint.connected-app-secret must be defined.")
         }
         try {
             deployer.deployApplication(deploymentPackage.deploymentRequest,

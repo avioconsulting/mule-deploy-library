@@ -31,8 +31,8 @@ class HttpClientWrapper implements HttpRequestInterceptor {
     HttpClientWrapper(String baseUrl,
                       String username,
                       String password,
-                      String connectedAppId,
-                      String connectedAppSecret,
+                      String connectedAppId = null,
+                      String connectedAppSecret = null,
                       ILogger logger,
                       String anypointOrganizationName = null) {
         this.anypointOrganizationName = anypointOrganizationName
