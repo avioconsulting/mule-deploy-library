@@ -46,7 +46,7 @@ class MuleDeployMojo extends BaseMojo {
                                               this.dryRunMode,
                                               this.anypointOrganizationName,
                                               this.environmentsToDoDesignCenterDeploymentOn)
-        if (this.anypointUsername != null && this.anypointPassword != null && this.anypointConnectedAppId != null && this.anypointConnectedAppSecret != null) {
+        if (this.anypointUsername == null && this.anypointPassword == null && this.anypointConnectedAppId == null && this.anypointConnectedAppSecret == null) {
             throw new Exception("Either anypoint.username and anypoint.password or anypoint.connected-app-id and anypoint.connected-app-secret must be defined..")
         }
         try {
