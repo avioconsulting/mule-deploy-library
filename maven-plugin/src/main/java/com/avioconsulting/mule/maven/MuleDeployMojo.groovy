@@ -16,9 +16,9 @@ class MuleDeployMojo extends BaseMojo {
     private String anypointUsername
     @Parameter(property = 'anypoint.password')
     private String anypointPassword
-    @Parameter(property = 'anypoint.connected-app-id')
+    @Parameter(property = 'anypoint.connected-app.id')
     private String anypointConnectedAppId
-    @Parameter(property = 'anypoint.connected-app-secret')
+    @Parameter(property = 'anypoint.connected-app.secret')
     private String anypointConnectedAppSecret
     @Parameter(property = 'anypoint.org.name')
     private String anypointOrganizationName
@@ -47,7 +47,7 @@ class MuleDeployMojo extends BaseMojo {
                                               this.anypointOrganizationName,
                                               this.environmentsToDoDesignCenterDeploymentOn)
         if (this.anypointUsername == null && this.anypointPassword == null && this.anypointConnectedAppId == null && this.anypointConnectedAppSecret == null) {
-            throw new Exception("Either anypoint.username and anypoint.password or anypoint.connected-app-id and anypoint.connected-app-secret must be defined.")
+            throw new Exception("Either anypoint.username and anypoint.password or anypoint.connected-app.id and anypoint.connected-app.secret must be defined.")
         }
         try {
             deployer.deployApplication(deploymentPackage.deploymentRequest,
