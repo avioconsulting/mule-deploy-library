@@ -16,6 +16,10 @@ class MuleDeployMojo extends BaseMojo {
     private String anypointUsername
     @Parameter(property = 'anypoint.password')
     private String anypointPassword
+    @Parameter(property = 'anypoint.connected-app-id')
+    private String anypointConnectedAppId
+    @Parameter(property = 'anypoint.connected-app-secret')
+    private String anypointConnectedAppSecret
     @Parameter(property = 'anypoint.org.name')
     private String anypointOrganizationName
     @Parameter(defaultValue = 'DEV', property = 'design.center.deployments')
@@ -24,7 +28,7 @@ class MuleDeployMojo extends BaseMojo {
 
     @Override
     void execute() throws MojoExecutionException, MojoFailureException {
-        if (dryRunMode != DryRunMode.OfflineValidate && !(anypointUsername || anypointPassword)) {
+        if (dryRunMode != DryRunMode.OfflineValidate && !(anypointUsername || anypointPassword || anypointConnectedAppId || anypointConnectedAppSecret)) {
             throw new Exception("In order to ${dryRunMode}, credentials must be supplied via the anypointUsername <config> item/anypoint.username property and the anypointPassword <config> item/anypoint.password property")
         }
         def deploymentPackage = processDsl()
@@ -36,10 +40,15 @@ class MuleDeployMojo extends BaseMojo {
         logger.println 'Beginning deployment'
         def deployer = deployerFactory.create(this.anypointUsername,
                                               this.anypointPassword,
+                                              this.anypointConnectedAppId,
+                                              this.anypointConnectedAppSecret,
                                               logger,
                                               this.dryRunMode,
                                               this.anypointOrganizationName,
                                               this.environmentsToDoDesignCenterDeploymentOn)
+        if (this.anypointUsername == null && this.anypointPassword == null && this.anypointConnectedAppId == null && this.anypointConnectedAppSecret == null) {
+            throw new Exception("Either anypoint.username and anypoint.password or anypoint.connected-app-id and anypoint.connected-app-secret must be defined.")
+        }
         try {
             deployer.deployApplication(deploymentPackage.deploymentRequest,
                                        deploymentPackage.apiSpecifications,

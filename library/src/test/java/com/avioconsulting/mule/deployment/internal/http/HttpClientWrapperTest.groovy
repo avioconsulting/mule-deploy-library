@@ -77,6 +77,70 @@ class HttpClientWrapperTest extends BaseTest {
     }
 
     @Test
+    void authenticate_correct_request_connected_application() {
+        // arrange
+        String url = null
+        String method = null
+        String contentType = null
+        Map sentJson = null
+        String authHeader = null
+        withHttpServer { HttpServerRequest request ->
+            def payload = null
+            if (request.uri() == '/accounts/api/v2/oauth2/token') {
+                url = request.uri()
+                method = request.method().name()
+                contentType = request.getHeader('Content-Type')
+                authHeader = request.getHeader('Authorization')
+                request.bodyHandler { body ->
+                    sentJson = new JsonSlurper().parseText(body.toString())
+                }
+                payload = [
+                        access_token: 'the token'
+                ]
+            } else if (request.uri() == '/accounts/api/me') {
+                payload = [
+                        user: [
+                                id                   : 'the_id',
+                                username             : 'the_username',
+                                memberOfOrganizations: [
+                                        [
+                                                name: 'the-org-name',
+                                                id  : 'the-org-id'
+                                        ]
+                                ]
+                        ]
+                ]
+            }
+            request.response().with {
+                statusCode = 200
+                putHeader('Content-Type',
+                        'application/json')
+                end(JsonOutput.toJson(payload))
+            }
+        }
+
+        // act
+        clientWrapperConnectedApp.authenticate()
+
+        // assert
+        assertThat url,
+                is(equalTo('/accounts/api/v2/oauth2/token'))
+        assertThat method,
+                is(equalTo('POST'))
+        assertThat contentType,
+                is(equalTo('application/json'))
+        assertThat sentJson,
+                is(equalTo([
+                        client_id: 'the client',
+                        client_secret: 'the secret',
+                        grant_type: 'client_credentials'
+                ]))
+        assertThat 'We have not authenticated yet',
+                authHeader,
+                is(nullValue())
+    }
+
+    @Test
     void authenticate_succeeds() {
         // arrange
         def tokenOnNextRequest = null

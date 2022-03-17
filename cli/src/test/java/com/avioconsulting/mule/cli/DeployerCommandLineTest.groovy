@@ -25,6 +25,8 @@ class DeployerCommandLineTest implements MavenInvoke {
                                            String groovyFileText,
                                            String user = 'our user',
                                            String pass = 'our pass',
+                                           String connId = null,
+                                           String connSecret = null,
                                            DryRunMode dryRunMode = DryRunMode.Run,
                                            String orgName = null,
                                            Map<String, String> otherArgs = [:]) {
@@ -35,14 +37,25 @@ class DeployerCommandLineTest implements MavenInvoke {
             groovyFile.text = groovyFileText
         }
         DeployerCommandLine.deployerFactory = mockDeployerFactory
-        def args = [
-                '-u',
-                "\"${user}\"".toString(),
-                '-p',
-                "\"${pass}\"".toString(),
-                '-m',
-                dryRunMode.name(),
-        ]
+        def args
+        if (connId != null && connSecret != null)
+            args = [
+                    '-i',
+                    "\"${connId}\"".toString(),
+                    '-s',
+                    "\"${connSecret}\"".toString(),
+                    '-m',
+                    dryRunMode.name()
+            ]
+        else
+            args = [
+                    '-u',
+                    "\"${user}\"".toString(),
+                    '-p',
+                    "\"${pass}\"".toString(),
+                    '-m',
+                    dryRunMode.name(),
+            ]
         if (orgName) {
             args += [
                     '-o',
@@ -121,6 +134,65 @@ muleDeploy {
     }
 
     @Test
+    void runs_with_connected_application() {
+        // arrange
+        FileBasedAppDeploymentRequest actualApp
+        ApiSpecificationList actualApiSpec
+        List<Features> actualFeatures
+        def mockDeployer = [
+                deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
+                                     ApiSpecificationList apiSpecification,
+                                     List<Policy> desiredPolicies,
+                                     List<Features> enabledFeatures ->
+                    actualApp = appDeploymentRequest
+                    actualApiSpec = apiSpecification
+                    actualFeatures = enabledFeatures
+                }
+        ] as IDeployer
+        def mock = [
+                create: { String connectedAppId,
+                          String connectedAppSecret,
+                          ILogger logger,
+                          DryRunMode dryRunMode,
+                          String anypointOrganizationName,
+                          List<String> environmentsToDoDesignCenterDeploymentOn ->
+                    return mockDeployer
+                }
+        ] as IDeployerFactory
+        def dslText = """
+muleDeploy {
+    version '1.0'
+    
+    onPremApplication {
+        environment 'DEV'
+        applicationName 'the-app'
+        appVersion '1.2.3'
+        file '${builtFile}'
+        targetServerOrClusterName 'theServer'
+    }
+}
+"""
+
+        // act
+        executeCommandLine(mock,
+                dslText)
+
+        // assert
+        assertThat 'No policies since we omitted that section',
+                actualFeatures,
+                is(equalTo([Features.AppDeployment, Features.DesignCenterSync, Features.ApiManagerDefinitions]))
+        assertThat actualApiSpec,
+                is(equalTo([]))
+        assert actualApp instanceof OnPremDeploymentRequest
+        actualApp.with {
+            assertThat it.appName,
+                    is(equalTo('the-app'))
+            assertThat it.environment,
+                    is(equalTo('DEV'))
+        }
+    }
+
+    @Test
     void offline_validate() {
         // arrange
         def deployed = false
@@ -160,6 +232,8 @@ muleDeploy {
                            dslText,
                            'user',
                            'pass',
+                           null,
+                           null,
                            DryRunMode.OfflineValidate)
 
         // assert
@@ -216,6 +290,8 @@ muleDeploy {
                            dslText,
                            'our user',
                            'our pass',
+                           null,
+                           null,
                            DryRunMode.Run,
                            null,
                            [

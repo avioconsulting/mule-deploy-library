@@ -18,6 +18,8 @@ import org.apache.http.protocol.HttpContext
 class HttpClientWrapper implements HttpRequestInterceptor {
     private final String username
     private final String password
+    private final String connectedAppId
+    private final String connectedAppSecret
     private String accessToken
     private String ownerGuid
     private final ILogger logger
@@ -29,11 +31,15 @@ class HttpClientWrapper implements HttpRequestInterceptor {
     HttpClientWrapper(String baseUrl,
                       String username,
                       String password,
+                      String connectedAppId = null,
+                      String connectedAppSecret = null,
                       ILogger logger,
                       String anypointOrganizationName = null) {
         this.anypointOrganizationName = anypointOrganizationName
         this.password = password
         this.username = username
+        this.connectedAppId = connectedAppId
+        this.connectedAppSecret = connectedAppSecret
         this.logger = logger
         this.baseUrl = baseUrl
         this.httpClient = HttpClients.custom()
@@ -50,7 +56,10 @@ class HttpClientWrapper implements HttpRequestInterceptor {
 
     private def authenticate() {
         if (!this.accessToken) {
-            fetchAccessToken()
+            if (username != null)
+                fetchAccessTokenAsUser()
+            else if (connectedAppId != null)
+                fetchAccessTokenWithConnectedApp()
             fetchUserInfo()
         }
     }
@@ -91,7 +100,7 @@ class HttpClientWrapper implements HttpRequestInterceptor {
         }
     }
 
-    private def fetchAccessToken() {
+    private def fetchAccessTokenAsUser() {
         logger.println "Authenticating to Anypoint as user '${username}'"
         def payload = [
                 username: username,
@@ -106,6 +115,27 @@ class HttpClientWrapper implements HttpRequestInterceptor {
         httpClient.execute(request).with { response ->
             def result = assertSuccessfulResponseAndReturnJson(response,
                                                                "authenticate to Anypoint as '${username}'")
+            logger.println 'Successfully authenticated'
+            accessToken = result.access_token
+        }
+    }
+
+    private def fetchAccessTokenWithConnectedApp() {
+        logger.println "Authenticating to Anypoint with connected app '${connectedAppId}'"
+        def payload = [
+                client_id: connectedAppId,
+                client_secret: connectedAppSecret,
+                grant_type: "client_credentials"
+        ]
+        def request = new HttpPost("${baseUrl}/accounts/api/v2/oauth2/token").with {
+            setEntity(new StringEntity(JsonOutput.toJson(payload)))
+            addHeader('Content-Type',
+                    'application/json')
+            it
+        }
+        httpClient.execute(request).with { response ->
+            def result = assertSuccessfulResponseAndReturnJson(response,
+                    "authenticate to Anypoint with connected app '${connectedAppId}'")
             logger.println 'Successfully authenticated'
             accessToken = result.access_token
         }

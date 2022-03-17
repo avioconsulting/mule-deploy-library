@@ -34,7 +34,7 @@ class MuleDeployMojoTest implements MavenInvoke {
     @Test
     void gets_correct_params() {
         // arrange
-        String actualUser, actualPass, actualOrg
+        String actualUser, actualPass, actualConnectedAppId, actualConnectedAppSecret, actualOrg
         ILogger actualLogger
         DryRunMode actualDryRunMode
         List<String> actualEnvs
@@ -48,12 +48,16 @@ class MuleDeployMojoTest implements MavenInvoke {
         def mock = [
                 create: { String username,
                           String password,
+                          String connectedAppId,
+                          String connectedAppSecret,
                           ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,
                           List<String> environmentsToDoDesignCenterDeploymentOn ->
                     actualUser = username
                     actualPass = password
+                    actualConnectedAppId = connectedAppId
+                    actualConnectedAppSecret = connectedAppSecret
                     actualLogger = logger
                     actualDryRunMode = dryRunMode
                     actualEnvs = environmentsToDoDesignCenterDeploymentOn
@@ -78,6 +82,8 @@ muleDeploy {
                            dslText,
                            'the user',
                            'the pass',
+                           'the client',
+                           'the secret',
                            // we don't want this thing to actually run
                            DryRunMode.OnlineValidate,
                            'the org',
@@ -91,6 +97,10 @@ muleDeploy {
                    is(equalTo('the user'))
         assertThat actualPass,
                    is(equalTo('the pass'))
+        assertThat actualConnectedAppId,
+                is(equalTo('the client'))
+        assertThat actualConnectedAppSecret,
+                is(equalTo('the secret'))
         assertThat actualOrg,
                    is(equalTo('the org'))
         assertThat actualDryRunMode,
@@ -103,6 +113,8 @@ muleDeploy {
                            String groovyFileText,
                            String user = 'our user',
                            String pass = 'our pass',
+                           String connId = null,
+                           String connSecret = null,
                            DryRunMode dryRunMode = DryRunMode.Run,
                            String orgName = null,
                            List<String> envs = ['DEV'],
@@ -112,6 +124,8 @@ muleDeploy {
         new MuleDeployMojo().with {
             it.anypointUsername = user
             it.anypointPassword = pass
+            it.anypointConnectedAppId = connId
+            it.anypointConnectedAppId = connSecret
             it.dryRunMode = dryRunMode
             it.groovyFile = groovyFile
             it.anypointOrganizationName = orgName
@@ -222,6 +236,8 @@ muleDeploy {
                            dslText,
                            null,
                            null,
+                           null,
+                           null,
                            DryRunMode.OfflineValidate)
         // act
         mojo.execute()
@@ -270,6 +286,8 @@ muleDeploy {
                            dslText,
                            null,
                            null,
+                           null,
+                           null,
                            DryRunMode.OnlineValidate)
         // act
         def exception = shouldFail {
@@ -300,6 +318,8 @@ muleDeploy {
         def mock = [
                 create: { String username,
                           String password,
+                          String connectedAppId,
+                          String ConnectedAppSecret,
                           ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,
@@ -349,6 +369,8 @@ muleDeploy {
                            dslText,
                            'user',
                            'pass',
+                           null,
+                           null,
                            DryRunMode.Run,
                            null,
                            ['DEV'],

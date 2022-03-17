@@ -40,6 +40,8 @@ class Deployer implements IDeployer {
      */
     Deployer(String username,
              String password,
+             String connectedAppId,
+             String connectedAppSecret,
              ILogger logger,
              DryRunMode dryRunMode,
              String anypointOrganizationName = null,
@@ -48,6 +50,8 @@ class Deployer implements IDeployer {
         this(new HttpClientWrapper(baseUrl,
                                    username,
                                    password,
+                                   connectedAppId,
+                                   connectedAppSecret,
                                    logger,
                                    anypointOrganizationName),
              dryRunMode,

@@ -9,7 +9,7 @@
 
     <modules>
         <module>library</module>
-        <module>cli</module>
+<!--        <module>cli</module>-->
         <module>maven-plugin</module>
     </modules>
 

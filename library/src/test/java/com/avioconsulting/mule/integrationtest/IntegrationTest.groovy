@@ -31,6 +31,8 @@ class IntegrationTest implements MavenInvoke {
     private static final String AVIO_SANDBOX_BIZ_GROUP_NAME = 'AVIO Sandbox'
     private static final String ANYPOINT_USERNAME = System.getProperty('anypoint.username')
     private static final String ANYPOINT_PASSWORD = System.getProperty('anypoint.password')
+    private static final String ANYPOINT_CONNECTED_APP_ID = System.getProperty('anypoint.connected-app-id')
+    private static final String ANYPOINT_CONNECTED_APP_SECRET = System.getProperty('anypoint.connected-app-secret')
     private static final String ANYPOINT_CLIENT_ID = System.getProperty('anypoint.client.id')
     private static final String ANYPOINT_CLIENT_SECRET = System.getProperty('anypoint.client.secret')
     private static final String ON_PREM_SERVER_NAME = System.getProperty('mule4.onprem.server.name')
@@ -53,8 +55,13 @@ class IntegrationTest implements MavenInvoke {
         // cut down on the unit test noise here
         Configurator.setLevel('org.apache.http.wire',
                               Level.INFO)
-        assert ANYPOINT_USERNAME: 'Did you forget -Danypoint.username?'
-        assert ANYPOINT_PASSWORD: 'Did you forget -Danypoint.password?'
+        if (!ANYPOINT_CLIENT_ID && !ANYPOINT_CLIENT_SECRET) {
+            assert ANYPOINT_USERNAME: 'Did you forget -Danypoint.username?'
+            assert ANYPOINT_PASSWORD: 'Did you forget -Danypoint.password?'
+        } else {
+            assert ANYPOINT_CONNECTED_APP_ID: 'Did you forget -Danypoint.connected-app-id?'
+            assert ANYPOINT_CONNECTED_APP_SECRET: 'Did you forget -Danypoint.connected-app-secret?'
+        }
         assert ANYPOINT_CLIENT_ID: 'Did you forget -Danypoint.client.id?'
         assert ANYPOINT_CLIENT_SECRET: 'Did you forget -Danypoint.client.secret?'
     }
@@ -127,6 +134,8 @@ class IntegrationTest implements MavenInvoke {
         clientWrapper = new HttpClientWrapper('https://anypoint.mulesoft.com',
                                               ANYPOINT_USERNAME,
                                               ANYPOINT_PASSWORD,
+                                              ANYPOINT_CONNECTED_APP_ID,
+                                              ANYPOINT_CONNECTED_APP_SECRET,
                                               logger,
                                               AVIO_SANDBOX_BIZ_GROUP_NAME)
         def environmentLocator = new EnvironmentLocator(this.clientWrapper,
