@@ -55,7 +55,7 @@ class IntegrationTest implements MavenInvoke {
         // cut down on the unit test noise here
         Configurator.setLevel('org.apache.http.wire',
                               Level.INFO)
-        if (!ANYPOINT_CLIENT_ID && !ANYPOINT_CLIENT_SECRET) {
+        if (!ANYPOINT_CONNECTED_APP_ID && !ANYPOINT_CONNECTED_APP_SECRET) {
             assert ANYPOINT_USERNAME: 'Did you forget -Danypoint.username?'
             assert ANYPOINT_PASSWORD: 'Did you forget -Danypoint.password?'
         } else {
