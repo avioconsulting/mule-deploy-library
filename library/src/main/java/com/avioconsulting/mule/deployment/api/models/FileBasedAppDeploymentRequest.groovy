@@ -73,6 +73,10 @@ abstract class FileBasedAppDeploymentRequest {
         this.autoDiscoveries[propertyName] = autoDiscoveryId
     }
 
+    String getArtifactId() {
+        return this.parsedPomProperties.artifactId
+    }
+
     abstract String getAppVersion()
 
     abstract String getEnvironment()

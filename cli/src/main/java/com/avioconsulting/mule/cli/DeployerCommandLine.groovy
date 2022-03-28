@@ -84,6 +84,7 @@ class DeployerCommandLine implements Callable<Integer> {
             deployer.deployApplication(deploymentPackage.deploymentRequest,
                                        deploymentPackage.apiSpecifications,
                                        deploymentPackage.desiredPolicies,
+                                       deploymentPackage.requestedContracts,
                                        deploymentPackage.enabledFeatures)
             logger.println 'Deployment completed'
         }

@@ -53,6 +53,7 @@ class MuleDeployMojo extends BaseMojo {
             deployer.deployApplication(deploymentPackage.deploymentRequest,
                                        deploymentPackage.apiSpecifications,
                                        deploymentPackage.desiredPolicies,
+                                       deploymentPackage.requestedContracts,
                                        deploymentPackage.enabledFeatures)
         }
         catch (e) {

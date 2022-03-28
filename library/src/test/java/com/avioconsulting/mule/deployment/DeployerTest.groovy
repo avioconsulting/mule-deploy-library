@@ -25,6 +25,7 @@ class DeployerTest {
     private List<DesignCenterSync> designCenterSyncs
     private List<ApiSyncCalls> apiSyncs
     private List<PolicySyncCalls> policySyncCalls
+    private List<ContractSyncCalls> contractSyncCalls
     private boolean failDeployment
 
     @Canonical
@@ -45,6 +46,12 @@ class DeployerTest {
         List<Policy> desiredPolicies
     }
 
+    @Canonical
+    class ContractSyncCalls {
+        ExistingApiSpec apiSpec
+        List<RequestedContract> requestedContracts
+    }
+
     @Before
     void cleanup() {
         deployedChApps = []
@@ -52,6 +59,7 @@ class DeployerTest {
         designCenterSyncs = []
         apiSyncs = []
         policySyncCalls = []
+        contractSyncCalls = []
         failDeployment = false
         deployer = null
         // "default"
@@ -115,6 +123,14 @@ class DeployerTest {
                                                            desiredPolicies)
                 }
         ] as IPolicyDeployer
+        def mockContractDeployer = [
+                synchronizeApplicationContracts: { ExistingApiSpec apiSpec,
+                                       List<Policy> requestedContracts ->
+                    contractSyncCalls << new ContractSyncCalls(apiSpec,
+                            requestedContracts)
+                }
+        ] as IApplicationContractDeployer
+
         deployer = new Deployer(null,
                                 dryRunMode,
                                 new TestConsoleLogger(),
@@ -125,7 +141,8 @@ class DeployerTest {
                                 mockOnPremDeployer,
                                 mockDcDeployer,
                                 mockApiDeployer,
-                                mockPolicyDeployer)
+                                mockPolicyDeployer,
+                                mockContractDeployer)
     }
 
     @Test
@@ -193,6 +210,9 @@ class DeployerTest {
                                                       '1.2.0',
                                                       [exposeHeaders: false],
                                                       Policy.mulesoftGroupId)
+                                   ],
+                                   [
+                                           new RequestedContract('123', 'test-api')
                                    ])
 
         // assert
@@ -237,6 +257,8 @@ class DeployerTest {
                    is(equalTo(file))
         assertThat policySyncCalls.size(),
                    is(equalTo(1))
+        assertThat contractSyncCalls.size(),
+                is(equalTo(1))
         def policySync = policySyncCalls[0]
         assertThat policySync.apiSpec.id,
                    is(equalTo('api1234'))
@@ -440,6 +462,7 @@ class DeployerTest {
         deployer.deployApplication(request,
                                    new ApiSpecificationList(new ApiSpecificationList([apiSpec])),
                                    null,
+                                   null,
                                    [Features.DesignCenterSync])
 
         // assert
@@ -477,6 +500,7 @@ class DeployerTest {
         // act
         deployer.deployApplication(request,
                                    new ApiSpecificationList([apiSpec]),
+                                   null,
                                    null,
                                    [Features.AppDeployment])
 

@@ -1,9 +1,9 @@
 package com.avioconsulting.mule.deployment.api
 
-
 import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.RequestedContract
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 
 interface IDeployer {
@@ -19,5 +19,6 @@ interface IDeployer {
     def deployApplication(FileBasedAppDeploymentRequest appDeploymentRequest,
                           ApiSpecificationList apiSpecifications,
                           List<Policy> desiredPolicies,
+                          List<RequestedContract> requestedContracts,
                           List<Features> enabledFeatures)
 }

@@ -3,12 +3,14 @@ package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.RequestedContract
 import com.avioconsulting.mule.deployment.dsl.policies.PolicyListContext
 
 class MuleDeployContext extends BaseContext {
     String version
     private ApiSpecListContext apiSpecifications = new ApiSpecListContext()
     private PolicyListContext policies = new PolicyListContext()
+    private ContractListContext contracts = new ContractListContext()
     private CloudhubContext cloudHubApplication = new CloudhubContext()
     private OnPremContext onPremApplication = new OnPremContext()
     private FeaturesContext enabledFeatures = new FeaturesContext()
@@ -67,6 +69,7 @@ class MuleDeployContext extends BaseContext {
         return new DeploymentPackage(deploymentRequest,
                                      apiSpecifications.createApiSpecList(deploymentRequest),
                                      policyList,
+                                     contracts.createContractRequestList(deploymentRequest),
                                      features)
     }
 

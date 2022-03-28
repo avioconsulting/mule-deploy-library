@@ -5,6 +5,7 @@ import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.RequestedContract
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
@@ -24,6 +25,7 @@ class Deployer implements IDeployer {
     private final IDesignCenterDeployer designCenterDeployer
     private final IApiManagerDeployer apiManagerDeployer
     private final IPolicyDeployer policyDeployer
+    private final IApplicationContractDeployer applicationContractDeployer
     private final List<String> environmentsToDoDesignCenterDeploymentOn
     private int stepNumber
     private final DryRunMode dryRunMode
@@ -69,7 +71,8 @@ class Deployer implements IDeployer {
                      IOnPremDeployer onPremDeployer = null,
                      IDesignCenterDeployer designCenterDeployer = null,
                      IApiManagerDeployer apiManagerDeployer = null,
-                     IPolicyDeployer policyDeployer = null) {
+                     IPolicyDeployer policyDeployer = null,
+                     IApplicationContractDeployer applicationContractDeployer = null) {
         this.dryRunMode = dryRunMode
         this.logger = logger
         this.environmentsToDoDesignCenterDeploymentOn = environmentsToDoDesignCenterDeploymentOn
@@ -96,6 +99,10 @@ class Deployer implements IDeployer {
                                                                    this.environmentLocator,
                                                                    this.logger,
                                                                    dryRunMode)
+        this.applicationContractDeployer = applicationContractDeployer ?: new ApplicationContractDeployer(this.clientWrapper,
+                                                                                                        this.environmentLocator,
+                                                                                                        this.logger,
+                                                                                                        dryRunMode)
     }
 
     /**
@@ -103,11 +110,13 @@ class Deployer implements IDeployer {
      * @param appDeploymentRequest Details about how to deploy your app
      * @param apiSpecification How API specification details work. This can be optional. Doing so will automatically remove Design Center sync and policy sync from enabled features
      * @param desiredPolicies Which policies to apply. The default value is empty, which means apply no policies and remove any policies already there
+     * @param requestedContracts Which contracts to request. The default value is empty, which means request no contracts
      * @param enabledFeatures Which features of this tool to turn on. All by default.
      */
     def deployApplication(FileBasedAppDeploymentRequest appDeploymentRequest,
                           ApiSpecificationList apiSpecifications = null,
                           List<Policy> desiredPolicies = [],
+                          List<RequestedContract> requestedContracts = [],
                           List<Features> enabledFeatures = [Features.All]) {
         stepNumber = 0
         // TODO: dirty?
@@ -124,6 +133,7 @@ class Deployer implements IDeployer {
         performCommonDeploymentTasks(isSoapApi,
                                      apiSpecifications,
                                      desiredPolicies,
+                                     requestedContracts,
                                      appDeploymentRequest,
                                      appDeploymentRequest.environment,
                                      enabledFeatures,
@@ -171,6 +181,7 @@ class Deployer implements IDeployer {
     private def performCommonDeploymentTasks(boolean isSoapApi,
                                              ApiSpecificationList apiSpecifications,
                                              List<Policy> desiredPolicies,
+                                             List<RequestedContract> requestedContractList,
                                              FileBasedAppDeploymentRequest appDeploymentRequest,
                                              String environment,
                                              List<Features> enabledFeatures,
@@ -218,10 +229,22 @@ class Deployer implements IDeployer {
             } else {
                 skipReason = 'API Sync was disabled so policy is too'
             }
+
             executeStep("Policy Sync - ${apiHeader}",
                         skipReason) {
                 policyDeployer.synchronizePolicies(existingApiManagerDefinition,
                                                    desiredPolicies)
+            }
+
+            if (existingApiManagerDefinition) {
+                skipReason = isFeatureDisabled(Features.ContractSync)
+            } else {
+                skipReason = 'API Sync was disabled so contract sync is too'
+            }
+
+            executeStep("Contracts Sync - ${apiHeader}",
+                    skipReason) {
+                applicationContractDeployer.synchronizeApplicationContracts(existingApiManagerDefinition, requestedContractList)
             }
         }
     }
