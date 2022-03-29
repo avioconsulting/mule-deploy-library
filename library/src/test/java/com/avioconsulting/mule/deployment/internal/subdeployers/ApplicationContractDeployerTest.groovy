@@ -203,7 +203,7 @@ class ApplicationContractDeployerTest extends BaseTest {
         applicationContractDeployer.synchronizeApplicationContracts(apiSpec, requestedContracts)
         assertThat requests, is(equalTo([
                 "GET /apiplatform/repository/v2/organizations/the-org-id/applications?targetAdminSite=true&query=test-client",
-                "GET /apiplatform/repository/v2/organizations/the-org-id/applications/1234/contracts",
+                "GET /apiplatform/repository/v2/organizations/the-org-id/applications/123/contracts",
                 "GET /api/v2/assets/the-org-id/target-two-api/asset",
                 "GET /exchange/api/v2/assets/the-org-id/target-two-api/versionGroups/v1/instances",
                 "POST /exchange/api/v2/organizations/the-org-id/applications/123/contracts"
@@ -315,7 +315,7 @@ class ApplicationContractDeployerTest extends BaseTest {
     }
 
     static boolean isExchangeVersionInformationGet(HttpServerRequest httpServerRequest) {
-        return (httpServerRequest.uri().matches(/\/api\\/v2\\/assets\\/.+\\/.+\\/asset/)
+        return (httpServerRequest.uri().matches(/\/exchange\/api\/v2\/assets\/.+\/.+\/asset/)
                 && httpServerRequest.method() == HttpMethod.GET)
     }
 

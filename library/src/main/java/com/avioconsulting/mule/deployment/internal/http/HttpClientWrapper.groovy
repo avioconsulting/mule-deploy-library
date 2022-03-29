@@ -15,6 +15,8 @@ import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
 import org.apache.http.protocol.HttpContext
 
+import java.util.stream.Collectors
+
 class HttpClientWrapper implements HttpRequestInterceptor {
     private final String username
     private final String password

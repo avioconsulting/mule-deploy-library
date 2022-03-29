@@ -37,6 +37,13 @@ class MuleDeployContextTest implements AppBuilding {
                 clientEnforcementPolicyBasic()
             }
 
+            contracts {
+                exchangeIdsToContractWith List.of(
+                        "test-api",
+                        "test-two-api"
+                )
+            }
+
             cloudHubApplication {
                 environment 'DEV'
                 applicationName 'the-app'
@@ -65,6 +72,8 @@ class MuleDeployContextTest implements AppBuilding {
                    is(instanceOf(CloudhubDeploymentRequest))
         assertThat deploymentPackage.apiSpecifications.size(),
                    is(not(0))
+        assertThat deploymentPackage.requestedContracts.size(),
+                is(equalTo(2))
         assertThat deploymentPackage.desiredPolicies.size(),
                    is(equalTo(1))
         assertThat deploymentPackage.enabledFeatures,

@@ -40,14 +40,14 @@ class ApplicationContractDeployer implements IApplicationContractDeployer {
             throw new Exception("Could not locate the client ${clientApplicationName} in Exchange, please make sure it has been created and the properties files updated with the associated credentials.")
         }
         def environmentId = environmentLocator.getEnvironmentId(existingApiManagerDefinition.environment)
-        def contractRequestList = filterAndNormalizeContractsList(requestedContractList, collectCurrentContracts(existingApiManagerDefinition.id))
+        def contractRequestList = filterAndNormalizeContractsList(requestedContractList, collectCurrentContracts(ourClientAppId))
 
         contractRequestList.forEach { contract ->
             contract.ourClientApplicationId = ourClientAppId
             contract.organizationId = clientWrapper.anypointOrganizationId
             contract.environmentId = environmentId
             clientWrapper.executeWithSuccessfulCloseableResponse(new HttpGet(
-                    "${clientWrapper.baseUrl}/api/v2/assets/${clientWrapper.anypointOrganizationId}/${contract.exchangeAssetId}/asset"),
+                    "${clientWrapper.baseUrl}/exchange/api/v2/assets/${clientWrapper.anypointOrganizationId}/${contract.exchangeAssetId}/asset"),
                     "get version information for ${contract.exchangeAssetId}")
                     { response ->
                         contract.versionGroup = response.versionGroup
@@ -66,7 +66,7 @@ class ApplicationContractDeployer implements IApplicationContractDeployer {
         } as Integer
     }
 
-    private List<String> collectCurrentContracts(String ourClientAppId) {
+    private List<String> collectCurrentContracts(Integer ourClientAppId) {
         clientWrapper.executeWithSuccessfulCloseableResponse(new HttpGet("${clientWrapper.baseUrl}/apiplatform/repository/v2/organizations/${clientWrapper.anypointOrganizationId}/applications/${ourClientAppId}/contracts"),
                 "get contract information") { response ->
             def key = "assetId:"
