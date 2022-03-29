@@ -55,7 +55,7 @@ class ApplicationContractDeployerTest extends BaseTest {
             }
         }
         // act
-        def results = applicationContractDeployer.collectCurrentContracts('123')
+        def results = applicationContractDeployer.collectCurrentContracts(123)
         assertThat results.size(), is(equalTo(1))
         assertThat url, is(equalTo('/apiplatform/repository/v2/organizations/the-org-id/applications/123/contracts'))
     }
@@ -204,7 +204,7 @@ class ApplicationContractDeployerTest extends BaseTest {
         assertThat requests, is(equalTo([
                 "GET /apiplatform/repository/v2/organizations/the-org-id/applications?targetAdminSite=true&query=test-client",
                 "GET /apiplatform/repository/v2/organizations/the-org-id/applications/123/contracts",
-                "GET /api/v2/assets/the-org-id/target-two-api/asset",
+                "GET /exchange/api/v2/assets/the-org-id/target-two-api/asset",
                 "GET /exchange/api/v2/assets/the-org-id/target-two-api/versionGroups/v1/instances",
                 "POST /exchange/api/v2/organizations/the-org-id/applications/123/contracts"
         ]))
