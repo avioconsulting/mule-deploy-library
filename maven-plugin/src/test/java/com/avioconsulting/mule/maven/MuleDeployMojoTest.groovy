@@ -297,6 +297,7 @@ muleDeploy {
                 deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
                                      ApiSpecificationList apiSpecification,
                                      List<Policy> desiredPolicies,
+                                     List< RequestedContract> requestedContracts,
                                      List<Features> enabledFeatures ->
                     actualApp = appDeploymentRequest
                 }
