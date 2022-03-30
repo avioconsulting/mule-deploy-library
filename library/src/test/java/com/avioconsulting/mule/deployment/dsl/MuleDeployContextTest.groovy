@@ -40,10 +40,10 @@ class MuleDeployContextTest implements AppBuilding {
 
             contracts {
                 clientApplicationName "tester-client"
-                exchangeIdsToContractWith List.of(
+                exchangeIdsToContractWith ([
                         "test-api",
                         "test-two-api"
-                )
+                ] as LinkedList)
             }
 
             cloudHubApplication {

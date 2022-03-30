@@ -5,7 +5,7 @@ import com.avioconsulting.mule.deployment.api.models.RequestedContract
 
 class ContractListContext extends BaseContext {
     String clientApplicationName
-    private List exchangeIdsToContractWith
+    List exchangeIdsToContractWith
 
     List<RequestedContract> createContractRequestList(FileBasedAppDeploymentRequest request) {
         def contractCollection = exchangeIdsToContractWith.collect { id ->
