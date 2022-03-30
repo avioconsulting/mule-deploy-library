@@ -5,17 +5,22 @@ import com.avioconsulting.mule.deployment.api.models.RequestedContract
 
 class ContractListContext extends BaseContext {
     String clientApplicationName
-    private Object exchangeIdsToContractWith
+    private List exchangeIdsToContractWith
 
     List<RequestedContract> createContractRequestList(FileBasedAppDeploymentRequest request) {
+        def contractCollection = exchangeIdsToContractWith.collect { id ->
+            if (!isNormalizedClientApplicationName(clientApplicationName, request.environment))
+                normalizeClientApplicationName(request)
+            new RequestedContract(clientApplicationName, id)
+        }
+        return contractCollection
+    }
+
+    String normalizeClientApplicationName(FileBasedAppDeploymentRequest request) {
         if(!clientApplicationName) {
             this.clientApplicationName =  "${request.getArtifactId()}-client"
         }
         this.clientApplicationName = "${clientApplicationName}-${request.environment}"
-        def contractCollection = exchangeIdsToContractWith.collect { id ->
-            new RequestedContract(clientApplicationName, id)
-        }
-        return contractCollection
     }
 
     @Override
@@ -23,4 +28,7 @@ class ContractListContext extends BaseContext {
         return ['clientApplicationName']
     }
 
+    static boolean isNormalizedClientApplicationName(String clientApplicationName, String environment) {
+        clientApplicationName.contains("client-${environment}")
+    }
 }

@@ -75,6 +75,7 @@ contributor([closureScopeContext]) {
         #closureParam('onPremApplication')
         #closureParam('apiSpecification')
         #closureParam('policies')
+        #closureParam('contracts')
         #closureParam('enabledFeatures')
     }
     call = enclosingCall('enabledFeatures')
@@ -127,6 +128,11 @@ contributor([closureScopeContext]) {
         #closureParam('jwtPolicy')
         #closureParam('azureAdJwtPolicy')
         #closureParam('DLBIPWhiteListPolicy')
+    }
+    call = enclosingCall('contracts')
+    if (call) {
+        #closureParam('clientApplicationName')
+        #closureParam('exchangeIdsToContractWith')
     }
     call = enclosingCall('policy')
     if (call) {

@@ -284,7 +284,6 @@ class CloudhubContextTest implements MavenInvoke {
         assertThat exception.message,
                    is(equalTo("""Your deployment request is not complete. The following errors exist:
 - cloudHubAppPrefix missing
-- cloudHubAppSuffix missing
 - cryptoKey missing
 - environment missing
 - file missing
