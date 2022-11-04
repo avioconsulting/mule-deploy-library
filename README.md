@@ -10,6 +10,11 @@ Both approaches 1 and 2 lean on using a Groovy DSL to supply your deployment spe
 
 ALL of these methods assume your CI/CD tool white lists secrets from output. If it does not, it's on YOU to deal with that. Jenkins and Azure DevOps should do this out of the box with no further configuration.
 
+# Authentication
+The tool supports two type of authentication methods -
+1. Basic Anypoint Platform Credentials
+2. Anypoint [Connected App Credentials](https://help.mulesoft.com/s/article/How-to-deploy-an-application-to-CloudHub-using-Connected-App-functionality)
+
 # Maven plugin
 
 NOTE: The Maven plugin has 2 goals (deploy and validate). Regardless of whether you use it to actually perform the deployment, it's highly recommended you use the validate goal to ensure your DSL file is correct during the build pipeline.
@@ -66,7 +71,12 @@ If you have no strong preference, then stick with the "with POM" approach which 
 mvn clean deploy -DmuleDeploy.env=DEV -Danypoint.username=bob -Danypoint.password=asecret -DmuleDeploy.cryptoKey=hello -DmuleDeploy.autoDiscClientId=theId -DmuleDeploy.autoDiscClientSecret=theSecret
 ```
 
-See maven-plugin/README.md for more information.
+To see all parameters, run help goal of the plugin:
+```shell
+mvn com.avioconsulting.mule:mule-deploy-maven-plugin:help -Ddetail=true
+```
+
+See [maven-plugin/README.md](./maven-plugin/README.md) for more information.
 
 # CLI
 

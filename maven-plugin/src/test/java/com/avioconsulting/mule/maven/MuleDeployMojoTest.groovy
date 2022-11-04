@@ -5,6 +5,7 @@ import com.avioconsulting.mule.deployment.api.IDeployer
 import com.avioconsulting.mule.deployment.api.IDeployerFactory
 import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.api.models.*
+import com.avioconsulting.mule.deployment.api.models.credentials.Credential
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.ArtifactHandler
@@ -34,7 +35,8 @@ class MuleDeployMojoTest implements MavenInvoke {
     @Test
     void gets_correct_params() {
         // arrange
-        String actualUser, actualPass, actualConnectedAppId, actualConnectedAppSecret, actualOrg
+        String actualOrg
+        Credential actualCredential
         ILogger actualLogger
         DryRunMode actualDryRunMode
         List<String> actualEnvs
@@ -46,18 +48,12 @@ class MuleDeployMojoTest implements MavenInvoke {
                 }
         ] as IDeployer
         def mock = [
-                create: { String username,
-                          String password,
-                          String connectedAppId,
-                          String connectedAppSecret,
+                create: { Credential credential,
                           ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,
                           List<String> environmentsToDoDesignCenterDeploymentOn ->
-                    actualUser = username
-                    actualPass = password
-                    actualConnectedAppId = connectedAppId
-                    actualConnectedAppSecret = connectedAppSecret
+                    actualCredential = credential
                     actualLogger = logger
                     actualDryRunMode = dryRunMode
                     actualEnvs = environmentsToDoDesignCenterDeploymentOn
@@ -82,6 +78,81 @@ muleDeploy {
                            dslText,
                            'the user',
                            'the pass',
+                    null,
+                null,
+                           // we don't want this thing to actually run
+                           DryRunMode.OnlineValidate,
+                           'the org',
+                           ['TST'])
+
+        // act
+        mojo.execute()
+
+        // assert
+        assertThat actualCredential.principal,
+                   is(equalTo('the user'))
+        assertThat actualCredential.username,
+                is(equalTo('the user'))
+        assertThat actualCredential.password,
+                   is(equalTo('the pass'))
+//        assertThat actualConnectedAppId,
+//                is(equalTo('the client'))
+//        assertThat actualConnectedAppSecret,
+//                is(equalTo('the secret'))
+        assertThat actualOrg,
+                   is(equalTo('the org'))
+        assertThat actualDryRunMode,
+                   is(equalTo(DryRunMode.OnlineValidate))
+        assertThat actualEnvs,
+                   is(equalTo(['TST']))
+    }
+
+    @Test
+    void gets_correct_params_connectedApp() {
+        // arrange
+        String actualOrg
+        Credential actualCredential
+        ILogger actualLogger
+        DryRunMode actualDryRunMode
+        List<String> actualEnvs
+        def mockDeployer = [
+                deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
+                                     ApiSpecificationList apiSpecification,
+                                     List<Policy> desiredPolicies,
+                                     List<Features> enabledFeatures ->
+                }
+        ] as IDeployer
+        def mock = [
+                create: { Credential credential,
+                          ILogger logger,
+                          DryRunMode dryRunMode,
+                          String anypointOrganizationName,
+                          List<String> environmentsToDoDesignCenterDeploymentOn ->
+                    actualCredential = credential
+                    actualLogger = logger
+                    actualDryRunMode = dryRunMode
+                    actualEnvs = environmentsToDoDesignCenterDeploymentOn
+                    actualOrg = anypointOrganizationName
+                    return mockDeployer
+                }
+        ] as IDeployerFactory
+        def dslText = """
+muleDeploy {
+    version '1.0'
+    
+    onPremApplication {
+        environment 'DEV'
+        applicationName 'the-app'
+        appVersion '1.2.3'
+        file '${builtFile}'
+        targetServerOrClusterName 'theServer'
+    }
+}
+"""
+        def mojo = getMojo(mock,
+                           dslText,
+                           null,
+                           null,
                            'the client',
                            'the secret',
                            // we don't want this thing to actually run
@@ -93,14 +164,16 @@ muleDeploy {
         mojo.execute()
 
         // assert
-        assertThat actualUser,
-                   is(equalTo('the user'))
-        assertThat actualPass,
-                   is(equalTo('the pass'))
-        assertThat actualConnectedAppId,
+        assertThat actualCredential.principal,
+                   is(equalTo('the client'))
+        assertThat actualCredential.id,
                 is(equalTo('the client'))
-        assertThat actualConnectedAppSecret,
-                is(equalTo('the secret'))
+        assertThat actualCredential.secret,
+                   is(equalTo('the secret'))
+//        assertThat actualConnectedAppId,
+//                is(equalTo('the client'))
+//        assertThat actualConnectedAppSecret,
+//                is(equalTo('the secret'))
         assertThat actualOrg,
                    is(equalTo('the org'))
         assertThat actualDryRunMode,
@@ -111,8 +184,8 @@ muleDeploy {
 
     MuleDeployMojo getMojo(IDeployerFactory mockDeployerFactory,
                            String groovyFileText,
-                           String user = 'our user',
-                           String pass = 'our pass',
+                           String user = null,
+                           String pass = null,
                            String connId = null,
                            String connSecret = null,
                            DryRunMode dryRunMode = DryRunMode.Run,
@@ -125,7 +198,7 @@ muleDeploy {
             it.anypointUsername = user
             it.anypointPassword = pass
             it.anypointConnectedAppId = connId
-            it.anypointConnectedAppId = connSecret
+            it.anypointConnectedAppSecret = connSecret
             it.dryRunMode = dryRunMode
             it.groovyFile = groovyFile
             it.anypointOrganizationName = orgName
@@ -154,8 +227,7 @@ muleDeploy {
                 }
         ] as IDeployer
         def mock = [
-                create: { String username,
-                          String password,
+                create: { Credential credential,
                           ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,
@@ -177,7 +249,9 @@ muleDeploy {
 }
 """
         def mojo = getMojo(mock,
-                           dslText)
+                           dslText,
+        'the user',
+        'the pass')
 
         // act
         mojo.execute()
@@ -298,7 +372,7 @@ muleDeploy {
         assertThat deployed,
                    is(equalTo(false))
         assertThat exception.message,
-                   is(containsString('In order to OnlineValidate, credentials must be supplied via the anypointUsername <config> item/anypoint.username property and the anypointPassword <config> item/anypoint.password property'))
+                   is(containsString('Either (anypointUsername and anypointPassword) or (anypointConnectedAppId and anypointConnectedAppSecret) must be defined. Run \':help -Pdetail=true\' goal for parameter details.'))
     }
 
     @Test
@@ -316,10 +390,7 @@ muleDeploy {
                 }
         ] as IDeployer
         def mock = [
-                create: { String username,
-                          String password,
-                          String connectedAppId,
-                          String ConnectedAppSecret,
+                create: { Credential credential,
                           ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,
@@ -402,8 +473,7 @@ muleDeploy {
                 }
         ] as IDeployer
         def mock = [
-                create: { String username,
-                          String password,
+                create: { Credential credential,
                           ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,
@@ -425,7 +495,9 @@ muleDeploy {
 }
 """
         def mojo = getMojo(mock,
-                           dslText)
+                           dslText,
+                    'the user',
+                    'the pass')
         mojo.groovyFile = new File('foobar')
 
         // act
@@ -454,8 +526,7 @@ muleDeploy {
                 }
         ] as IDeployer
         def mock = [
-                create: { String username,
-                          String password,
+                create: { Credential credential,
                           ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,
@@ -477,7 +548,9 @@ muleDeploy {
 }
 """
         def mojo = getMojo(mock,
-                           dslText)
+                           dslText,
+                'the user',
+                'the pass')
 
         // act
         def exception = shouldFail {

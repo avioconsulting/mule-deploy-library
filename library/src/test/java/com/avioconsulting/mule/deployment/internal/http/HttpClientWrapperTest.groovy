@@ -2,6 +2,7 @@ package com.avioconsulting.mule.deployment.internal.http
 
 import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.TestConsoleLogger
+import com.avioconsulting.mule.deployment.api.models.credentials.UsernamePasswordCredential
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpServerRequest
@@ -270,8 +271,8 @@ class HttpClientWrapperTest extends BaseTest {
     void getAnypointOrganizationId_default_org_prefs_exist() {
         // arrange
         clientWrapper = new HttpClientWrapper("http://localhost:${httpServer.actualPort()}",
-                                              'the user',
-                                              'the password',
+                                              new UsernamePasswordCredential('the user',
+                                              'the password'),
                                               new TestConsoleLogger())
         withHttpServer { HttpServerRequest request ->
             request.response().with {
@@ -319,8 +320,8 @@ class HttpClientWrapperTest extends BaseTest {
     void getAnypointOrganizationId_default_no_org_prefs_exist() {
         // arrange
         clientWrapper = new HttpClientWrapper("http://localhost:${httpServer.actualPort()}",
-                                              'the user',
-                                              'the password',
+                                              new UsernamePasswordCredential('the user',
+                                              'the password'),
                                               new TestConsoleLogger())
         withHttpServer { HttpServerRequest request ->
             request.response().with {
