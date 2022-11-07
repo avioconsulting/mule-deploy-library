@@ -38,9 +38,10 @@ You can get an idea of available options by running `./muleDeploy --help`:
 
 ```
 Missing required parameter: <groovyFile>
-Usage: deploy [-V] [-m=<dryRunMode>] [-o=<anypointOrganizationName>]
-              -p=<anypointPassword> -u=<anypointUsername>
-              [-a=<String=String>]...
+Usage: deploy ([-u=<anypointUsername> -p=<anypointPassword>]
+              [-caid=<anypointConnectedAppId>
+              -casec=<anypointConnectedAppSecret>]) [-V] [-m=<dryRunMode>]
+              [-o=<anypointOrganizationName>] [-a=<String=String>]...
               [-e=<environmentsToDoDesignCenterDeploymentOn>]... <groovyFile>
 Will deploy using your Mule DSL
       <groovyFile>   The path to your DSL file
@@ -57,11 +58,16 @@ Will deploy using your Mule DSL
   -o, --anypoint-org-name=<anypointOrganizationName>
                      The org/business group to use. If you do not specify it,
                        the default for your user will be used
+  -V, --version      print version info
+Basic auth credentials of Anypoint Platform
   -p, --anypoint-password=<anypointPassword>
 
   -u, --anypoint-username=<anypointUsername>
 
-  -V, --version      print version info
+Connected App credentials
+      -caid, --anypoint-connected-app-id=<anypointConnectedAppId>
+
+      -casec, --anypoint-connected-app-secret=<anypointConnectedAppSecret>
 
 ```
 
