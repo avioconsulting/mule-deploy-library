@@ -1,19 +1,15 @@
 package com.avioconsulting.mule.deployment.api
 
+import com.avioconsulting.mule.deployment.api.models.credentials.Credential
+
 class DeployerFactory implements IDeployerFactory {
     @Override
-    IDeployer create(String username,
-                     String password,
-                     String connectedAppId,
-                     String connectedAppSecret,
+    IDeployer create(Credential credential,
                      ILogger logger,
                      DryRunMode dryRunMode,
                      String anypointOrganizationName,
                      List<String> environmentsToDoDesignCenterDeploymentOn) {
-        new Deployer(username,
-                     password,
-                     connectedAppId,
-                     connectedAppSecret,
+        new Deployer(credential,
                      logger,
                      dryRunMode,
                      anypointOrganizationName,

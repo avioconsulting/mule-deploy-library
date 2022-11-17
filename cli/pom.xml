@@ -2,9 +2,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>c18a7555-97b2-41a8-83fe-e38c21f78cdc</groupId>
+    <groupId>com.avioconsulting.mule</groupId>
     <artifactId>mule-deploy-cli</artifactId>
-    <version>1.0.3</version>
+    <version>1.2.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Mule deployment CLI</name>
     <description>Deploys Mule applications via Runtime Manager APIs</description>
@@ -23,17 +23,11 @@
 
     <distributionManagement>
         <repository>
-            <id>anypoint-exchange</id>
-            <name>Corporate Repository</name>
-            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/c18a7555-97b2-41a8-83fe-e38c21f78cdc/maven</url>
+            <id>github</id>
+            <name>GitHub OWNER Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
             <layout>default</layout>
         </repository>
-        <snapshotRepository>
-            <id>anypoint-exchange</id>
-            <name>Corporate Repository</name>
-            <url>https://maven.anypoint.mulesoft.com/api/v1/organizations/c18a7555-97b2-41a8-83fe-e38c21f78cdc/maven</url>
-            <layout>default</layout>
-        </snapshotRepository>
     </distributionManagement>
 
     <build>
@@ -134,7 +128,7 @@
             <version>${groovy.compiler.version}</version>
         </dependency>
         <dependency>
-            <groupId>c18a7555-97b2-41a8-83fe-e38c21f78cdc</groupId>
+            <groupId>com.avioconsulting.mule</groupId>
             <artifactId>mule-deploy-library</artifactId>
             <version>${project.version}</version>
         </dependency>

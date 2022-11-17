@@ -1,10 +1,9 @@
 package com.avioconsulting.mule.deployment.api
 
+import com.avioconsulting.mule.deployment.api.models.credentials.Credential
+
 interface IDeployerFactory {
-    IDeployer create(String username,
-                     String password,
-                     String connectedAppId,
-                     String connectedAppSecret,
+    IDeployer create(Credential credential,
                      ILogger logger,
                      DryRunMode dryRunMode,
                      String anypointOrganizationName,
