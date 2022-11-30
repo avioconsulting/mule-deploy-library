@@ -8,7 +8,9 @@ The plugin has 2 goals (validate and deploy). The first goal should definitely g
 
 ## POM Changes
 
-In your project's POM, add the following snippet. Get the latest version number from Nexus.
+In your project's POM, add the following snippet -
+
+**NOTE:** Get the latest release version from [Releases](https://github.com/avioconsulting/mule-deploy-library/releases).
 
 ```xml
 <project>
@@ -18,7 +20,7 @@ In your project's POM, add the following snippet. Get the latest version number 
             <plugin>
                 <groupId>com.avioconsulting.mule</groupId>
                 <artifactId>mule-deploy-maven-plugin</artifactId>
-                <version>1.0.0</version>
+                <version>${mule-deploy-maven-plugin.version}</version>
                 <configuration>
                     <!-- this is optional, deploySpec.groovy is te default if you do not specify -->
                     <groovyFile>deploySpec.groovy</groovyFile>
