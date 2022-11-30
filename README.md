@@ -15,6 +15,33 @@ The tool supports two type of authentication methods -
 1. Basic Anypoint Platform Credentials
 2. Anypoint [Connected App Credentials](https://help.mulesoft.com/s/article/How-to-deploy-an-application-to-CloudHub-using-Connected-App-functionality)
 
+# Distribution
+
+Starting v1.2.0, The Maven Plugin and Core library is published to [Maven Central](https://repo1.maven.org/maven2/com/avioconsulting/mule/). To **use released versions** from maven central, you do not need any credential or pluginRepository declaration. Just add mule-deploy-maven-plugin configuration to your project and you are good to go.
+
+
+## Snapshots
+Starting v1.2.0, SNAPSHOTs are build from `master` branch and are published to [Sonatype Snapshot Repository](https://oss.sonatype.org/content/repositories/snapshots/com/avioconsulting/mule/). 
+
+To use snapshot versions, you would need to add following in your pom.xml - 
+
+```xml
+<pluginRepositories>
+    <!-- Your any existing plugin repositories can stay in the pom and add a new one shown below -->
+    <pluginRepository>
+        <id>oss.sonatype.org-snapshot</id>
+        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        <releases>
+            <enabled>false</enabled>
+        </releases>
+        <snapshots>
+            <enabled>true</enabled>
+        </snapshots>
+    </pluginRepository>
+</pluginRepositories>
+```
+
+
 # Maven plugin
 
 NOTE: The Maven plugin has 2 goals (deploy and validate). Regardless of whether you use it to actually perform the deployment, it's highly recommended you use the validate goal to ensure your DSL file is correct during the build pipeline.
@@ -42,7 +69,7 @@ If you have no strong preference, then stick with the "with POM" approach which 
             <plugin>
                 <groupId>com.avioconsulting.mule</groupId>
                 <artifactId>mule-deploy-maven-plugin</artifactId>
-                <version>1.0.0</version>                
+                <version>${mule-deploy-maven-plugin.version}</version>                
                 <executions>
                     <execution>
                         <id>do_validation</id>
