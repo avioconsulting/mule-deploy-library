@@ -178,6 +178,28 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <!--
+                        This project uses groovy to for development.
+                        The default maven-javadoc-plugin does not generate javadocs for groovy classes.
+                        maven-javadoc-plugin generates jars for library and maven-plugin due to the
+                        generated sources by apollo graphql plugin and help mojo java files.
+                        But CLI module does not have any java files so javadocs doesn't generate there.
+
+                        Adding groovydoc-maven-plugin to generate javadocs from groovy as well as java.
+                     -->
+                    <plugin>
+                        <groupId>com.bluetrainsoftware.maven</groupId>
+                        <artifactId>groovydoc-maven-plugin</artifactId>
+                        <version>2.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-docs</id>
+                                <goals>
+                                    <goal>attach-docs</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
