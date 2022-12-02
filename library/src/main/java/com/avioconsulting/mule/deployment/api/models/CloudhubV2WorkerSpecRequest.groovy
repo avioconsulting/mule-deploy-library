@@ -33,9 +33,39 @@ class CloudhubV2WorkerSpecRequest {
     final int replicas
 
     /***
-     *  Strategy used o deploye, default rolling
+     *  Strategy used on deployment, default rolling
      */
     final UpdateStrategies updateStrategy
+
+    /***
+     *  Enables last mile security, default false
+     */
+    final boolean lastMileSecurity
+
+    /***
+     *  Configures the Mule application to use a persistent object store, default false
+     */
+    final boolean persistentObjectStore
+
+    /***
+     *  Enables clustering across two or more replicas of the application, default false
+     */
+    final boolean clustered
+
+    /***
+     *  Enforces the deployment of replicas across different nodes, default false
+     */
+    final boolean replicasAcrossNodes
+
+    /***
+     *  URL of the deployed application
+     */
+    final String publicURL
+
+    /***
+     *  Enables SSL forwarding during a session, default false
+     */
+    final boolean forwardSslSession
 
     /***
      * Standard request, see properties for parameter info.
@@ -45,13 +75,25 @@ class CloudhubV2WorkerSpecRequest {
                                 VCoresSize replicaSize = VCoresSize.vCore1GB,
                                 String target = null,
                                 boolean objectStoreV2Enabled = true,
-                                UpdateStrategies updateStrategy = UpdateStrategies.rolling) {
+                                UpdateStrategies updateStrategy = UpdateStrategies.rolling,
+                                boolean lastMileSecurity = false,
+                                boolean persistentObjectStore = false,
+                                boolean clustered = false,
+                                boolean replicasAcrossNodes = false,
+                                String publicURL = null,
+                                boolean forwardSslSession = false) {
         this.muleVersion = muleVersion
         this.replicas = replicas
         this.replicaSize = replicaSize
         this.target = target
         this.objectStoreV2Enabled = objectStoreV2Enabled
         this.updateStrategy = updateStrategy
+        this.lastMileSecurity = lastMileSecurity
+        this.persistentObjectStore = persistentObjectStore
+        this.clustered = clustered
+        this.replicasAcrossNodes = replicasAcrossNodes
+        this.publicURL = publicURL
+        this.forwardSslSession = forwardSslSession
     }
 
     CloudhubV2WorkerSpecRequest withNewMuleVersion(String newMuleVersion) {
@@ -60,6 +102,12 @@ class CloudhubV2WorkerSpecRequest {
                                         replicaSize,
                                         target,
                                         objectStoreV2Enabled,
-                                        updateStrategy)
+                                        updateStrategy,
+                                        lastMileSecurity,
+                                        persistentObjectStore,
+                                        clustered,
+                                        replicasAcrossNodes,
+                                        publicURL,
+                                        forwardSslSession)
     }
 }
