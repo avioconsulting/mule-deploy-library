@@ -3,6 +3,7 @@ package com.avioconsulting.mule.deployment.api
 
 import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.CloudhubV2DeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.credentials.Credential
@@ -21,6 +22,7 @@ class Deployer implements IDeployer {
     private final EnvironmentLocator environmentLocator
     private final HttpClientWrapper clientWrapper
     private final ICloudHubDeployer cloudHubDeployer
+    private final ICloudHubDeployer cloudHubV2Deployer
     private final IOnPremDeployer onPremDeployer
     private final IDesignCenterDeployer designCenterDeployer
     private final IApiManagerDeployer apiManagerDeployer
@@ -74,6 +76,10 @@ class Deployer implements IDeployer {
                                                                          this.environmentLocator,
                                                                          logger,
                                                                          dryRunMode)
+        this.cloudHubV2Deployer = new CloudHubV2Deployer(this.clientWrapper,
+                                                         this.environmentLocator,
+                                                         logger,
+                                                         dryRunMode)
         this.onPremDeployer = onPremDeployer ?: new OnPremDeployer(this.clientWrapper,
                                                                    this.environmentLocator,
                                                                    logger,
@@ -110,6 +116,9 @@ class Deployer implements IDeployer {
         if (appDeploymentRequest instanceof CloudhubDeploymentRequest) {
             deployer = cloudHubDeployer
             description = 'CloudHub app deployment'
+        } else if (appDeploymentRequest instanceof CloudhubV2DeploymentRequest) {
+            deployer = cloudHubV2Deployer
+            description = 'CloudHub v2 app deployment'
         } else {
             deployer = onPremDeployer
             description = 'On-prem app deployment'

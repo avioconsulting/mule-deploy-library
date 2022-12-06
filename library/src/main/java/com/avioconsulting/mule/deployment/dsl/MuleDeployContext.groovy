@@ -10,12 +10,13 @@ class MuleDeployContext extends BaseContext {
     private ApiSpecListContext apiSpecifications = new ApiSpecListContext()
     private PolicyListContext policies = new PolicyListContext()
     private CloudhubContext cloudHubApplication = new CloudhubContext()
+    private CloudhubV2Context cloudHubV2Application = new CloudhubV2Context()
     private OnPremContext onPremApplication = new OnPremContext()
     private FeaturesContext enabledFeatures = new FeaturesContext()
 
     def findErrors() {
         List<String> errors = super.findErrors()
-        if (!cloudHubSet && !onPremSet) {
+        if (!cloudHubSet && !cloudHubV2Set && !onPremSet) {
             errors << '- Either onPremApplication or cloudHubApplication should be supplied'
         }
         return errors
@@ -23,6 +24,10 @@ class MuleDeployContext extends BaseContext {
 
     private boolean isCloudHubSet() {
         hasFieldBeenSet('cloudHubApplication')
+    }
+
+    private boolean isCloudHubV2Set() {
+        hasFieldBeenSet('cloudHub2Application')
     }
 
     private boolean isOnPremSet() {
@@ -51,7 +56,7 @@ class MuleDeployContext extends BaseContext {
             def errorList = errors.join('\n')
             throw new Exception("Your file is not complete. The following errors exist:\n${errorList}")
         }
-        if (onPremSet && cloudHubSet) {
+        if (onPremSet && (cloudHubSet || cloudHubV2Set)) {
             throw new Exception('You cannot deploy both a CloudHub and on-prem application!')
         }
         def policyList = policies.createPolicyList()
@@ -61,9 +66,19 @@ class MuleDeployContext extends BaseContext {
             features = removeFeature(Features.PolicySync,
                                      features)
         }
-        FileBasedAppDeploymentRequest deploymentRequest = cloudHubSet ?
-                cloudHubApplication.createDeploymentRequest() :
-                onPremApplication.createDeploymentRequest()
+        FileBasedAppDeploymentRequest deploymentRequest;
+
+        if (cloudHubSet) {
+            deploymentRequest = cloudHubSet ?
+                    cloudHubApplication.createDeploymentRequest() :
+                    onPremApplication.createDeploymentRequest()
+        } else if (cloudHubV2Set) {
+            deploymentRequest = cloudHubV2Application.createDeploymentRequest()
+        } else {
+            deploymentRequest = cloudHubV2Set ?
+                    cloudHubApplication.createDeploymentRequest() :
+                    onPremApplication.createDeploymentRequest()
+        }
         return new DeploymentPackage(deploymentRequest,
                                      apiSpecifications.createApiSpecList(deploymentRequest),
                                      policyList,
