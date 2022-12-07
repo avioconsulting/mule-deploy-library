@@ -22,7 +22,7 @@ class Deployer implements IDeployer {
     private final EnvironmentLocator environmentLocator
     private final HttpClientWrapper clientWrapper
     private final ICloudHubDeployer cloudHubDeployer
-    private final ICloudHubDeployer cloudHubV2Deployer
+    private final ICloudHubV2Deployer cloudHubV2Deployer
     private final IOnPremDeployer onPremDeployer
     private final IDesignCenterDeployer designCenterDeployer
     private final IApiManagerDeployer apiManagerDeployer

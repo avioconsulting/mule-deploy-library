@@ -3,15 +3,15 @@ package com.avioconsulting.mule.deployment.dsl
 import com.avioconsulting.mule.deployment.api.models.CloudhubV2DeploymentRequest
 
 class CloudhubV2Context extends BaseContext {
-    String environment, applicationName, appVersion, groupId, file, cryptoKey, cloudHubAppPrefix
+    String environment, applicationName, appVersion, file, cryptoKey, cloudHubAppPrefix
     // make API visualizer, etc. more easy by default
     boolean analyticsAgentEnabled = true
-    private WorkerSpecContext workerSpecs = new WorkerSpecContext()
+    private WorkerSpecV2Context workerSpecs = new WorkerSpecV2Context()
     private AutodiscoveryContext autoDiscovery = new AutodiscoveryContext()
     Map<String, String> appProperties = [:]
     Map<String, String> otherCloudHubProperties = [:]
 
-    CloudhubV2DeploymentRequest createDeploymentRequest() {
+    CloudhubV2DeploymentRequest createV2DeploymentRequest() {
         def errors = findErrors()
         def specs = workerSpecs
         errors += specs.findErrors('workerSpecs')
@@ -30,7 +30,6 @@ class CloudhubV2Context extends BaseContext {
                                       this.cloudHubAppPrefix,
                                       this.applicationName,
                                       this.appVersion,
-                                      this.groupId,
                                       this.appProperties,
                                       this.otherCloudHubProperties,
                                       this.analyticsAgentEnabled)

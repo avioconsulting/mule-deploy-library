@@ -23,7 +23,7 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
     /**
      * CloudHub specs
      */
-    final CloudhubV2WorkerSpecRequest workerSpecRequest
+    final CloudhubWorkerV2SpecRequest workerSpecRequest
     /**
      * The file to deploy. The name of this file will also be used for the Runtime Manager settings pane
      */
@@ -62,12 +62,6 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     final String appVersion
 
-    /**
-     * Version of the app you are deploying (e.g. <version> from the POM). This parameter is optional and if it's not supplied
-     * then it will be derived from the <version> parameter in the project's POM based on the JAR/ZIP
-     */
-    final String groupId
-
     /***
      * Sets anypoint.platform.config.analytics.agent.enabled to true in CH props
      * False by default
@@ -80,7 +74,7 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
      * Construct a "standard" request. See properties for parameter info.
      */
     CloudhubV2DeploymentRequest(String environment,
-                                CloudhubV2WorkerSpecRequest workerSpecRequest,
+                                CloudhubWorkerV2SpecRequest workerV2SpecRequest,
                                 File file,
                                 String cryptoKey,
                                 String anypointClientId,
@@ -88,7 +82,6 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
                                 String cloudHubAppPrefix,
                                 String appName = null,
                                 String appVersion = null,
-                                String groupId = null,
                                 Map<String, String> appProperties = [:],
                                 Map<String, String> otherCloudHubProperties = [:],
                                 boolean analyticsAgentEnabled = true) {
@@ -96,8 +89,16 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
         this.environment = environment
         this.appName = appName ?: parsedPomProperties.artifactId
         this.appVersion = appVersion ?: parsedPomProperties.version
-        this.groupId = groupId ?: parsedPomProperties.groupId
-        this.workerSpecRequest = workerSpecRequest
+        if (!workerV2SpecRequest.muleVersion) {
+            def propertyToUse = mule4Request ? 'app.runtime' : 'mule.version'
+            def rawVersion = parsedPomProperties.props[propertyToUse]
+            // Studio will modify some projects with 4.2.2-hf2. The -hf2 part is meaningless to CloudHub
+            // because it's done in the form of update IDs. It's better to just remove it
+            rawVersion = rawVersion.split('-')[0]
+            this.workerSpecRequest = workerV2SpecRequest.withNewMuleVersion(rawVersion)
+        } else {
+            this.workerSpecRequest = workerV2SpecRequest
+        }
         this.cryptoKey = cryptoKey
         this.anypointClientId = anypointClientId
         this.anypointClientSecret = anypointClientSecret
@@ -144,42 +145,27 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
         props += this.autoDiscoveries
         def result = [
                 // CloudHub's API calls the Mule application the 'domain'
-                application: [
-                    ref: [
-                        groupId: groupId,
-                        artifactId : appName,
-                        version: appVersion,
-                        packaging: "jar"
-                    ],
-                    desiredState: "STARTED",
-                    configuration: [
-                        "mule.agent.application.properties.service": [
-                            applicationName: appName
-                        ]
-                    ],
-                    "vCores": workerSpecRequest.replicaSize
+                domain                   : normalizedAppName,
+                muleVersion              : workerSpecRequest.versionInfo,
+                region                   : workerSpecRequest.awsRegion?.awsCode,
+                monitoringAutoRestart    : true,
+                workers                  : [
+                        type  : [
+                                name: workerSpecRequest.workerType.toString()
+                        ],
+                        amount: workerSpecRequest.workerCount
                 ],
-                target: [
-                    targetId: workerSpecRequest.target,
-                    provider: "MC",
-                    deploymentSettings: [
-                        runtimeVersion: workerSpecRequest.muleVersion,
-                        lastMileSecurity: workerSpecRequest.lastMileSecurity,
-                        persistentObjectStore: workerSpecRequest.persistentObjectStore,
-                        clustered: workerSpecRequest.clustered,
-                        updateStrategy: workerSpecRequest.updateStrategy,
-                        enforceDeployingReplicasAcrossNodes: workerSpecRequest.replicasAcrossNodes,
-                        forwardSslSession: workerSpecRequest.forwardSslSession,
-                        disableAmLogForwarding: workerSpecRequest.forwardSslSession,
-                        generateDefaultPublicUrl: workerSpecRequest.publicURL
-                    ],
-                    replicas: workerSpecRequest.replicas
-                ],
+                staticIPsEnabled         : workerSpecRequest.staticIpEnabled,
+                loggingCustomLog4JEnabled: workerSpecRequest.customLog4j2Enabled,
+                objectStoreV1            : !workerSpecRequest.objectStoreV2Enabled,
+                persistentQueues         : workerSpecRequest.usePersistentQueues,
                 // these are the actual properties in the 'Settings' tab
                 properties               : props
-
-
         ] as Map<String, String>
+        if (!result.region) {
+            // use default/runtime manager region
+            result.remove('region')
+        }
         if (otherCloudHubProperties.containsKey('properties')) {
             otherCloudHubProperties.properties = props + otherCloudHubProperties.properties
         }

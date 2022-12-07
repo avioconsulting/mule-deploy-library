@@ -27,7 +27,7 @@ class MuleDeployContext extends BaseContext {
     }
 
     private boolean isCloudHubV2Set() {
-        hasFieldBeenSet('cloudHub2Application')
+        hasFieldBeenSet('cloudHubV2Application')
     }
 
     private boolean isOnPremSet() {
@@ -73,7 +73,7 @@ class MuleDeployContext extends BaseContext {
                     cloudHubApplication.createDeploymentRequest() :
                     onPremApplication.createDeploymentRequest()
         } else if (cloudHubV2Set) {
-            deploymentRequest = cloudHubV2Application.createDeploymentRequest()
+            deploymentRequest = cloudHubV2Application.createV2DeploymentRequest()
         } else {
             deploymentRequest = cloudHubV2Set ?
                     cloudHubApplication.createDeploymentRequest() :

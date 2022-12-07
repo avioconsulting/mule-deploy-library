@@ -1,10 +1,10 @@
 package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.deployment.api.models.AwsRegions
-import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
+import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerV2SpecRequest
 import com.avioconsulting.mule.deployment.api.models.WorkerTypes
 
-class WorkerSpecContext extends BaseContext {
+class WorkerSpecV2Context extends BaseContext {
     String muleVersion, updateId
     boolean usePersistentQueues, customLog4j2Enabled, staticIpEnabled
     boolean objectStoreV2Enabled = true
@@ -12,8 +12,8 @@ class WorkerSpecContext extends BaseContext {
     int workerCount = 1
     AwsRegions awsRegion
 
-    CloudhubWorkerSpecRequest createRequest() {
-        new CloudhubWorkerSpecRequest(this.muleVersion,
+    CloudhubWorkerV2SpecRequest createRequest() {
+        new CloudhubWorkerV2SpecRequest(this.muleVersion,
                                       this.usePersistentQueues,
                                       this.workerCount,
                                       this.workerType,
