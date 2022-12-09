@@ -43,11 +43,13 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
 
     def deploy(CloudhubV2DeploymentRequest deploymentRequest) {
         def existingAppStatus = getAppStatus(deploymentRequest.environment,
+                                             deploymentRequest.groupId,
                                              deploymentRequest.normalizedAppName)
         def request = getDeploymentHttpRequest(existingAppStatus.getAppStatus(),
                                                deploymentRequest)
         doDeployment(request,
                      deploymentRequest)
+
         if ([AppStatus.Undeployed, AppStatus.Failed].contains(existingAppStatus.appStatus)) {
             if (dryRunMode != DryRunMode.Run) {
                 logger.println "Since existing app was in '${existingAppStatus}' status before the deployment we just did, we WOULD start the app manually but we're in dry run mode"
@@ -69,14 +71,15 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
                                                                     CloudhubV2DeploymentRequest deploymentRequest) {
         def appName = deploymentRequest.normalizedAppName
         def fileName = deploymentRequest.file.name
+        def groupId = deploymentRequest.groupId
         HttpEntityEnclosingRequestBase request
-        if (existingAppStatus == AppStatus.NotFound) {
+        /*if (existingAppStatus == AppStatus.NotFound) {
             logger.println "Deploying '${appName}', ${fileName} as a NEW application"
-            request = new HttpPost("${clientWrapper.baseUrl}/cloudhub/api/v2/applications")
+            request = new HttpPost("${clientWrapper.baseUrl}/amc/application-manager/api/v2/organizations/${groupId}/environments/c06ef9b7-19c0-4e87-add9-60ed58b20aad/deployments")
         } else {
             logger.println "Deploying '${appName}', ${fileName} as an UPDATED application"
             request = new HttpPut("${clientWrapper.baseUrl}/cloudhub/api/v2/applications/${appName}")
-        }
+        }*/
         request
     }
 
@@ -178,20 +181,20 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
     }
 
     AppStatusPackage getAppStatus(String environmentName,
+                                  String groupId,
                                   String appName) {
-        def request = new HttpGet("${clientWrapper.baseUrl}/cloudhub/api/v2/applications/${appName}").with {
-            addStandardStuff(it,
-                             environmentName)
-            it
-        } as HttpGet
+        def envId = environmentLocator.getEnvironmentId(environmentName)
+        def request = new HttpGet("${clientWrapper.baseUrl}/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments")
         def response = clientWrapper.execute(request)
+        def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
+                "Error retrieving applications. Chek if the groupId (${groupId}) and environment (${environmentName}) provided are correct")
+        def apps = result.items.collectEntries { app ->
+            [app.name, app.id]
+        }
         try {
-            if (response.statusLine.statusCode == 404) {
-                return new AppStatusPackage(AppStatus.NotFound,
-                                            null)
+            if (apps[appName] == null) {
+                return new AppStatusPackage(AppStatus.NotFound,null)
             }
-            def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
-                                                                             'check app status')
             def mapper = new AppStatusMapper()
             return mapper.parseAppStatus(result)
         }

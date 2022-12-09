@@ -2,31 +2,37 @@ package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.deployment.api.models.AwsRegions
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerV2SpecRequest
+import com.avioconsulting.mule.deployment.api.models.UpdateStrategies
+import com.avioconsulting.mule.deployment.api.models.VCoresSize
 import com.avioconsulting.mule.deployment.api.models.WorkerTypes
 
 class WorkerSpecV2Context extends BaseContext {
-    String muleVersion, updateId
-    boolean usePersistentQueues, customLog4j2Enabled, staticIpEnabled
-    boolean objectStoreV2Enabled = true
-    WorkerTypes workerType = WorkerTypes.Micro
+    String muleVersion, target
+    boolean lastMileSecurity = false
+    boolean persistentObjectStore = false
+    boolean clustered = false
+    UpdateStrategies updateStrategy = UpdateStrategies.rolling
+    boolean replicasAcrossNodes = false
+    String publicURL = null
+    VCoresSize replicaSize = VCoresSize.vCore1GB
     int workerCount = 1
-    AwsRegions awsRegion
 
     CloudhubWorkerV2SpecRequest createRequest() {
-        new CloudhubWorkerV2SpecRequest(this.muleVersion,
-                                      this.usePersistentQueues,
-                                      this.workerCount,
-                                      this.workerType,
-                                      this.awsRegion,
-                                      this.updateId,
-                                      this.customLog4j2Enabled,
-                                      this.staticIpEnabled,
-                                      this.objectStoreV2Enabled)
+        new CloudhubWorkerV2SpecRequest(this.target,
+                                        this.muleVersion,
+                                        this.lastMileSecurity,
+                                        this.persistentObjectStore,
+                                        this.clustered,
+                                        this.updateStrategy,
+                                        this.replicasAcrossNodes,
+                                        this.publicURL,
+                                        this.replicaSize,
+                                        this.workerCount)
     }
 
     @Override
     List<String> findOptionalProperties() {
-        ['muleVersion', 'awsRegion', 'updateId', 'customLog4j2Enabled', 'staticIpEnabled', 'objectStoreV2Enabled']
+        ['muleVersion', 'lastMileSecurity', 'persistentObjectStore', 'clustered', 'updateStrategy', 'replicasAcrossNodes', 'publicURL', 'replicaSize', 'workerCount']
     }
 
     /***

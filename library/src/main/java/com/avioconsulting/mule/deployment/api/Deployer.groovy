@@ -62,6 +62,7 @@ class Deployer implements IDeployer {
                      List<String> environmentsToDoDesignCenterDeploymentOn,
                      EnvironmentLocator environmentLocator = null,
                      ICloudHubDeployer cloudHubDeployer = null,
+                     ICloudHubV2Deployer cloudHubV2Deployer = null,
                      IOnPremDeployer onPremDeployer = null,
                      IDesignCenterDeployer designCenterDeployer = null,
                      IApiManagerDeployer apiManagerDeployer = null,
@@ -76,10 +77,10 @@ class Deployer implements IDeployer {
                                                                          this.environmentLocator,
                                                                          logger,
                                                                          dryRunMode)
-        this.cloudHubV2Deployer = new CloudHubV2Deployer(this.clientWrapper,
-                                                         this.environmentLocator,
-                                                         logger,
-                                                         dryRunMode)
+        this.cloudHubV2Deployer = cloudHubV2Deployer ?: new CloudHubV2Deployer(this.clientWrapper,
+                                                                               this.environmentLocator,
+                                                                               logger,
+                                                                               dryRunMode)
         this.onPremDeployer = onPremDeployer ?: new OnPremDeployer(this.clientWrapper,
                                                                    this.environmentLocator,
                                                                    logger,

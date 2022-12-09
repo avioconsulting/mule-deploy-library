@@ -11,80 +11,94 @@ class CloudhubWorkerV2SpecRequest {
      */
     final String muleVersion
 
-    /**
-     * The "in-between" CloudHub version ID. https://anypoint.mulesoft.com/cloudhub/api/mule-versions will give you options
+    /***
+     * Enable Last-Mile security to forward HTTPS connections to be decrypted by this application.
+     * This requires an SSL certificate to be included in the Mule ap. Defaults to false.
      */
-    final String updateId
-
-    /**
-     * If you want to use the log4j2.xml file in your app. This requires support portal interaction to use if you
-     * have not done it already
-     * https://docs.mulesoft.com/runtime-manager/custom-log-appender
-     * False by default
-     */
-    final boolean customLog4j2Enabled
+    final boolean lastMileSecurity
 
     /***
-     * If your app needs a public static IP (internal/VPC static IPs are not supported)
-     * False by default
+     * Enables clustering across two or more replicas of the application. Defaults to false.
      */
-    final boolean staticIpEnabled
+    final boolean persistentObjectStore
 
     /***
-     * Use object store v2 (true by default)
+     * Use persistent ObjectStore. Defaults to false.
      */
-    final boolean objectStoreV2Enabled
+    final boolean clustered
 
     /***
-     * Only affects VM usage in your app, has nothing to do with Anypoint MQ. Defaults to false.
+     * rolling: Maintains availability by updating replicas incrementally.
+     * recreate: Terminates replicas before re-deployment. Defaults to rolling.
      */
-    final boolean usePersistentQueues
+    final UpdateStrategies updateStrategy
+
+    /***
+     * Enforces the deployment of replicas across different nodes. Defaults to false.
+     */
+    final boolean replicasAcrossNodes
+
+    /***
+     * Enables SSL forwarding during a session. Defaults to false.
+     */
+    final boolean forwardSslSession
+
+    /***
+     * URL of the deployed application.
+     */
+    final String publicURL
+
     /***
      * How big of a worker to use
      */
-    final WorkerTypes workerType
+    final VCoresSize replicaSize
+
     /***
      * How many workers, defaults to 1
      */
     final int workerCount
+
     /**
      * by default will use what's configured in Runtime Manager if you don't supply one
      */
-    final AwsRegions awsRegion
+    final String target
 
     /***
      * Standard request, see properties for parameter info.
      */
-    CloudhubWorkerV2SpecRequest(String muleVersion = null,
-                                boolean usePersistentQueues = false,
-                                int workerCount = 1,
-                                WorkerTypes workerType = WorkerTypes.Micro,
-                                AwsRegions awsRegion = null,
-                                String updateId = null,
-                                boolean customLog4j2Enabled = false,
-                                boolean staticIpEnabled = false,
-                                boolean objectStoreV2Enabled = true) {
+    CloudhubWorkerV2SpecRequest(String target,
+                                String muleVersion = null,
+                                boolean lastMileSecurity = false,
+                                boolean persistentObjectStore = false,
+                                boolean clustered = false,
+                                UpdateStrategies updateStrategy = UpdateStrategies.rolling,
+                                boolean replicasAcrossNodes = false,
+                                String publicURL = null,
+                                VCoresSize replicaSize = VCoresSize.vCore1GB,
+                                int workerCount = 1) {
         this.muleVersion = muleVersion
-        this.usePersistentQueues = usePersistentQueues
-        this.workerType = workerType
+        this.lastMileSecurity = lastMileSecurity
+        this.persistentObjectStore = persistentObjectStore
+        this.clustered = clustered
+        this.updateStrategy = updateStrategy
+        this.replicasAcrossNodes = replicasAcrossNodes
+        this.publicURL = publicURL
+        this.replicaSize = replicaSize
         this.workerCount = workerCount
-        this.awsRegion = awsRegion
-        this.updateId = updateId
-        this.customLog4j2Enabled = customLog4j2Enabled
-        this.staticIpEnabled = staticIpEnabled
-        this.objectStoreV2Enabled = objectStoreV2Enabled
+        this.target = target
     }
 
     CloudhubWorkerV2SpecRequest withNewMuleVersion(String newMuleVersion) {
-        new CloudhubWorkerV2SpecRequest(newMuleVersion,
-                                      usePersistentQueues,
-                                      workerCount,
-                                      workerType,
-                                      awsRegion,
-                                      updateId,
-                                      customLog4j2Enabled,
-                                      staticIpEnabled,
-                                      objectStoreV2Enabled)
+        new CloudhubWorkerV2SpecRequest(target,
+                                        newMuleVersion,
+                                        lastMileSecurity,
+                                        persistentObjectStore,
+                                        clustered,
+                                        updateStrategy,
+                                        replicasAcrossNodes,
+                                        publicURL,
+                                        replicaSize,
+                                        workerCount)
     }
 
     Map<String, String> getVersionInfo() {

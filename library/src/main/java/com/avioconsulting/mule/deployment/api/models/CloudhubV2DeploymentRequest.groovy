@@ -62,6 +62,12 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     final String appVersion
 
+    /**
+     * Version of the app you are deploying (e.g. <version> from the POM). This parameter is optional and if it's not supplied
+     * then it will be derived from the <version> parameter in the project's POM based on the JAR/ZIP
+     */
+    final String groupId
+
     /***
      * Sets anypoint.platform.config.analytics.agent.enabled to true in CH props
      * False by default
@@ -89,6 +95,7 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
         this.environment = environment
         this.appName = appName ?: parsedPomProperties.artifactId
         this.appVersion = appVersion ?: parsedPomProperties.version
+        this.groupId = groupId ?: parsedPomProperties.groupId
         if (!workerV2SpecRequest.muleVersion) {
             def propertyToUse = mule4Request ? 'app.runtime' : 'mule.version'
             def rawVersion = parsedPomProperties.props[propertyToUse]
@@ -145,20 +152,37 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
         props += this.autoDiscoveries
         def result = [
                 // CloudHub's API calls the Mule application the 'domain'
-                domain                   : normalizedAppName,
-                muleVersion              : workerSpecRequest.versionInfo,
-                region                   : workerSpecRequest.awsRegion?.awsCode,
-                monitoringAutoRestart    : true,
-                workers                  : [
-                        type  : [
-                                name: workerSpecRequest.workerType.toString()
+                application: [
+                        ref: [
+                                groupId: groupId,
+                                artifactId : appName,
+                                version: appVersion,
+                                packaging: "jar"
                         ],
-                        amount: workerSpecRequest.workerCount
+                        desiredState: "STARTED",
+                        configuration: [
+                                "mule.agent.application.properties.service": [
+                                        applicationName: appName
+                                ]
+                        ],
+                        "vCores": workerSpecRequest.replicaSize
                 ],
-                staticIPsEnabled         : workerSpecRequest.staticIpEnabled,
-                loggingCustomLog4JEnabled: workerSpecRequest.customLog4j2Enabled,
-                objectStoreV1            : !workerSpecRequest.objectStoreV2Enabled,
-                persistentQueues         : workerSpecRequest.usePersistentQueues,
+                target: [
+                        targetId: workerSpecRequest.target,
+                        provider: "MC",
+                        deploymentSettings: [
+                                runtimeVersion: workerSpecRequest.muleVersion,
+                                lastMileSecurity: workerSpecRequest.lastMileSecurity,
+                                persistentObjectStore: workerSpecRequest.persistentObjectStore,
+                                clustered: workerSpecRequest.clustered,
+                                updateStrategy: workerSpecRequest.updateStrategy,
+                                enforceDeployingReplicasAcrossNodes: workerSpecRequest.replicasAcrossNodes,
+                                forwardSslSession: workerSpecRequest.forwardSslSession,
+                                disableAmLogForwarding: workerSpecRequest.forwardSslSession,
+                                generateDefaultPublicUrl: workerSpecRequest.publicURL
+                        ],
+                        replicas: workerSpecRequest.workerCount
+                ],
                 // these are the actual properties in the 'Settings' tab
                 properties               : props
         ] as Map<String, String>
