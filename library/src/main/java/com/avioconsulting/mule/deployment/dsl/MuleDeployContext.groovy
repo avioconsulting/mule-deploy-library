@@ -69,15 +69,11 @@ class MuleDeployContext extends BaseContext {
         FileBasedAppDeploymentRequest deploymentRequest;
 
         if (cloudHubSet) {
-            deploymentRequest = cloudHubSet ?
-                    cloudHubApplication.createDeploymentRequest() :
-                    onPremApplication.createDeploymentRequest()
+            deploymentRequest = cloudHubApplication.createDeploymentRequest()
         } else if (cloudHubV2Set) {
             deploymentRequest = cloudHubV2Application.createV2DeploymentRequest()
         } else {
-            deploymentRequest = cloudHubV2Set ?
-                    cloudHubApplication.createDeploymentRequest() :
-                    onPremApplication.createDeploymentRequest()
+            deploymentRequest = onPremApplication.createDeploymentRequest()
         }
         return new DeploymentPackage(deploymentRequest,
                                      apiSpecifications.createApiSpecList(deploymentRequest),
