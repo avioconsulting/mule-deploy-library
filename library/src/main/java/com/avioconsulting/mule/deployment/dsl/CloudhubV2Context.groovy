@@ -21,7 +21,8 @@ class CloudhubV2Context extends BaseContext {
             def errorList = errors.join('\n')
             throw new Exception("Your deployment request is not complete. The following errors exist:\n${errorList}")
         }
-        new CloudhubV2DeploymentRequest(this.environment,
+        new CloudhubV2DeploymentRequest(this.workerSpecs.target,
+                                      this.environment,
                                       specs.createRequest(),
                                       new File(this.file),
                                       this.cryptoKey,

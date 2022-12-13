@@ -44,9 +44,9 @@ class CloudhubWorkerV2SpecRequest {
     final boolean forwardSslSession
 
     /***
-     * URL of the deployed application.
+     * When this parameter is set to true, CloudHub 2.0 generates a public URL for the deployed application. Default to false
      */
-    final String publicURL
+    final boolean publicURL
 
     /***
      * How big of a worker to use
@@ -59,7 +59,8 @@ class CloudhubWorkerV2SpecRequest {
     final int workerCount
 
     /**
-     * by default will use what's configured in Runtime Manager if you don't supply one
+     * The CloudHub 2.0 target name to deploy the app to.
+     * Specify either a shared space or a private space available in your Deployment Target values in CloudHub 2.0
      */
     final String target
 
@@ -73,7 +74,7 @@ class CloudhubWorkerV2SpecRequest {
                                 boolean clustered = false,
                                 UpdateStrategies updateStrategy = UpdateStrategies.rolling,
                                 boolean replicasAcrossNodes = false,
-                                String publicURL = null,
+                                boolean publicURL = false,
                                 VCoresSize replicaSize = VCoresSize.vCore1GB,
                                 int workerCount = 1) {
         this.muleVersion = muleVersion

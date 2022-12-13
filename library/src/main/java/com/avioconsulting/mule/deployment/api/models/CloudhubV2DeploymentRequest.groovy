@@ -74,12 +74,24 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     final boolean analyticsAgentEnabled
 
+    /**
+     * The CloudHub 2.0 target name to deploy the app to.
+     * Specify either a shared space or a private space available in your Deployment Target values in CloudHub 2.0
+     */
+    final String target
+
+    /**
+     * Id of target based on the target name
+     */
+    String targetId
+
     private CloudhubAppProperties cloudhubAppProperties
 
     /**
      * Construct a "standard" request. See properties for parameter info.
      */
-    CloudhubV2DeploymentRequest(String environment,
+    CloudhubV2DeploymentRequest(String target,
+                                String environment,
                                 CloudhubWorkerV2SpecRequest workerV2SpecRequest,
                                 File file,
                                 String cryptoKey,
@@ -96,6 +108,7 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
         this.appName = appName ?: parsedPomProperties.artifactId
         this.appVersion = appVersion ?: parsedPomProperties.version
         this.groupId = groupId ?: parsedPomProperties.groupId
+        this.target = target
         if (!workerV2SpecRequest.muleVersion) {
             def propertyToUse = mule4Request ? 'app.runtime' : 'mule.version'
             def rawVersion = parsedPomProperties.props[propertyToUse]
@@ -134,15 +147,9 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
     HttpEntity getHttpPayload() {
         MultipartEntityBuilder.create()
                 .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
-        // without autoStart, the app won't actually start after we push this request out
-                .addTextBody('autoStart',
-                             'true')
                 .addTextBody('appInfoJson',
-                             cloudhubAppInfoAsJson)
-                .addBinaryBody('file',
-                               this.file,
-                               ContentType.APPLICATION_OCTET_STREAM,
-                               this.file.name)
+                             cloudhubAppInfoAsJson,
+                             ContentType.APPLICATION_JSON)
                 .build()
     }
 
@@ -151,7 +158,8 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
                                                     Map)
         props += this.autoDiscoveries
         def result = [
-                // CloudHub's API calls the Mule application the 'domain'
+                // CloudHub's v2 API calls the Mule application the 'domain'
+                name: appName,
                 application: [
                         ref: [
                                 groupId: groupId,
@@ -165,10 +173,10 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
                                         applicationName: appName
                                 ]
                         ],
-                        "vCores": workerSpecRequest.replicaSize
+                        "vCores": workerSpecRequest.replicaSize.vCoresSize
                 ],
                 target: [
-                        targetId: workerSpecRequest.target,
+                        targetId: targetId,
                         provider: "MC",
                         deploymentSettings: [
                                 runtimeVersion: workerSpecRequest.muleVersion,
@@ -177,28 +185,24 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
                                 clustered: workerSpecRequest.clustered,
                                 updateStrategy: workerSpecRequest.updateStrategy,
                                 enforceDeployingReplicasAcrossNodes: workerSpecRequest.replicasAcrossNodes,
+                                http: [
+                                    inbound: {}
+                                ],
                                 forwardSslSession: workerSpecRequest.forwardSslSession,
                                 disableAmLogForwarding: workerSpecRequest.forwardSslSession,
                                 generateDefaultPublicUrl: workerSpecRequest.publicURL
                         ],
                         replicas: workerSpecRequest.workerCount
-                ],
-                // these are the actual properties in the 'Settings' tab
-                properties               : props
+                ]
         ] as Map<String, String>
-        if (!result.region) {
-            // use default/runtime manager region
-            result.remove('region')
-        }
-        if (otherCloudHubProperties.containsKey('properties')) {
-            otherCloudHubProperties.properties = props + otherCloudHubProperties.properties
-        }
-        def appInfo = result + otherCloudHubProperties
-        appInfo.properties = appInfo.properties + appProperties
-        appInfo
+        result
     }
 
     String getCloudhubAppInfoAsJson() {
         JsonOutput.toJson(cloudhubAppInfo)
+    }
+
+    void setTargetId(String targetId) {
+        this.targetId = targetId
     }
 }

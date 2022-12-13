@@ -42,49 +42,43 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
     }
 
     def deploy(CloudhubV2DeploymentRequest deploymentRequest) {
-        def existingAppStatus = getAppStatus(deploymentRequest.environment,
-                                             deploymentRequest.groupId,
-                                             deploymentRequest.normalizedAppName)
-        def request = getDeploymentHttpRequest(existingAppStatus.getAppStatus(),
-                                               deploymentRequest)
-        doDeployment(request,
-                     deploymentRequest)
-
-        if ([AppStatus.Undeployed, AppStatus.Failed].contains(existingAppStatus.appStatus)) {
-            if (dryRunMode != DryRunMode.Run) {
-                logger.println "Since existing app was in '${existingAppStatus}' status before the deployment we just did, we WOULD start the app manually but we're in dry run mode"
-            } else {
-                logger.println "Since existing app was in '${existingAppStatus}' status before the deployment we just did, we will now try and start the app manually"
-                startApplication(deploymentRequest.environment,
-                                 deploymentRequest.normalizedAppName)
-            }
-        }
+        deploymentRequest.setTargetId(getTargetId(deploymentRequest.target))
+        doDeployment(deploymentRequest)
         if (dryRunMode != DryRunMode.Run) {
             return
         }
         waitForAppToStart(deploymentRequest.environment,
                           deploymentRequest.normalizedAppName,
-                          existingAppStatus)
+                          null)
     }
 
-    private HttpEntityEnclosingRequestBase getDeploymentHttpRequest(AppStatus existingAppStatus,
-                                                                    CloudhubV2DeploymentRequest deploymentRequest) {
-        def appName = deploymentRequest.normalizedAppName
-        def fileName = deploymentRequest.file.name
+    def getTargetId(String targetName) {
+        logger.println('Fetching all available targets')
+        def groupId = clientWrapper.anypointOrganizationId
+        def request = new HttpGet("${clientWrapper.baseUrl}/runtimefabric/api/organizations/${groupId}/targets")
+        def response = clientWrapper.execute(request)
+        try {
+            def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
+                    "Unable to retrieve targets. Please ensure your org ID (${groupId}) is correct and the credentials you are using have the right permissions.)")
+            def targets = result.collectEntries { target ->
+                [target.name, target.id]
+            }
+            def target = targets[targetName]
+            if (!target) {
+                def valids = targets.keySet()
+                throw new Exception("Unable to find target '${targetName}'. Valid targets are ${valids}")
+            }
+            return target
+        }
+        finally {
+            response.close()
+        }
+    }
+
+    private def doDeployment(CloudhubV2DeploymentRequest deploymentRequest) {
+        def envId = environmentLocator.getEnvironmentId(deploymentRequest.environment)
         def groupId = deploymentRequest.groupId
-        HttpEntityEnclosingRequestBase request
-        /*if (existingAppStatus == AppStatus.NotFound) {
-            logger.println "Deploying '${appName}', ${fileName} as a NEW application"
-            request = new HttpPost("${clientWrapper.baseUrl}/amc/application-manager/api/v2/organizations/${groupId}/environments/c06ef9b7-19c0-4e87-add9-60ed58b20aad/deployments")
-        } else {
-            logger.println "Deploying '${appName}', ${fileName} as an UPDATED application"
-            request = new HttpPut("${clientWrapper.baseUrl}/cloudhub/api/v2/applications/${appName}")
-        }*/
-        request
-    }
-
-    private def doDeployment(HttpEntityEnclosingRequestBase request,
-                             CloudhubV2DeploymentRequest deploymentRequest) {
+        def request = new HttpPost("${clientWrapper.baseUrl}/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments")
         def prettyJson = JsonOutput.prettyPrint(deploymentRequest.cloudhubAppInfoAsJson)
         if (dryRunMode != DryRunMode.Run) {
             logger.println "WOULD deploy using settings but in dry-run mode: ${prettyJson}"
@@ -92,6 +86,7 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
         }
         logger.println "Deploying using settings: ${prettyJson}"
         request = request.with {
+            setHeader('Content-Type', 'application/json')
             addStandardStuff(it,
                              deploymentRequest.environment)
             def entity = deploymentRequest.getHttpPayload()
