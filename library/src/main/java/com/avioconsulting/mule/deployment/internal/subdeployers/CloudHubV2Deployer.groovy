@@ -6,7 +6,7 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubV2DeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
-import com.avioconsulting.mule.deployment.internal.models.AppStatusPackage
+import com.avioconsulting.mule.deployment.internal.models.DeploymentItem
 import com.avioconsulting.mule.deployment.internal.models.DeploymentUpdateStatus
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.*
@@ -14,6 +14,7 @@ import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 
 class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
+
     CloudHubV2Deployer(HttpClientWrapper clientWrapper,
                        EnvironmentLocator environmentLocator,
                        ILogger logger,
@@ -42,14 +43,20 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
     }
 
     def deploy(CloudhubV2DeploymentRequest deploymentRequest) {
-        deploymentRequest.setTargetId(getTargetId(deploymentRequest.target))
-        doDeployment(deploymentRequest)
+        def envId = environmentLocator.getEnvironmentId(deploymentRequest.environment)
+        def groupId = deploymentRequest.groupId
+        def appName = deploymentRequest.appName
+        def targetId = getTargetId(deploymentRequest.target)
+        deploymentRequest.setTargetId(targetId)
+
+        DeploymentItem appInfo = getAppInfo(envId, groupId, appName)
+
+        doDeployment(deploymentRequest, envId)
+
         if (dryRunMode != DryRunMode.Run) {
             return
         }
-        waitForAppToStart(deploymentRequest.environment,
-                          deploymentRequest.normalizedAppName,
-                          null)
+        waitForAppToStart(envId, groupId, appName)
     }
 
     def getTargetId(String targetName) {
@@ -75,9 +82,22 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
         }
     }
 
-    private def doDeployment(CloudhubV2DeploymentRequest deploymentRequest) {
-        def envId = environmentLocator.getEnvironmentId(deploymentRequest.environment)
+    private def doDeployment(CloudhubV2DeploymentRequest deploymentRequest, String envId) {
         def groupId = deploymentRequest.groupId
+        DeploymentItem appInfo = getAppInfo(envId, groupId, deploymentRequest.appName)
+
+        if (appInfo == null) {
+            logger.println "Starting new deployment for application '${deploymentRequest.appName}'."
+            createApp(deploymentRequest, envId, groupId)
+        } else {
+            logger.println "The name of the application '${deploymentRequest.appName}' is already used. Updating the application."
+            updateApp(deploymentRequest, appInfo, envId, groupId)
+        }
+    }
+
+    private def createApp(CloudhubV2DeploymentRequest deploymentRequest,
+                                  String envId,
+                                  String groupId) {
         def request = new HttpPost("${clientWrapper.baseUrl}/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments")
         def prettyJson = JsonOutput.prettyPrint(deploymentRequest.cloudhubAppInfoAsJson)
         if (dryRunMode != DryRunMode.Run) {
@@ -87,21 +107,37 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
         logger.println "Deploying using settings: ${prettyJson}"
         request = request.with {
             setHeader('Content-Type', 'application/json')
-            addStandardStuff(it,
-                             deploymentRequest.environment)
-            def entity = deploymentRequest.getHttpPayload()
-            setEntity(entity)
+            addStandardStuff(it, deploymentRequest.environment)
+            setEntity(new StringEntity(prettyJson))
             it
         }
         def response = clientWrapper.execute(request)
-        try {
-            def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
-                                                                             'deploy application')
-            logger.println("Application '${deploymentRequest.normalizedAppName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
+        def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,'deploy application')
+        logger.println("Application '${deploymentRequest.normalizedAppName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
+        response.close()
+    }
+
+    private def updateApp(CloudhubV2DeploymentRequest deploymentRequest,
+                          DeploymentItem appInfo,
+                          String envId,
+                          String groupId) {
+        def request = new HttpPatch("${clientWrapper.baseUrl}/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments/${appInfo.getId()}")
+        def prettyJson = JsonOutput.prettyPrint(deploymentRequest.cloudhubAppInfoAsJson)
+        if (dryRunMode != DryRunMode.Run) {
+            logger.println "WOULD deploy using settings but in dry-run mode: ${prettyJson}"
+            return
         }
-        finally {
-            response.close()
+        logger.println "Deploying using settings: ${prettyJson}"
+        request = request.with {
+            setHeader('Content-Type', 'application/json')
+            addStandardStuff(it, deploymentRequest.environment)
+            setEntity(new StringEntity(prettyJson))
+            it
         }
+        def response = clientWrapper.execute(request)
+        def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,'deploy application')
+        logger.println("Application '${deploymentRequest.normalizedAppName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
+        response.close()
     }
 
     def deleteApp(String environment,
@@ -122,9 +158,9 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
         }
     }
 
-    def waitForAppToStart(String environment,
-                          String appName,
-                          AppStatusPackage baselineStatus) {
+    def waitForAppToStart(String envId,
+                          String groupId,
+                          String appName) {
         logger.println 'Now will wait for application to start...'
         def tries = 0
         def deployed = false
@@ -137,32 +173,37 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
         while (!deployed && tries < this.maxTries) {
             tries++
             logger.println "*** Try ${tries} ***"
-            AppStatusPackage status
+            DeploymentItem status
             try {
-                status = getAppStatus(environment,
-                                      appName)
+                status = getAppInfo(envId,
+                                    groupId,
+                                    appName)
             } catch (e) {
                 logger.println("Caught exception ${e.message} while checking app status, will ignore and retry")
                 sleep()
                 continue
             }
-            logger.println "Current status is '${status}'"
-            if (status == baselineStatus && !hasBaselineStatusChanged) {
-                logger.println "We have not seen the baseline status change from '${baselineStatus}' so will keep checking"
-                sleep()
-                continue
-            } else if (status != baselineStatus && !hasBaselineStatusChanged) {
-                hasBaselineStatusChanged = true
-            }
-            if (status.appStatus == AppStatus.Started && status.deploymentUpdateStatus == null) {
-                logger.println 'App started successfully!'
-                deployed = true
-                break
-            }
-            if (status.appStatus == AppStatus.Failed || status.deploymentUpdateStatus == DeploymentUpdateStatus.Failed) {
-                failed = true
-                logger.println 'Deployment FAILED on 1 more nodes!'
-                break
+            if (status != null) {
+                logger.println "Current status is '${status.getAppStatus()}'"
+                if (status.getAppStatus() != "RUNNING" && !hasBaselineStatusChanged) {
+                    logger.println "We have not seen the baseline status change from '' so will keep checking"
+                    sleep()
+                    continue
+                } else if (status.getAppStatus() == "RUNNING" && !hasBaselineStatusChanged) {
+                    hasBaselineStatusChanged = true
+                }
+                if (status.getAppStatus() == "RUNNING") {
+                    logger.println 'App started successfully!'
+                    deployed = true
+                    break
+                }
+                if (status.appStatus == AppStatus.Failed || status.getAppStatus() == DeploymentUpdateStatus.Failed) {
+                    failed = true
+                    logger.println 'Deployment FAILED on 1 more nodes!'
+                    break
+                }
+            } else {
+                logger.println "Current status is 'UNKNOWN'"
             }
             logger.println 'Have not seen Started state yet'
             sleep()
@@ -175,23 +216,26 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
         }
     }
 
-    AppStatusPackage getAppStatus(String environmentName,
-                                  String groupId,
-                                  String appName) {
-        def envId = environmentLocator.getEnvironmentId(environmentName)
+    DeploymentItem getAppInfo(String envId,
+                              String groupId,
+                              String appName) {
         def request = new HttpGet("${clientWrapper.baseUrl}/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments")
         def response = clientWrapper.execute(request)
         def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
-                "Error retrieving applications. Chek if the groupId (${groupId}) and environment (${environmentName}) provided are correct")
-        def apps = result.items.collectEntries { app ->
-            [app.name, app.id]
-        }
+                "Error retrieving applications. Chek if the groupId (${groupId}) and environment (${envId}) provided are correct")
+
+        def apps = result.items.collectEntries { app -> [
+            app.name,
+            new DeploymentItem(app.id,
+                               app.name,
+                               app.status,
+                               app.application.status,
+                               app.target.id,
+                               app.target.provider)
+        ]}
+        def app = apps[appName]
         try {
-            if (apps[appName] == null) {
-                return new AppStatusPackage(AppStatus.NotFound,null)
-            }
-            def mapper = new AppStatusMapper()
-            return mapper.parseAppStatus(result)
+            return app
         }
         finally {
             response.close()
@@ -204,14 +248,13 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
         deploymentRequest.isMule4Request()
     }
 
-    def startApplication(String environment,
+    def startApplication(String envId,
                          String appName) {
         def request = new HttpPost("${clientWrapper.baseUrl}/cloudhub/api/applications/${appName}/status").with {
             def payload = [
                     status: 'start'
             ]
-            setHeader('X-ANYPNT-ENV-ID',
-                      environmentLocator.getEnvironmentId(environment))
+            setHeader('X-ANYPNT-ENV-ID', envId)
             setEntity(new StringEntity(JsonOutput.toJson(payload),
                                        ContentType.APPLICATION_JSON))
             it
