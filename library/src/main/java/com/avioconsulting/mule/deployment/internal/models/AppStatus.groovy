@@ -7,5 +7,13 @@ enum AppStatus {
     Failed,
     Started,
     NotFound,
-    Deleted
+    Deleted,
+    PartiallyStarted,
+    DeploymentFailed,
+    Starting,
+    Stopping,
+    Stopped,
+    Updated,
+    Applied,
+    Applying
 }

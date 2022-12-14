@@ -6,6 +6,7 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubV2DeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
+import com.avioconsulting.mule.deployment.internal.models.AppStatusPackage
 import com.avioconsulting.mule.deployment.internal.models.DeploymentItem
 import com.avioconsulting.mule.deployment.internal.models.DeploymentUpdateStatus
 import groovy.json.JsonOutput
@@ -50,13 +51,14 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
         deploymentRequest.setTargetId(targetId)
 
         DeploymentItem appInfo = getAppInfo(envId, groupId, appName)
+        AppStatusPackage appStatus = getAppStatus(appInfo)
 
         doDeployment(deploymentRequest, envId)
 
         if (dryRunMode != DryRunMode.Run) {
             return
         }
-        waitForAppToStart(envId, groupId, appName)
+        waitForAppToStart(envId, groupId, appName, appStatus)
     }
 
     def getTargetId(String targetName) {
@@ -160,7 +162,8 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
 
     def waitForAppToStart(String envId,
                           String groupId,
-                          String appName) {
+                          String appName,
+                          AppStatusPackage baselineStatus) {
         logger.println 'Now will wait for application to start...'
         def tries = 0
         def deployed = false
@@ -173,37 +176,35 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
         while (!deployed && tries < this.maxTries) {
             tries++
             logger.println "*** Try ${tries} ***"
-            DeploymentItem status
+            DeploymentItem appInfo
+            AppStatusPackage status
             try {
-                status = getAppInfo(envId,
-                                    groupId,
-                                    appName)
+                appInfo = getAppInfo(envId,
+                        groupId,
+                        appName)
+                status = getAppStatus(appInfo)
             } catch (e) {
                 logger.println("Caught exception ${e.message} while checking app status, will ignore and retry")
                 sleep()
                 continue
             }
-            if (status != null) {
-                logger.println "Current status is '${status.getAppStatus()}'"
-                if (status.getAppStatus() != "RUNNING" && !hasBaselineStatusChanged) {
-                    logger.println "We have not seen the baseline status change from '' so will keep checking"
-                    sleep()
-                    continue
-                } else if (status.getAppStatus() == "RUNNING" && !hasBaselineStatusChanged) {
-                    hasBaselineStatusChanged = true
-                }
-                if (status.getAppStatus() == "RUNNING") {
-                    logger.println 'App started successfully!'
-                    deployed = true
-                    break
-                }
-                if (status.appStatus == AppStatus.Failed || status.getAppStatus() == DeploymentUpdateStatus.Failed) {
-                    failed = true
-                    logger.println 'Deployment FAILED on 1 more nodes!'
-                    break
-                }
-            } else {
-                logger.println "Current status is 'UNKNOWN'"
+            logger.println "Current status is '${status}'"
+            if (status == baselineStatus && !hasBaselineStatusChanged) {
+                logger.println "We have not seen the baseline status change from '${baselineStatus}' so will keep checking"
+                sleep()
+                continue
+            } else if (status != baselineStatus && !hasBaselineStatusChanged) {
+                hasBaselineStatusChanged = true
+            }
+            if (status.appStatus == AppStatus.Applied && status.deploymentUpdateStatus == DeploymentUpdateStatus.Running) {
+                logger.println 'App started successfully!'
+                deployed = true
+                break
+            }
+            if (status.appStatus == AppStatus.Failed || status.appStatus == AppStatus.DeploymentFailed) {
+                failed = true
+                logger.println 'Deployment FAILED on 1 more nodes!'
+                break
             }
             logger.println 'Have not seen Started state yet'
             sleep()
@@ -240,6 +241,14 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
         finally {
             response.close()
         }
+    }
+
+    AppStatusPackage getAppStatus(DeploymentItem app) {
+        if (app == null) {
+            return new AppStatusPackage(AppStatus.NotFound, null)
+        }
+        def mapper = new AppStatusMapper()
+        return mapper.parseAppStatus([status: app.getStatus(), deploymentUpdateStatus: app.getAppStatus()])
     }
 
     @Override
