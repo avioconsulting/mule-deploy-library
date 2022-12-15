@@ -90,9 +90,8 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
     /**
      * Construct a "standard" request. See properties for parameter info.
      */
-    CloudhubV2DeploymentRequest(String target,
-                                String environment,
-                                CloudhubWorkerV2SpecRequest workerV2SpecRequest,
+    CloudhubV2DeploymentRequest(String environment,
+                                CloudhubWorkerV2SpecRequest workerSpecRequest,
                                 File file,
                                 String cryptoKey,
                                 String anypointClientId,
@@ -108,16 +107,16 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
         this.appName = appName ?: parsedPomProperties.artifactId
         this.appVersion = appVersion ?: parsedPomProperties.version
         this.groupId = groupId ?: parsedPomProperties.groupId
-        this.target = target
-        if (!workerV2SpecRequest.muleVersion) {
+        this.target = workerSpecRequest.target
+        if (!workerSpecRequest.muleVersion) {
             def propertyToUse = mule4Request ? 'app.runtime' : 'mule.version'
             def rawVersion = parsedPomProperties.props[propertyToUse]
             // Studio will modify some projects with 4.2.2-hf2. The -hf2 part is meaningless to CloudHub
             // because it's done in the form of update IDs. It's better to just remove it
             rawVersion = rawVersion.split('-')[0]
-            this.workerSpecRequest = workerV2SpecRequest.withNewMuleVersion(rawVersion)
+            this.workerSpecRequest = workerSpecRequest.withNewMuleVersion(rawVersion)
         } else {
-            this.workerSpecRequest = workerV2SpecRequest
+            this.workerSpecRequest = workerSpecRequest
         }
         this.cryptoKey = cryptoKey
         this.anypointClientId = anypointClientId

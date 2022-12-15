@@ -20,6 +20,7 @@ import static org.hamcrest.Matchers.*
 class DeployerTest {
     private Deployer deployer
     private List<CloudhubDeploymentRequest> deployedChApps
+    private List<CloudhubV2DeploymentRequest> deployedChV2Apps
     private List<OnPremDeploymentRequest> deployedOnPremApps
     private List<DesignCenterSync> designCenterSyncs
     private List<ApiSyncCalls> apiSyncs
@@ -47,6 +48,7 @@ class DeployerTest {
     @Before
     void cleanup() {
         deployedChApps = []
+        deployedChV2Apps = []
         deployedOnPremApps = []
         designCenterSyncs = []
         apiSyncs = []
@@ -78,6 +80,17 @@ class DeployerTest {
                     deploymentRequest.appName.contains('mule4')
                 }
         ] as ICloudHubDeployer
+        def mockCloudHubV2Deployer = [
+                deploy        : { CloudhubV2DeploymentRequest request ->
+                    if (failDeployment) {
+                        throw new Exception('something did not work')
+                    }
+                    deployedChApps << request
+                },
+                isMule4Request: { CloudhubV2DeploymentRequest deploymentRequest ->
+                    deploymentRequest.appName.contains('mule4')
+                }
+        ] as ICloudHubV2Deployer
         def mockOnPremDeployer = [
                 deploy        : { OnPremDeploymentRequest request ->
                     deployedOnPremApps << request
@@ -121,6 +134,7 @@ class DeployerTest {
                                 null,
                                 // shouldn't need this since we mock so much
                                 mockCloudHubDeployer,
+                                mockCloudHubV2Deployer,
                                 mockOnPremDeployer,
                                 mockDcDeployer,
                                 mockApiDeployer,
