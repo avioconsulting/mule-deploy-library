@@ -1,10 +1,10 @@
 package com.avioconsulting.mule.deployment.dsl
 
-import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerV2SpecRequest
+import com.avioconsulting.mule.deployment.api.models.CloudhubV2WorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.UpdateStrategy
 import com.avioconsulting.mule.deployment.api.models.VCoresSize
 
-class WorkerSpecV2Context extends BaseContext {
+class WorkerV2SpecContext extends BaseContext {
     String muleVersion, target
     boolean lastMileSecurity = false
     boolean persistentObjectStore = false
@@ -15,8 +15,8 @@ class WorkerSpecV2Context extends BaseContext {
     VCoresSize replicaSize = VCoresSize.vCore1GB
     int workerCount = 1
 
-    CloudhubWorkerV2SpecRequest createRequest() {
-        new CloudhubWorkerV2SpecRequest(this.target,
+    CloudhubV2WorkerSpecRequest createRequest() {
+        new CloudhubV2WorkerSpecRequest(this.target,
                                         this.muleVersion,
                                         this.lastMileSecurity,
                                         this.persistentObjectStore,

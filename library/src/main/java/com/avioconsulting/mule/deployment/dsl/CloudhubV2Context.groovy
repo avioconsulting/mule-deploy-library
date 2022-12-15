@@ -5,7 +5,7 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubV2DeploymentRequest
 class CloudhubV2Context extends BaseContext {
     String environment, applicationName, appVersion, file, cryptoKey, cloudHubAppPrefix
     // make API visualizer, etc. more easy by default
-    private WorkerSpecV2Context workerSpecs = new WorkerSpecV2Context()
+    private WorkerV2SpecContext workerSpecs = new WorkerV2SpecContext()
     private AutodiscoveryContext autoDiscovery = new AutodiscoveryContext()
     Map<String, String> appProperties = [:]
     Map<String, String> otherCloudHubProperties = [:]

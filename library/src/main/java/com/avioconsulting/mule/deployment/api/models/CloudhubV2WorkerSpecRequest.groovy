@@ -3,7 +3,7 @@ package com.avioconsulting.mule.deployment.api.models
 import groovy.transform.ToString
 
 @ToString
-class CloudhubWorkerV2SpecRequest {
+class CloudhubV2WorkerSpecRequest {
     /**
      * E.g. 4.2.2. This parameter is optional. If you do not supply it, then the deployer will derive it
      * by looking at POM properties, the <app.runtime> property for Mule 4 projects and <mule.version> for
@@ -67,7 +67,7 @@ class CloudhubWorkerV2SpecRequest {
     /***
      * Standard request, see properties for parameter info.
      */
-    CloudhubWorkerV2SpecRequest(String target,
+    CloudhubV2WorkerSpecRequest(String target,
                                 String muleVersion = null,
                                 boolean lastMileSecurity = false,
                                 boolean persistentObjectStore = false,
@@ -89,8 +89,8 @@ class CloudhubWorkerV2SpecRequest {
         this.target = target
     }
 
-    CloudhubWorkerV2SpecRequest withNewMuleVersion(String newMuleVersion) {
-        new CloudhubWorkerV2SpecRequest(target,
+    CloudhubV2WorkerSpecRequest withNewMuleVersion(String newMuleVersion) {
+        new CloudhubV2WorkerSpecRequest(target,
                                         newMuleVersion,
                                         lastMileSecurity,
                                         persistentObjectStore,
