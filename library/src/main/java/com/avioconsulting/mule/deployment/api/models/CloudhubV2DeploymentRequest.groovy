@@ -68,12 +68,6 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     final String groupId
 
-    /***
-     * Sets anypoint.platform.config.analytics.agent.enabled to true in CH props
-     * False by default
-     */
-    final boolean analyticsAgentEnabled
-
     /**
      * The CloudHub 2.0 target name to deploy the app to.
      * Specify either a shared space or a private space available in your Deployment Target values in CloudHub 2.0
@@ -100,8 +94,7 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
                                 String appName = null,
                                 String appVersion = null,
                                 Map<String, String> appProperties = [:],
-                                Map<String, String> otherCloudHubProperties = [:],
-                                boolean analyticsAgentEnabled = true) {
+                                Map<String, String> otherCloudHubProperties = [:]) {
         this.file = file
         this.environment = environment
         this.appName = appName ?: parsedPomProperties.artifactId
@@ -138,9 +131,7 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
                                                                cryptoKey,
                                                                anypointClientId,
                                                                anypointClientSecret,
-                                                               // only include prop if it's true
-                                                               analyticsAgentEnabled ? true : null)
-        this.analyticsAgentEnabled = analyticsAgentEnabled
+                                                               null)
     }
 
     HttpEntity getHttpPayload() {
