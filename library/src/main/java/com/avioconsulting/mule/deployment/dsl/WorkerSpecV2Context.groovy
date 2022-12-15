@@ -1,7 +1,7 @@
 package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerV2SpecRequest
-import com.avioconsulting.mule.deployment.api.models.UpdateStrategies
+import com.avioconsulting.mule.deployment.api.models.UpdateStrategy
 import com.avioconsulting.mule.deployment.api.models.VCoresSize
 
 class WorkerSpecV2Context extends BaseContext {
@@ -9,7 +9,7 @@ class WorkerSpecV2Context extends BaseContext {
     boolean lastMileSecurity = false
     boolean persistentObjectStore = false
     boolean clustered = false
-    UpdateStrategies updateStrategy = UpdateStrategies.rolling
+    UpdateStrategy updateStrategy = UpdateStrategy.rolling
     boolean replicasAcrossNodes = false
     boolean publicURL = false
     VCoresSize replicaSize = VCoresSize.vCore1GB

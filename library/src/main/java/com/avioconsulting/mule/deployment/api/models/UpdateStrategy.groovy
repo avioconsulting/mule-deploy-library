@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.api.models
 
-enum UpdateStrategies {
+enum UpdateStrategy {
     /**
      * 0.1 vCores
      */

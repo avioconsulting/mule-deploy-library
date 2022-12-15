@@ -31,7 +31,7 @@ class CloudhubWorkerV2SpecRequest {
      * rolling: Maintains availability by updating replicas incrementally.
      * recreate: Terminates replicas before re-deployment. Defaults to rolling.
      */
-    final UpdateStrategies updateStrategy
+    final UpdateStrategy updateStrategy
 
     /***
      * Enforces the deployment of replicas across different nodes. Defaults to false.
@@ -72,7 +72,7 @@ class CloudhubWorkerV2SpecRequest {
                                 boolean lastMileSecurity = false,
                                 boolean persistentObjectStore = false,
                                 boolean clustered = false,
-                                UpdateStrategies updateStrategy = UpdateStrategies.rolling,
+                                UpdateStrategy updateStrategy = UpdateStrategy.rolling,
                                 boolean replicasAcrossNodes = false,
                                 boolean publicURL = false,
                                 VCoresSize replicaSize = VCoresSize.vCore1GB,

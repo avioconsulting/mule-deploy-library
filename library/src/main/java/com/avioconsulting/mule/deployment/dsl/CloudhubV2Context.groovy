@@ -35,6 +35,6 @@ class CloudhubV2Context extends BaseContext {
 
     @Override
     List<String> findOptionalProperties() {
-        ['appVersion', 'applicationName', 'workerSpecs', 'analyticsAgentEnabled']
+        ['appVersion', 'applicationName']
     }
 }
