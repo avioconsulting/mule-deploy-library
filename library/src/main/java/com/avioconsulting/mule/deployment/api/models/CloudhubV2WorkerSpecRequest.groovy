@@ -44,6 +44,11 @@ class CloudhubV2WorkerSpecRequest {
     final boolean forwardSslSession
 
     /***
+     * Disables forwarding applications logs to Anypoint Monitoring.. Defaults to true.
+     */
+    final boolean disableAmLogForwarding
+
+    /***
      * When this parameter is set to true, CloudHub 2.0 generates a public URL for the deployed application. Default to false
      */
     final boolean publicURL
@@ -76,7 +81,9 @@ class CloudhubV2WorkerSpecRequest {
                                 boolean replicasAcrossNodes = false,
                                 boolean publicURL = false,
                                 VCoresSize replicaSize = VCoresSize.vCore1GB,
-                                int workerCount = 1) {
+                                int workerCount = 1,
+                                boolean forwardSslSession = false,
+                                boolean disableAmLogForwarding = true) {
         this.muleVersion = muleVersion
         this.lastMileSecurity = lastMileSecurity
         this.persistentObjectStore = persistentObjectStore
@@ -84,6 +91,8 @@ class CloudhubV2WorkerSpecRequest {
         this.updateStrategy = updateStrategy
         this.replicasAcrossNodes = replicasAcrossNodes
         this.publicURL = publicURL
+        this.forwardSslSession = forwardSslSession
+        this.disableAmLogForwarding = disableAmLogForwarding
         this.replicaSize = replicaSize
         this.workerCount = workerCount
         this.target = target
