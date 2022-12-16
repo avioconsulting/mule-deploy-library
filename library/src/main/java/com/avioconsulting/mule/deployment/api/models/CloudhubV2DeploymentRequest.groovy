@@ -63,8 +63,8 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
     final String appVersion
 
     /**
-     * Version of the app you are deploying (e.g. <version> from the POM). This parameter is optional and if it's not supplied
-     * then it will be derived from the <version> parameter in the project's POM based on the JAR/ZIP
+     * The Business group ID of the deployment
+     * The Business group ID is a mandatory parameter when you have access only to a specific Business group but not to the parent organization
      */
     final String groupId
 
@@ -93,6 +93,7 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
                                 String cloudHubAppPrefix,
                                 String appName = null,
                                 String appVersion = null,
+                                String groupId = null,
                                 Map<String, String> appProperties = [:],
                                 Map<String, String> otherCloudHubProperties = [:]) {
         this.file = file
@@ -175,11 +176,8 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
                                 clustered: workerSpecRequest.clustered,
                                 updateStrategy: workerSpecRequest.updateStrategy,
                                 enforceDeployingReplicasAcrossNodes: workerSpecRequest.replicasAcrossNodes,
-                                http: [
-                                    inbound: {}
-                                ],
                                 forwardSslSession: workerSpecRequest.forwardSslSession,
-                                disableAmLogForwarding: workerSpecRequest.forwardSslSession,
+                                disableAmLogForwarding: workerSpecRequest.disableAmLogForwarding,
                                 generateDefaultPublicUrl: workerSpecRequest.publicURL
                         ],
                         replicas: workerSpecRequest.workerCount
