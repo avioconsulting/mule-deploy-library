@@ -141,24 +141,6 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
         response.close()
     }
 
-    def deleteApp(String environment,
-                  String appName,
-                  String defaultFailReason = 'remove failed app deployment') {
-        def request = new HttpDelete("${clientWrapper.baseUrl}/cloudhub/api/v2/applications/${appName}").with {
-            addStandardStuff(it,
-                             environment)
-            it
-        } as HttpDelete
-        def response = clientWrapper.execute(request)
-        try {
-            clientWrapper.assertSuccessfulResponse(response,
-                                                   defaultFailReason)
-        }
-        finally {
-            response.close()
-        }
-    }
-
     def waitForAppToStart(String envId,
                           String groupId,
                           String appName,
@@ -256,18 +238,4 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
         deploymentRequest.isMule4Request()
     }
 
-    def startApplication(String envId,
-                         String appName) {
-        def request = new HttpPost("${clientWrapper.baseUrl}/cloudhub/api/applications/${appName}/status").with {
-            def payload = [
-                    status: 'start'
-            ]
-            setHeader('X-ANYPNT-ENV-ID', envId)
-            setEntity(new StringEntity(JsonOutput.toJson(payload),
-                                       ContentType.APPLICATION_JSON))
-            it
-        }
-        clientWrapper.executeWithSuccessfulCloseableResponse(request,
-                                                             'Start application')
-    }
 }
