@@ -53,7 +53,7 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
         DeploymentItem appInfo = getAppInfo(envId, groupId, appName)
         AppStatusPackage appStatus = getAppStatus(appInfo)
 
-        doDeployment(deploymentRequest, envId)
+        doDeployment(deploymentRequest, envId, appInfo)
 
         if (dryRunMode != DryRunMode.Run) {
             return
@@ -84,9 +84,8 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
         }
     }
 
-    private def doDeployment(CloudhubV2DeploymentRequest deploymentRequest, String envId) {
+    private def doDeployment(CloudhubV2DeploymentRequest deploymentRequest, String envId, DeploymentItem appInfo) {
         def groupId = deploymentRequest.groupId
-        DeploymentItem appInfo = getAppInfo(envId, groupId, deploymentRequest.appName)
 
         if (appInfo == null) {
             logger.println "Starting new deployment for application '${deploymentRequest.appName}'."
@@ -248,7 +247,7 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
             return new AppStatusPackage(AppStatus.NotFound, null)
         }
         def mapper = new AppStatusMapper()
-        return mapper.parseAppStatus([status: app.getStatus(), deploymentUpdateStatus: app.getAppStatus()])
+        return mapper.parseAppStatus([status: app.getDeploymentStatus(), deploymentUpdateStatus: app.getAppStatus()])
     }
 
     @Override
