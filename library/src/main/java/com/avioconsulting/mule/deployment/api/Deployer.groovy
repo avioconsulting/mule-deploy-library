@@ -6,6 +6,7 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.CloudhubV2DeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.RuntimeFabricDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.credentials.Credential
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
@@ -23,6 +24,7 @@ class Deployer implements IDeployer {
     private final HttpClientWrapper clientWrapper
     private final ICloudHubDeployer cloudHubDeployer
     private final ICloudHubV2Deployer cloudHubV2Deployer
+    private final IRuntimeFabricDeployer runtimeFabricDeployer
     private final IOnPremDeployer onPremDeployer
     private final IDesignCenterDeployer designCenterDeployer
     private final IApiManagerDeployer apiManagerDeployer
@@ -63,6 +65,7 @@ class Deployer implements IDeployer {
                      EnvironmentLocator environmentLocator = null,
                      ICloudHubDeployer cloudHubDeployer = null,
                      ICloudHubV2Deployer cloudHubV2Deployer = null,
+                     IRuntimeFabricDeployer runtimeFabricDeployer = null,
                      IOnPremDeployer onPremDeployer = null,
                      IDesignCenterDeployer designCenterDeployer = null,
                      IApiManagerDeployer apiManagerDeployer = null,
@@ -81,6 +84,10 @@ class Deployer implements IDeployer {
                                                                                this.environmentLocator,
                                                                                logger,
                                                                                dryRunMode)
+        this.runtimeFabricDeployer = runtimeFabricDeployer ?: new RuntimeFabricDeployer(this.clientWrapper,
+                                                                                this.environmentLocator,
+                                                                                logger,
+                                                                                dryRunMode)
         this.onPremDeployer = onPremDeployer ?: new OnPremDeployer(this.clientWrapper,
                                                                    this.environmentLocator,
                                                                    logger,
@@ -120,6 +127,9 @@ class Deployer implements IDeployer {
         } else if (appDeploymentRequest instanceof CloudhubV2DeploymentRequest) {
             deployer = cloudHubV2Deployer
             description = 'CloudHub v2 app deployment'
+        } else if (appDeploymentRequest instanceof RuntimeFabricDeploymentRequest) {
+            deployer = runtimeFabricDeployer
+            description = 'Runtime Fabric app deployment'
         } else {
             deployer = onPremDeployer
             description = 'On-prem app deployment'

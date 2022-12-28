@@ -11,6 +11,7 @@ class MuleDeployContext extends BaseContext {
     private PolicyListContext policies = new PolicyListContext()
     private CloudhubContext cloudHubApplication = new CloudhubContext()
     private CloudhubV2Context cloudHubV2Application = new CloudhubV2Context()
+    private RuntimeFabricContext runtimeFabricApplication = new RuntimeFabricContext()
     private OnPremContext onPremApplication = new OnPremContext()
     private FeaturesContext enabledFeatures = new FeaturesContext()
 
@@ -28,6 +29,10 @@ class MuleDeployContext extends BaseContext {
 
     private boolean isCloudHubV2Set() {
         hasFieldBeenSet('cloudHubV2Application')
+    }
+
+    private boolean isRuntimeFabricSet() {
+        hasFieldBeenSet('runtimeFabricDeployment')
     }
 
     private boolean isOnPremSet() {
@@ -72,6 +77,8 @@ class MuleDeployContext extends BaseContext {
             deploymentRequest = cloudHubApplication.createDeploymentRequest()
         } else if (cloudHubV2Set) {
             deploymentRequest = cloudHubV2Application.createV2DeploymentRequest()
+        } else if (runtimeFabricSet) {
+            deploymentRequest = runtimeFabricApplication.createDeploymentRequest()
         } else {
             deploymentRequest = onPremApplication.createDeploymentRequest()
         }

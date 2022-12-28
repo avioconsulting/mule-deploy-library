@@ -21,6 +21,7 @@ class DeployerTest {
     private Deployer deployer
     private List<CloudhubDeploymentRequest> deployedChApps
     private List<CloudhubV2DeploymentRequest> deployedChV2Apps
+    private List<RuntimeFabricDeploymentRequest> deployedRtfApps
     private List<OnPremDeploymentRequest> deployedOnPremApps
     private List<DesignCenterSync> designCenterSyncs
     private List<ApiSyncCalls> apiSyncs
@@ -49,6 +50,7 @@ class DeployerTest {
     void cleanup() {
         deployedChApps = []
         deployedChV2Apps = []
+        deployedRtfApps = []
         deployedOnPremApps = []
         designCenterSyncs = []
         apiSyncs = []
@@ -91,6 +93,17 @@ class DeployerTest {
                     deploymentRequest.appName.contains('mule4')
                 }
         ] as ICloudHubV2Deployer
+        def mockRuntimeFabricDeployer = [
+                deploy        : { RuntimeFabricDeploymentRequest request ->
+                    if (failDeployment) {
+                        throw new Exception('something did not work')
+                    }
+                    deployedChApps << request
+                },
+                isMule4Request: { RuntimeFabricDeploymentRequest deploymentRequest ->
+                    deploymentRequest.appName.contains('mule4')
+                }
+        ] as IRuntimeFabricDeployer
         def mockOnPremDeployer = [
                 deploy        : { OnPremDeploymentRequest request ->
                     deployedOnPremApps << request
@@ -135,6 +148,7 @@ class DeployerTest {
                                 // shouldn't need this since we mock so much
                                 mockCloudHubDeployer,
                                 mockCloudHubV2Deployer,
+                                mockRuntimeFabricDeployer,
                                 mockOnPremDeployer,
                                 mockDcDeployer,
                                 mockApiDeployer,
