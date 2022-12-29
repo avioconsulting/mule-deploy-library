@@ -76,7 +76,7 @@ class MuleDeployContext extends BaseContext {
         if (cloudHubSet) {
             deploymentRequest = cloudHubApplication.createDeploymentRequest()
         } else if (cloudHubV2Set) {
-            deploymentRequest = cloudHubV2Application.createV2DeploymentRequest()
+            deploymentRequest = cloudHubV2Application.createDeploymentRequest()
         } else if (runtimeFabricSet) {
             deploymentRequest = runtimeFabricApplication.createDeploymentRequest()
         } else {

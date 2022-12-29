@@ -10,7 +10,7 @@ class CloudhubV2Context extends BaseContext {
     Map<String, String> appProperties = [:]
     Map<String, String> otherCloudHubProperties = [:]
 
-    CloudhubV2DeploymentRequest createV2DeploymentRequest() {
+    CloudhubV2DeploymentRequest createDeploymentRequest() {
         def errors = findErrors()
         def specs = workerSpecs
         errors += specs.findErrors('workerSpecs')

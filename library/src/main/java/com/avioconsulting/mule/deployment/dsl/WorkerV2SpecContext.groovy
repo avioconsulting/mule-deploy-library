@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.dsl
 
-import com.avioconsulting.mule.deployment.api.models.RuntimeFabricWorkerSpecRequest
+import com.avioconsulting.mule.deployment.api.models.WorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.UpdateStrategy
 import com.avioconsulting.mule.deployment.api.models.VCoresSize
 
@@ -15,17 +15,17 @@ class WorkerV2SpecContext extends BaseContext {
     VCoresSize replicaSize = VCoresSize.vCore1GB
     int workerCount = 1
 
-    RuntimeFabricWorkerSpecRequest createRequest() {
-        new RuntimeFabricWorkerSpecRequest(this.target,
-                                        this.muleVersion,
-                                        this.lastMileSecurity,
-                                        this.persistentObjectStore,
-                                        this.clustered,
-                                        this.updateStrategy,
-                                        this.replicasAcrossNodes,
-                                        this.publicURL,
-                                        this.replicaSize,
-                                        this.workerCount)
+    WorkerSpecRequest createRequest() {
+        new WorkerSpecRequest(this.target,
+                              this.muleVersion,
+                              this.lastMileSecurity,
+                              this.persistentObjectStore,
+                              this.clustered,
+                              this.updateStrategy,
+                              this.replicasAcrossNodes,
+                              this.publicURL,
+                              this.replicaSize,
+                              this.workerCount)
     }
 
     @Override

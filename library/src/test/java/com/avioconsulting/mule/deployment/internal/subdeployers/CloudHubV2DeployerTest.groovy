@@ -5,7 +5,7 @@ import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.CloudhubV2DeploymentRequest
-import com.avioconsulting.mule.deployment.api.models.RuntimeFabricWorkerSpecRequest
+import com.avioconsulting.mule.deployment.api.models.WorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.UpdateStrategy
 import com.avioconsulting.mule.deployment.api.models.VCoresSize
 import groovy.json.JsonOutput
@@ -91,7 +91,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
         }
 
         def request = new CloudhubV2DeploymentRequest(ENV,
-                new RuntimeFabricWorkerSpecRequest(TARGET_NAME,
+                new WorkerSpecRequest(TARGET_NAME,
                         VERSION,
                         true,
                         true,
@@ -161,7 +161,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
         }
 
         def request = new CloudhubV2DeploymentRequest(ENV,
-                new RuntimeFabricWorkerSpecRequest(TARGET_NAME,
+                new WorkerSpecRequest(TARGET_NAME,
                         VERSION,
                         true,
                         true,
@@ -231,7 +231,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
         }
 
         def request = new CloudhubV2DeploymentRequest(ENV,
-                new RuntimeFabricWorkerSpecRequest(TARGET_NAME,
+                new WorkerSpecRequest(TARGET_NAME,
                         VERSION,
                         true,
                         true,
@@ -302,7 +302,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
         }
 
         def request = new CloudhubV2DeploymentRequest(ENV,
-                new RuntimeFabricWorkerSpecRequest(TARGET_NAME,
+                new WorkerSpecRequest(TARGET_NAME,
                         VERSION,
                         true,
                         true,
@@ -347,7 +347,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
         }
 
         def request = new CloudhubV2DeploymentRequest('INVALID_ENV',
-                new RuntimeFabricWorkerSpecRequest(TARGET_NAME,
+                new WorkerSpecRequest(TARGET_NAME,
                         VERSION,
                         true,
                         true,
@@ -395,7 +395,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
         }
 
         def request = new CloudhubV2DeploymentRequest(ENV,
-                new RuntimeFabricWorkerSpecRequest('INVALID_TARGET_NAME',
+                new WorkerSpecRequest('INVALID_TARGET_NAME',
                         VERSION,
                         true,
                         true,

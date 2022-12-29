@@ -3,7 +3,7 @@ package com.avioconsulting.mule.deployment.api.models
 import groovy.transform.ToString
 
 @ToString
-class RuntimeFabricWorkerSpecRequest {
+class WorkerSpecRequest {
     /**
      * E.g. 4.2.2. This parameter is optional. If you do not supply it, then the deployer will derive it
      * by looking at POM properties, the <app.runtime> property for Mule 4 projects and <mule.version> for
@@ -72,18 +72,18 @@ class RuntimeFabricWorkerSpecRequest {
     /***
      * Standard request, see properties for parameter info.
      */
-    RuntimeFabricWorkerSpecRequest(String target,
-                                   String muleVersion = null,
-                                   boolean lastMileSecurity = false,
-                                   boolean persistentObjectStore = false,
-                                   boolean clustered = false,
-                                   UpdateStrategy updateStrategy = UpdateStrategy.rolling,
-                                   boolean replicasAcrossNodes = false,
-                                   boolean publicURL = false,
-                                   VCoresSize replicaSize = VCoresSize.vCore1GB,
-                                   int workerCount = 1,
-                                   boolean forwardSslSession = false,
-                                   boolean disableAmLogForwarding = true) {
+    WorkerSpecRequest(String target,
+                      String muleVersion = null,
+                      boolean lastMileSecurity = false,
+                      boolean persistentObjectStore = false,
+                      boolean clustered = false,
+                      UpdateStrategy updateStrategy = UpdateStrategy.rolling,
+                      boolean replicasAcrossNodes = false,
+                      boolean publicURL = false,
+                      VCoresSize replicaSize = VCoresSize.vCore1GB,
+                      int workerCount = 1,
+                      boolean forwardSslSession = false,
+                      boolean disableAmLogForwarding = true) {
         this.muleVersion = muleVersion
         this.lastMileSecurity = lastMileSecurity
         this.persistentObjectStore = persistentObjectStore
@@ -98,8 +98,8 @@ class RuntimeFabricWorkerSpecRequest {
         this.target = target
     }
 
-    RuntimeFabricWorkerSpecRequest withNewMuleVersion(String newMuleVersion) {
-        new RuntimeFabricWorkerSpecRequest(target,
+    WorkerSpecRequest withNewMuleVersion(String newMuleVersion) {
+        new WorkerSpecRequest(target,
                                            newMuleVersion,
                                            lastMileSecurity,
                                            persistentObjectStore,

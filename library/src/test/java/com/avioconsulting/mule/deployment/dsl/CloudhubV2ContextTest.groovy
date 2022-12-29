@@ -38,7 +38,7 @@ class CloudhubV2ContextTest implements MavenInvoke {
 
         // act
         closure.call()
-        def request = context.createV2DeploymentRequest()
+        def request = context.createDeploymentRequest()
 
         // assert
         request.with {
@@ -96,7 +96,7 @@ class CloudhubV2ContextTest implements MavenInvoke {
         // act
         closure.call()
         def exception = shouldFail {
-            context.createV2DeploymentRequest()
+            context.createDeploymentRequest()
         }
 
         assertThat exception.message,
@@ -143,7 +143,7 @@ class CloudhubV2ContextTest implements MavenInvoke {
 
         // act
         closure.call()
-        def request = context.createV2DeploymentRequest()
+        def request = context.createDeploymentRequest()
 
         // assert
         request.with {

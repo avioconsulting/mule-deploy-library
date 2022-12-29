@@ -10,7 +10,7 @@ class RuntimeFabricContext extends BaseContext {
     Map<String, String> appProperties = [:]
     Map<String, String> otherCloudHubProperties = [:]
 
-    RuntimeFabricContext createDeploymentRequest() {
+    RuntimeFabricDeploymentRequest createDeploymentRequest() {
         def errors = findErrors()
         def specs = workerSpecs
         errors += specs.findErrors('workerSpecs')

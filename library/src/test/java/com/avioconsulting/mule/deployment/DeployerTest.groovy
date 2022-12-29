@@ -313,7 +313,7 @@ class DeployerTest {
         def file = new File('src/test/resources/some_file.txt')
 
         def request = new CloudhubV2DeploymentRequest('DEV',
-                new RuntimeFabricWorkerSpecRequest('target',
+                new WorkerSpecRequest('target',
                         '4.2.2',
                         false,
                         false,

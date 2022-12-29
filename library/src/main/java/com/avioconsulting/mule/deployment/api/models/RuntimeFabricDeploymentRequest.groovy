@@ -23,7 +23,7 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
     /**
      * CloudHub specs
      */
-    final RuntimeFabricWorkerSpecRequest workerSpecRequest
+    final WorkerSpecRequest workerSpecRequest
     /**
      * The file to deploy. The name of this file will also be used for the Runtime Manager settings pane
      */
@@ -90,7 +90,7 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
      * Construct a "standard" request. See properties for parameter info.
      */
     RuntimeFabricDeploymentRequest(String environment,
-                                   RuntimeFabricWorkerSpecRequest workerSpecRequest,
+                                   WorkerSpecRequest workerSpecRequest,
                                    File file,
                                    String cryptoKey,
                                    String anypointClientId,
