@@ -44,6 +44,20 @@ class RuntimeFabricDeployer extends BaseDeployer implements IRuntimeFabricDeploy
               dryRunMode)
     }
 
+    RuntimeFabricDeployer(int retryIntervalInMs,
+                          int maxTries,
+                          ILogger logger,
+                          HttpClientWrapper clientWrapper,
+                          EnvironmentLocator environmentLocator,
+                          DryRunMode dryRunMode) {
+        super(retryIntervalInMs,
+              maxTries,
+              logger,
+              clientWrapper,
+              environmentLocator,
+              dryRunMode)
+    }
+
     def deploy(RuntimeFabricDeploymentRequest deploymentRequest) {
         def envId = environmentLocator.getEnvironmentId(deploymentRequest.environment)
         def groupId = deploymentRequest.groupId
@@ -62,7 +76,7 @@ class RuntimeFabricDeployer extends BaseDeployer implements IRuntimeFabricDeploy
         waitForAppToStart(envId, groupId, appName, appStatus)
     }
 
-    def getTargetId(String targetName) {
+    protected def getTargetId(String targetName) {
         logger.println('Fetching all available targets')
         def groupId = clientWrapper.anypointOrganizationId
         def request = new HttpGet("${clientWrapper.baseUrl}/runtimefabric/api/organizations/${groupId}/targets")
@@ -213,8 +227,7 @@ class RuntimeFabricDeployer extends BaseDeployer implements IRuntimeFabricDeploy
                                app.name,
                                app.status,
                                app.application.status,
-                               app.target.id,
-                               app.target.provider)
+                               app.target.id)
         ]}
         def app = apps[appName]
         try {

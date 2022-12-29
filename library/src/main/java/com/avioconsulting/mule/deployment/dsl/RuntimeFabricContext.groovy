@@ -21,17 +21,17 @@ class RuntimeFabricContext extends BaseContext {
             throw new Exception("Your deployment request is not complete. The following errors exist:\n${errorList}")
         }
         new RuntimeFabricDeploymentRequest(this.environment,
-                                      specs.createRequest(),
-                                      new File(this.file),
-                                      this.cryptoKey,
-                                      autoDiscovery.clientId,
-                                      autoDiscovery.clientSecret,
-                                      this.cloudHubAppPrefix,
-                                      this.applicationName,
-                                      this.appVersion,
-                                      this.businessGroupId,
-                                      this.appProperties,
-                                      this.otherCloudHubProperties)
+                                           specs.createRequest(),
+                                           new File(this.file),
+                                           this.cryptoKey,
+                                           autoDiscovery.clientId,
+                                           autoDiscovery.clientSecret,
+                                           this.cloudHubAppPrefix,
+                                           this.applicationName,
+                                           this.appVersion,
+                                           this.businessGroupId,
+                                           this.appProperties,
+                                           this.otherCloudHubProperties)
     }
 
     @Override

@@ -75,6 +75,11 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
     final String target
 
     /**
+     * As per the documentation, set to MC, for Runtime Fabric.
+     */
+    final String provider = "MC"
+
+    /**
      * Id of target based on the target name
      */
     String targetId
@@ -85,7 +90,7 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
      * Construct a "standard" request. See properties for parameter info.
      */
     RuntimeFabricDeploymentRequest(String environment,
-                                   CloudhubV2WorkerSpecRequest workerSpecRequest,
+                                   RuntimeFabricWorkerSpecRequest workerSpecRequest,
                                    File file,
                                    String cryptoKey,
                                    String anypointClientId,
@@ -163,12 +168,11 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
                                 "mule.agent.application.properties.service": [
                                         applicationName: appName
                                 ]
-                        ],
-                        "vCores": workerSpecRequest.replicaSize.vCoresSize
+                        ]
                 ],
                 target: [
                         targetId: targetId,
-                        provider: "MC",
+                        provider: provider,
                         deploymentSettings: [
                                 runtimeVersion: workerSpecRequest.muleVersion,
                                 lastMileSecurity: workerSpecRequest.lastMileSecurity,

@@ -5,16 +5,13 @@ import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.api.models.CloudhubV2DeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
-import com.avioconsulting.mule.deployment.internal.models.AppStatus
 import com.avioconsulting.mule.deployment.internal.models.AppStatusPackage
 import com.avioconsulting.mule.deployment.internal.models.DeploymentItem
-import com.avioconsulting.mule.deployment.internal.models.DeploymentUpdateStatus
 import groovy.json.JsonOutput
 import org.apache.http.client.methods.*
-import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 
-class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
+class CloudHubV2Deployer extends RuntimeFabricDeployer implements ICloudHubV2Deployer {
 
     CloudHubV2Deployer(HttpClientWrapper clientWrapper,
                        EnvironmentLocator environmentLocator,
@@ -59,29 +56,6 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
             return
         }
         waitForAppToStart(envId, groupId, appName, appStatus)
-    }
-
-    def getTargetId(String targetName) {
-        logger.println('Fetching all available targets')
-        def groupId = clientWrapper.anypointOrganizationId
-        def request = new HttpGet("${clientWrapper.baseUrl}/runtimefabric/api/organizations/${groupId}/targets")
-        def response = clientWrapper.execute(request)
-        try {
-            def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
-                    "Unable to retrieve targets. Please ensure your org ID (${groupId}) is correct and the credentials you are using have the right permissions.)")
-            def targets = result.collectEntries { target ->
-                [target.name, target.id]
-            }
-            def target = targets[targetName]
-            if (!target) {
-                def valids = targets.keySet()
-                throw new Exception("Unable to find target '${targetName}'. Valid targets are ${valids}")
-            }
-            return target
-        }
-        finally {
-            response.close()
-        }
     }
 
     private def doDeployment(CloudhubV2DeploymentRequest deploymentRequest, String envId, DeploymentItem appInfo) {
@@ -139,97 +113,6 @@ class CloudHubV2Deployer extends BaseDeployer implements ICloudHubV2Deployer {
         def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,'deploy application')
         logger.println("Application '${deploymentRequest.normalizedAppName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
         response.close()
-    }
-
-    def waitForAppToStart(String envId,
-                          String groupId,
-                          String appName,
-                          AppStatusPackage baselineStatus) {
-        logger.println 'Now will wait for application to start...'
-        def tries = 0
-        def deployed = false
-        def failed = false
-        def hasBaselineStatusChanged = false
-        def sleep = {
-            logger.println "Sleeping for ${this.retryIntervalInMs / 1000} seconds and will recheck..."
-            Thread.sleep(this.retryIntervalInMs)
-        }
-        while (!deployed && tries < this.maxTries) {
-            tries++
-            logger.println "*** Try ${tries} ***"
-            DeploymentItem appInfo
-            AppStatusPackage status
-            try {
-                appInfo = getAppInfo(envId,
-                        groupId,
-                        appName)
-                status = getAppStatus(appInfo)
-            } catch (e) {
-                logger.println("Caught exception ${e.message} while checking app status, will ignore and retry")
-                sleep()
-                continue
-            }
-            logger.println "Current status is '${status}'"
-            if (status == baselineStatus && !hasBaselineStatusChanged) {
-                logger.println "We have not seen the baseline status change from '${baselineStatus}' so will keep checking"
-                sleep()
-                continue
-            } else if (status != baselineStatus && !hasBaselineStatusChanged) {
-                hasBaselineStatusChanged = true
-            }
-            if (status.appStatus == AppStatus.Applied && status.deploymentUpdateStatus == DeploymentUpdateStatus.Running) {
-                logger.println 'App started successfully!'
-                deployed = true
-                break
-            }
-            if (status.appStatus == AppStatus.Failed || status.appStatus == AppStatus.DeploymentFailed) {
-                failed = true
-                logger.println 'Deployment FAILED on 1 more nodes!'
-                break
-            }
-            logger.println 'Have not seen Started state yet'
-            sleep()
-        }
-        if (!deployed && failed) {
-            throw new Exception('Deployment failed on 1 or more workers. Please see logs and messages as to why app did not start')
-        }
-        if (!deployed) {
-            throw new Exception("Deployment has not failed but app has not started after ${tries} tries!")
-        }
-    }
-
-    DeploymentItem getAppInfo(String envId,
-                              String groupId,
-                              String appName) {
-        def request = new HttpGet("${clientWrapper.baseUrl}/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments")
-        def response = clientWrapper.execute(request)
-        def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
-                "Error retrieving applications. Chek if the groupId (${groupId}) and environment (${envId}) provided are correct")
-
-        def apps = result.items.collectEntries { app -> [
-            app.name,
-            new DeploymentItem(app.id,
-                               app.name,
-                               app.status,
-                               app.application.status,
-                               app.target.id,
-                               app.target.provider)
-        ]}
-        def app = apps[appName]
-        try {
-            return app
-        }
-        finally {
-            response.close()
-        }
-    }
-
-    AppStatusPackage getAppStatus(DeploymentItem app) {
-        if (app == null) {
-            return new AppStatusPackage(AppStatus.NotFound, null)
-        }
-        def mapper = new AppStatusMapper()
-        return mapper.parseAppStatus([status: app.getDeploymentStatus(), deploymentUpdateStatus: app.getAppStatus()])
     }
 
     @Override

@@ -23,7 +23,7 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
     /**
      * CloudHub specs
      */
-    final CloudhubV2WorkerSpecRequest workerSpecRequest
+    final RuntimeFabricWorkerSpecRequest workerSpecRequest
     /**
      * The file to deploy. The name of this file will also be used for the Runtime Manager settings pane
      */
@@ -75,6 +75,11 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
     final String target
 
     /**
+     * As per the documentation, set to MC, for CloudHub 2.0.
+     */
+    final String provider = "MC"
+
+    /**
      * Id of target based on the target name
      */
     String targetId
@@ -85,7 +90,7 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
      * Construct a "standard" request. See properties for parameter info.
      */
     CloudhubV2DeploymentRequest(String environment,
-                                CloudhubV2WorkerSpecRequest workerSpecRequest,
+                                RuntimeFabricWorkerSpecRequest workerSpecRequest,
                                 File file,
                                 String cryptoKey,
                                 String anypointClientId,
@@ -168,7 +173,7 @@ class CloudhubV2DeploymentRequest extends FileBasedAppDeploymentRequest {
                 ],
                 target: [
                         targetId: targetId,
-                        provider: "MC",
+                        provider: provider,
                         deploymentSettings: [
                                 runtimeVersion: workerSpecRequest.muleVersion,
                                 lastMileSecurity: workerSpecRequest.lastMileSecurity,

@@ -20,7 +20,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
     void explicit() {
 
         def request = new CloudhubV2DeploymentRequest('DEV',
-                                                    new CloudhubV2WorkerSpecRequest('us-west-2',
+                                                    new RuntimeFabricWorkerSpecRequest('us-west-2',
                                                                            '4.2.2'),
                                                     builtFile,
                                                     'theKey',
@@ -48,7 +48,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
     void derived_app_version_and_name_normal() {
 
         def request = new CloudhubV2DeploymentRequest('DEV',
-                                                    new CloudhubV2WorkerSpecRequest('us-west-2'),
+                                                    new RuntimeFabricWorkerSpecRequest('us-west-2'),
                                                     builtFile,
                                                     'theKey',
                                                     'theClientId',
@@ -82,7 +82,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
 
         try {
             def request = new CloudhubV2DeploymentRequest('DEV',
-                                                        new CloudhubV2WorkerSpecRequest('us-west-2'),
+                                                        new RuntimeFabricWorkerSpecRequest('us-west-2'),
                                                         builtFile,
                                                         'theKey',
                                                         'theClientId',
@@ -104,7 +104,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
 
         def exception = shouldFail {
             new CloudhubV2DeploymentRequest('DEV',
-                                          new CloudhubV2WorkerSpecRequest('us-west-2'),
+                                          new RuntimeFabricWorkerSpecRequest('us-west-2'),
                                           builtFile,
                                           'theKey',
                                           'theClientId',
@@ -122,7 +122,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
     void getCloudhubAppInfo_only_required() {
 
         def request = new CloudhubV2DeploymentRequest('DEV',
-                                                    new CloudhubV2WorkerSpecRequest('us-west-2'),
+                                                    new RuntimeFabricWorkerSpecRequest('us-west-2'),
                                                     builtFile,
                                                     'theKey',
                                                     'theClientId',
@@ -172,7 +172,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
     void getCloudhubAppInfo_all_properties() {
 
         def request = new CloudhubV2DeploymentRequest('DEV',
-                new CloudhubV2WorkerSpecRequest('us-west-2',
+                new RuntimeFabricWorkerSpecRequest('us-west-2',
                         '4.2.2',
                         true,
                         true,

@@ -54,6 +54,11 @@ class RuntimeFabricWorkerSpecRequest {
     final boolean publicURL
 
     /***
+     * How big of a worker to use
+     */
+    final VCoresSize replicaSize
+
+    /***
      * How many workers, defaults to 1
      */
     final int workerCount
@@ -75,6 +80,7 @@ class RuntimeFabricWorkerSpecRequest {
                                    UpdateStrategy updateStrategy = UpdateStrategy.rolling,
                                    boolean replicasAcrossNodes = false,
                                    boolean publicURL = false,
+                                   VCoresSize replicaSize = VCoresSize.vCore1GB,
                                    int workerCount = 1,
                                    boolean forwardSslSession = false,
                                    boolean disableAmLogForwarding = true) {
@@ -87,20 +93,22 @@ class RuntimeFabricWorkerSpecRequest {
         this.publicURL = publicURL
         this.forwardSslSession = forwardSslSession
         this.disableAmLogForwarding = disableAmLogForwarding
+        this.replicaSize = replicaSize
         this.workerCount = workerCount
         this.target = target
     }
 
     RuntimeFabricWorkerSpecRequest withNewMuleVersion(String newMuleVersion) {
         new RuntimeFabricWorkerSpecRequest(target,
-                                        newMuleVersion,
-                                        lastMileSecurity,
-                                        persistentObjectStore,
-                                        clustered,
-                                        updateStrategy,
-                                        replicasAcrossNodes,
-                                        publicURL,
-                                        workerCount)
+                                           newMuleVersion,
+                                           lastMileSecurity,
+                                           persistentObjectStore,
+                                           clustered,
+                                           updateStrategy,
+                                           replicasAcrossNodes,
+                                           publicURL,
+                                           replicaSize,
+                                           workerCount)
     }
 
     Map<String, String> getVersionInfo() {
