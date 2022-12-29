@@ -14,7 +14,7 @@ muleDeploy {
         }
     }
 
-    runtimeFabricDeployment {
+    runtimeFabricApplication {
         environment params.env
         file params.appArtifact
         cryptoKey params.cryptoKey

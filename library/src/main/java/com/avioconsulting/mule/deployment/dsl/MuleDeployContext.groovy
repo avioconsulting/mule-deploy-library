@@ -32,7 +32,7 @@ class MuleDeployContext extends BaseContext {
     }
 
     private boolean isRuntimeFabricSet() {
-        hasFieldBeenSet('runtimeFabricDeployment')
+        hasFieldBeenSet('runtimeFabricApplication')
     }
 
     private boolean isOnPremSet() {
