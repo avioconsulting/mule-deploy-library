@@ -1,13 +1,8 @@
 package com.avioconsulting.mule.deployment.api.models
 
 import com.avioconsulting.mule.deployment.internal.models.CloudhubAppProperties
-import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import groovy.transform.ToString
-import org.apache.http.HttpEntity
-import org.apache.http.entity.ContentType
-import org.apache.http.entity.mime.HttpMultipartMode
-import org.apache.http.entity.mime.MultipartEntityBuilder
 
 @ToString
 class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
@@ -84,7 +79,7 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     String targetId
 
-    private CloudhubAppProperties cloudhubAppProperties
+    protected CloudhubAppProperties cloudhubAppProperties
 
     /**
      * Construct a "standard" request. See properties for parameter info.
@@ -140,19 +135,7 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
                                                                null)
     }
 
-    HttpEntity getHttpPayload() {
-        MultipartEntityBuilder.create()
-                .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
-                .addTextBody('appInfoJson',
-                             cloudhubAppInfoAsJson,
-                             ContentType.APPLICATION_JSON)
-                .build()
-    }
-
     Map<String, String> getCloudhubAppInfo() {
-        def props = new ObjectMapper().convertValue(this.cloudhubAppProperties,
-                                                    Map)
-        props += this.autoDiscoveries
         def result = [
                 // CloudHub's v2 API calls the Mule application the 'domain'
                 name: appName,

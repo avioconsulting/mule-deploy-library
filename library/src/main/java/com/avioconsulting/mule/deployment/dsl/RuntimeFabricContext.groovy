@@ -5,8 +5,8 @@ import com.avioconsulting.mule.deployment.api.models.RuntimeFabricDeploymentRequ
 class RuntimeFabricContext extends BaseContext {
     String environment, applicationName, appVersion, file, cryptoKey, cloudHubAppPrefix, businessGroupId
     // make API visualizer, etc. more easy by default
-    private WorkerV2SpecContext workerSpecs = new WorkerV2SpecContext()
-    private AutodiscoveryContext autoDiscovery = new AutodiscoveryContext()
+    WorkerV2SpecContext workerSpecs = new WorkerV2SpecContext()
+    AutodiscoveryContext autoDiscovery = new AutodiscoveryContext()
     Map<String, String> appProperties = [:]
     Map<String, String> otherCloudHubProperties = [:]
 

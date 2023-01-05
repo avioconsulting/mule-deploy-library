@@ -2,13 +2,7 @@ package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.deployment.api.models.CloudhubV2DeploymentRequest
 
-class CloudhubV2Context extends BaseContext {
-    String environment, applicationName, appVersion, file, cryptoKey, cloudHubAppPrefix, businessGroupId
-    // make API visualizer, etc. more easy by default
-    private WorkerV2SpecContext workerSpecs = new WorkerV2SpecContext()
-    private AutodiscoveryContext autoDiscovery = new AutodiscoveryContext()
-    Map<String, String> appProperties = [:]
-    Map<String, String> otherCloudHubProperties = [:]
+class CloudhubV2Context extends RuntimeFabricContext {
 
     CloudhubV2DeploymentRequest createDeploymentRequest() {
         def errors = findErrors()
@@ -34,8 +28,4 @@ class CloudhubV2Context extends BaseContext {
                                       this.otherCloudHubProperties)
     }
 
-    @Override
-    List<String> findOptionalProperties() {
-        ['appVersion', 'applicationName', 'businessGroupId']
-    }
 }
