@@ -17,8 +17,8 @@ class MuleDeployContext extends BaseContext {
 
     def findErrors() {
         List<String> errors = super.findErrors()
-        if (!cloudHubSet && !cloudHubV2Set && !onPremSet) {
-            errors << '- Either onPremApplication or cloudHubApplication should be supplied'
+        if (!cloudHubSet && !cloudHubV2Set && !onPremSet && !runtimeFabricSet) {
+            errors << '- Either onPremApplication, cloudHubApplication, cloudHubV2Application or runtimeFabricApplication should be supplied'
         }
         return errors
     }
@@ -61,7 +61,7 @@ class MuleDeployContext extends BaseContext {
             def errorList = errors.join('\n')
             throw new Exception("Your file is not complete. The following errors exist:\n${errorList}")
         }
-        if (onPremSet && (cloudHubSet || cloudHubV2Set)) {
+        if (onPremSet && (cloudHubSet || cloudHubV2Set || runtimeFabricSet)) {
             throw new Exception('You cannot deploy both a CloudHub and on-prem application!')
         }
         def policyList = policies.createPolicyList()

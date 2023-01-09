@@ -1,8 +1,10 @@
 package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.CloudhubV2DeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.RuntimeFabricDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.AppBuilding
 import org.junit.Before
 import org.junit.Test
@@ -115,6 +117,102 @@ class MuleDeployContextTest implements AppBuilding {
     }
 
     @Test
+    void cloudhubV2() {
+        // arrange
+        def tempRequest = buildFullApp()
+        def closure = {
+            version '1.0'
+
+            apiSpecification {
+                name 'Design Center Project Name'
+            }
+
+            cloudHubV2Application {
+                environment 'DEV'
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                businessGroupId 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee'
+                workerSpecs {
+                    muleVersion '4.2.2'
+                    target 'sharedTarget'
+                }
+                file tempRequest.file.path
+                cryptoKey 'theKey'
+                autoDiscovery {
+                    clientId 'the_client_id'
+                    clientSecret 'the_client_secret'
+                }
+                cloudHubAppPrefix 'AVI'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def deploymentPackage = context.createDeploymentPackage()
+
+        // assert
+        assertThat deploymentPackage.deploymentRequest,
+                is(instanceOf(CloudhubV2DeploymentRequest))
+        assertThat deploymentPackage.apiSpecifications.size(),
+                is(not(0))
+        assertThat deploymentPackage.enabledFeatures,
+                is(equalTo([
+                        Features.AppDeployment,
+                        Features.DesignCenterSync,
+                        Features.ApiManagerDefinitions
+                ]))
+    }
+
+    @Test
+    void runtimeFabric() {
+        // arrange
+        def tempRequest = buildFullApp()
+        def closure = {
+            version '1.0'
+
+            apiSpecification {
+                name 'Design Center Project Name'
+            }
+
+            runtimeFabricApplication {
+                environment 'DEV'
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                businessGroupId 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee'
+                workerSpecs {
+                    muleVersion '4.2.2'
+                    target 'sharedTarget'
+                }
+                file tempRequest.file.path
+                cryptoKey 'theKey'
+                autoDiscovery {
+                    clientId 'the_client_id'
+                    clientSecret 'the_client_secret'
+                }
+                cloudHubAppPrefix 'AVI'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def deploymentPackage = context.createDeploymentPackage()
+
+        // assert
+        assertThat deploymentPackage.deploymentRequest,
+                is(instanceOf(RuntimeFabricDeploymentRequest))
+        assertThat deploymentPackage.apiSpecifications.size(),
+                is(not(0))
+        assertThat deploymentPackage.enabledFeatures,
+                is(equalTo([
+                        Features.AppDeployment,
+                        Features.DesignCenterSync,
+                        Features.ApiManagerDefinitions
+                ]))
+    }
+
+    @Test
     void unsupported_version() {
         // arrange
         def closure = {
@@ -200,6 +298,108 @@ class MuleDeployContextTest implements AppBuilding {
     }
 
     @Test
+    void attempt_to_do_ch2_and_on_prem() {
+        // arrange
+        def closure = {
+            version '1.0'
+
+            apiSpecification {
+                name 'Design Center Project Name'
+            }
+
+            policies {
+                clientEnforcementPolicyBasic()
+            }
+
+            onPremApplication {
+                environment 'DEV'
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                file 'path/to/file.jar'
+                targetServerOrClusterName 'theServer'
+            }
+
+            cloudHubV2Application {
+                environment 'DEV'
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                workerSpecs {
+                    muleVersion '4.2.2'
+                }
+                file 'path/to/file.jar'
+                cryptoKey 'theKey'
+                autoDiscovery {
+                    clientId 'the_client_id'
+                    clientSecret 'the_client_secret'
+                }
+                cloudHubAppPrefix 'AVI'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def exception = shouldFail {
+            context.createDeploymentPackage()
+        }
+
+        // assert
+        assertThat exception.message,
+                is(containsString('You cannot deploy both a CloudHub and on-prem application!'))
+    }
+
+    @Test
+    void attempt_to_do_rtf_and_on_prem() {
+        // arrange
+        def closure = {
+            version '1.0'
+
+            apiSpecification {
+                name 'Design Center Project Name'
+            }
+
+            policies {
+                clientEnforcementPolicyBasic()
+            }
+
+            onPremApplication {
+                environment 'DEV'
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                file 'path/to/file.jar'
+                targetServerOrClusterName 'theServer'
+            }
+
+            runtimeFabricApplication {
+                environment 'DEV'
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                workerSpecs {
+                    muleVersion '4.2.2'
+                }
+                file 'path/to/file.jar'
+                cryptoKey 'theKey'
+                autoDiscovery {
+                    clientId 'the_client_id'
+                    clientSecret 'the_client_secret'
+                }
+                cloudHubAppPrefix 'AVI'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def exception = shouldFail {
+            context.createDeploymentPackage()
+        }
+
+        // assert
+        assertThat exception.message,
+                is(containsString('You cannot deploy both a CloudHub and on-prem application!'))
+    }
+
+    @Test
     void missing_stuff() {
         // arrange
         def closure = {
@@ -217,7 +417,7 @@ class MuleDeployContextTest implements AppBuilding {
         assertThat exception.message,
                    is(equalTo("""Your file is not complete. The following errors exist:
 - version missing
-- Either onPremApplication or cloudHubApplication should be supplied
+- Either onPremApplication, cloudHubApplication, cloudHubV2Application or runtimeFabricApplication should be supplied
 """.trim()))
     }
 
