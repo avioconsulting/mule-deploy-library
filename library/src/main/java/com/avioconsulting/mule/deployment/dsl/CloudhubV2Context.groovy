@@ -5,17 +5,9 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubV2DeploymentRequest
 class CloudhubV2Context extends RuntimeFabricContext {
 
     CloudhubV2DeploymentRequest createDeploymentRequest() {
-        def errors = findErrors()
-        def specs = workerSpecs
-        errors += specs.findErrors('workerSpecs')
-        def autoDiscovery = this.autoDiscovery
-        errors += autoDiscovery.findErrors('autoDiscovery')
-        if (errors.any()) {
-            def errorList = errors.join('\n')
-            throw new Exception("Your deployment request is not complete. The following errors exist:\n${errorList}")
-        }
+        validateContext()
         new CloudhubV2DeploymentRequest(this.environment,
-                                      specs.createRequest(),
+                                      workerSpecs.createRequest(),
                                       new File(this.file),
                                       this.cryptoKey,
                                       autoDiscovery.clientId,
