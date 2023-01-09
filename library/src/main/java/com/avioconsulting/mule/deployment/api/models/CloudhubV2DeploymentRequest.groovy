@@ -25,41 +25,9 @@ class CloudhubV2DeploymentRequest extends RuntimeFabricDeploymentRequest {
     }
 
     Map<String, String> getCloudhubAppInfo() {
-        def result = [
-                // CloudHub's v2 API calls the Mule application the 'domain'
-                name: appName,
-                application: [
-                        ref: [
-                                groupId: groupId,
-                                artifactId : appName,
-                                version: appVersion,
-                                packaging: "jar"
-                        ],
-                        desiredState: "STARTED",
-                        configuration: [
-                                "mule.agent.application.properties.service": [
-                                        applicationName: appName
-                                ]
-                        ],
-                        "vCores": workerSpecRequest.replicaSize.vCoresSize
-                ],
-                target: [
-                        targetId: targetId,
-                        provider: provider,
-                        deploymentSettings: [
-                                runtimeVersion: workerSpecRequest.muleVersion,
-                                lastMileSecurity: workerSpecRequest.lastMileSecurity,
-                                persistentObjectStore: workerSpecRequest.persistentObjectStore,
-                                clustered: workerSpecRequest.clustered,
-                                updateStrategy: workerSpecRequest.updateStrategy,
-                                enforceDeployingReplicasAcrossNodes: workerSpecRequest.replicasAcrossNodes,
-                                forwardSslSession: workerSpecRequest.forwardSslSession,
-                                disableAmLogForwarding: workerSpecRequest.disableAmLogForwarding,
-                                generateDefaultPublicUrl: workerSpecRequest.publicURL
-                        ],
-                        replicas: workerSpecRequest.workerCount
-                ]
-        ] as Map<String, String>
+        def result = super.getCloudhubAppInfo()
+        def vCores = ["vCores": workerSpecRequest.replicaSize.vCoresSize]
+        result.application << vCores
         result
     }
 
