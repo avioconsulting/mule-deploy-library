@@ -41,10 +41,10 @@ class CloudHubV2Deployer extends RuntimeFabricDeployer implements ICloudHubV2Dep
     }
 
     def deploy(CloudhubV2DeploymentRequest deploymentRequest) {
-        def envId = environmentLocator.getEnvironmentId(deploymentRequest.environment)
         def groupId = deploymentRequest.groupId
+        def envId = environmentLocator.getEnvironmentId(deploymentRequest.environment, groupId)
         def appName = deploymentRequest.appName
-        def targetId = getTargetId(deploymentRequest.target)
+        def targetId = getTargetId(deploymentRequest.target, groupId)
         deploymentRequest.setTargetId(targetId)
 
         DeploymentItem appInfo = getAppInfo(envId, groupId, appName)

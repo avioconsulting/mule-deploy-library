@@ -59,10 +59,10 @@ class RuntimeFabricDeployer extends BaseDeployer implements IRuntimeFabricDeploy
     }
 
     def deploy(RuntimeFabricDeploymentRequest deploymentRequest) {
-        def envId = environmentLocator.getEnvironmentId(deploymentRequest.environment)
         def groupId = deploymentRequest.groupId
+        def envId = environmentLocator.getEnvironmentId(deploymentRequest.environment, groupId)
         def appName = deploymentRequest.appName
-        def targetId = getTargetId(deploymentRequest.target)
+        def targetId = getTargetId(deploymentRequest.target, groupId)
         deploymentRequest.setTargetId(targetId)
 
         DeploymentItem appInfo = getAppInfo(envId, groupId, appName)
@@ -76,9 +76,9 @@ class RuntimeFabricDeployer extends BaseDeployer implements IRuntimeFabricDeploy
         waitForAppToStart(envId, groupId, appName, appStatus)
     }
 
-    protected def getTargetId(String targetName) {
+    protected def getTargetId(String targetName, String businessGroupId) {
         logger.println('Fetching all available targets')
-        def groupId = clientWrapper.anypointOrganizationId
+        def groupId = businessGroupId ?: clientWrapper.anypointOrganizationId
         def request = new HttpGet("${clientWrapper.baseUrl}/runtimefabric/api/organizations/${groupId}/targets")
         def response = clientWrapper.execute(request)
         try {

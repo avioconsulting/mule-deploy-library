@@ -6,10 +6,11 @@ import org.apache.http.client.methods.HttpGet
 class EnvironmentLocator {
     private final HttpClientWrapper clientWrapper
     private final ILogger logger
+    private String anypointOrganizationId
     @Lazy
     private Map<String, String> environments = {
         logger.println('Fetching all environment GUIDs')
-        def anypointOrganizationId = clientWrapper.anypointOrganizationId
+        def anypointOrganizationId = this.anypointOrganizationId ?: clientWrapper.anypointOrganizationId
         def request = new HttpGet("${clientWrapper.baseUrl}/accounts/api/organizations/${anypointOrganizationId}/environments")
         def response = clientWrapper.execute(request)
         try {
@@ -30,7 +31,8 @@ class EnvironmentLocator {
         this.clientWrapper = httpClientWrapper
     }
 
-    def getEnvironmentId(String environmentName) {
+    def getEnvironmentId(String environmentName, String anypointOrganizationId = null) {
+        this.anypointOrganizationId = anypointOrganizationId
         def environment = environments[environmentName]
         if (!environment) {
             def valids = environments.keySet()
