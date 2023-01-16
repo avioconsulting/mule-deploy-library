@@ -4,7 +4,7 @@ import com.avioconsulting.mule.deployment.api.models.WorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.UpdateStrategy
 import com.avioconsulting.mule.deployment.api.models.VCoresSize
 
-class WorkerV2SpecContext extends BaseContext {
+class WorkerSpecV2Context extends BaseContext {
     String muleVersion, target
     boolean lastMileSecurity = false
     boolean persistentObjectStore = false
