@@ -53,6 +53,16 @@ class WorkerSpecRequest {
      */
     final boolean publicURL
 
+    /**
+     * Specifies the number of cores to allocate for each application replica. The default value is 0.5 vCores
+     */
+    final String cpuReserved
+
+    /**
+     * Specifies the amount of memory to allocate for each application replica. The default value is 700 MB
+     */
+    final String memoryReserved
+
     /***
      * How big of a worker to use
      */
@@ -83,7 +93,9 @@ class WorkerSpecRequest {
                       VCoresSize replicaSize = VCoresSize.vCore1GB,
                       int workerCount = 1,
                       boolean forwardSslSession = false,
-                      boolean disableAmLogForwarding = true) {
+                      boolean disableAmLogForwarding = true,
+                      int cpuReserved = 20,
+                      int memoryReserved = 700) {
         this.muleVersion = muleVersion
         this.lastMileSecurity = lastMileSecurity
         this.persistentObjectStore = persistentObjectStore
@@ -93,6 +105,8 @@ class WorkerSpecRequest {
         this.publicURL = publicURL
         this.forwardSslSession = forwardSslSession
         this.disableAmLogForwarding = disableAmLogForwarding
+        this.cpuReserved = "${cpuReserved}m"
+        this.memoryReserved = "${memoryReserved}Mi"
         this.replicaSize = replicaSize
         this.workerCount = workerCount
         this.target = target
@@ -100,15 +114,15 @@ class WorkerSpecRequest {
 
     WorkerSpecRequest withNewMuleVersion(String newMuleVersion) {
         new WorkerSpecRequest(target,
-                                           newMuleVersion,
-                                           lastMileSecurity,
-                                           persistentObjectStore,
-                                           clustered,
-                                           updateStrategy,
-                                           replicasAcrossNodes,
-                                           publicURL,
-                                           replicaSize,
-                                           workerCount)
+                              newMuleVersion,
+                              lastMileSecurity,
+                              persistentObjectStore,
+                              clustered,
+                              updateStrategy,
+                              replicasAcrossNodes,
+                              publicURL,
+                              replicaSize,
+                              workerCount)
     }
 
     Map<String, String> getVersionInfo() {

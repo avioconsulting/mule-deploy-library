@@ -129,7 +129,7 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                                     'theSecret',
                                                     'client')
 
-        def appInfo = request.getCloudhubAppInfo()
+        def appInfo = request.getCloudhubAppInfoWithResources()
 
         assertThat appInfo,
                    is(equalTo([
@@ -160,7 +160,15 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                            enforceDeployingReplicasAcrossNodes: false,
                                            forwardSslSession: false,
                                            disableAmLogForwarding: true,
-                                           generateDefaultPublicUrl: false
+                                           generateDefaultPublicUrl: false,
+                                           resources: [
+                                                   cpu: [
+                                                           reserved: "20m"
+                                                   ],
+                                                   memory: [
+                                                           reserved: "700Mi"
+                                                   ]
+                                           ]
                                    ],
                                    replicas: 1
                            ]
@@ -182,7 +190,9 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                         VCoresSize.vCore15GB,
                         13,
                         true,
-                        false),
+                        false,
+                        456,
+                        789),
                 builtFile,
                 'theKey',
                 'theClientId',
@@ -192,7 +202,7 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                 '1.2.3',
                 'new-group-id')
 
-        def appInfo = request.getCloudhubAppInfo()
+        def appInfo = request.getCloudhubAppInfoWithResources()
 
         assertThat appInfo,
                    is(equalTo([
@@ -223,7 +233,15 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                            enforceDeployingReplicasAcrossNodes: true,
                                            forwardSslSession: true,
                                            disableAmLogForwarding: false,
-                                           generateDefaultPublicUrl: true
+                                           generateDefaultPublicUrl: true,
+                                           resources: [
+                                                   cpu: [
+                                                           reserved: "456m"
+                                                   ],
+                                                   memory: [
+                                                           reserved: "789Mi"
+                                                   ]
+                                           ]
                                    ],
                                    replicas: 13
                            ]

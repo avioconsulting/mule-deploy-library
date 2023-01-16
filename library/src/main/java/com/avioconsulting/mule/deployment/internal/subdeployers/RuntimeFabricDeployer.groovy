@@ -181,8 +181,8 @@ class RuntimeFabricDeployer extends BaseDeployer implements IRuntimeFabricDeploy
                 status = getAppStatus(appInfo)
             } catch (e) {
                 logger.println("Caught exception ${e.message} while checking app status, will ignore and retry")
-                sleep()
-                continue
+                failed = true
+                break
             }
             logger.println "Current status is '${status}'"
             if (status == baselineStatus && !hasBaselineStatusChanged) {

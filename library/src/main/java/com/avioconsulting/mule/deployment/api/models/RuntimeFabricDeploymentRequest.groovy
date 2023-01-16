@@ -173,8 +173,20 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
         result
     }
 
+    Map<String, String> getCloudhubAppInfoWithResources() {
+        def result = cloudhubAppInfo
+        def resources = [
+                resources: [
+                    cpu: [ reserved: workerSpecRequest.cpuReserved ],
+                    memory: [ reserved: workerSpecRequest.memoryReserved ]
+                ]
+        ]
+        result.target.deploymentSettings << resources
+        result
+    }
+
     String getCloudhubAppInfoAsJson() {
-        JsonOutput.toJson(cloudhubAppInfo)
+        JsonOutput.toJson(cloudhubAppInfoWithResources)
     }
 
     void setTargetId(String targetId) {

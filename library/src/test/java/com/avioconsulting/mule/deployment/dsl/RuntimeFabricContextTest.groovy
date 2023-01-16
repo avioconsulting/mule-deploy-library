@@ -138,6 +138,8 @@ class RuntimeFabricContextTest implements MavenInvoke {
                 publicURL true
                 replicaSize VCoresSize.vCore15GB
                 workerCount 13
+                cpuReserved 30
+                memoryReserved 800
             }
         }
         closure.delegate = context
@@ -185,6 +187,10 @@ class RuntimeFabricContextTest implements MavenInvoke {
                         is(equalTo(VCoresSize.vCore15GB))
                 assertThat workerCount,
                         is(equalTo(13))
+                assertThat cpuReserved,
+                        is(equalTo("30m"))
+                assertThat memoryReserved,
+                        is(equalTo("800Mi"))
             }
         }
     }

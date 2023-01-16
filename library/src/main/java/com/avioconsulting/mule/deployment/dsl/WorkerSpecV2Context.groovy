@@ -12,8 +12,11 @@ class WorkerSpecV2Context extends BaseContext {
     UpdateStrategy updateStrategy = UpdateStrategy.rolling
     boolean replicasAcrossNodes = false
     boolean publicURL = false
+    boolean forwardSslSession = false
+    boolean disableAmLogForwarding = true
     VCoresSize replicaSize = VCoresSize.vCore1GB
     int workerCount = 1
+    int cpuReserved, memoryReserved
 
     WorkerSpecRequest createRequest() {
         new WorkerSpecRequest(this.target,
@@ -25,11 +28,19 @@ class WorkerSpecV2Context extends BaseContext {
                               this.replicasAcrossNodes,
                               this.publicURL,
                               this.replicaSize,
-                              this.workerCount)
+                              this.workerCount,
+                              this.forwardSslSession,
+                              this.disableAmLogForwarding,
+                              this.cpuReserved,
+                              this.memoryReserved)
     }
 
     @Override
     List<String> findOptionalProperties() {
-        ['muleVersion', 'lastMileSecurity', 'persistentObjectStore', 'clustered', 'updateStrategy', 'replicasAcrossNodes', 'publicURL', 'replicaSize', 'workerCount']
+        [
+            'muleVersion', 'lastMileSecurity', 'persistentObjectStore', 'clustered',
+            'updateStrategy', 'replicasAcrossNodes', 'publicURL', 'replicaSize',
+            'workerCount', 'cpuReserved', 'memoryReserved'
+        ]
     }
 }
