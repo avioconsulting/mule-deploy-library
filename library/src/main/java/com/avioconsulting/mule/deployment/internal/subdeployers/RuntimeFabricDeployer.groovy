@@ -76,7 +76,7 @@ class RuntimeFabricDeployer extends BaseDeployer implements IRuntimeFabricDeploy
         waitForAppToStart(envId, groupId, appName, appStatus)
     }
 
-    protected def getTargetId(String targetName, String businessGroupId) {
+    protected def getTargets(String businessGroupId) {
         logger.println('Fetching all available targets')
         def groupId = businessGroupId ?: clientWrapper.anypointOrganizationId
         def request = new HttpGet("${clientWrapper.baseUrl}/runtimefabric/api/organizations/${groupId}/targets")
@@ -84,19 +84,22 @@ class RuntimeFabricDeployer extends BaseDeployer implements IRuntimeFabricDeploy
         try {
             def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
                     "Unable to retrieve targets. Please ensure your org ID (${groupId}) is correct and the credentials you are using have the right permissions.)")
-            def targets = result.collectEntries { target ->
-                [target.name, target.id]
-            }
-            def target = targets[targetName]
-            if (!target) {
-                def valids = targets.keySet()
-                throw new Exception("Unable to find target '${targetName}'. Valid targets are ${valids}")
-            }
-            return target
+            return result
         }
         finally {
             response.close()
         }
+    }
+
+    protected def getTargetId(String targetName, String businessGroupId) {
+        def targets = getTargets(businessGroupId).findAll { env -> env.type == RUNTIME_FABRIC_TARGET_TYPE }
+                .collectEntries { target -> [target.name, target.id] }
+        def target = targets[targetName]
+        if (!target) {
+            def valids = targets.keySet()
+            throw new Exception("Unable to find a valid runtime fabric target '${targetName}'. Valid targets are ${valids}")
+        }
+        return target
     }
 
     private def doDeployment(RuntimeFabricDeploymentRequest deploymentRequest, String envId, DeploymentItem appInfo) {

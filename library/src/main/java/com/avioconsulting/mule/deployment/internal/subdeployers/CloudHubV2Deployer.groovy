@@ -58,6 +58,18 @@ class CloudHubV2Deployer extends RuntimeFabricDeployer implements ICloudHubV2Dep
         waitForAppToStart(envId, groupId, appName, appStatus)
     }
 
+    def getTargetId(String targetName, String businessGroupId) {
+        def targets = getTargets(businessGroupId).findAll {
+            env -> env.type == PRIVATE_SPACE_TARGET_TYPE || env.type == SHARED_SPACE_TARGET_TYPE
+        }.collectEntries { target -> [target.name, target.id] }
+        def target = targets[targetName]
+        if (!target) {
+            def valids = targets.keySet()
+            throw new Exception("Unable to find valid cloudhub v2 target '${targetName}'. Valid targets are ${valids}")
+        }
+        return target
+    }
+
     private def doDeployment(CloudhubV2DeploymentRequest deploymentRequest, String envId, DeploymentItem appInfo) {
         def groupId = deploymentRequest.groupId
 

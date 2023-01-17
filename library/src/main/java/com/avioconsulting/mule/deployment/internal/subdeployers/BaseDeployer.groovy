@@ -13,6 +13,9 @@ abstract class BaseDeployer {
     protected final int maxTries
     protected final HttpClientWrapper clientWrapper
     protected final DryRunMode dryRunMode
+    protected final String RUNTIME_FABRIC_TARGET_TYPE = "runtime-fabric"
+    protected final String PRIVATE_SPACE_TARGET_TYPE = "private-space"
+    protected final String SHARED_SPACE_TARGET_TYPE = "shared-space"
 
     BaseDeployer(int retryIntervalInMs,
                  int maxTries,

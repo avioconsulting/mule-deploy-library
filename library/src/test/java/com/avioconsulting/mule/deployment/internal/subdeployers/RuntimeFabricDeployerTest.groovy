@@ -46,7 +46,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
     }
 
     def setupDeployer(DryRunMode dryRunMode) {
-        deployer = new CloudHubV2Deployer(this.clientWrapper,
+        deployer = new RuntimeFabricDeployer(this.clientWrapper,
                 environmentLocator,
                 500,
                 maxTries,
@@ -381,7 +381,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
     }
 
     @Test
-    void invalid_target_failure() {
+    void invalid_targetType_failure() {
         withHttpServer { HttpServerRequest request ->
             if (mockAuthenticationOk(request)) {
                 return
@@ -389,7 +389,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
             if (mockEnvironments(request)) {
                 return
             }
-            if (mockGetTargetId(request, false)) {
+            if (mockGetTargetId(request, false, true)) {
                 return
             }
         }
@@ -424,12 +424,61 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
         }
 
         assertThat exception.message,
-                is(containsString("Unable to find target 'INVALID_TARGET_NAME'. Valid targets are [Not_Found_Target_Name]"))
+                is(containsString("Unable to find a valid runtime fabric target 'INVALID_TARGET_NAME'. Valid targets are []"))
+
+    }
+
+    @Test
+    void invalid_targetId_failure() {
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request)) {
+                return
+            }
+            if (mockEnvironments(request)) {
+                return
+            }
+            if (mockGetTargetId(request, false, false)) {
+                return
+            }
+        }
+
+        def request = new RuntimeFabricDeploymentRequest(ENV,
+                new WorkerSpecRequest('INVALID_TARGET_NAME',
+                        VERSION,
+                        true,
+                        true,
+                        true,
+                        UpdateStrategy.recreate,
+                        true,
+                        true,
+                        VCoresSize.vCore15GB,
+                        13,
+                        true,
+                        false),
+                builtFile,
+                'theKey',
+                'theClientId',
+                'theSecret',
+                'client',
+                APP_NAME,
+                APP_VERSION,
+                GROUP_ID)
+
+        request.setAutoDiscoveryId('the.auto.disc.prop',
+                '1234')
+
+        def exception = shouldFail {
+            deployer.deploy(request)
+        }
+
+        assertThat exception.message,
+                is(containsString("Unable to find a valid runtime fabric target 'INVALID_TARGET_NAME'. Valid targets are [Not_Found_Target_Name]"))
 
     }
 
     def mockGetTargetId(HttpServerRequest request,
                         boolean isSuccess = true,
+                        boolean isErrorGetTargetType = false,
                         String groupId = this.GROUP_ID) {
         def uri = request.absoluteURI()
         if (uri.endsWith("/runtimefabric/api/organizations/${groupId}/targets") && request.method().name() == 'GET') {
@@ -440,7 +489,16 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                     putHeader('Content-Type',
                             'application/json')
                     end(JsonOutput.toJson([
-                        [id: TARGET_ID, name: TARGET_NAME]
+                        [id: TARGET_ID, name: TARGET_NAME, type: deployer.RUNTIME_FABRIC_TARGET_TYPE]
+                    ]))
+                }
+            } else if (isErrorGetTargetType) {
+                request.response().with {
+                    statusCode = 200
+                    putHeader('Content-Type',
+                            'application/json')
+                    end(JsonOutput.toJson([
+                            [id: TARGET_ID, name: TARGET_NAME, type: 'Invalid_Type']
                     ]))
                 }
             } else {
@@ -449,7 +507,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                     putHeader('Content-Type',
                             'application/json')
                     end(JsonOutput.toJson([
-                        [id: 'Not_Found_Target_Id', name: 'Not_Found_Target_Name']
+                        [id: 'Not_Found_Target_Id', name: 'Not_Found_Target_Name', type: deployer.RUNTIME_FABRIC_TARGET_TYPE]
                     ]))
                 }
             }
