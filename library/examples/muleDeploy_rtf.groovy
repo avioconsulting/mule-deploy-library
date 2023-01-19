@@ -39,8 +39,8 @@ muleDeploy {
             updateStrategy 'recreate'
             forwardSslSession 'true'
             publicUrl 'myapp.anypoint.com'
-            cpuReserved '30'
-            memoryReserved '800'
+            cpuReserved 30
+            memoryReserved 800
         }
 
         environment 'DEV'

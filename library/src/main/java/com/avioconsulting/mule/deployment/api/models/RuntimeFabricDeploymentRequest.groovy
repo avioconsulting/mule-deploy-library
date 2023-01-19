@@ -102,15 +102,14 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
         this.appVersion = appVersion ?: parsedPomProperties.version
         this.groupId = groupId ?: parsedPomProperties.groupId
         this.target = workerSpecRequest.target
+        this.workerSpecRequest = workerSpecRequest
         if (!workerSpecRequest.muleVersion) {
             def propertyToUse = mule4Request ? 'app.runtime' : 'mule.version'
             def rawVersion = parsedPomProperties.props[propertyToUse]
             // Studio will modify some projects with 4.2.2-hf2. The -hf2 part is meaningless to CloudHub
             // because it's done in the form of update IDs. It's better to just remove it
             rawVersion = rawVersion.split('-')[0]
-            this.workerSpecRequest = workerSpecRequest.withNewMuleVersion(rawVersion)
-        } else {
-            this.workerSpecRequest = workerSpecRequest
+            this.workerSpecRequest.muleVersion = rawVersion
         }
         this.cryptoKey = cryptoKey
         this.anypointClientId = anypointClientId

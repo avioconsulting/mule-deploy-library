@@ -9,7 +9,7 @@ class WorkerSpecRequest {
      * by looking at POM properties, the <app.runtime> property for Mule 4 projects and <mule.version> for
      * Mule 3 projects. The POM will be read from the JAR/ZIP of the app
      */
-    final String muleVersion
+    String muleVersion
 
     /***
      * Enable Last-Mile security to forward HTTPS connections to be decrypted by this application.
@@ -110,19 +110,6 @@ class WorkerSpecRequest {
         this.replicaSize = replicaSize
         this.workerCount = workerCount
         this.target = target
-    }
-
-    WorkerSpecRequest withNewMuleVersion(String newMuleVersion) {
-        new WorkerSpecRequest(target,
-                              newMuleVersion,
-                              lastMileSecurity,
-                              persistentObjectStore,
-                              clustered,
-                              updateStrategy,
-                              replicasAcrossNodes,
-                              publicURL,
-                              replicaSize,
-                              workerCount)
     }
 
     Map<String, String> getVersionInfo() {
