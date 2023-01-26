@@ -129,8 +129,8 @@ class CloudHubV2Deployer extends RuntimeFabricDeployer implements ICloudHubV2Dep
 
     @Override
     boolean isMule4Request(CloudhubV2DeploymentRequest deploymentRequest) {
-        // TODO: Is using this (which leans on JAR vs. ZIP) ok?
-        deploymentRequest.isMule4Request()
+        // TODO: How are we going to support Mule 3 for RTF and CHv2?
+        true
     }
 
 }

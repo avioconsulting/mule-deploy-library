@@ -8,31 +8,13 @@ import org.apache.http.entity.mime.MultipartEntityBuilder
 
 class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
     /**
-     * environment name (e.g. DEV, not GUID)
-     */
-    final String environment
-    /**
-     * Actual name of your application WITHOUT any kind of customer/environment prefix or suffix. Spaces in the name are not allowed and will be rejected.
-     * This parameter is optional. If you don't supply it, the <artifactId> from your app's POM will be used.
-     */
-    final String appName
-    /**
      * Name (NOT ID) of server, cluster, or server group
      */
     final String targetServerOrClusterName
     /**
-     * The file to deploy. The name of this file will also be used for the Runtime Manager settings pane
-     */
-    final File file
-    /**
      * Mule app property overrides (the stuff in the properties tab)
      */
     final Map<String, String> appProperties
-    /**
-     * Version of the app you are deploying (e.g. <version> from the POM). This parameter is optional and if it's not supplied
-     * then it will be derived from the <version> parameter in the project's POM based on the JAR/ZIP
-     */
-    final String appVersion
 
     /**
      * Standard deployment request. See properties for parameter info.
@@ -43,16 +25,10 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
                             String appName = null,
                             String appVersion = null,
                             Map<String, String> appProperties = [:]) {
-        this.file = file
-        if (!appName) {
-            appName = parsedPomProperties.artifactId
-        }
+        super(file, appName, appVersion, environment)
         if (appName.contains(' ')) {
             throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
         }
-        this.environment = environment
-        this.appName = appName
-        this.appVersion = appVersion ?: parsedPomProperties.version
         this.targetServerOrClusterName = targetServerOrClusterName
         this.appProperties = appProperties
     }

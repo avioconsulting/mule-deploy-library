@@ -2,10 +2,10 @@ package com.avioconsulting.mule.deployment.api
 
 
 import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
+import com.avioconsulting.mule.deployment.api.models.AppDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.CloudhubV2DeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
-import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.RuntimeFabricDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.credentials.Credential
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
@@ -113,7 +113,7 @@ class Deployer implements IDeployer {
      * @param desiredPolicies Which policies to apply. The default value is empty, which means apply no policies and remove any policies already there
      * @param enabledFeatures Which features of this tool to turn on. All by default.
      */
-    def deployApplication(FileBasedAppDeploymentRequest appDeploymentRequest,
+    def deployApplication(AppDeploymentRequest appDeploymentRequest,
                           ApiSpecificationList apiSpecifications = null,
                           List<Policy> desiredPolicies = [],
                           List<Features> enabledFeatures = [Features.All]) {
@@ -185,7 +185,7 @@ class Deployer implements IDeployer {
     private def performCommonDeploymentTasks(boolean isSoapApi,
                                              ApiSpecificationList apiSpecifications,
                                              List<Policy> desiredPolicies,
-                                             FileBasedAppDeploymentRequest appDeploymentRequest,
+                                             AppDeploymentRequest appDeploymentRequest,
                                              String environment,
                                              List<Features> enabledFeatures,
                                              ISubDeployer deployer) {

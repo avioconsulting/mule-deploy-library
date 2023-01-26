@@ -8,8 +8,7 @@ import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
 
-abstract class FileBasedAppDeploymentRequest {
-    protected final Map<String, String> autoDiscoveries = [:]
+abstract class FileBasedAppDeploymentRequest extends AppDeploymentRequest {
 
     static final List<String> IGNORE_DC_FILES = [
             'exchange_modules', // we don't deal with Exchange dependencies
@@ -19,6 +18,24 @@ abstract class FileBasedAppDeploymentRequest {
     ]
 
     static List<String> IGNORE_DC_FILES_EXCEPT_EXCHANGE = IGNORE_DC_FILES - ['exchange_modules']
+
+    /**
+     * The file to deploy. The name of this file will also be used for the Runtime Manager settings pane
+     */
+    final File file
+
+    FileBasedAppDeploymentRequest(File file, String appName, String appVersion, String environment) {
+        super(appName, appVersion, environment)
+
+        // Properties are not passed then extract the artifactId and version from the pom.xml
+        if(!appName) {
+            setAppName(this.parsedPomProperties.artifactId)
+        }
+        if(!appVersion) {
+            setAppVersion(parsedPomProperties.version)
+        }
+        this.file = file
+    }
 
     static boolean isIgnored(Path something,
                              boolean ignoreExchange = true) {
@@ -66,16 +83,9 @@ abstract class FileBasedAppDeploymentRequest {
         file.name.endsWith('.jar')
     }
 
-    abstract File getFile()
-
-    def setAutoDiscoveryId(String propertyName,
-                           String autoDiscoveryId) {
-        this.autoDiscoveries[propertyName] = autoDiscoveryId
+    File getFile() {
+        this.file
     }
-
-    abstract String getAppVersion()
-
-    abstract String getEnvironment()
 
     List<RamlFile> getRamlFilesFromApp(String rootRamlDirectory,
                                        boolean ignoreExchange) {

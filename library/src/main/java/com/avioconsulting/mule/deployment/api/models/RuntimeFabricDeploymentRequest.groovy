@@ -5,16 +5,7 @@ import groovy.json.JsonOutput
 import groovy.transform.ToString
 
 @ToString
-class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
-    /**
-     * environment name (e.g. DEV, not GUID)
-     */
-    final String environment
-    /**
-     * Actual name of your application WITHOUT any kind of customer/environment prefix or suffix. Spaces in the name are not allowed and will be rejected.
-     * This parameter is optional. If you don't supply it, the <artifactId> from your app's POM will be used.
-     */
-    final String appName
+class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
     /**
      * CloudHub specs
      */
@@ -51,11 +42,6 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
      * Get only property, derived from app, environment, and prefix, this the real application name that will be used in CloudHub to ensure uniqueness.
      */
     final String normalizedAppName
-    /**
-     * Version of the app you are deploying (e.g. <version> from the POM). This parameter is optional and if it's not supplied
-     * then it will be derived from the <version> parameter in the project's POM based on the JAR/ZIP
-     */
-    final String appVersion
 
     /**
      * The Business group ID of the deployment
@@ -96,10 +82,7 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
                                    String groupId = null,
                                    Map<String, String> appProperties = [:],
                                    Map<String, String> otherCloudHubProperties = [:]) {
-        this.file = file
-        this.environment = environment
-        this.appName = appName ?: parsedPomProperties.artifactId
-        this.appVersion = appVersion ?: parsedPomProperties.version
+        super(appName, appVersion, environment)
         this.groupId = groupId ?: parsedPomProperties.groupId
         this.target = workerSpecRequest.target
         this.workerSpecRequest = workerSpecRequest

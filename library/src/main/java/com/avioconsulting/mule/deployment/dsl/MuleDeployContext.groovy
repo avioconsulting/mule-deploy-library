@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.dsl
 
-
+import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.dsl.policies.PolicyListContext
@@ -82,10 +82,18 @@ class MuleDeployContext extends BaseContext {
         } else {
             deploymentRequest = onPremApplication.createDeploymentRequest()
         }
-        return new DeploymentPackage(deploymentRequest,
-                                     apiSpecifications.createApiSpecList(deploymentRequest),
-                                     policyList,
-                                     features)
+
+        if(deploymentRequest instanceof FileBasedAppDeploymentRequest) {
+            return new DeploymentPackage(deploymentRequest,
+                    apiSpecifications.createApiSpecList(deploymentRequest),
+                    policyList,
+                    features)
+        } else {
+            return new DeploymentPackage(deploymentRequest,
+                    null,
+                    policyList,
+                    features)
+        }
     }
 
     def version(String version) {

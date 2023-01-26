@@ -251,8 +251,8 @@ class RuntimeFabricDeployer extends BaseDeployer implements IRuntimeFabricDeploy
 
     @Override
     boolean isMule4Request(RuntimeFabricDeploymentRequest deploymentRequest) {
-        // TODO: Is using this (which leans on JAR vs. ZIP) ok?
-        deploymentRequest.isMule4Request()
+        // TODO: How are we going to support Mule 3 for RTF and CHv2?
+        true
     }
 
 }

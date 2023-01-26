@@ -60,6 +60,6 @@ trait AppBuilding {
         FileUtils.deleteQuietly(zipFile)
         antBuilder.zip(destfile: zipFile,
                        basedir: tempAppDirectory)
-        new TestFileBasedRequest(zipFile)
+        new TestFileBasedRequest(zipFile, "my-app", "1.0.0", "PROD")
     }
 }
