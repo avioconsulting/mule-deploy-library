@@ -16,7 +16,8 @@ muleDeploy {
 
     cloudHubV2Application {
         environment params.env
-        file params.appArtifact
+        applicationName 'hello-world-test'
+        appVersion '1.0.0-SNAPSHOT'
         cryptoKey params.cryptoKey
         autoDiscovery {
             clientId params.autoDiscClientId

@@ -12,9 +12,8 @@ muleDeploy {
 
     cloudHubV2Application {
         environment params.env
-        // the Maven plugin will automatically set `params.appArtifact` to the path of the target JAR if it is used
-        // in a project POM
-        file params.appArtifact
+        applicationName 'hello-world-test'
+        appVersion '1.0.0-SNAPSHOT'
         cryptoKey params.cryptoKey
         autoDiscovery {
             clientId params.autoDiscClientId
