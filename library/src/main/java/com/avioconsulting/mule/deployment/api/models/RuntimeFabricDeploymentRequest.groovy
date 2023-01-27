@@ -11,10 +11,6 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
      */
     final WorkerSpecRequest workerSpecRequest
     /**
-     * The file to deploy. The name of this file will also be used for the Runtime Manager settings pane
-     */
-    final File file
-    /**
      * Will be set in the 'crypto.key' CloudHub property
      */
     final String cryptoKey
@@ -72,28 +68,20 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
      */
     RuntimeFabricDeploymentRequest(String environment,
                                    WorkerSpecRequest workerSpecRequest,
-                                   File file,
                                    String cryptoKey,
                                    String anypointClientId,
                                    String anypointClientSecret,
                                    String cloudHubAppPrefix,
-                                   String appName = null,
-                                   String appVersion = null,
-                                   String groupId = null,
+                                   String appName,
+                                   String appVersion,
+                                   String groupId,
                                    Map<String, String> appProperties = [:],
                                    Map<String, String> otherCloudHubProperties = [:]) {
         super(appName, appVersion, environment)
-        this.groupId = groupId ?: parsedPomProperties.groupId
+        this.groupId = groupId
         this.target = workerSpecRequest.target
         this.workerSpecRequest = workerSpecRequest
-        if (!workerSpecRequest.muleVersion) {
-            def propertyToUse = mule4Request ? 'app.runtime' : 'mule.version'
-            def rawVersion = parsedPomProperties.props[propertyToUse]
-            // Studio will modify some projects with 4.2.2-hf2. The -hf2 part is meaningless to CloudHub
-            // because it's done in the form of update IDs. It's better to just remove it
-            rawVersion = rawVersion.split('-')[0]
-            this.workerSpecRequest.muleVersion = rawVersion
-        }
+        this.workerSpecRequest.muleVersion = workerSpecRequest.muleVersion
         this.cryptoKey = cryptoKey
         this.anypointClientId = anypointClientId
         this.anypointClientSecret = anypointClientSecret

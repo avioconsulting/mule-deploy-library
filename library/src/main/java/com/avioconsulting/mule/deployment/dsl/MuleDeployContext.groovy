@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.dsl
 
-import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
+import com.avioconsulting.mule.deployment.api.models.ExchangeAppDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.dsl.policies.PolicyListContext
@@ -71,24 +71,25 @@ class MuleDeployContext extends BaseContext {
             features = removeFeature(Features.PolicySync,
                                      features)
         }
-        FileBasedAppDeploymentRequest deploymentRequest;
 
-        if (cloudHubSet) {
-            deploymentRequest = cloudHubApplication.createDeploymentRequest()
-        } else if (cloudHubV2Set) {
-            deploymentRequest = cloudHubV2Application.createDeploymentRequest()
-        } else if (runtimeFabricSet) {
-            deploymentRequest = runtimeFabricApplication.createDeploymentRequest()
-        } else {
-            deploymentRequest = onPremApplication.createDeploymentRequest()
-        }
-
-        if(deploymentRequest instanceof FileBasedAppDeploymentRequest) {
+        if (cloudHubSet || onPremSet) {
+            FileBasedAppDeploymentRequest deploymentRequest;
+            if (cloudHubSet) {
+                deploymentRequest = cloudHubApplication.createDeploymentRequest()
+            } else {
+                deploymentRequest = onPremApplication.createDeploymentRequest()
+            }
             return new DeploymentPackage(deploymentRequest,
                     apiSpecifications.createApiSpecList(deploymentRequest),
                     policyList,
                     features)
         } else {
+            ExchangeAppDeploymentRequest deploymentRequest
+            if (cloudHubV2Set) {
+                deploymentRequest = cloudHubV2Application.createDeploymentRequest()
+            } else {
+                deploymentRequest = runtimeFabricApplication.createDeploymentRequest()
+            }
             return new DeploymentPackage(deploymentRequest,
                     null,
                     policyList,

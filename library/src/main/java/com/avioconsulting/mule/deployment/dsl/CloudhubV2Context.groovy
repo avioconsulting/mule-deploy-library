@@ -8,7 +8,6 @@ class CloudhubV2Context extends RuntimeFabricContext {
         validateContext()
         new CloudhubV2DeploymentRequest(this.environment,
                                       workerSpecs.createRequest(),
-                                      new File(this.file),
                                       this.cryptoKey,
                                       autoDiscovery.clientId,
                                       autoDiscovery.clientSecret,
