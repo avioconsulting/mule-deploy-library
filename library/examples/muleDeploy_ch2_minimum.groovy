@@ -19,13 +19,13 @@ muleDeploy {
             clientId params.autoDiscClientId
             clientSecret params.autoDiscClientSecret
         }
-        cloudHubAppPrefix 'AVI'
 
         // When the user is member of multiple organizations, businessGroupId must be provided
         // in order to have correct ID when the plugin is retrieving info of target, environment, etc
         businessGroupId 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee'
         workerSpecs {
             target 'Cloudhub-US-East-1'
+            muleVersion '4.4.0'
         }
     }
 }

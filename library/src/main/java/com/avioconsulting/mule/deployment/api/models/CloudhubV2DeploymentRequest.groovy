@@ -24,7 +24,7 @@ class CloudhubV2DeploymentRequest extends RuntimeFabricDeploymentRequest {
     }
 
     Map<String, String> getCloudhubAppInfo() {
-        def result = super.getCloudhubAppInfo()
+        def result = super.getCloudhubBaseAppInfo()
         def vCores = ["vCores": workerSpecRequest.replicaSize.vCoresSize]
         result.application << vCores
         result

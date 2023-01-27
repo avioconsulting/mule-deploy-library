@@ -38,7 +38,7 @@ class WorkerSpecV2Context extends BaseContext {
     @Override
     List<String> findOptionalProperties() {
         [
-            'muleVersion', 'lastMileSecurity', 'persistentObjectStore', 'clustered',
+            'lastMileSecurity', 'persistentObjectStore', 'clustered',
             'updateStrategy', 'replicasAcrossNodes', 'publicURL', 'replicaSize',
             'workerCount', 'cpuReserved', 'memoryReserved'
         ]
