@@ -71,7 +71,7 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
                                    String cryptoKey,
                                    String anypointClientId,
                                    String anypointClientSecret,
-                                   String cloudHubAppPrefix = null,
+                                   String cloudHubAppPrefix,
                                    String appName,
                                    String appVersion,
                                    String groupId,
@@ -91,7 +91,7 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
         if (this.appName.contains(' ')) {
             throw new Exception("Runtime Manager does not like spaces in app names and you specified '${this.appName}'!")
         }
-        def newAppName = cloudHubAppPrefix.isEmpty() ? "${this.appName}-${environment}" : "${cloudHubAppPrefix}-${this.appName}-${environment}"
+        def newAppName = cloudHubAppPrefix == null ? "${this.appName}-${environment}" : "${cloudHubAppPrefix}-${this.appName}-${environment}"
         def appNameLowerCase = newAppName.toLowerCase()
         if (appNameLowerCase != newAppName) {
             newAppName = appNameLowerCase

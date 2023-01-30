@@ -103,7 +103,6 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
@@ -131,7 +130,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 is(equalTo('the-org-id'))
         def map = new JsonSlurper().parseText(rawBody)
         assertThat map.name,
-                is(equalTo('new-app'))
+                is(equalTo('client-new-app-dev'))
         assertThat map.application.ref.groupId,
                 is(equalTo(GROUP_ID))
         assertThat map.application.ref.version,
@@ -173,7 +172,6 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
@@ -243,7 +241,6 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
@@ -271,7 +268,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 is(equalTo('the-org-id'))
         def map = new JsonSlurper().parseText(rawBody)
         assertThat map.name,
-                is(equalTo(APP_NAME))
+                is(equalTo('client-new-app-dev'))
         assertThat map.application.ref.groupId,
                 is(equalTo(GROUP_ID))
         assertThat map.application.ref.version,
@@ -314,7 +311,6 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
@@ -359,7 +355,6 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
@@ -407,7 +402,6 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
@@ -455,7 +449,6 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
