@@ -6,7 +6,7 @@ class TestFileBasedRequest extends FileBasedAppDeploymentRequest {
     private final File zipFile
 
     TestFileBasedRequest(File zipFile, String appName, String appVersion, String environment) {
-        super(appName, appVersion, environment)
+        super(zipFile, appName, appVersion, environment)
         this.zipFile = zipFile
     }
 

@@ -26,7 +26,8 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
                             String appVersion = null,
                             Map<String, String> appProperties = [:]) {
         super(file, appName, appVersion, environment)
-        if (appName.contains(' ')) {
+
+        if (this.appName.contains(' ')) {
             throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
         }
         this.targetServerOrClusterName = targetServerOrClusterName

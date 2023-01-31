@@ -11,7 +11,7 @@ class ApiSpecContextTest implements AppBuilding {
     @Test
     void required_only() {
         // arrange
-        def appRequest = buildFullApp()
+        def appRequest = buildFullFileBasedApp()
         def context = new ApiSpecContext()
         def closure = {
             name 'Foo Bar'
@@ -42,7 +42,7 @@ class ApiSpecContextTest implements AppBuilding {
     @Test
     void soap() {
         // arrange
-        def appRequest = buildFullApp()
+        def appRequest = buildFullFileBasedApp()
         def context = new ApiSpecContext()
         def closure = {
             name 'Foo Bar'
@@ -76,7 +76,7 @@ class ApiSpecContextTest implements AppBuilding {
     @Test
     void soap_and_rest() {
         // arrange
-        def appRequest = buildFullApp()
+        def appRequest = buildFullFileBasedApp()
         def context = new ApiSpecContext()
         def closure = {
             name 'Foo Bar'
@@ -99,7 +99,7 @@ class ApiSpecContextTest implements AppBuilding {
     @Test
     void includes_optional() {
         // arrange
-        def appRequest = buildFullApp()
+        def appRequest = buildFullFileBasedApp()
         def context = new ApiSpecContext()
         def closure = {
             name 'Foo Bar'
@@ -140,7 +140,7 @@ class ApiSpecContextTest implements AppBuilding {
     @Test
     void includes_optional_source_directory_not_found() {
         // arrange
-        def appRequest = buildFullApp()
+        def appRequest = buildFullFileBasedApp()
         def context = new ApiSpecContext()
         def closure = {
             name 'Foo Bar'

@@ -106,7 +106,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 'new-app',
                 APP_VERSION,
                 GROUP_ID)
@@ -130,7 +130,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 is(equalTo('the-org-id'))
         def map = new JsonSlurper().parseText(rawBody)
         assertThat map.name,
-                is(equalTo('client-new-app-dev'))
+                is(equalTo('new-app-dev'))
         assertThat map.application.ref.groupId,
                 is(equalTo(GROUP_ID))
         assertThat map.application.ref.version,
@@ -175,7 +175,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 'new-app',
                 APP_VERSION,
                 GROUP_ID)
@@ -244,7 +244,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 APP_NAME,
                 APP_VERSION,
                 GROUP_ID)
@@ -268,7 +268,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 is(equalTo('the-org-id'))
         def map = new JsonSlurper().parseText(rawBody)
         assertThat map.name,
-                is(equalTo('client-new-app-dev'))
+                is(equalTo('new-app-dev'))
         assertThat map.application.ref.groupId,
                 is(equalTo(GROUP_ID))
         assertThat map.application.ref.version,
@@ -314,7 +314,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 APP_NAME,
                 APP_VERSION,
                 GROUP_ID)
@@ -358,7 +358,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 APP_NAME,
                 APP_VERSION,
                 GROUP_ID)
@@ -475,14 +475,15 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                         String groupId = this.GROUP_ID) {
         def uri = request.absoluteURI()
         if (uri.endsWith("/runtimefabric/api/organizations/${groupId}/targets") && request.method().name() == 'GET') {
-            println "mock status invocation /runtimefabric/api/organizations/${groupId}/targets"
+            println "mock get targetId /runtimefabric/api/organizations/${groupId}/targets"
             if(isSuccess) {
                 request.response().with {
                     statusCode = 200
                     putHeader('Content-Type',
                             'application/json')
                     end(JsonOutput.toJson([
-                        [id: TARGET_ID, name: TARGET_NAME, type: deployer.RUNTIME_FABRIC_TARGET_TYPE]
+                        [id: TARGET_ID, name: TARGET_NAME, type: deployer.RUNTIME_FABRIC_TARGET_TYPE],
+                        [id: TARGET_ID, name: TARGET_NAME, type: deployer.SHARED_SPACE_TARGET_TYPE]
                     ]))
                 }
             } else if (isErrorGetTargetType) {
@@ -516,7 +517,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                        String envId = this.ENV_ID) {
         def uri = request.absoluteURI()
         if (uri.endsWith("/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments") && request.method().name() == 'GET') {
-            println "mock status invocation /amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments"
+            println "mock get appInfo /amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments"
             if (newApp && isSuccess && statusCheckCount <= 1) {
                 statusCheckCount++
                 request.response().with {
@@ -643,7 +644,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                         String envId = this.ENV_ID) {
         def uri = request.absoluteURI()
         if (uri.endsWith("/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments") && request.method().name() == 'POST') {
-            println "mock status invocation /amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments"
+            println "mock creat app invocation /amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments"
 
             request.response().with {
                 statusCode = 202
@@ -670,7 +671,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                       String appId = this.APP_ID) {
         def uri = request.absoluteURI()
         if (uri.endsWith("/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments/${appId}") && request.method().name() == 'PATCH') {
-            println "mock status invocation /runtimefabric/api/organizations/${groupId}/targets"
+            println "mock updte app invocation /runtimefabric/api/organizations/${groupId}/targets"
             if(isSuccess) {
                 request.response().with {
                     statusCode = 200

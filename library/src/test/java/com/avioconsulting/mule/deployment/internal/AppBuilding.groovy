@@ -1,10 +1,11 @@
 package com.avioconsulting.mule.deployment.internal
 
+import com.avioconsulting.mule.deployment.api.models.ExchangeAppDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
 import org.apache.commons.io.FileUtils
 
 trait AppBuilding {
-    FileBasedAppDeploymentRequest buildFullApp() {
+    FileBasedAppDeploymentRequest buildFullFileBasedApp() {
         def tempDir = new File('target/temp')
         def tempAppDirectory = new File(tempDir,
                                         'designcenterapp')

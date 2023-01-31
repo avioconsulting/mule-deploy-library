@@ -103,11 +103,10 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 'new-app',
                 APP_VERSION,
                 GROUP_ID)
@@ -116,6 +115,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                 '1234')
 
         // act
+
         deployer.deploy(request)
 
         // assert
@@ -131,7 +131,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                 is(equalTo('the-org-id'))
         def map = new JsonSlurper().parseText(rawBody)
         assertThat map.name,
-                is(equalTo('new-app'))
+                is(equalTo('new-app-dev'))
         assertThat map.application.ref.groupId,
                 is(equalTo(GROUP_ID))
         assertThat map.application.ref.version,
@@ -173,11 +173,10 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 'new-app',
                 APP_VERSION,
                 GROUP_ID)
@@ -243,11 +242,10 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 APP_NAME,
                 APP_VERSION,
                 GROUP_ID)
@@ -271,7 +269,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                 is(equalTo('the-org-id'))
         def map = new JsonSlurper().parseText(rawBody)
         assertThat map.name,
-                is(equalTo(APP_NAME))
+                is(equalTo("new-app-dev"))
         assertThat map.application.ref.groupId,
                 is(equalTo(GROUP_ID))
         assertThat map.application.ref.version,
@@ -314,11 +312,10 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 APP_NAME,
                 APP_VERSION,
                 GROUP_ID)
@@ -359,11 +356,10 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 APP_NAME,
                 APP_VERSION,
                 GROUP_ID)
@@ -407,11 +403,10 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 APP_NAME,
                 APP_VERSION,
                 GROUP_ID)
@@ -455,11 +450,10 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 APP_NAME,
                 APP_VERSION,
                 GROUP_ID)
@@ -482,7 +476,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         String groupId = this.GROUP_ID) {
         def uri = request.absoluteURI()
         if (uri.endsWith("/runtimefabric/api/organizations/${groupId}/targets") && request.method().name() == 'GET') {
-            println "mock status invocation /runtimefabric/api/organizations/${groupId}/targets"
+            println "mock get targetId invocation /runtimefabric/api/organizations/${groupId}/targets"
             if(isSuccess) {
                 request.response().with {
                     statusCode = 200
@@ -523,7 +517,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                        String envId = this.ENV_ID) {
         def uri = request.absoluteURI()
         if (uri.endsWith("/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments") && request.method().name() == 'GET') {
-            println "mock status invocation /amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments"
+            println "mock get appInfo invocation /amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments"
             if (newApp && isSuccess && statusCheckCount <= 1) {
                 statusCheckCount++
                 request.response().with {
@@ -557,7 +551,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         items: [
                             [
                                 id: APP_ID,
-                                name: APP_NAME,
+                                name: "${APP_NAME}-${ENV}".toLowerCase(),
                                 status: 'APPLIED',
                                 application: [
                                     status: 'RUNNING'
@@ -580,7 +574,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         items: [
                             [
                                 id: APP_ID,
-                                name: APP_NAME,
+                                name: "${APP_NAME}-${ENV}".toLowerCase(),
                                 status: 'APPLIED',
                                 application: [
                                     status: 'RUNNING'
@@ -603,7 +597,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         items: [
                             [
                                 id: APP_ID,
-                                name: APP_NAME,
+                                name: "${APP_NAME}-${ENV}".toLowerCase(),
                                 status: 'APPLYING',
                                 application: [
                                     status: 'RUNNING'
@@ -650,7 +644,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         String envId = this.ENV_ID) {
         def uri = request.absoluteURI()
         if (uri.endsWith("/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments") && request.method().name() == 'POST') {
-            println "mock status invocation /amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments"
+            println "mock creat app /amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments"
 
             request.response().with {
                 statusCode = 202
@@ -659,7 +653,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                 end(JsonOutput.toJson([
                     [
                         id: APP_ID,
-                        name: APP_NAME,
+                        name: "${APP_NAME}-${ENV}".toLowerCase(),
                         creationDate: 1671455155002,
                         lastModifiedDate: 1671455155002
                     ]
@@ -677,7 +671,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                       String appId = this.APP_ID) {
         def uri = request.absoluteURI()
         if (uri.endsWith("/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments/${appId}") && request.method().name() == 'PATCH') {
-            println "mock status invocation /runtimefabric/api/organizations/${groupId}/targets"
+            println "mock update app invocation /amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments/${appId}"
             if(isSuccess) {
                 request.response().with {
                     statusCode = 200
@@ -686,7 +680,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                     end(JsonOutput.toJson([
                         [
                             id: APP_ID,
-                            name: APP_NAME,
+                            name: "${APP_NAME}-${ENV}".toLowerCase(),
                             creationDate: 1671455155002,
                             lastModifiedDate: 1671455155002
                         ]

@@ -27,6 +27,8 @@ abstract class FileBasedAppDeploymentRequest extends AppDeploymentRequest {
     FileBasedAppDeploymentRequest(File file, String appName, String appVersion, String environment) {
         super(appName, appVersion, environment)
 
+        this.file = file
+
         // Properties are not passed then extract the artifactId and version from the pom.xml
         if(!appName) {
             setAppName(this.parsedPomProperties.artifactId)
@@ -34,7 +36,6 @@ abstract class FileBasedAppDeploymentRequest extends AppDeploymentRequest {
         if(!appVersion) {
             setAppVersion(parsedPomProperties.version)
         }
-        this.file = file
     }
 
     static boolean isIgnored(Path something,

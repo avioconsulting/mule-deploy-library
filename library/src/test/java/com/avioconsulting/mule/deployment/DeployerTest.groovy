@@ -324,7 +324,6 @@ class DeployerTest {
                         false,
                         VCoresSize.vCore1GB,
                         1),
-                file,
                 'theKey',
                 'theClientId',
                 'theSecret',
