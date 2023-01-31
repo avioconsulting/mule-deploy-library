@@ -24,18 +24,18 @@ import static org.hamcrest.Matchers.is
 @SuppressWarnings("GroovyAccessibility")
 class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
     private RuntimeFabricDeployer deployer
-    private int statusCheckCount
-    private int maxTries
+    protected int statusCheckCount
+    protected int maxTries
 
-    private final String ENV = 'DEV'
-    private final String ENV_ID = 'def456'
-    private final String VERSION = '4.2.2'
-    private final String TARGET_NAME = 'us-west-2'
-    private final String TARGET_ID = '123-456-789'
-    private final String APP_NAME = 'new-app'
-    private final String APP_ID = '987-654-321'
-    private final String APP_VERSION = '1.2.3'
-    private final String GROUP_ID = 'the-org-id'
+    protected final String ENV = 'DEV'
+    protected final String ENV_ID = 'def456'
+    protected final String VERSION = '4.2.2'
+    protected final String TARGET_NAME = 'us-west-2'
+    protected final String TARGET_ID = '123-456-789'
+    protected final String APP_NAME = 'new-app'
+    protected final String APP_ID = '987-654-321'
+    protected final String APP_VERSION = '1.2.3'
+    protected final String GROUP_ID = 'the-org-id'
 
     @Before
     void clean() {
@@ -501,7 +501,8 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                     putHeader('Content-Type',
                             'application/json')
                     end(JsonOutput.toJson([
-                        [id: 'Not_Found_Target_Id', name: 'Not_Found_Target_Name', type: deployer.RUNTIME_FABRIC_TARGET_TYPE]
+                        [id: 'Not_Found_Target_Id', name: 'Not_Found_Target_Name', type: deployer.RUNTIME_FABRIC_TARGET_TYPE],
+                        [id: 'Not_Found_Target_Id', name: 'Not_Found_Target_Name', type: deployer.SHARED_SPACE_TARGET_TYPE]
                     ]))
                 }
             }
@@ -551,7 +552,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                         items: [
                             [
                                 id: APP_ID,
-                                name: APP_NAME,
+                                name: "${APP_NAME}-${ENV}".toLowerCase(),
                                 status: 'APPLIED',
                                 application: [
                                     status: 'RUNNING'
@@ -574,7 +575,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                         items: [
                             [
                                 id: APP_ID,
-                                name: APP_NAME,
+                                name: "${APP_NAME}-${ENV}".toLowerCase(),
                                 status: 'APPLIED',
                                 application: [
                                     status: 'RUNNING'
@@ -597,7 +598,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                         items: [
                             [
                                 id: APP_ID,
-                                name: APP_NAME,
+                                name: "${APP_NAME}-${ENV}".toLowerCase(),
                                 status: 'APPLYING',
                                 application: [
                                     status: 'RUNNING'
@@ -653,7 +654,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 end(JsonOutput.toJson([
                     [
                         id: APP_ID,
-                        name: APP_NAME,
+                        name: "${APP_NAME}-${ENV}".toLowerCase(),
                         creationDate: 1671455155002,
                         lastModifiedDate: 1671455155002
                     ]
@@ -680,7 +681,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                     end(JsonOutput.toJson([
                         [
                             id: APP_ID,
-                            name: APP_NAME,
+                            name: "${APP_NAME}-${ENV}".toLowerCase(),
                             creationDate: 1671455155002,
                             lastModifiedDate: 1671455155002
                         ]
@@ -704,5 +705,4 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
         }
         return false
     }
-
 }

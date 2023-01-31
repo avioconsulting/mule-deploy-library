@@ -61,7 +61,7 @@ class RuntimeFabricDeployer extends BaseDeployer implements IRuntimeFabricDeploy
     def deploy(RuntimeFabricDeploymentRequest deploymentRequest) {
         def groupId = deploymentRequest.groupId
         def envId = environmentLocator.getEnvironmentId(deploymentRequest.environment, groupId)
-        def appName = deploymentRequest.appName
+        def appName = deploymentRequest.normalizedAppName
         def targetId = getTargetId(deploymentRequest.target, groupId)
         deploymentRequest.setTargetId(targetId)
 

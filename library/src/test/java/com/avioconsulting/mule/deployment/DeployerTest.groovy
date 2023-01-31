@@ -308,50 +308,6 @@ class DeployerTest {
     }
 
     @Test
-    void deployApplication_cloudhub_v2_mule_4() {
-        // TODO: What is this test actually testing?
-        // arrange
-        def file = new File('src/test/resources/some_file.txt')
-
-        def request = new CloudhubV2DeploymentRequest('DEV',
-                new WorkerSpecRequest('target',
-                        '4.2.2',
-                        false,
-                        false,
-                        false,
-                        UpdateStrategy.rolling,
-                        false,
-                        false,
-                        VCoresSize.vCore1GB,
-                        1),
-                'theKey',
-                'theClientId',
-                'theSecret',
-                'client',
-                'new-app-mule4',
-                '1.2.3',
-                'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
-//        def apiSpec = new ApiSpecification('Hello API',
-//                simpleRamlFiles,
-//                null,
-//                'the-asset-id',
-//                'https://foo')
-
-        // act
-        deployer.deployApplication(request, null)
-
-        // assert
-//        assertThat apiSyncs.size(),
-//                is(equalTo(0))
-//        apiSyncs[0].with {
-//            it.apiSpec.with {
-//                assertThat it.isMule4OrAbove,
-//                        is(equalTo(true))
-//            }
-//        }
-    }
-
-    @Test
     void deployApplication_no_dc_deployment_for_tst_environment() {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
