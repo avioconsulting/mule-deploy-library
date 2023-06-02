@@ -56,7 +56,7 @@ abstract class FileBasedAppDeploymentRequest extends AppDeploymentRequest {
     protected PomInfo parsedPomProperties = {
         def zipOrJarPath = getFile().toPath()
         FileSystems.newFileSystem(zipOrJarPath,
-                                  new HashMap<String, Object>()).withCloseable { fs ->
+                                  null).withCloseable { fs ->
             def pomXmlPath = Files.walk(fs.getPath('/META-INF/maven')).find { p ->
                 p.endsWith('pom.xml')
             } as Path
@@ -91,7 +91,7 @@ abstract class FileBasedAppDeploymentRequest extends AppDeploymentRequest {
     List<RamlFile> getRamlFilesFromApp(String rootRamlDirectory,
                                        boolean ignoreExchange) {
         return FileSystems.newFileSystem(file.toPath(),
-                                         new HashMap<String, Object>()).withCloseable { fs ->
+                                         null).withCloseable { fs ->
             def apiPath = fs.getPath(rootRamlDirectory)
             if (!Files.exists(apiPath)) {
                 return []
