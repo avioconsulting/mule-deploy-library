@@ -48,4 +48,21 @@ abstract class BaseContext {
             this[name] = argument
         }
     }
+
+    /**
+     * Call the findErrors method from BaseContext class and also for all classes provided by the parameter
+     * @param childrenObjects
+     */
+    protected validateBaseContext(Map<String, BaseContext> childrenObjects = [:]) {
+        def errors = findErrors()
+        childrenObjects.each {
+            errors += it.value.findErrors(it.key)
+        }
+
+        if (errors.any()) {
+            def errorList = errors.join('\n')
+            throw new Exception("Your deployment request is not complete. The following errors exist:\n${errorList}")
+        }
+    }
+
 }

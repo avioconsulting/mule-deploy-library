@@ -7,11 +7,7 @@ class OnPremContext extends BaseContext {
     Map<String, String> appProperties = [:]
 
     OnPremDeploymentRequest createDeploymentRequest() {
-        def errors = findErrors()
-        if (errors.any()) {
-            def errorList = errors.join('\n')
-            throw new Exception("Your deployment request is not complete. The following errors exist:\n${errorList}")
-        }
+        validateBaseContext()
         new OnPremDeploymentRequest(this.environment,
                                     this.targetServerOrClusterName,
                                     new File(this.file),

@@ -25,16 +25,11 @@ class RuntimeFabricContext extends BaseContext {
                                            this.otherCloudHubProperties)
     }
 
-    protected List validateContext() {
-        def errors = findErrors()
-        def specs = workerSpecs
-        errors += specs.findErrors('workerSpecs')
-        def autoDiscovery = this.autoDiscovery
-        errors += autoDiscovery.findErrors('autoDiscovery')
-        if (errors.any()) {
-            def errorList = errors.join('\n')
-            throw new Exception("Your deployment request is not complete. The following errors exist:\n${errorList}")
-        }
+    /**
+     * Besides of validating attributes of the class itself, validates attributes from workSpecs and autoDiscovery objects
+     */
+    protected def validateContext() {
+        validateBaseContext(["workerSpecs": workerSpecs, "autoDiscovery": autoDiscovery])
     }
 
     @Override
