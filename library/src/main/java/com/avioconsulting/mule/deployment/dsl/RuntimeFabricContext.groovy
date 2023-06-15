@@ -34,6 +34,6 @@ class RuntimeFabricContext extends BaseContext {
 
     @Override
     List<String> findOptionalProperties() {
-        ['cloudHubAppPrefix', 'cryptoKey']
+        ['cloudHubAppPrefix']
     }
 }
