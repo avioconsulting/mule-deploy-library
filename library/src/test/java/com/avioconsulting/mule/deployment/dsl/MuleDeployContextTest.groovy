@@ -1,10 +1,10 @@
 package com.avioconsulting.mule.deployment.dsl
 
-import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
-import com.avioconsulting.mule.deployment.api.models.CloudhubV2DeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubV2DeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
-import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
-import com.avioconsulting.mule.deployment.api.models.RuntimeFabricDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.AppBuilding
 import org.junit.Before
 import org.junit.Test

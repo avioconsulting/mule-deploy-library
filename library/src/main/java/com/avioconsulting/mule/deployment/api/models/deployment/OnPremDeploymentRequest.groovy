@@ -1,4 +1,4 @@
-package com.avioconsulting.mule.deployment.api.models
+package com.avioconsulting.mule.deployment.api.models.deployment
 
 import groovy.json.JsonOutput
 import org.apache.http.HttpEntity

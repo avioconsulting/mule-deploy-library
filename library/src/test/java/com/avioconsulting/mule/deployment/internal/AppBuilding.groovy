@@ -1,7 +1,7 @@
 package com.avioconsulting.mule.deployment.internal
 
-import com.avioconsulting.mule.deployment.api.models.ExchangeAppDeploymentRequest
-import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+
+import com.avioconsulting.mule.deployment.api.models.deployment.FileBasedAppDeploymentRequest
 import org.apache.commons.io.FileUtils
 
 trait AppBuilding {

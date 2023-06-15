@@ -1,5 +1,6 @@
-package com.avioconsulting.mule.deployment.api.models
+package com.avioconsulting.mule.deployment.api.models.deployment
 
+import com.avioconsulting.mule.deployment.api.models.WorkerSpecRequest
 import groovy.json.JsonOutput
 import groovy.transform.ToString
 

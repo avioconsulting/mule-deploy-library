@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.dsl
 
-import com.avioconsulting.mule.deployment.api.models.RuntimeFabricDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
 
 class RuntimeFabricContext extends BaseContext {
     String environment, applicationName, appVersion, cryptoKey, cloudHubAppPrefix, businessGroupId
@@ -39,6 +39,6 @@ class RuntimeFabricContext extends BaseContext {
 
     @Override
     List<String> findOptionalProperties() {
-        ['cloudHubAppPrefix']
+        ['cloudHubAppPrefix', 'cryptoKey']
     }
 }

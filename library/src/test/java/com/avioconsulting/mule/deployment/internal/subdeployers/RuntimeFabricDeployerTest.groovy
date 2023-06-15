@@ -4,7 +4,7 @@ import com.avioconsulting.mule.MavenInvoke
 import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.DryRunMode
-import com.avioconsulting.mule.deployment.api.models.RuntimeFabricDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.UpdateStrategy
 import com.avioconsulting.mule.deployment.api.models.VCoresSize
 import com.avioconsulting.mule.deployment.api.models.WorkerSpecRequest

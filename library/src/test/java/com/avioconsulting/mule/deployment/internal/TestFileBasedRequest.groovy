@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.internal
 
-import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.FileBasedAppDeploymentRequest
 
 class TestFileBasedRequest extends FileBasedAppDeploymentRequest {
     private final File zipFile

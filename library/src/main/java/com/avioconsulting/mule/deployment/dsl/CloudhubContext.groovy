@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.dsl
 
-import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
 
 class CloudhubContext extends BaseContext {
     String environment, applicationName, appVersion, file, cryptoKey, cloudHubAppPrefix

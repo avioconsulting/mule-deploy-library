@@ -1,5 +1,6 @@
-package com.avioconsulting.mule.deployment.api.models
+package com.avioconsulting.mule.deployment.api.models.deployment
 
+import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.internal.models.CloudhubAppProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput

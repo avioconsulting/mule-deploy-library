@@ -1,8 +1,9 @@
 package com.avioconsulting.mule.deployment.dsl
 
-import com.avioconsulting.mule.deployment.api.models.ExchangeAppDeploymentRequest
+
 import com.avioconsulting.mule.deployment.api.models.Features
-import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.ExchangeAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.dsl.policies.PolicyListContext
 
 class MuleDeployContext extends BaseContext {

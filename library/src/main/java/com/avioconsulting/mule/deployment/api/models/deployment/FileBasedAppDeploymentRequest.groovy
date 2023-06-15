@@ -1,5 +1,6 @@
-package com.avioconsulting.mule.deployment.api.models
+package com.avioconsulting.mule.deployment.api.models.deployment
 
+import com.avioconsulting.mule.deployment.api.models.PomInfo
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import groovy.xml.XmlSlurper
 import groovy.xml.slurpersupport.NodeChild

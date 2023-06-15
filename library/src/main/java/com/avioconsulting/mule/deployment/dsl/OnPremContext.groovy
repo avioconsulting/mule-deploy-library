@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.dsl
 
-import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeploymentRequest
 
 class OnPremContext extends BaseContext {
     String environment, applicationName, appVersion, file, targetServerOrClusterName

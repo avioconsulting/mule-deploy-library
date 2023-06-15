@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.api.models
 
 import com.avioconsulting.mule.MavenInvoke
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubV2DeploymentRequest
 import org.hamcrest.MatcherAssert
 import org.junit.BeforeClass
 import org.junit.Test
