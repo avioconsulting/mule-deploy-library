@@ -239,4 +239,33 @@ class CloudhubV2ContextTest implements MavenInvoke {
         MatcherAssert.assertThat exception.message,
                    is(equalTo("Field 'workerSpecs' has already been set!"))
     }
+
+    @Test
+    void repeat_child_closure() {
+        // arrange
+        def context = new CloudhubV2Context()
+        def closure = {
+            environment 'DEV'
+            cryptoKey 'theKey'
+            autoDiscovery {
+                clientId 'the_client_id'
+                clientSecret 'the_client_secret'
+            }
+            cloudHubAppPrefix 'AVI'
+            workerSpecs {
+                target 'target_name'
+                target 'target_name_2'
+            }
+        }
+        closure.delegate = context
+
+        // act
+        def exception = shouldFail {
+            closure.call()
+        }
+
+        // assert
+        MatcherAssert.assertThat exception.message,
+                is(equalTo("Field 'target' has already been set!"))
+    }
 }
