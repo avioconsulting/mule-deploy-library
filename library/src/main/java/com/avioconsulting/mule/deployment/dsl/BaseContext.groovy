@@ -13,6 +13,12 @@ abstract class BaseContext {
         fieldsThatHaveBeenSet.contains(field)
     }
 
+    /**
+     * Get all fields from the class and check if has value, if not, check if it is an optional parameters, if so just ignore,
+     * otherwise add into the list of errors.
+     * @param prefix (Optional with null as default value) prefix to add on all properties when is looking for missing values
+     * @return
+     */
     def findErrors(String prefix = null) {
         def optional = findOptionalProperties()
         this.getProperties().findAll { k, v ->

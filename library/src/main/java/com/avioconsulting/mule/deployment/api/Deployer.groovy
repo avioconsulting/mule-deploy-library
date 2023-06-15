@@ -107,7 +107,7 @@ class Deployer implements IDeployer {
     }
 
     /**
-     * Deploys a CloudHub or on-prem application, end to end
+     * Deploys a CloudHub v1 or v2, RTF or on-prem application, end to end
      * @param appDeploymentRequest Details about how to deploy your app
      * @param apiSpecification How API specification details work. This can be optional. Doing so will automatically remove Design Center sync and policy sync from enabled features
      * @param desiredPolicies Which policies to apply. The default value is empty, which means apply no policies and remove any policies already there
