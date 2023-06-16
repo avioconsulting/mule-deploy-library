@@ -3,6 +3,11 @@ package com.avioconsulting.mule.deployment
 import com.avioconsulting.mule.deployment.api.Deployer
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.*
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubV2DeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.internal.models.ApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
@@ -303,51 +308,6 @@ class DeployerTest {
             it.apiSpec.with {
                 assertThat it.isMule4OrAbove,
                            is(equalTo(true))
-            }
-        }
-    }
-
-    @Test
-    void deployApplication_cloudhub_v2_mule_4() {
-        // arrange
-        def file = new File('src/test/resources/some_file.txt')
-
-        def request = new CloudhubV2DeploymentRequest('DEV',
-                new WorkerSpecRequest('target',
-                        '4.2.2',
-                        false,
-                        false,
-                        false,
-                        UpdateStrategy.rolling,
-                        false,
-                        false,
-                        VCoresSize.vCore1GB,
-                        1),
-                file,
-                'theKey',
-                'theClientId',
-                'theSecret',
-                'client',
-                'new-app-mule4',
-                '1.2.3',
-                'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
-        def apiSpec = new ApiSpecification('Hello API',
-                simpleRamlFiles,
-                null,
-                'the-asset-id',
-                'https://foo')
-
-        // act
-        deployer.deployApplication(request,
-                new ApiSpecificationList([apiSpec]))
-
-        // assert
-        assertThat apiSyncs.size(),
-                is(equalTo(1))
-        apiSyncs[0].with {
-            it.apiSpec.with {
-                assertThat it.isMule4OrAbove,
-                        is(equalTo(true))
             }
         }
     }

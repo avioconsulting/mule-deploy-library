@@ -1,28 +1,17 @@
-package com.avioconsulting.mule.deployment.api.models
+package com.avioconsulting.mule.deployment.api.models.deployment
 
+
+import com.avioconsulting.mule.deployment.api.models.WorkerSpecRequest
 import com.avioconsulting.mule.deployment.internal.models.CloudhubAppProperties
 import groovy.json.JsonOutput
 import groovy.transform.ToString
 
 @ToString
-class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
-    /**
-     * environment name (e.g. DEV, not GUID)
-     */
-    final String environment
-    /**
-     * Actual name of your application WITHOUT any kind of customer/environment prefix or suffix. Spaces in the name are not allowed and will be rejected.
-     * This parameter is optional. If you don't supply it, the <artifactId> from your app's POM will be used.
-     */
-    final String appName
+class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
     /**
      * CloudHub specs
      */
     final WorkerSpecRequest workerSpecRequest
-    /**
-     * The file to deploy. The name of this file will also be used for the Runtime Manager settings pane
-     */
-    final File file
     /**
      * Will be set in the 'crypto.key' CloudHub property
      */
@@ -51,11 +40,6 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
      * Get only property, derived from app, environment, and prefix, this the real application name that will be used in CloudHub to ensure uniqueness.
      */
     final String normalizedAppName
-    /**
-     * Version of the app you are deploying (e.g. <version> from the POM). This parameter is optional and if it's not supplied
-     * then it will be derived from the <version> parameter in the project's POM based on the JAR/ZIP
-     */
-    final String appVersion
 
     /**
      * The Business group ID of the deployment
@@ -86,31 +70,20 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     RuntimeFabricDeploymentRequest(String environment,
                                    WorkerSpecRequest workerSpecRequest,
-                                   File file,
                                    String cryptoKey,
                                    String anypointClientId,
                                    String anypointClientSecret,
                                    String cloudHubAppPrefix,
-                                   String appName = null,
-                                   String appVersion = null,
-                                   String groupId = null,
+                                   String appName,
+                                   String appVersion,
+                                   String groupId,
                                    Map<String, String> appProperties = [:],
                                    Map<String, String> otherCloudHubProperties = [:]) {
-        this.file = file
-        this.environment = environment
-        this.appName = appName ?: parsedPomProperties.artifactId
-        this.appVersion = appVersion ?: parsedPomProperties.version
-        this.groupId = groupId ?: parsedPomProperties.groupId
+        super(appName, appVersion, environment)
+        this.groupId = groupId
         this.target = workerSpecRequest.target
         this.workerSpecRequest = workerSpecRequest
-        if (!workerSpecRequest.muleVersion) {
-            def propertyToUse = mule4Request ? 'app.runtime' : 'mule.version'
-            def rawVersion = parsedPomProperties.props[propertyToUse]
-            // Studio will modify some projects with 4.2.2-hf2. The -hf2 part is meaningless to CloudHub
-            // because it's done in the form of update IDs. It's better to just remove it
-            rawVersion = rawVersion.split('-')[0]
-            this.workerSpecRequest.muleVersion = rawVersion
-        }
+        this.workerSpecRequest.muleVersion = workerSpecRequest.muleVersion
         this.cryptoKey = cryptoKey
         this.anypointClientId = anypointClientId
         this.anypointClientSecret = anypointClientSecret
@@ -120,7 +93,7 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
         if (this.appName.contains(' ')) {
             throw new Exception("Runtime Manager does not like spaces in app names and you specified '${this.appName}'!")
         }
-        def newAppName = "${cloudHubAppPrefix}-${this.appName}-${environment}"
+        def newAppName = cloudHubAppPrefix == null ? "${this.appName}-${environment}" : "${cloudHubAppPrefix}-${this.appName}-${environment}"
         def appNameLowerCase = newAppName.toLowerCase()
         if (appNameLowerCase != newAppName) {
             newAppName = appNameLowerCase
@@ -134,10 +107,10 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
                                                                null)
     }
 
-    Map<String, String> getCloudhubAppInfo() {
+    Map<String, String> getCloudhubBaseAppInfo() {
         def result = [
                 // CloudHub's v2 API calls the Mule application the 'domain'
-                name: appName,
+                name: normalizedAppName,
                 application: [
                         ref: [
                                 groupId: groupId,
@@ -172,8 +145,8 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
         result
     }
 
-    Map<String, String> getCloudhubAppInfoWithResources() {
-        def result = cloudhubAppInfo
+    Map<String, String> getCloudhubAppInfo() {
+        def result = cloudhubBaseAppInfo
         def resources = [
                 resources: [
                     cpu: [ reserved: workerSpecRequest.cpuReserved ],
@@ -185,7 +158,7 @@ class RuntimeFabricDeploymentRequest extends FileBasedAppDeploymentRequest {
     }
 
     String getCloudhubAppInfoAsJson() {
-        JsonOutput.toJson(cloudhubAppInfoWithResources)
+        JsonOutput.toJson(cloudhubAppInfo)
     }
 
     void setTargetId(String targetId) {

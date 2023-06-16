@@ -1,9 +1,9 @@
 package com.avioconsulting.mule.deployment.dsl
 
-import com.avioconsulting.mule.deployment.api.models.RuntimeFabricDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
 
 class RuntimeFabricContext extends BaseContext {
-    String environment, applicationName, appVersion, file, cryptoKey, cloudHubAppPrefix, businessGroupId
+    String environment, applicationName, appVersion, cryptoKey, cloudHubAppPrefix, businessGroupId
     // make API visualizer, etc. more easy by default
     WorkerSpecV2Context workerSpecs = new WorkerSpecV2Context()
     AutodiscoveryContext autoDiscovery = new AutodiscoveryContext()
@@ -14,7 +14,6 @@ class RuntimeFabricContext extends BaseContext {
         validateContext()
         new RuntimeFabricDeploymentRequest(this.environment,
                                            workerSpecs.createRequest(),
-                                           new File(this.file),
                                            this.cryptoKey,
                                            autoDiscovery.clientId,
                                            autoDiscovery.clientSecret,
@@ -26,20 +25,15 @@ class RuntimeFabricContext extends BaseContext {
                                            this.otherCloudHubProperties)
     }
 
-    protected List validateContext() {
-        def errors = findErrors()
-        def specs = workerSpecs
-        errors += specs.findErrors('workerSpecs')
-        def autoDiscovery = this.autoDiscovery
-        errors += autoDiscovery.findErrors('autoDiscovery')
-        if (errors.any()) {
-            def errorList = errors.join('\n')
-            throw new Exception("Your deployment request is not complete. The following errors exist:\n${errorList}")
-        }
+    /**
+     * Besides of validating attributes of the class itself, validates attributes from workSpecs and autoDiscovery objects
+     */
+    protected def validateContext() {
+        validateBaseContext(["workerSpecs": workerSpecs, "autoDiscovery": autoDiscovery])
     }
 
     @Override
     List<String> findOptionalProperties() {
-        ['appVersion', 'applicationName', 'businessGroupId']
+        ['cloudHubAppPrefix']
     }
 }

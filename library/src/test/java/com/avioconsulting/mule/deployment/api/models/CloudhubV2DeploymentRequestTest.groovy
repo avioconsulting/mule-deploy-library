@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.api.models
 
 import com.avioconsulting.mule.MavenInvoke
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubV2DeploymentRequest
 import org.hamcrest.MatcherAssert
 import org.junit.BeforeClass
 import org.junit.Test
@@ -22,19 +23,19 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
         def request = new CloudhubV2DeploymentRequest('DEV',
                                                     new WorkerSpecRequest('us-west-2',
                                                                            '4.2.2'),
-                                                    builtFile,
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
+                                                    'prefix',
                                                     'new-app',
-                                                    '1.2.3')
+                                                    '1.2.3',
+                                                    'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
 
         request.with {
             assertThat appName,
                        is(equalTo('new-app'))
             assertThat normalizedAppName,
-                       is(equalTo('client-new-app-dev'))
+                       is(equalTo('prefix-new-app-dev'))
             assertThat appVersion,
                        is(equalTo('1.2.3'))
             assertThat groupId,
@@ -48,18 +49,20 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
     void derived_app_version_and_name_normal() {
 
         def request = new CloudhubV2DeploymentRequest('DEV',
-                                                    new WorkerSpecRequest('us-west-2'),
-                                                    builtFile,
+                                                    new WorkerSpecRequest('us-west-2', '4.3.0'),
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client')
+                                                    'prefix',
+                                                    'new-app',
+                                                    '2.2.9',
+                                                    'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
 
         request.with {
             assertThat appName,
-                       is(equalTo('mule-deploy-lib-v4-test-app'))
+                       is(equalTo('new-app'))
             assertThat normalizedAppName,
-                       is(equalTo('client-mule-deploy-lib-v4-test-app-dev'))
+                       is(equalTo('prefix-new-app-dev'))
             assertThat appVersion,
                        is(equalTo('2.2.9'))
             assertThat groupId,
@@ -68,34 +71,10 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                     is(equalTo('us-west-2'))
             assertThat 'artifactId in the POM',
                        appName,
-                       is(equalTo('mule-deploy-lib-v4-test-app'))
+                       is(equalTo('new-app'))
             assertThat 'app.runtime in the POM',
                     workerSpecRequest.muleVersion,
                     is(equalTo('4.3.0'))
-        }
-    }
-
-    @Test
-    void derived_app_version_hf2() {
-
-        buildApp('4.1.4-hf2')
-
-        try {
-            def request = new CloudhubV2DeploymentRequest('DEV',
-                                                        new WorkerSpecRequest('us-west-2'),
-                                                        builtFile,
-                                                        'theKey',
-                                                        'theClientId',
-                                                        'theSecret',
-                                                        'client')
-
-            assertThat 'app.runtime in the POM',
-                       request.workerSpecRequest.muleVersion,
-                       is(equalTo('4.1.4'))
-        }
-        finally {
-            // need to restore our 'normal' version as to not break the other tests
-            buildApp()
         }
     }
 
@@ -105,13 +84,13 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
         def exception = shouldFail {
             new CloudhubV2DeploymentRequest('DEV',
                                           new WorkerSpecRequest('us-west-2'),
-                                          builtFile,
                                           'theKey',
                                           'theClientId',
                                           'theSecret',
                                           'client',
                                           'some app name',
-                                          '1.2.3')
+                                          '4.2.2',
+                                          'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
         }
 
         MatcherAssert.assertThat exception.message,
@@ -122,29 +101,31 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
     void getCloudhubAppInfo_only_required() {
 
         def request = new CloudhubV2DeploymentRequest('DEV',
-                                                    new WorkerSpecRequest('us-west-2'),
-                                                    builtFile,
+                                                    new WorkerSpecRequest('us-west-2', '4.3.0'),
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client')
+                                                    null,
+                                                    'new-app',
+                                                    '2.2.9',
+                                                    'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
 
         def appInfo = request.getCloudhubAppInfo()
 
         assertThat appInfo,
                    is(equalTo([
-                           name: 'mule-deploy-lib-v4-test-app',
+                           name: 'new-app-dev',
                            application: [
                                    ref: [
                                            groupId: 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee',
-                                           artifactId : 'mule-deploy-lib-v4-test-app',
+                                           artifactId : 'new-app',
                                            version: '2.2.9',
                                            packaging: "jar"
                                    ],
                                    desiredState: "STARTED",
                                    configuration: [
                                            "mule.agent.application.properties.service": [
-                                                   applicationName: 'mule-deploy-lib-v4-test-app'
+                                                   applicationName: 'new-app'
                                            ]
                                    ],
                                    "vCores": VCoresSize.vCore1GB.vCoresSize
@@ -184,11 +165,10 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                'prefix',
                 'new-app',
                 '1.2.3',
                 'new-group-id')
@@ -197,7 +177,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
 
         assertThat appInfo,
                    is(equalTo([
-                           name: 'new-app',
+                           name: 'prefix-new-app-dev',
                            application: [
                                    ref: [
                                            groupId: 'new-group-id',

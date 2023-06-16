@@ -3,7 +3,7 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
-import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Version
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper

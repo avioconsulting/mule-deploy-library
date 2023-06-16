@@ -37,7 +37,7 @@ class FileBasedAppDeploymentRequestTest implements AppBuilding {
     @Test
     void getRamlFilesFromApp_is_apikit() {
         // arrange
-        def request = buildFullApp()
+        def request = buildFullFileBasedApp()
 
         // act
         def result = request.getRamlFilesFromApp('/api',
@@ -62,7 +62,7 @@ class FileBasedAppDeploymentRequestTest implements AppBuilding {
     @Test
     void getRamlFilesFromApp_directory_specified() {
         // arrange
-        def request = buildFullApp()
+        def request = buildFullFileBasedApp()
 
         // act
         def result = request.getRamlFilesFromApp('/api/folder',
@@ -80,7 +80,7 @@ class FileBasedAppDeploymentRequestTest implements AppBuilding {
     @Test
     void getRamlFilesFromApp_include_exchange() {
         // arrange
-        def request = buildFullApp()
+        def request = buildFullFileBasedApp()
 
         // act
         def result = request.getRamlFilesFromApp('/api',

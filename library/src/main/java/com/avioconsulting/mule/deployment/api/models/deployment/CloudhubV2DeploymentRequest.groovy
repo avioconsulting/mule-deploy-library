@@ -1,5 +1,6 @@
-package com.avioconsulting.mule.deployment.api.models
+package com.avioconsulting.mule.deployment.api.models.deployment
 
+import com.avioconsulting.mule.deployment.api.models.WorkerSpecRequest
 import groovy.json.JsonOutput
 import groovy.transform.ToString
 
@@ -11,21 +12,20 @@ class CloudhubV2DeploymentRequest extends RuntimeFabricDeploymentRequest {
      */
     CloudhubV2DeploymentRequest(String environment,
                                 WorkerSpecRequest workerSpecRequest,
-                                File file,
                                 String cryptoKey,
                                 String anypointClientId,
                                 String anypointClientSecret,
                                 String cloudHubAppPrefix,
-                                String appName = null,
-                                String appVersion = null,
-                                String groupId = null,
+                                String appName,
+                                String appVersion,
+                                String groupId,
                                 Map<String, String> appProperties = [:],
                                 Map<String, String> otherCloudHubProperties = [:]) {
-        super(environment, workerSpecRequest, file, cryptoKey, anypointClientId, anypointClientSecret, cloudHubAppPrefix, appName, appVersion, groupId, appProperties, otherCloudHubProperties)
+        super(environment, workerSpecRequest, cryptoKey, anypointClientId, anypointClientSecret, cloudHubAppPrefix, appName, appVersion, groupId, appProperties, otherCloudHubProperties)
     }
 
     Map<String, String> getCloudhubAppInfo() {
-        def result = super.getCloudhubAppInfo()
+        def result = super.getCloudhubBaseAppInfo()
         def vCores = ["vCores": workerSpecRequest.replicaSize.vCoresSize]
         result.application << vCores
         result

@@ -2,7 +2,8 @@ package com.avioconsulting.mule.deployment.dsl
 
 
 import com.avioconsulting.mule.deployment.api.models.Features
-import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.ExchangeAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.dsl.policies.PolicyListContext
 
 class MuleDeployContext extends BaseContext {
@@ -71,21 +72,30 @@ class MuleDeployContext extends BaseContext {
             features = removeFeature(Features.PolicySync,
                                      features)
         }
-        FileBasedAppDeploymentRequest deploymentRequest;
 
-        if (cloudHubSet) {
-            deploymentRequest = cloudHubApplication.createDeploymentRequest()
-        } else if (cloudHubV2Set) {
-            deploymentRequest = cloudHubV2Application.createDeploymentRequest()
-        } else if (runtimeFabricSet) {
-            deploymentRequest = runtimeFabricApplication.createDeploymentRequest()
+        if (cloudHubSet || onPremSet) {
+            FileBasedAppDeploymentRequest deploymentRequest;
+            if (cloudHubSet) {
+                deploymentRequest = cloudHubApplication.createDeploymentRequest()
+            } else {
+                deploymentRequest = onPremApplication.createDeploymentRequest()
+            }
+            return new DeploymentPackage(deploymentRequest,
+                    apiSpecifications.createApiSpecList(deploymentRequest),
+                    policyList,
+                    features)
         } else {
-            deploymentRequest = onPremApplication.createDeploymentRequest()
+            ExchangeAppDeploymentRequest deploymentRequest
+            if (cloudHubV2Set) {
+                deploymentRequest = cloudHubV2Application.createDeploymentRequest()
+            } else {
+                deploymentRequest = runtimeFabricApplication.createDeploymentRequest()
+            }
+            return new DeploymentPackage(deploymentRequest,
+                    null,
+                    policyList,
+                    features)
         }
-        return new DeploymentPackage(deploymentRequest,
-                                     apiSpecifications.createApiSpecList(deploymentRequest),
-                                     policyList,
-                                     features)
     }
 
     def version(String version) {

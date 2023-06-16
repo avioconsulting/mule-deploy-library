@@ -1,10 +1,10 @@
 package com.avioconsulting.mule.deployment.dsl
 
-import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
-import com.avioconsulting.mule.deployment.api.models.CloudhubV2DeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubV2DeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
-import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
-import com.avioconsulting.mule.deployment.api.models.RuntimeFabricDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.AppBuilding
 import org.junit.Before
 import org.junit.Test
@@ -27,7 +27,7 @@ class MuleDeployContextTest implements AppBuilding {
     @Test
     void cloudhub() {
         // arrange
-        def tempRequest = buildFullApp()
+        def tempRequest = buildFullFileBasedApp()
         def closure = {
             version '1.0'
 
@@ -77,7 +77,7 @@ class MuleDeployContextTest implements AppBuilding {
     @Test
     void on_prem() {
         // arrange
-        def tempRequest = buildFullApp()
+        def tempRequest = buildFullFileBasedApp()
         def closure = {
             version '1.0'
 
@@ -119,7 +119,6 @@ class MuleDeployContextTest implements AppBuilding {
     @Test
     void cloudhubV2() {
         // arrange
-        def tempRequest = buildFullApp()
         def closure = {
             version '1.0'
 
@@ -136,7 +135,6 @@ class MuleDeployContextTest implements AppBuilding {
                     muleVersion '4.2.2'
                     target 'sharedTarget'
                 }
-                file tempRequest.file.path
                 cryptoKey 'theKey'
                 autoDiscovery {
                     clientId 'the_client_id'
@@ -154,8 +152,8 @@ class MuleDeployContextTest implements AppBuilding {
         // assert
         assertThat deploymentPackage.deploymentRequest,
                 is(instanceOf(CloudhubV2DeploymentRequest))
-        assertThat deploymentPackage.apiSpecifications.size(),
-                is(not(0))
+        assertThat deploymentPackage.apiSpecifications,
+                is(null)
         assertThat deploymentPackage.enabledFeatures,
                 is(equalTo([
                         Features.AppDeployment,
@@ -167,7 +165,7 @@ class MuleDeployContextTest implements AppBuilding {
     @Test
     void runtimeFabric() {
         // arrange
-        def tempRequest = buildFullApp()
+        def tempRequest = buildFullFileBasedApp()
         def closure = {
             version '1.0'
 
@@ -184,7 +182,6 @@ class MuleDeployContextTest implements AppBuilding {
                     muleVersion '4.2.2'
                     target 'sharedTarget'
                 }
-                file tempRequest.file.path
                 cryptoKey 'theKey'
                 autoDiscovery {
                     clientId 'the_client_id'
@@ -202,8 +199,8 @@ class MuleDeployContextTest implements AppBuilding {
         // assert
         assertThat deploymentPackage.deploymentRequest,
                 is(instanceOf(RuntimeFabricDeploymentRequest))
-        assertThat deploymentPackage.apiSpecifications.size(),
-                is(not(0))
+        assertThat deploymentPackage.apiSpecifications,
+                is(null)
         assertThat deploymentPackage.enabledFeatures,
                 is(equalTo([
                         Features.AppDeployment,
@@ -326,7 +323,6 @@ class MuleDeployContextTest implements AppBuilding {
                 workerSpecs {
                     muleVersion '4.2.2'
                 }
-                file 'path/to/file.jar'
                 cryptoKey 'theKey'
                 autoDiscovery {
                     clientId 'the_client_id'
@@ -377,7 +373,6 @@ class MuleDeployContextTest implements AppBuilding {
                 workerSpecs {
                     muleVersion '4.2.2'
                 }
-                file 'path/to/file.jar'
                 cryptoKey 'theKey'
                 autoDiscovery {
                     clientId 'the_client_id'
@@ -424,7 +419,7 @@ class MuleDeployContextTest implements AppBuilding {
     @Test
     void optional_stuff() {
         // arrange
-        def tempRequest = buildFullApp()
+        def tempRequest = buildFullFileBasedApp()
         def closure = {
             version '1.0'
 
@@ -457,7 +452,7 @@ class MuleDeployContextTest implements AppBuilding {
     @Test
     void specify_features() {
         // arrange
-        def tempRequest = buildFullApp()
+        def tempRequest = buildFullFileBasedApp()
         def closure = {
             version '1.0'
 
@@ -495,7 +490,7 @@ class MuleDeployContextTest implements AppBuilding {
     @Test
     void specify_features_with_policy_section_omitted() {
         // arrange
-        def tempRequest = buildFullApp()
+        def tempRequest = buildFullFileBasedApp()
         def closure = {
             version '1.0'
 
@@ -535,7 +530,7 @@ class MuleDeployContextTest implements AppBuilding {
     @Test
     void empty_policies() {
         // arrange
-        def tempRequest = buildFullApp()
+        def tempRequest = buildFullFileBasedApp()
         def closure = {
             version '1.0'
 

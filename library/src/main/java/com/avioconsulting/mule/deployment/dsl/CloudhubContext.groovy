@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.dsl
 
-import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
 
 class CloudhubContext extends BaseContext {
     String environment, applicationName, appVersion, file, cryptoKey, cloudHubAppPrefix
@@ -12,17 +12,9 @@ class CloudhubContext extends BaseContext {
     Map<String, String> otherCloudHubProperties = [:]
 
     CloudhubDeploymentRequest createDeploymentRequest() {
-        def errors = findErrors()
-        def specs = workerSpecs
-        errors += specs.findErrors('workerSpecs')
-        def autoDiscovery = this.autoDiscovery
-        errors += autoDiscovery.findErrors('autoDiscovery')
-        if (errors.any()) {
-            def errorList = errors.join('\n')
-            throw new Exception("Your deployment request is not complete. The following errors exist:\n${errorList}")
-        }
+        validateContext()
         new CloudhubDeploymentRequest(this.environment,
-                                      specs.createRequest(),
+                                      workerSpecs.createRequest(),
                                       new File(this.file),
                                       this.cryptoKey,
                                       autoDiscovery.clientId,
@@ -33,6 +25,13 @@ class CloudhubContext extends BaseContext {
                                       this.appProperties,
                                       this.otherCloudHubProperties,
                                       this.analyticsAgentEnabled)
+    }
+
+    /**
+     * Besides of validating attributes of the class itself, validates attributes from workSpecs and autoDiscovery objects
+     */
+    private def validateContext() {
+        validateBaseContext(["workerSpecs": workerSpecs, "autoDiscovery": autoDiscovery])
     }
 
     @Override

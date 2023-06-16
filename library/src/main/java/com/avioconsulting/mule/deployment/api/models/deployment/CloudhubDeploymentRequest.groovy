@@ -1,5 +1,6 @@
-package com.avioconsulting.mule.deployment.api.models
+package com.avioconsulting.mule.deployment.api.models.deployment
 
+import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.internal.models.CloudhubAppProperties
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
@@ -12,22 +13,9 @@ import org.apache.http.entity.mime.MultipartEntityBuilder
 @ToString
 class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
     /**
-     * environment name (e.g. DEV, not GUID)
-     */
-    final String environment
-    /**
-     * Actual name of your application WITHOUT any kind of customer/environment prefix or suffix. Spaces in the name are not allowed and will be rejected.
-     * This parameter is optional. If you don't supply it, the <artifactId> from your app's POM will be used.
-     */
-    final String appName
-    /**
      * CloudHub specs
      */
     final CloudhubWorkerSpecRequest workerSpecRequest
-    /**
-     * The file to deploy. The name of this file will also be used for the Runtime Manager settings pane
-     */
-    final File file
     /**
      * Will be set in the 'crypto.key' CloudHub property
      */
@@ -56,11 +44,6 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
      * Get only property, derived from app, environment, and prefix, this the real application name that will be used in CloudHub to ensure uniqueness.
      */
     final String normalizedAppName
-    /**
-     * Version of the app you are deploying (e.g. <version> from the POM). This parameter is optional and if it's not supplied
-     * then it will be derived from the <version> parameter in the project's POM based on the JAR/ZIP
-     */
-    final String appVersion
 
     /***
      * Sets anypoint.platform.config.analytics.agent.enabled to true in CH props
@@ -85,10 +68,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                               Map<String, String> appProperties = [:],
                               Map<String, String> otherCloudHubProperties = [:],
                               boolean analyticsAgentEnabled = true) {
-        this.file = file
-        this.environment = environment
-        this.appName = appName ?: parsedPomProperties.artifactId
-        this.appVersion = appVersion ?: parsedPomProperties.version
+        super(file, appName, appVersion, environment)
         if (!workerSpecRequest.muleVersion) {
             def propertyToUse = mule4Request ? 'app.runtime' : 'mule.version'
             def rawVersion = parsedPomProperties.props[propertyToUse]

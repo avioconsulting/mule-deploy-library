@@ -1,10 +1,11 @@
 package com.avioconsulting.mule.deployment.internal
 
-import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+
+import com.avioconsulting.mule.deployment.api.models.deployment.FileBasedAppDeploymentRequest
 import org.apache.commons.io.FileUtils
 
 trait AppBuilding {
-    FileBasedAppDeploymentRequest buildFullApp() {
+    FileBasedAppDeploymentRequest buildFullFileBasedApp() {
         def tempDir = new File('target/temp')
         def tempAppDirectory = new File(tempDir,
                                         'designcenterapp')
@@ -60,6 +61,6 @@ trait AppBuilding {
         FileUtils.deleteQuietly(zipFile)
         antBuilder.zip(destfile: zipFile,
                        basedir: tempAppDirectory)
-        new TestFileBasedRequest(zipFile)
+        new TestFileBasedRequest(zipFile, "my-app", "1.0.0", "PROD")
     }
 }

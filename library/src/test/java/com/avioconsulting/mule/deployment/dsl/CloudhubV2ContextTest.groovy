@@ -25,14 +25,18 @@ class CloudhubV2ContextTest implements MavenInvoke {
         def context = new CloudhubV2Context()
         def closure = {
             environment 'DEV'
-            file builtFile.absolutePath
             cryptoKey 'theKey'
             autoDiscovery {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
-            workerSpecs { target 'target_name'}
+            businessGroupId '123-456-789'
+            appVersion '2.2.9'
+            applicationName 'new-app'
+            workerSpecs {
+                target 'target_name'
+                muleVersion '4.3.0'
+            }
         }
         closure.delegate = context
 
@@ -45,19 +49,15 @@ class CloudhubV2ContextTest implements MavenInvoke {
             assertThat environment,
                        is(equalTo('DEV'))
             assertThat request.appName,
-                       is(equalTo('mule-deploy-lib-v4-test-app'))
+                       is(equalTo('new-app'))
             assertThat appVersion,
                        is(equalTo('2.2.9'))
-            assertThat file,
-                       is(equalTo(builtFile))
             assertThat cryptoKey,
                        is(equalTo('theKey'))
             assertThat anypointClientId,
                        is(equalTo('the_client_id'))
             assertThat anypointClientSecret,
                        is(equalTo('the_client_secret'))
-            assertThat cloudHubAppPrefix,
-                       is(equalTo('AVI'))
             workerSpecRequest.with {
                 assertThat target,
                         is(equalTo('target_name'))
@@ -101,10 +101,10 @@ class CloudhubV2ContextTest implements MavenInvoke {
 
         assertThat exception.message,
                 is(equalTo("""Your deployment request is not complete. The following errors exist:
-- cloudHubAppPrefix missing
+- businessGroupId missing
 - cryptoKey missing
 - environment missing
-- file missing
+- workerSpecs.muleVersion missing
 - workerSpecs.target missing
 - autoDiscovery.clientId missing
 - autoDiscovery.clientSecret missing
@@ -119,12 +119,12 @@ class CloudhubV2ContextTest implements MavenInvoke {
             environment 'DEV'
             applicationName 'the-app'
             appVersion '2.2.9'
-            file builtFile.absolutePath
             cryptoKey 'theKey'
             autoDiscovery {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
+            businessGroupId '123-456-789'
             cloudHubAppPrefix 'AVI'
             workerSpecs {
                 target 'target_name'
@@ -153,8 +153,6 @@ class CloudhubV2ContextTest implements MavenInvoke {
                     is(equalTo('the-app'))
             assertThat appVersion,
                     is(equalTo('2.2.9'))
-            assertThat file,
-                    is(equalTo(builtFile))
             assertThat cryptoKey,
                     is(equalTo('theKey'))
             assertThat anypointClientId,
@@ -195,7 +193,6 @@ class CloudhubV2ContextTest implements MavenInvoke {
         def closure = {
             environment 'DEV'
             environment 'DEV'
-            file builtFile.absolutePath
             cryptoKey 'theKey'
             autoDiscovery {
                 clientId 'the_client_id'
@@ -222,7 +219,6 @@ class CloudhubV2ContextTest implements MavenInvoke {
         def context = new CloudhubV2Context()
         def closure = {
             environment 'DEV'
-            file builtFile.absolutePath
             cryptoKey 'theKey'
             autoDiscovery {
                 clientId 'the_client_id'
@@ -242,5 +238,34 @@ class CloudhubV2ContextTest implements MavenInvoke {
         // assert
         MatcherAssert.assertThat exception.message,
                    is(equalTo("Field 'workerSpecs' has already been set!"))
+    }
+
+    @Test
+    void repeat_child_closure() {
+        // arrange
+        def context = new CloudhubV2Context()
+        def closure = {
+            environment 'DEV'
+            cryptoKey 'theKey'
+            autoDiscovery {
+                clientId 'the_client_id'
+                clientSecret 'the_client_secret'
+            }
+            cloudHubAppPrefix 'AVI'
+            workerSpecs {
+                target 'target_name'
+                target 'target_name_2'
+            }
+        }
+        closure.delegate = context
+
+        // act
+        def exception = shouldFail {
+            closure.call()
+        }
+
+        // assert
+        MatcherAssert.assertThat exception.message,
+                is(equalTo("Field 'target' has already been set!"))
     }
 }

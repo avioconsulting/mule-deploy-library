@@ -2,7 +2,7 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.ILogger
-import com.avioconsulting.mule.deployment.api.models.RuntimeFabricDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
@@ -61,7 +61,7 @@ class RuntimeFabricDeployer extends BaseDeployer implements IRuntimeFabricDeploy
     def deploy(RuntimeFabricDeploymentRequest deploymentRequest) {
         def groupId = deploymentRequest.groupId
         def envId = environmentLocator.getEnvironmentId(deploymentRequest.environment, groupId)
-        def appName = deploymentRequest.appName
+        def appName = deploymentRequest.normalizedAppName
         def targetId = getTargetId(deploymentRequest.target, groupId)
         deploymentRequest.setTargetId(targetId)
 
@@ -251,8 +251,8 @@ class RuntimeFabricDeployer extends BaseDeployer implements IRuntimeFabricDeploy
 
     @Override
     boolean isMule4Request(RuntimeFabricDeploymentRequest deploymentRequest) {
-        // TODO: Is using this (which leans on JAR vs. ZIP) ok?
-        deploymentRequest.isMule4Request()
+        // TODO: How are we going to support Mule 3 for RTF and CHv2?
+        true
     }
 
 }

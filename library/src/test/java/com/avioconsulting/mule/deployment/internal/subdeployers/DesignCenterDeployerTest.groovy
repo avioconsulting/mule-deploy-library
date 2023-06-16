@@ -1187,7 +1187,7 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def request = buildFullApp()
+        def request = buildFullFileBasedApp()
         def apiSpec = new ApiSpecification('Hello API',
                                            request.getRamlFilesFromApp('/api',
                                                                        false))
@@ -1252,7 +1252,7 @@ class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
                 end("Unexpected request ${request.absoluteURI()}")
             }
         }
-        def appInfo = buildFullApp()
+        def appInfo = buildFullFileBasedApp()
         def apiSpec = new ApiSpecification('Hello API',
                                            appInfo.getRamlFilesFromApp('/api',
                                                                        false))

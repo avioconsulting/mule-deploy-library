@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.dsl
 
-import com.avioconsulting.mule.deployment.api.models.CloudhubV2DeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubV2DeploymentRequest
 
 class CloudhubV2Context extends RuntimeFabricContext {
 
@@ -8,7 +8,6 @@ class CloudhubV2Context extends RuntimeFabricContext {
         validateContext()
         new CloudhubV2DeploymentRequest(this.environment,
                                       workerSpecs.createRequest(),
-                                      new File(this.file),
                                       this.cryptoKey,
                                       autoDiscovery.clientId,
                                       autoDiscovery.clientSecret,

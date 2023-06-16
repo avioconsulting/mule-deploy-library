@@ -1,14 +1,12 @@
 package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.MavenInvoke
-import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.DryRunMode
-import com.avioconsulting.mule.deployment.api.models.CloudhubV2DeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubV2DeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.WorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.UpdateStrategy
 import com.avioconsulting.mule.deployment.api.models.VCoresSize
-import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
 import io.vertx.core.http.HttpServerRequest
@@ -22,20 +20,8 @@ import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
 @SuppressWarnings("GroovyAccessibility")
-class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
+class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenInvoke {
     private CloudHubV2Deployer deployer
-    private int statusCheckCount
-    private int maxTries
-
-    private final String ENV = 'DEV'
-    private final String ENV_ID = 'def456'
-    private final String VERSION = '4.2.2'
-    private final String TARGET_NAME = 'us-west-2'
-    private final String TARGET_ID = '123-456-789'
-    private final String APP_NAME = 'new-app'
-    private final String APP_ID = '987-654-321'
-    private final String APP_VERSION = '1.2.3'
-    private final String GROUP_ID = 'the-org-id'
 
     @Before
     void clean() {
@@ -103,11 +89,10 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 'new-app',
                 APP_VERSION,
                 GROUP_ID)
@@ -116,6 +101,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                 '1234')
 
         // act
+
         deployer.deploy(request)
 
         // assert
@@ -131,7 +117,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                 is(equalTo('the-org-id'))
         def map = new JsonSlurper().parseText(rawBody)
         assertThat map.name,
-                is(equalTo('new-app'))
+                is(equalTo('new-app-dev'))
         assertThat map.application.ref.groupId,
                 is(equalTo(GROUP_ID))
         assertThat map.application.ref.version,
@@ -173,11 +159,10 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 'new-app',
                 APP_VERSION,
                 GROUP_ID)
@@ -243,11 +228,10 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 APP_NAME,
                 APP_VERSION,
                 GROUP_ID)
@@ -271,7 +255,7 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                 is(equalTo('the-org-id'))
         def map = new JsonSlurper().parseText(rawBody)
         assertThat map.name,
-                is(equalTo(APP_NAME))
+                is(equalTo("new-app-dev"))
         assertThat map.application.ref.groupId,
                 is(equalTo(GROUP_ID))
         assertThat map.application.ref.version,
@@ -314,11 +298,10 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 APP_NAME,
                 APP_VERSION,
                 GROUP_ID)
@@ -359,11 +342,10 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 APP_NAME,
                 APP_VERSION,
                 GROUP_ID)
@@ -407,11 +389,10 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 APP_NAME,
                 APP_VERSION,
                 GROUP_ID)
@@ -455,11 +436,10 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
                         13,
                         true,
                         false),
-                builtFile,
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
+                null,
                 APP_NAME,
                 APP_VERSION,
                 GROUP_ID)
@@ -473,243 +453,5 @@ class CloudHubV2DeployerTest extends BaseTest implements MavenInvoke {
 
         assertThat exception.message,
                 is(containsString("Unable to find valid cloudhub v2 target 'INVALID_TARGET_NAME'. Valid targets are [Not_Found_Target_Name]"))
-
     }
-
-    def mockGetTargetId(HttpServerRequest request,
-                        boolean isSuccess = true,
-                        boolean isErrorGetTargetType = false,
-                        String groupId = this.GROUP_ID) {
-        def uri = request.absoluteURI()
-        if (uri.endsWith("/runtimefabric/api/organizations/${groupId}/targets") && request.method().name() == 'GET') {
-            println "mock status invocation /runtimefabric/api/organizations/${groupId}/targets"
-            if(isSuccess) {
-                request.response().with {
-                    statusCode = 200
-                    putHeader('Content-Type',
-                            'application/json')
-                    end(JsonOutput.toJson([
-                        [id: TARGET_ID, name: TARGET_NAME, type: deployer.SHARED_SPACE_TARGET_TYPE]
-                    ]))
-                }
-            } else if (isErrorGetTargetType) {
-                request.response().with {
-                    statusCode = 200
-                    putHeader('Content-Type',
-                            'application/json')
-                    end(JsonOutput.toJson([
-                            [id: TARGET_ID, name: TARGET_NAME, type: 'Invalid_Type']
-                    ]))
-                }
-            } else {
-                request.response().with {
-                    statusCode = 200
-                    putHeader('Content-Type',
-                            'application/json')
-                    end(JsonOutput.toJson([
-                        [id: 'Not_Found_Target_Id', name: 'Not_Found_Target_Name', type: deployer.SHARED_SPACE_TARGET_TYPE]
-                    ]))
-                }
-            }
-            return true
-        }
-        return false
-    }
-
-    def mockGetAppInfo(HttpServerRequest request,
-                       boolean newApp = true,
-                       boolean isSuccess = true,
-                       String groupId = this.GROUP_ID,
-                       String envId = this.ENV_ID) {
-        def uri = request.absoluteURI()
-        if (uri.endsWith("/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments") && request.method().name() == 'GET') {
-            println "mock status invocation /amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments"
-            if (newApp && isSuccess && statusCheckCount <= 1) {
-                statusCheckCount++
-                request.response().with {
-                    statusCode = 200
-                    putHeader('Content-Type',
-                            'application/json')
-                    end(JsonOutput.toJson([
-                        items: [
-                            [
-                                id: APP_ID,
-                                name: 'app-not-found',
-                                status: 'APPLYING',
-                                application: [
-                                    status: 'RUNNING'
-                                ],
-                                target: [
-                                    provider: 'MC',
-                                    targetId: 'us-east-2'
-                                ]
-                            ]
-                        ]
-                    ]))
-                }
-            } else if (newApp && isSuccess && statusCheckCount > 1) {
-                statusCheckCount++
-                request.response().with {
-                    statusCode = 200
-                    putHeader('Content-Type',
-                            'application/json')
-                    end(JsonOutput.toJson([
-                        items: [
-                            [
-                                id: APP_ID,
-                                name: APP_NAME,
-                                status: 'APPLIED',
-                                application: [
-                                    status: 'RUNNING'
-                                ],
-                                target: [
-                                    provider: 'MC',
-                                    targetId: 'us-east-2'
-                                ]
-                            ]
-                        ]
-                    ]))
-                }
-            } else if (!newApp && isSuccess && (statusCheckCount == 0 || statusCheckCount > 1)) {
-                statusCheckCount++
-                request.response().with {
-                    statusCode = 200
-                    putHeader('Content-Type',
-                            'application/json')
-                    end(JsonOutput.toJson([
-                        items: [
-                            [
-                                id: APP_ID,
-                                name: APP_NAME,
-                                status: 'APPLIED',
-                                application: [
-                                    status: 'RUNNING'
-                                ],
-                                target: [
-                                    provider: 'MC',
-                                    targetId: 'us-east-2'
-                                ]
-                            ]
-                        ]
-                    ]))
-                }
-            } else if ((!newApp && isSuccess && statusCheckCount == 1) || (!newApp && !isSuccess)) {
-                statusCheckCount++
-                request.response().with {
-                    statusCode = 200
-                    putHeader('Content-Type',
-                            'application/json')
-                    end(JsonOutput.toJson([
-                        items: [
-                            [
-                                id: APP_ID,
-                                name: APP_NAME,
-                                status: 'APPLYING',
-                                application: [
-                                    status: 'RUNNING'
-                                ],
-                                target: [
-                                    provider: 'MC',
-                                    targetId: 'us-east-2'
-                                ]
-                            ]
-                        ]
-                    ]))
-                }
-            } else {
-                request.response().with {
-                    statusCheckCount++
-                    statusCode = 200
-                    putHeader('Content-Type',
-                            'application/json')
-                    end(JsonOutput.toJson([
-                        items: [
-                            [
-                                id: APP_ID,
-                                name: 'app-not-found',
-                                status: 'STOPPED',
-                                application: [
-                                        status: 'NOT_RUNNING'
-                                ],
-                                target: [
-                                        provider: 'MC',
-                                        targetId: 'us-east-2'
-                                ]
-                            ]
-                        ]
-                    ]))
-                }
-            }
-            return true
-        }
-        return false
-    }
-
-    def mockCreateApp(HttpServerRequest request,
-                        String groupId = this.GROUP_ID,
-                        String envId = this.ENV_ID) {
-        def uri = request.absoluteURI()
-        if (uri.endsWith("/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments") && request.method().name() == 'POST') {
-            println "mock status invocation /amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments"
-
-            request.response().with {
-                statusCode = 202
-                putHeader('Content-Type',
-                        'application/json')
-                end(JsonOutput.toJson([
-                    [
-                        id: APP_ID,
-                        name: APP_NAME,
-                        creationDate: 1671455155002,
-                        lastModifiedDate: 1671455155002
-                    ]
-                ]))
-            }
-            return true
-        }
-        return false
-    }
-
-    def mockUpdateApp(HttpServerRequest request,
-                      boolean isSuccess = true,
-                      String groupId = this.GROUP_ID,
-                      String envId = this.ENV_ID,
-                      String appId = this.APP_ID) {
-        def uri = request.absoluteURI()
-        if (uri.endsWith("/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments/${appId}") && request.method().name() == 'PATCH') {
-            println "mock status invocation /runtimefabric/api/organizations/${groupId}/targets"
-            if(isSuccess) {
-                request.response().with {
-                    statusCode = 200
-                    putHeader('Content-Type',
-                            'application/json')
-                    end(JsonOutput.toJson([
-                        [
-                            id: APP_ID,
-                            name: APP_NAME,
-                            creationDate: 1671455155002,
-                            lastModifiedDate: 1671455155002
-                        ]
-                    ]))
-                }
-            } else {
-                request.response().with {
-                    statusCode = 500
-                    putHeader('Content-Type',
-                            'application/json')
-                    def result = []
-                    end(JsonOutput.toJson([
-                        [
-                            timestamp: 1671456239010,
-                            status: 500,
-                            error: 'Internal Server Error'
-                        ]
-                    ]))
-                }
-            }
-            return true
-        }
-        return false
-    }
-
 }

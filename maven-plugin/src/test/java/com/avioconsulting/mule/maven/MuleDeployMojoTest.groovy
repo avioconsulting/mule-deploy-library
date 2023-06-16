@@ -6,6 +6,9 @@ import com.avioconsulting.mule.deployment.api.IDeployerFactory
 import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.api.models.*
 import com.avioconsulting.mule.deployment.api.models.credentials.Credential
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.ArtifactHandler

@@ -24,6 +24,11 @@ trait MavenInvoke {
                               appVersion)
     }
 
+    /**
+     * Invoke the goals clean and package using the gave pom file. It will use the maven installation from maven.home
+     * system property
+     * @param muleVersion (Optional with default value 4.3.0) Mule version to be set into the pom file
+     */
     static def buildApp(String muleVersion = '4.3.0') {
         def pomFile = getProjectDir('mule4_project')
         def appVersion = '2.2.9'

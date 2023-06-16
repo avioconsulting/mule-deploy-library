@@ -26,14 +26,18 @@ class RuntimeFabricContextTest implements MavenInvoke {
         def context = new RuntimeFabricContext()
         def closure = {
             environment 'DEV'
-            file builtFile.absolutePath
             cryptoKey 'theKey'
             autoDiscovery {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
-            workerSpecs { target 'target_name'}
+            businessGroupId '123-456-789'
+            appVersion '2.2.9'
+            applicationName 'new-app'
+            workerSpecs {
+                target 'target_name'
+                muleVersion '4.3.0'
+            }
         }
         closure.delegate = context
 
@@ -46,19 +50,15 @@ class RuntimeFabricContextTest implements MavenInvoke {
             assertThat environment,
                        is(equalTo('DEV'))
             assertThat request.appName,
-                       is(equalTo('mule-deploy-lib-v4-test-app'))
+                       is(equalTo('new-app'))
             assertThat appVersion,
                        is(equalTo('2.2.9'))
-            assertThat file,
-                       is(equalTo(builtFile))
             assertThat cryptoKey,
                        is(equalTo('theKey'))
             assertThat anypointClientId,
                        is(equalTo('the_client_id'))
             assertThat anypointClientSecret,
                        is(equalTo('the_client_secret'))
-            assertThat cloudHubAppPrefix,
-                       is(equalTo('AVI'))
             workerSpecRequest.with {
                 assertThat target,
                         is(equalTo('target_name'))
@@ -102,10 +102,10 @@ class RuntimeFabricContextTest implements MavenInvoke {
 
         MatcherAssert.assertThat exception.message,
                 is(equalTo("""Your deployment request is not complete. The following errors exist:
-- cloudHubAppPrefix missing
+- businessGroupId missing
 - cryptoKey missing
 - environment missing
-- file missing
+- workerSpecs.muleVersion missing
 - workerSpecs.target missing
 - autoDiscovery.clientId missing
 - autoDiscovery.clientSecret missing
@@ -120,12 +120,12 @@ class RuntimeFabricContextTest implements MavenInvoke {
             environment 'DEV'
             applicationName 'the-app'
             appVersion '2.2.9'
-            file builtFile.absolutePath
             cryptoKey 'theKey'
             autoDiscovery {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
+            businessGroupId '123-456-789'
             cloudHubAppPrefix 'AVI'
             workerSpecs {
                 target 'target_name'
@@ -156,8 +156,6 @@ class RuntimeFabricContextTest implements MavenInvoke {
                     is(equalTo('the-app'))
             assertThat appVersion,
                     is(equalTo('2.2.9'))
-            assertThat file,
-                    is(equalTo(builtFile))
             assertThat cryptoKey,
                     is(equalTo('theKey'))
             assertThat anypointClientId,
@@ -202,7 +200,6 @@ class RuntimeFabricContextTest implements MavenInvoke {
         def closure = {
             environment 'DEV'
             environment 'DEV'
-            file builtFile.absolutePath
             cryptoKey 'theKey'
             autoDiscovery {
                 clientId 'the_client_id'
@@ -229,7 +226,6 @@ class RuntimeFabricContextTest implements MavenInvoke {
         def context = new RuntimeFabricContext()
         def closure = {
             environment 'DEV'
-            file builtFile.absolutePath
             cryptoKey 'theKey'
             autoDiscovery {
                 clientId 'the_client_id'

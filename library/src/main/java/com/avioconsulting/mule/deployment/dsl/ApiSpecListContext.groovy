@@ -1,7 +1,7 @@
 package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
-import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.FileBasedAppDeploymentRequest
 
 class ApiSpecListContext {
     private List<ApiSpecContext> apiSpecContexts = []

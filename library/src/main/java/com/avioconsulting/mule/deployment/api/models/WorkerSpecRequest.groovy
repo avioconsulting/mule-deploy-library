@@ -112,13 +112,4 @@ class WorkerSpecRequest {
         this.target = target
     }
 
-    Map<String, String> getVersionInfo() {
-        def map = [
-                version: muleVersion
-        ]
-        if (updateId) {
-            map['updateId'] = updateId
-        }
-        map
-    }
 }
