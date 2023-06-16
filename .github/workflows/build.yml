@@ -50,11 +50,10 @@ jobs:
         run: ./mvnw --batch-mode verify
 
       - name: Publish Unit Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v1
+        uses: EnricoMi/publish-unit-test-result-action@v2
         if: always()
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          files: ./*/*/surefire-reports/*.xml
+          files: ./*/target/surefire-reports/*.xml
 
       - name: Publish to Maven Central
         id: publish-to-maven-central
