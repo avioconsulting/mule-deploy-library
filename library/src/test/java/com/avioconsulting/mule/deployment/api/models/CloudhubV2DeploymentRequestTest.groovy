@@ -228,7 +228,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
         }
 
         MatcherAssert.assertThat exception.message,
-                is(equalTo("The maximum size of application name is 42 and the current name has 59 characters"))
+                is(equalTo("Maximum size of application name is 42 and the provided name has 59 characters"))
     }
 
 }
