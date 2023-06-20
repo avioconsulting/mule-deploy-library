@@ -1,6 +1,5 @@
 package com.avioconsulting.mule.deployment.api.models.deployment
 
-
 import com.avioconsulting.mule.deployment.api.models.WorkerSpecRequest
 import com.avioconsulting.mule.deployment.internal.models.CloudhubAppProperties
 import groovy.json.JsonOutput
@@ -8,6 +7,8 @@ import groovy.transform.ToString
 
 @ToString
 class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
+
+    final MAX_SIZE_APPLICATION_NAME = 42
     /**
      * CloudHub specs
      */
@@ -97,6 +98,9 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
         def appNameLowerCase = newAppName.toLowerCase()
         if (appNameLowerCase != newAppName) {
             newAppName = appNameLowerCase
+        }
+        if (newAppName.size() > MAX_SIZE_APPLICATION_NAME) {
+            throw new Exception("Maximum size of application name is ${MAX_SIZE_APPLICATION_NAME} and the provided name has ${newAppName.size()} characters")
         }
         normalizedAppName = newAppName
         this.cloudhubAppProperties = new CloudhubAppProperties(this.appName,
