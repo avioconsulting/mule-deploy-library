@@ -212,4 +212,23 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                    ]))
     }
 
+    @Test
+    void appNameBiggerThanSupported() {
+
+        def exception = shouldFail {
+            new CloudhubV2DeploymentRequest('DEV',
+                    new WorkerSpecRequest('us-west-2'),
+                    'theKey',
+                    'theClientId',
+                    'theSecret',
+                    'client',
+                    'app-name-should-not-have-more-than-42-characters',
+                    '4.2.2',
+                    'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
+        }
+
+        MatcherAssert.assertThat exception.message,
+                is(equalTo("The maximum size of application name is 42 and the current name has 59 characters"))
+    }
+
 }
