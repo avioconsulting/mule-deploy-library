@@ -60,14 +60,14 @@ Currently, the application supports the following features:
 1. AppDeployment: This feature tells the library to perform the application deployment into CloudHub/On-Prem instance 
 2. DesignCenterSync: Used to publish the local RAML files to Design Center. Needed to set the data of API on `apiSpec` section 
 3. ApiManagerDefinitions: Perform the synchronization for the API Manager specification. The details are retrieved within `apiSpec` section
-4. PolicySync: Apply the policies specified in the Groovy file into the API manager. The specification of rules must be placed in the `policies` section
+4. PolicySync: Apply the policies specified in the Groovy file to the API manager. The specification of rules must be placed in the `policies` section
 
-Note: DesignCenterSync, ApiManagerDefinitions and PolicySync all are dependent on `apiSpec`, so any of these options only executes if there is `apiSpec` 
+Note: DesignCenterSync, ApiManagerDefinitions, and PolicySync all are dependent on `apiSpec`, so any of these options only executes if there is `apiSpec` 
 
-Instead of specify all features in the Groovy file, the library offers `all` option to let the plugin knows that should try to perform all features.
-Also, if no one features is specified in the enabledFeatures section, the library will assume `all` option.
+Instead of specifying all features in the Groovy file, the library offers an `all` option to let the plugin knows that should try to perform all features.
+Also, if no one feature is specified in the enabledFeatures section, the library will assume the `all` option.
 
-*Important: When specify `all`, is not permitted to add any other option, because the application is understanding that should do all operations.*
+*Important: When specifying `all`, is not permitted to add any other option, because the application is understanding that should do all operations.*
 
 Below are some examples of how to specify enabledFeatures section in the Groovy file.
 1. Using all option
