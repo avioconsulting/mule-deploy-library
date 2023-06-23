@@ -52,23 +52,58 @@ This is largely just a standard Maven project. There are a couple ENUMs that sho
 
 # Features
 
-# enabledFeatures
+## enabledFeatures
 
 In order to keep the plugin customizable for each scenario, the application offers a configuration to identify which feature is allowed to execute.
 Currently, the application supports the following features:
 
-1. AppDeployment: This feature tells the library to perform the application deployment into CloudHub/On-Prem instance 
-2. DesignCenterSync: Used to publish the local RAML files to Design Center. Needed to set the data of API on `apiSpec` section 
-3. ApiManagerDefinitions: Perform the synchronization for the API Manager specification. The details are retrieved within `apiSpec` section
-4. PolicySync: Apply the policies specified in the Groovy file to the API manager. The specification of rules must be placed in the `policies` section
+### AppDeployment
+This feature tells the library to perform the application deployment into CloudHub/On-Prem/CloubHub 2.0/RTF instance.
 
-Note: DesignCenterSync, ApiManagerDefinitions, and PolicySync all are dependent on `apiSpec`, so any of these options only executes if there is `apiSpec` 
+For CloudHub version 1 and On-premise deployment, is necessary to specify where is the file for the application, that is used to deploy into the server. 
 
+For CloudHub version 2 and RTF deployment, the application only sends the GAV in the request, because the deployment process is done doing the download of the artifact from the Exchange. With that being said, is required to have the application available in Exchange before this process.
+
+In all cases, the library is capable of either doing a new deployment or updating an existing deployed application. 
+
+### DesignCenterSync
+Using this flag, the library will extract all RAML files from the source directory (provided in `apiSpec`), find the project in the design center by the name to be able to retrieve the current content in the server,
+then will perform a comparison in the files, to find new, changed, and deleted files locally, and finally will do the synchronization with the server for all changes.
+
+The last step is pushing the latest version to Exchange the RAML files, using the version provided in the API specification.
+
+**Limitations**
+- Not supported when API is SOAP
+- Not supported when using CloudHub 2.0 and RTF deployment
+
+### ApiManagerDefinitions
+Based on `exchangeAssetId` the library searches for the API definition in the API manager, in case of already exists one API definition
+for the version, the application will perform a synchronization on the API manager server using the configuration provided in the `apiSpec` section,
+updating the settings to match the definition from the file. 
+
+In case the API definition still not exists in the API manager server, the library will create it
+using the provided configuration.
+
+**Limitations**
+- Not supported when using CloudHub 2.0 and RTF deployment
+
+### PolicySync
+Enabling this flag, the library will read all specification from the `policies` section, where the list of policies is detailed. 
+With that the application retrieves all current policies in the API manager, then do a loop deleting everything in the server
+and creating the specified policies in the Groovy file.
+
+**Limitations**
+- Not supported when using CloudHub 2.0 and RTF deployment
+
+### All
 Instead of specifying all features in the Groovy file, the library offers an `all` option to let the plugin knows that should try to perform all features.
 Also, if no one feature is specified in the enabledFeatures section, the library will assume the `all` option.
 
 *Important: When specifying `all`, is not permitted to add any other option, because the application is understanding that should do all operations.*
 
+Note: DesignCenterSync, ApiManagerDefinitions, and PolicySync all are dependent on `apiSpec`, so any of these options only executes if there is `apiSpec`
+
+### Examples
 Below are some examples of how to specify enabledFeatures section in the Groovy file.
 1. Using all option
 ```Groovy
