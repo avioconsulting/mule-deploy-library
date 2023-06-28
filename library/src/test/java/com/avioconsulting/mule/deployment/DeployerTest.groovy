@@ -136,6 +136,16 @@ class DeployerTest {
                                                'DEV',
                                                'v1',
                                                true)
+                },
+                getExistingApiDefinition: { ApiSpec desiredApiManagerDefinition ->
+                    apiSyncs << new ApiSyncCalls(desiredApiManagerDefinition)
+                    return new ExistingApiSpec('api1234',
+                            'the-asset-id',
+                            '1.2.3',
+                            'https://foo',
+                            'DEV',
+                            'v1',
+                            true)
                 }
         ] as IApiManagerDeployer
         def mockPolicyDeployer = [
@@ -476,7 +486,7 @@ class DeployerTest {
                    is(equalTo(1))
         assertThat 'no feature supplied',
                    apiSyncs.size(),
-                   is(equalTo(0))
+                   is(equalTo(1)) // 1 for getExistingApiDefinition that is always called
     }
 
     @Test
@@ -513,7 +523,7 @@ class DeployerTest {
                    is(equalTo(0))
         assertThat 'no feature supplied',
                    apiSyncs.size(),
-                   is(equalTo(0))
+                   is(equalTo(1)) // 1 for getExistingApiDefinition that is always called
     }
 
     @Test

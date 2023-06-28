@@ -98,7 +98,7 @@ class ApiManagerDeployer implements IApiManagerDeployer, ApiManagerFunctionality
         responsesForThisVersion[0]
     }
 
-    private ExistingApiSpec getExistingApiDefinition(ApiSpec desiredApiManagerDefinition) {
+    ExistingApiSpec getExistingApiDefinition(ApiSpec desiredApiManagerDefinition) {
         def assetId = desiredApiManagerDefinition.exchangeAssetId
         println "Checking for existing API Manager definition using Exchange asset ID '${assetId}'"
         def environment = desiredApiManagerDefinition.environment
