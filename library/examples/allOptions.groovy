@@ -7,7 +7,7 @@ muleDeploy {
     // Separate DC project to same exchange asset, works OK
     apiSpecification {
         name 'Design Center Project Name v1'
-        branchName 'v1'
+        designCenterBranchName 'v1'
         // everything else in this closure is optional
         exchangeAssetId 'the-asset-id'
         mainRamlFile 'stuff.raml'

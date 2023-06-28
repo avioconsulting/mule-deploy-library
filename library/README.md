@@ -131,3 +131,34 @@ Below are some examples of how to specify enabledFeatures section in the Groovy 
 ```
 
 More detailed examples of how to specify these tags are available on [examples folder](./examples).
+
+## apiSpec
+This is the section necessary to specify attributes about the API to be used in Design Center, API Manager.
+
+### name
+The name of your Design Center project and also the desired API definition name.
+
+### exchangeAssetId
+The exchange-asset-id to be used. By default, it will be derived from the `name`, converted to lower case and replaced all spaces by dash (-).
+
+Examples:
+* Product API --> product-api
+* SystemStuff API --> systemstuff-api
+
+### mainRamlFile
+What is the "main RAML" file in your app? If not specified, it will be the first RAML round at the "root" of your `sourceDirectory`.
+
+### endpoint
+The endpoint to show in the API Manager definition
+
+### autoDiscoveryPropertyName
+The application property that will be set by the deployer (after upserting the API definition) so that the app's autodiscovery element knows what the API ID is. Defaults to 'auto-discovery.api-id'.
+
+### designCenterBranchName
+Which design center branch should be updated from app (and published to Exchange). Default is master.
+
+### sourceDirectory
+Which source directory in your app code should be used to sync to Design Center? By default, this is the '/api' directory which ends up inside the JAR from being in src/main/resources.
+
+### soapEndpointWithVersion
+Major API Version for SOAP definition, used to synchronize with Design Center. When defined value, will assume it's a SOAP API instead of REST.
