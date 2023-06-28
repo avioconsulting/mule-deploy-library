@@ -194,37 +194,43 @@ class Deployer implements IDeployer {
                                  enabledFeatures,
                                  feature)
         }
-        String skipReason
-        if (!apiSpecifications) {
-            skipReason = "no API spec(s) were provided"
-        } else if (!this.environmentsToDoDesignCenterDeploymentOn.contains(environment)) {
-            skipReason = "Deploying to '${environment}', only ${this.environmentsToDoDesignCenterDeploymentOn} triggers Design Center deploys"
-        } else {
-            skipReason = isFeatureDisabled(Features.DesignCenterSync)
-        }
+
         apiSpecifications.each { apiSpecification ->
+
+            String skipReason
+            if (!this.environmentsToDoDesignCenterDeploymentOn.contains(environment)) {
+                skipReason = "Deploying to '${environment}', only ${this.environmentsToDoDesignCenterDeploymentOn} triggers Design Center deploys"
+            } else {
+                skipReason = isFeatureDisabled(Features.DesignCenterSync)
+            }
+
             def apiHeader = "${apiSpecification.name}/branch ${apiSpecification.designCenterBranchName}"
             executeStep("Design Center Deployment - ${apiHeader}",
                         skipReason) {
                 designCenterDeployer.synchronizeDesignCenterFromApp(apiSpecification,
                                                                     appDeploymentRequest)
             }
-            if (!apiSpecifications) {
-                skipReason = "no API spec(s) were provided"
-            } else {
-                skipReason = isFeatureDisabled(Features.ApiManagerDefinitions)
-            }
+
+            skipReason = isFeatureDisabled(Features.ApiManagerDefinitions)
+
+            def isMule4 = deployer.isMule4Request(appDeploymentRequest)
+            def internalSpec = new ApiSpec(apiSpecification.exchangeAssetId,
+                    apiSpecification.endpoint,
+                    environment,
+                    apiSpecification.apiMajorVersion,
+                    isMule4)
+
             ExistingApiSpec existingApiManagerDefinition = executeStep("API Manager Definition - ${apiHeader}",
                                                                        skipReason) {
-                def isMule4 = deployer.isMule4Request(appDeploymentRequest)
-                def internalSpec = new ApiSpec(apiSpecification.exchangeAssetId,
-                                               apiSpecification.endpoint,
-                                               environment,
-                                               apiSpecification.apiMajorVersion,
-                                               isMule4)
+
                 apiManagerDeployer.synchronizeApiDefinition(internalSpec,
                                                             appDeploymentRequest.appVersion)
             } as ExistingApiSpec
+
+            if (!existingApiManagerDefinition && apiSpecification.exchangeAssetId) {
+                existingApiManagerDefinition = apiManagerDeployer.getExistingApiDefinition(internalSpec)
+            }
+
             if (existingApiManagerDefinition) {
                 appDeploymentRequest.setAutoDiscoveryId(apiSpecification.autoDiscoveryPropertyName,
                                                         existingApiManagerDefinition.id)
