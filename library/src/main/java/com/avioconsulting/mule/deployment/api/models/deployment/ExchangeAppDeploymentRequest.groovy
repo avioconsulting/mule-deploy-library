@@ -11,7 +11,7 @@ abstract class ExchangeAppDeploymentRequest extends AppDeploymentRequest {
 
     @Override
     List<RamlFile> getRamlFilesFromApp(String rootRamlDirectory, boolean ignoreExchange) {
-        return Collections.emptyList()
+        return null
     }
 
     @Override
