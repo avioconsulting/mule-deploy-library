@@ -1,5 +1,8 @@
 package com.avioconsulting.mule.deployment.api.models.deployment
 
+
+import com.avioconsulting.mule.deployment.internal.models.RamlFile
+
 abstract class AppDeploymentRequest {
 
     protected final Map<String, String> autoDiscoveries = [:]
@@ -53,4 +56,6 @@ abstract class AppDeploymentRequest {
     String getAppVersion() {
         return appVersion
     }
+
+    abstract List<RamlFile> getRamlFilesFromApp(String rootRamlDirectory, boolean ignoreExchange)
 }
