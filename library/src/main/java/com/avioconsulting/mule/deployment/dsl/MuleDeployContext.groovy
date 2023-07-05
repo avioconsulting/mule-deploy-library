@@ -85,6 +85,8 @@ class MuleDeployContext extends BaseContext {
                     policyList,
                     features)
         } else {
+            features = removeFeature(Features.DesignCenterSync, features)
+
             ExchangeAppDeploymentRequest deploymentRequest
             if (cloudHubV2Set) {
                 deploymentRequest = cloudHubV2Application.createDeploymentRequest()
@@ -92,7 +94,7 @@ class MuleDeployContext extends BaseContext {
                 deploymentRequest = runtimeFabricApplication.createDeploymentRequest()
             }
             return new DeploymentPackage(deploymentRequest,
-                    null,
+                    apiSpecifications.createApiSpecList(deploymentRequest),
                     policyList,
                     features)
         }

@@ -152,12 +152,11 @@ class MuleDeployContextTest implements AppBuilding {
         // assert
         assertThat deploymentPackage.deploymentRequest,
                 is(instanceOf(CloudhubV2DeploymentRequest))
-        assertThat deploymentPackage.apiSpecifications,
-                is(null)
+        assertThat deploymentPackage.apiSpecifications.size(),
+                is(equalTo(1))
         assertThat deploymentPackage.enabledFeatures,
                 is(equalTo([
                         Features.AppDeployment,
-                        Features.DesignCenterSync,
                         Features.ApiManagerDefinitions
                 ]))
     }
@@ -199,12 +198,11 @@ class MuleDeployContextTest implements AppBuilding {
         // assert
         assertThat deploymentPackage.deploymentRequest,
                 is(instanceOf(RuntimeFabricDeploymentRequest))
-        assertThat deploymentPackage.apiSpecifications,
-                is(null)
+        assertThat deploymentPackage.apiSpecifications.size(),
+                is(equalTo(1))
         assertThat deploymentPackage.enabledFeatures,
                 is(equalTo([
                         Features.AppDeployment,
-                        Features.DesignCenterSync,
                         Features.ApiManagerDefinitions
                 ]))
     }
@@ -561,5 +559,58 @@ class MuleDeployContextTest implements AppBuilding {
                    is(equalTo([
                            Features.All
                    ]))
+    }
+
+    @Test
+    void cloudhubV2_and_policies() {
+        // arrange
+        def tempRequest = buildFullFileBasedApp()
+        def closure = {
+            version '1.0'
+
+            apiSpecification {
+                name 'Design Center Project Name'
+            }
+
+            policies {
+                clientEnforcementPolicyBasic()
+            }
+
+            cloudHubV2Application {
+                environment 'DEV'
+                applicationName 'the-app'
+                appVersion '1.2.3'
+                businessGroupId 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee'
+                workerSpecs {
+                    muleVersion '4.2.2'
+                    target 'sharedTarget'
+                }
+                cryptoKey 'theKey'
+                autoDiscovery {
+                    clientId 'the_client_id'
+                    clientSecret 'the_client_secret'
+                }
+                cloudHubAppPrefix 'AVI'
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def deploymentPackage = context.createDeploymentPackage()
+
+        // assert
+        assertThat deploymentPackage.deploymentRequest,
+                is(instanceOf(CloudhubV2DeploymentRequest))
+        assertThat deploymentPackage.apiSpecifications.size(),
+                is(not(0))
+        assertThat deploymentPackage.desiredPolicies.size(),
+                is(equalTo(1))
+        assertThat deploymentPackage.enabledFeatures,
+                is(equalTo([
+                        Features.AppDeployment,
+                        Features.ApiManagerDefinitions,
+                        Features.PolicySync
+                ]))
     }
 }
