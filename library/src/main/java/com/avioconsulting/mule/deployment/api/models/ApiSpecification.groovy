@@ -71,14 +71,11 @@ class ApiSpecification {
         this.autoDiscoveryPropertyName = autoDiscoveryPropertyName ?: 'auto-discovery.api-id'
         this.name = name
         sourceDirectory = getSourceDirectoryOrDefault(sourceDirectory)
-        this.mainRamlFile = mainRamlFile ?: findMainRamlFileName(ramlFiles)
-        if (this.mainRamlFile) {
-            validateMainRamlFile(this.mainRamlFile, ramlFiles, sourceDirectory)
-        }
+        this.mainRamlFile = getMainRamlFileOrDefault(mainRamlFile, ramlFiles)
         // SOAP will not have a main RAML file, just use v1 in that case
-        this.apiMajorVersion = this.mainRamlFile && !ramlFiles.isEmpty() ? getApiVersion(this.mainRamlFile,
-                                                                 ramlFiles,
-                                                                 sourceDirectory) : 'v1'
+        this.apiMajorVersion = this.mainRamlFile && ramlFiles != null ? getApiVersion(this.mainRamlFile,
+                                                                    ramlFiles,
+                                                                    sourceDirectory) : 'v1'
         this.exchangeAssetId = exchangeAssetId ?: name.toLowerCase().replace(' ',
                                                                              '-')
         this.endpoint = endpoint
@@ -114,10 +111,28 @@ class ApiSpecification {
         sourceDirectory ?: '/api'
     }
 
+    static String getMainRamlFileOrDefault(String mainRamlFile, List<RamlFile> ramlFiles) {
+        // in case mainRamlFile was specified, assume it
+        if (mainRamlFile) {
+            return mainRamlFile
+        }
+
+        // in case list of raml files was populated (even is empty), find the main raml file inside it
+        if (ramlFiles != null) {
+            return findMainRamlFileName(ramlFiles)
+        }
+
+        // if none of conditions were matched, return null to the caller
+        return null
+    }
+
     private static String getApiVersion(String mainRamlFile,
                                         List<RamlFile> ramlFiles,
                                         String sourceDirectory) {
         def mainFile = findMainRamlFile(mainRamlFile, ramlFiles)
+        if (!mainFile) {
+            throw new Exception("You specified '${mainRamlFile}' as your main RAML file but it does not exist in your application under ${sourceDirectory}!")
+        }
         def resourceLoader = new FromStringRamlResourceLoader(ramlFiles)
         def parserService = new ParserService()
         def apiRef = ApiReference.create(mainFile.fileName,
@@ -142,12 +157,5 @@ class ApiSpecification {
             f.fileName == mainRamlFile
         }
         return mainFile
-    }
-
-    private static void validateMainRamlFile(String mainRamlFile, List<RamlFile> ramlFiles, String sourceDirectory) {
-        def mainFile = findMainRamlFile(mainRamlFile, ramlFiles)
-        if (!mainFile) {
-            throw new Exception("You specified '${mainRamlFile}' as your main RAML file but it does not exist in your application under ${sourceDirectory}!")
-        }
     }
 }
