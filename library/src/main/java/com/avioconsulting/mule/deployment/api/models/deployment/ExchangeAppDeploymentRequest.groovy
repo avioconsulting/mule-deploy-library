@@ -11,11 +11,12 @@ abstract class ExchangeAppDeploymentRequest extends AppDeploymentRequest {
 
     @Override
     List<RamlFile> getRamlFilesFromApp(String rootRamlDirectory, boolean ignoreExchange) {
-        return null
+        return Collections.emptyList()
     }
 
     @Override
     List<Features> getUnsupportedFeatures() {
         return [Features.DesignCenterSync]
     }
+
 }
