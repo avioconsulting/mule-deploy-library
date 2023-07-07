@@ -125,7 +125,8 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                                    desiredState: "STARTED",
                                    configuration: [
                                            "mule.agent.application.properties.service": [
-                                                   applicationName: 'new-app'
+                                                   applicationName: 'new-app',
+                                                   properties: [:]
                                            ]
                                    ],
                                    "vCores": VCoresSize.vCore1GB.vCoresSize
@@ -175,6 +176,8 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
 
         def appInfo = request.getCloudhubAppInfo()
 
+        request.setAutoDiscoveryId("apiId", "123")
+
         assertThat appInfo,
                    is(equalTo([
                            name: 'prefix-new-app-dev',
@@ -189,6 +192,9 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                                    configuration: [
                                            "mule.agent.application.properties.service": [
                                                    applicationName: 'new-app',
+                                                   properties     : [
+                                                           apiId : '123'
+                                                   ]
                                            ]
                                    ],
                                    "vCores": VCoresSize.vCore15GB.vCoresSize
