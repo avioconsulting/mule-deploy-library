@@ -1,7 +1,6 @@
 package com.avioconsulting.mule.deployment.api.models.deployment
 
 
-import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.WorkerSpecRequest
 import com.avioconsulting.mule.deployment.internal.models.CloudhubAppProperties
 import groovy.json.JsonOutput
@@ -168,11 +167,6 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
 
     void setTargetId(String targetId) {
         this.targetId = targetId
-    }
-
-    @Override
-    List<Features> getUnsupportedFeatures() {
-        return [Features.DesignCenterSync]
     }
 
 }
