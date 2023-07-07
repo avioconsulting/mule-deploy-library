@@ -73,7 +73,7 @@ class ApiSpecification {
         sourceDirectory = getSourceDirectoryOrDefault(sourceDirectory)
         this.mainRamlFile = getMainRamlFileOrDefault(mainRamlFile, ramlFiles)
         // SOAP will not have a main RAML file, just use v1 in that case
-        this.apiMajorVersion = this.mainRamlFile && ramlFiles != null ? getApiVersion(this.mainRamlFile,
+        this.apiMajorVersion = this.mainRamlFile ? getApiVersion(this.mainRamlFile,
                                                                     ramlFiles,
                                                                     sourceDirectory) : 'v1'
         this.exchangeAssetId = exchangeAssetId ?: name.toLowerCase().replace(' ',
