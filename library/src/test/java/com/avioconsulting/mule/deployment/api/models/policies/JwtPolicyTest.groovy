@@ -22,7 +22,7 @@ class JwtPolicyTest {
         assertThat model.assetId,
                    is(equalTo('jwt-validation'))
         assertThat model.version,
-                   is(equalTo('1.1.4'))
+                   is(equalTo('1.3.1'))
         assertThat model.policyConfiguration,
                    is(equalTo([
                            jwtOrigin             : 'httpBearerAuthenticationHeader',
@@ -90,7 +90,7 @@ class JwtPolicyTest {
         assertThat model.assetId,
                    is(equalTo('jwt-validation'))
         assertThat model.version,
-                   is(equalTo('1.1.4'))
+                   is(equalTo('1.3.1'))
         assertThat model.policyConfiguration,
                    is(equalTo([
                            jwtOrigin             : 'httpBearerAuthenticationHeader',
@@ -143,7 +143,7 @@ class JwtPolicyTest {
         assertThat model.assetId,
                    is(equalTo('jwt-validation'))
         assertThat model.version,
-                   is(equalTo('1.1.4'))
+                   is(equalTo('1.3.1'))
         assertThat model.policyConfiguration,
                    is(equalTo([
                            jwtOrigin             : 'httpBearerAuthenticationHeader',
