@@ -73,21 +73,21 @@ class CloudHubDeployerTest extends BaseTest {
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
             if (mockDeploymentAndXStatusChecks(request,
-                                               'client-sys-new-app-dev',
-                                               new AppStatusPackage(AppStatus.NotFound,
-                                                                    null),
-                                               new AppStatusPackage(AppStatus.Undeployed,
-                                                                    null),
-                                               new AppStatusPackage(AppStatus.Deploying,
-                                                                    null),
-                                               new AppStatusPackage(AppStatus.Started,
-                                                                    null))) {
+                    'client-sys-new-app-suf',
+                    new AppStatusPackage(AppStatus.NotFound,
+                            null),
+                    new AppStatusPackage(AppStatus.Undeployed,
+                            null),
+                    new AppStatusPackage(AppStatus.Deploying,
+                            null),
+                    new AppStatusPackage(AppStatus.Started,
+                            null))) {
                 return
             }
             request.response().with {
                 statusCode = 200
                 putHeader('Content-Type',
-                          'application/json')
+                        'application/json')
                 // deployment service returns this
                 statusCode = 200
                 url = uri
@@ -104,71 +104,71 @@ class CloudHubDeployerTest extends BaseTest {
         }
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
-                                                    new CloudhubWorkerSpecRequest('3.9.1',
-                                                                                  false,
-                                                                                  1,
-                                                                                  WorkerTypes.Micro,
-                                                                                  AwsRegions.UsEast1),
-                                                    file,
-                                                    'theKey',
-                                                    'theClientId',
-                                                    'theSecret',
-                                                    'client',
-                                                    'suf',
-                                                    'sys-new-app',
-                                                    '1.2.3')
+                new CloudhubWorkerSpecRequest('3.9.1',
+                        false,
+                        1,
+                        WorkerTypes.Micro,
+                        AwsRegions.UsEast1),
+                file,
+                'theKey',
+                'theClientId',
+                'theSecret',
+                'client',
+                'suf',
+                'sys-new-app',
+                '1.2.3')
         request.setAutoDiscoveryId('the.auto.disc.prop',
-                                   '1234')
+                '1234')
 
         // act
         deployer.deploy(request)
 
         // assert
-        MatcherAssert.assertThat url,
-                   is(equalTo('/cloudhub/api/v2/applications'))
-        MatcherAssert.assertThat method,
-                   is(equalTo('POST'))
-        MatcherAssert.assertThat authToken,
-                   is(equalTo('Bearer the token'))
-        MatcherAssert.assertThat envId,
-                   is(equalTo('def456'))
-        MatcherAssert.assertThat orgId,
-                   is(equalTo('the-org-id'))
+        assertThat url,
+                is(equalTo('/cloudhub/api/v2/applications'))
+        assertThat method,
+                is(equalTo('POST'))
+        assertThat authToken,
+                is(equalTo('Bearer the token'))
+        assertThat envId,
+                is(equalTo('def456'))
+        assertThat orgId,
+                is(equalTo('the-org-id'))
         assertThat sentFormAttributes.names().toList().sort(),
-                   is(equalTo(['appInfoJson', 'autoStart']))
-        MatcherAssert.assertThat sentFormAttributes.get('autoStart'),
-                   is(equalTo('true'))
+                is(equalTo(['appInfoJson', 'autoStart']))
+        assertThat sentFormAttributes.get('autoStart'),
+                is(equalTo('true'))
         def map = new JsonSlurper().parseText(sentFormAttributes.get('appInfoJson'))
         assertThat map,
-                   is(equalTo([
-                           domain                   : 'client-sys-new-app-dev',
-                           muleVersion              : [
-                                   version: '3.9.1'
-                           ],
-                           region                   : 'us-east-1',
-                           monitoringAutoRestart    : true,
-                           workers                  : [
-                                   type  : [
-                                           name: 'Micro'
-                                   ],
-                                   amount: 1
-                           ],
-                           objectStoreV1            : false,
-                           staticIPsEnabled         : false,
-                           loggingCustomLog4JEnabled: false,
-                           persistentQueues         : false,
-                           properties               : [
-                                   env                                               : 'dev',
-                                   'crypto.key'                                      : 'theKey',
-                                   'anypoint.platform.client_id'                     : 'theClientId',
-                                   'anypoint.platform.client_secret'                 : 'theSecret',
-                                   'anypoint.platform.config.analytics.agent.enabled': true,
-                                   'anypoint.platform.visualizer.layer'              : 'System',
-                                   'the.auto.disc.prop'                              : '1234'
-                           ]
-                   ]))
-        MatcherAssert.assertThat rawBody,
-                   is(containsString('Content-Disposition: form-data; name="file"; filename="some_file.txt"'))
+                is(equalTo([
+                        domain                   : 'client-sys-new-app-suf',
+                        muleVersion              : [
+                                version: '3.9.1'
+                        ],
+                        region                   : 'us-east-1',
+                        monitoringAutoRestart    : true,
+                        workers                  : [
+                                type  : [
+                                        name: 'Micro'
+                                ],
+                                amount: 1
+                        ],
+                        objectStoreV1            : false,
+                        staticIPsEnabled         : false,
+                        loggingCustomLog4JEnabled: false,
+                        persistentQueues         : false,
+                        properties               : [
+                                env                                               : 'dev',
+                                'crypto.key'                                      : 'theKey',
+                                'anypoint.platform.client_id'                     : 'theClientId',
+                                'anypoint.platform.client_secret'                 : 'theSecret',
+                                'anypoint.platform.config.analytics.agent.enabled': true,
+                                'anypoint.platform.visualizer.layer'              : 'System',
+                                'the.auto.disc.prop'                              : '1234'
+                        ]
+                ]))
+        assertThat rawBody,
+                is(containsString('Content-Disposition: form-data; name="file"; filename="some_file.txt"'))
     }
 
     @Test

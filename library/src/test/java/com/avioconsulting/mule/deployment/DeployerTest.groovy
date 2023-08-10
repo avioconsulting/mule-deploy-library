@@ -496,34 +496,35 @@ class DeployerTest {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
-                                                    new CloudhubWorkerSpecRequest('3.9.1',
-                                                                                  false,
-                                                                                  1,
-                                                                                  WorkerTypes.Micro,
-                                                                                  AwsRegions.UsEast1),
-                                                    file,
-                                                    'theKey',
-                                                    'theClientId',
-                                                    'theSecret',
-                                                    'client',
-                                                    'new-app',
-                                                    '1.2.3')
+                new CloudhubWorkerSpecRequest('3.9.1',
+                        false,
+                        1,
+                        WorkerTypes.Micro,
+                        AwsRegions.UsEast1),
+                file,
+                'theKey',
+                'theClientId',
+                'theSecret',
+                'client',
+                "suff",
+                'new-app',
+                '1.2.3')
         def apiSpec = new ApiSpecification('Hello SOAP API',
-                                           'v1')
+                'v1')
 
         // act
         deployer.deployApplication(request,
-                                   new ApiSpecificationList([apiSpec]))
+                new ApiSpecificationList([apiSpec]))
 
         // assert
         assertThat deployedChApps.size(),
-                   is(equalTo(1))
+                is(equalTo(1))
         assertThat 'API sync should still happen',
-                   apiSyncs.size(),
-                   is(equalTo(1))
+                apiSyncs.size(),
+                is(equalTo(1))
         assertThat 'If a SOAP API is in use, we should not sync to DC',
-                   designCenterSyncs.size(),
-                   is(equalTo(0))
+                designCenterSyncs.size(),
+                is(equalTo(0))
     }
 
     @Test
