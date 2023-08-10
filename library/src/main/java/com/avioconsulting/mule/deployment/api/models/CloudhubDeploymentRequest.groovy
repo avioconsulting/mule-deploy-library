@@ -117,7 +117,15 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
         }
         def newAppName
         if (cloudHubAppSuffix != null) {
-            newAppName = "${cloudHubAppPrefix}-${this.appName}-${cloudHubAppSuffix}"
+            if (cloudHubAppSuffix == "") {
+                newAppName = "${cloudHubAppPrefix}-${this.appName}"
+            }
+            else if (cloudHubAppSuffix[0] == "-") {
+                newAppName = "${cloudHubAppPrefix}-${this.appName}${cloudHubAppSuffix}"
+            }
+            else {
+                newAppName = "${cloudHubAppPrefix}-${this.appName}-${cloudHubAppSuffix}"
+            }
         } else {
             newAppName = "${cloudHubAppPrefix}-${this.appName}-${environment}"
         }

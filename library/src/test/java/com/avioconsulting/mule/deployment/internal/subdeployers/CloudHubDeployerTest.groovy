@@ -73,7 +73,7 @@ class CloudHubDeployerTest extends BaseTest {
         withHttpServer { HttpServerRequest request ->
             def uri = request.uri()
             if (mockDeploymentAndXStatusChecks(request,
-                    'client-sys-new-app-suf',
+                    'client-sys-new-app',
                     new AppStatusPackage(AppStatus.NotFound,
                             null),
                     new AppStatusPackage(AppStatus.Undeployed,
@@ -114,7 +114,7 @@ class CloudHubDeployerTest extends BaseTest {
                 'theClientId',
                 'theSecret',
                 'client',
-                'suf',
+                '',
                 'sys-new-app',
                 '1.2.3')
         request.setAutoDiscoveryId('the.auto.disc.prop',
@@ -141,7 +141,7 @@ class CloudHubDeployerTest extends BaseTest {
         def map = new JsonSlurper().parseText(sentFormAttributes.get('appInfoJson'))
         assertThat map,
                 is(equalTo([
-                        domain                   : 'client-sys-new-app-suf',
+                        domain                   : 'client-sys-new-app',
                         muleVersion              : [
                                 version: '3.9.1'
                         ],
@@ -223,7 +223,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
-                                                    'DEV',
+                                                    '-DEV',
                                                     'new-app',
                                                     '1.2.3')
 
