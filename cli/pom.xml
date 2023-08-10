@@ -4,38 +4,20 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.avioconsulting.mule</groupId>
     <artifactId>mule-deploy-cli</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>Mule deployment CLI</name>
     <description>Deploys Mule applications via Runtime Manager APIs</description>
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>https://opensource.org/licenses/MIT</url>
-        </license>
-    </licenses>
-
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <groovy.compiler.version>3.0.7</groovy.compiler.version>
-    </properties>
-
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub OWNER Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
-            <layout>default</layout>
-        </repository>
-    </distributionManagement>
+    <parent>
+        <groupId>com.avioconsulting.mule</groupId>
+        <artifactId>mule-deploy-parent</artifactId>
+        <version>1.2.1-SNAPSHOT</version>
+    </parent>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
-                <version>2.5.2</version>
                 <configuration>
                     <!-- We use the appassembler -->
                     <skip>true</skip>
@@ -44,7 +26,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
                 <configuration>
                     <!-- We use the appassembler -->
                     <skip>true</skip>
@@ -111,6 +92,14 @@
                         <!-- Allows plugin to use the Maven version we are running with  -->
                         <maven.home>${maven.home}</maven.home>
                     </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
                 </configuration>
             </plugin>
         </plugins>

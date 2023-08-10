@@ -4,6 +4,9 @@ import com.avioconsulting.mule.deployment.api.DeployerFactory
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.IDeployerFactory
 import com.avioconsulting.mule.deployment.api.ILogger
+import com.avioconsulting.mule.deployment.api.models.credentials.ConnectedAppCredential
+import com.avioconsulting.mule.deployment.api.models.credentials.Credential
+import com.avioconsulting.mule.deployment.api.models.credentials.UsernamePasswordCredential
 import com.avioconsulting.mule.deployment.dsl.DeploymentPackage
 import com.avioconsulting.mule.deployment.dsl.MuleDeployContext
 import com.avioconsulting.mule.deployment.dsl.MuleDeployScript
@@ -21,10 +24,10 @@ import java.util.concurrent.Callable
 class DeployerCommandLine implements Callable<Integer> {
     @Parameters(index = '0', description = 'The path to your DSL file')
     private File groovyFile
-    @Option(names = ['-u', '--anypoint-username'], required = true)
-    private String anypointUsername
-    @Option(names = ['-p', '--anypoint-password'], required = true)
-    private String anypointPassword
+
+    @CommandLine.ArgGroup(exclusive = false, multiplicity = "1")
+    CredentialOptGroup credential;
+
     @Option(names = ['-o', '--anypoint-org-name'],
             description = 'The org/business group to use. If you do not specify it, the default for your user will be used')
     private String anypointOrganizationName
@@ -46,6 +49,44 @@ class DeployerCommandLine implements Callable<Integer> {
     private static IDeployerFactory deployerFactory = new DeployerFactory()
     private static ILogger logger = new SimpleLogger()
 
+    static class CredentialOptGroup {
+        @CommandLine.ArgGroup(exclusive = false, multiplicity = "0..1", order = 1, heading = "Basic auth credentials of Anypoint Platform%n", headingKey = "Basic Credentials")
+        UsernamePasswordCredentialOptGroup usernamePasswordCredential
+
+        @CommandLine.ArgGroup(exclusive = false, multiplicity = "0..1", order = 2, heading = "Connected App credentials%n", headingKey = "Connected App Credentials")
+        ConnectedAppCredentialOptGroup connectedAppCredential
+
+        Credential getCoreCredential(){
+            return usernamePasswordCredential != null ? usernamePasswordCredential.getCoreCredential() : connectedAppCredential.getCoreCredential()
+        }
+     }
+
+    static abstract class BaseCredential {
+        abstract Credential getCoreCredential()
+    }
+    static class UsernamePasswordCredentialOptGroup extends BaseCredential {
+        @Option(names = ['-u', '--anypoint-username'], required = true, order = 1)
+        String anypointUsername
+        @Option(names = ['-p', '--anypoint-password'], required = true, order = 2)
+        String anypointPassword
+
+        Credential getCoreCredential() {
+            return new UsernamePasswordCredential(anypointUsername,anypointPassword)
+        }
+    }
+
+    static class ConnectedAppCredentialOptGroup {
+        @Option(names = ['-caid', '--anypoint-connected-app-id'], required = true, order = 1)
+        String anypointConnectedAppId
+        @Option(names = ['-casec', '--anypoint-connected-app-secret'], required = true, order = 2)
+        String anypointConnectedAppSecret
+
+        Credential getCoreCredential() {
+            return new ConnectedAppCredential(anypointConnectedAppId,anypointConnectedAppSecret)
+        }
+    }
+
+
     static void main(String... args) {
         def commandLine = new CommandLine(new DeployerCommandLine())
         if (commandLine.versionHelpRequested) {
@@ -60,8 +101,7 @@ class DeployerCommandLine implements Callable<Integer> {
     Integer call() throws Exception {
         def deploymentPackage = processDsl()
         logger.println "Successfully processed ${groovyFile} through DSL"
-        def deployer = deployerFactory.create(this.anypointUsername,
-                                              this.anypointPassword,
+        def deployer = deployerFactory.create(this.credential.getCoreCredential(),
                                               logger,
                                               this.dryRunMode,
                                               this.anypointOrganizationName,

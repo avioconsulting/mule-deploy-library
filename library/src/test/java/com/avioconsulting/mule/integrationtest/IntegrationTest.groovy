@@ -4,11 +4,7 @@ import com.avioconsulting.mule.MavenInvoke
 import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.Deployer
 import com.avioconsulting.mule.deployment.api.DryRunMode
-import com.avioconsulting.mule.deployment.api.models.ApiSpecification
-import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
-import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
-import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
-import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.*
 import com.avioconsulting.mule.deployment.api.models.policies.MulesoftPolicy
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
@@ -23,11 +19,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.core.config.Configurator
-import org.junit.Assume
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.*
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
@@ -39,6 +31,8 @@ class IntegrationTest implements MavenInvoke {
     private static final String AVIO_SANDBOX_BIZ_GROUP_NAME = 'AVIO Sandbox'
     private static final String ANYPOINT_USERNAME = System.getProperty('anypoint.username')
     private static final String ANYPOINT_PASSWORD = System.getProperty('anypoint.password')
+    private static final String ANYPOINT_CONNECTED_APP_ID = System.getProperty('anypoint.connected-app.id')
+    private static final String ANYPOINT_CONNECTED_APP_SECRET = System.getProperty('anypoint.connected-app.secret')
     private static final String ANYPOINT_CLIENT_ID = System.getProperty('anypoint.client.id')
     private static final String ANYPOINT_CLIENT_SECRET = System.getProperty('anypoint.client.secret')
     private static final String ON_PREM_SERVER_NAME = System.getProperty('mule4.onprem.server.name')
@@ -61,8 +55,13 @@ class IntegrationTest implements MavenInvoke {
         // cut down on the unit test noise here
         Configurator.setLevel('org.apache.http.wire',
                               Level.INFO)
-        assert ANYPOINT_USERNAME: 'Did you forget -Danypoint.username?'
-        assert ANYPOINT_PASSWORD: 'Did you forget -Danypoint.password?'
+        if (!ANYPOINT_CONNECTED_APP_ID && !ANYPOINT_CONNECTED_APP_SECRET) {
+            assert ANYPOINT_USERNAME: 'Did you forget -Danypoint.username?'
+            assert ANYPOINT_PASSWORD: 'Did you forget -Danypoint.password?'
+        } else {
+            assert ANYPOINT_CONNECTED_APP_ID: 'Did you forget -Danypoint.connected-app.id?'
+            assert ANYPOINT_CONNECTED_APP_SECRET: 'Did you forget -Danypoint.connected-app.secret?'
+        }
         assert ANYPOINT_CLIENT_ID: 'Did you forget -Danypoint.client.id?'
         assert ANYPOINT_CLIENT_SECRET: 'Did you forget -Danypoint.client.secret?'
     }
@@ -135,6 +134,8 @@ class IntegrationTest implements MavenInvoke {
         clientWrapper = new HttpClientWrapper('https://anypoint.mulesoft.com',
                                               ANYPOINT_USERNAME,
                                               ANYPOINT_PASSWORD,
+                                              ANYPOINT_CONNECTED_APP_ID,
+                                              ANYPOINT_CONNECTED_APP_SECRET,
                                               logger,
                                               AVIO_SANDBOX_BIZ_GROUP_NAME)
         def environmentLocator = new EnvironmentLocator(this.clientWrapper,
@@ -170,7 +171,8 @@ class IntegrationTest implements MavenInvoke {
     void cloudhub() {
         // arrange
         def apiSpec1 = new ApiSpecification('Mule Deploy Design Center Test Project',
-                                           cloudhubDeploymentRequest.getRamlFilesFromApp('/api'),
+                                           cloudhubDeploymentRequest.getRamlFilesFromApp('/api',
+                                                                                         true),
                                             'mule-deploy-design-center-test-project-v2.raml',
                                             null,
                                             null,
@@ -179,7 +181,8 @@ class IntegrationTest implements MavenInvoke {
                                             '/api')
 
         def apiSpec2 = new ApiSpecification('Mule Deploy Design Center Test Project',
-                                            cloudhubDeploymentRequest.getRamlFilesFromApp('/api_v1'),
+                                            cloudhubDeploymentRequest.getRamlFilesFromApp('/api_v1',
+                                                                                          true),
                                             'mule-deploy-design-center-test-project.raml',
                                             null,
                                             null,
@@ -268,7 +271,7 @@ class IntegrationTest implements MavenInvoke {
             println 'Existing app does not exist, no problem'
         }
         def apiSpec = new ApiSpecification('Mule Deploy Design Center Test Project',
-                                           onPremDeploymentRequest.getRamlFilesFromApp('/api'))
+                                           onPremDeploymentRequest.getRamlFilesFromApp('/api', true))
 
         // act
         overallDeployer.deployApplication(onPremDeploymentRequest,

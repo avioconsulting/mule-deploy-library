@@ -30,7 +30,7 @@ abstract class BaseMojo extends AbstractMojo {
             (k as String).startsWith('muleDeploy.')
         }.collectEntries { k, v ->
             def withoutPrefix = (k as String).replaceFirst('muleDeploy\\.',
-                                                           '')
+                    '')
             [withoutPrefix, v]
         }
         if (artifact) {
@@ -52,19 +52,20 @@ abstract class BaseMojo extends AbstractMojo {
             def wrapper = getParamsWrapper()
             logger.println "Will resolve `params` in DSL using: ${wrapper.allProperties}"
             binding.setVariable('params',
-                                wrapper)
+                    wrapper)
             def shell = new GroovyShell(this.class.classLoader,
-                                        binding,
-                                        compilerConfig)
+                    binding,
+                    compilerConfig)
             // last line of MuleDeployScript.muleDeploy method returns this
             def context = shell.evaluate(groovyFile) as MuleDeployContext
             return context.createDeploymentPackage()
         }
         catch (e) {
             def exception = e.cause ?: e
-            logger.error("Unable to process DSL because ${exception.class} ${exception.message}")
+            logger.error("Unable to process DSL because ${exception.class} ${exception.message}",
+                    exception)
             throw new Exception('Unable to process DSL',
-                                e)
+                    e)
         }
     }
 }

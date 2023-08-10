@@ -5,6 +5,7 @@ import com.avioconsulting.mule.deployment.api.IDeployer
 import com.avioconsulting.mule.deployment.api.IDeployerFactory
 import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.api.models.*
+import com.avioconsulting.mule.deployment.api.models.credentials.Credential
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import org.apache.commons.io.FileUtils
 import org.junit.BeforeClass
@@ -25,6 +26,8 @@ class DeployerCommandLineTest implements MavenInvoke {
                                            String groovyFileText,
                                            String user = 'our user',
                                            String pass = 'our pass',
+                                           String connId = null,
+                                           String connSecret = null,
                                            DryRunMode dryRunMode = DryRunMode.Run,
                                            String orgName = null,
                                            Map<String, String> otherArgs = [:]) {
@@ -35,14 +38,25 @@ class DeployerCommandLineTest implements MavenInvoke {
             groovyFile.text = groovyFileText
         }
         DeployerCommandLine.deployerFactory = mockDeployerFactory
-        def args = [
-                '-u',
-                "\"${user}\"".toString(),
-                '-p',
-                "\"${pass}\"".toString(),
-                '-m',
-                dryRunMode.name(),
-        ]
+        def args
+        if (connId != null && connSecret != null)
+            args = [
+                    '-caid',
+                    "\"${connId}\"".toString(),
+                    '-casec',
+                    "\"${connSecret}\"".toString(),
+                    '-m',
+                    dryRunMode.name()
+            ]
+        else
+            args = [
+                    '-u',
+                    "\"${user}\"".toString(),
+                    '-p',
+                    "\"${pass}\"".toString(),
+                    '-m',
+                    dryRunMode.name(),
+            ]
         if (orgName) {
             args += [
                     '-o',
@@ -78,8 +92,7 @@ class DeployerCommandLineTest implements MavenInvoke {
                 }
         ] as IDeployer
         def mock = [
-                create: { String username,
-                          String password,
+                create: { Credential credential,
                           ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,
@@ -121,6 +134,64 @@ muleDeploy {
     }
 
     @Test
+    void runs_with_connected_application() {
+        // arrange
+        FileBasedAppDeploymentRequest actualApp
+        ApiSpecificationList actualApiSpec
+        List<Features> actualFeatures
+        def mockDeployer = [
+                deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
+                                     ApiSpecificationList apiSpecification,
+                                     List<Policy> desiredPolicies,
+                                     List<Features> enabledFeatures ->
+                    actualApp = appDeploymentRequest
+                    actualApiSpec = apiSpecification
+                    actualFeatures = enabledFeatures
+                }
+        ] as IDeployer
+        def mock = [
+                create: { Credential credential,
+                          ILogger logger,
+                          DryRunMode dryRunMode,
+                          String anypointOrganizationName,
+                          List<String> environmentsToDoDesignCenterDeploymentOn ->
+                    return mockDeployer
+                }
+        ] as IDeployerFactory
+        def dslText = """
+muleDeploy {
+    version '1.0'
+    
+    onPremApplication {
+        environment 'DEV'
+        applicationName 'the-app'
+        appVersion '1.2.3'
+        file '${builtFile}'
+        targetServerOrClusterName 'theServer'
+    }
+}
+"""
+
+        // act
+        executeCommandLine(mock,
+                dslText)
+
+        // assert
+        assertThat 'No policies since we omitted that section',
+                actualFeatures,
+                is(equalTo([Features.AppDeployment, Features.DesignCenterSync, Features.ApiManagerDefinitions]))
+        assertThat actualApiSpec,
+                is(equalTo([]))
+        assert actualApp instanceof OnPremDeploymentRequest
+        actualApp.with {
+            assertThat it.appName,
+                    is(equalTo('the-app'))
+            assertThat it.environment,
+                    is(equalTo('DEV'))
+        }
+    }
+
+    @Test
     void offline_validate() {
         // arrange
         def deployed = false
@@ -133,8 +204,7 @@ muleDeploy {
                 }
         ] as IDeployer
         def mock = [
-                create: { String username,
-                          String password,
+                create: { Credential credential,
                           ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,
@@ -160,6 +230,8 @@ muleDeploy {
                            dslText,
                            'user',
                            'pass',
+                           null,
+                           null,
                            DryRunMode.OfflineValidate)
 
         // assert
@@ -180,8 +252,7 @@ muleDeploy {
                 }
         ] as IDeployer
         def mock = [
-                create: { String username,
-                          String password,
+                create: { Credential credential,
                           ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,
@@ -216,6 +287,8 @@ muleDeploy {
                            dslText,
                            'our user',
                            'our pass',
+                           null,
+                           null,
                            DryRunMode.Run,
                            null,
                            [
@@ -243,8 +316,7 @@ muleDeploy {
                 }
         ] as IDeployer
         def mock = [
-                create: { String username,
-                          String password,
+                create: { Credential credential,
                           ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,
@@ -274,8 +346,7 @@ muleDeploy {
                 }
         ] as IDeployer
         def mock = [
-                create: { String username,
-                          String password,
+                create: { Credential credential,
                           ILogger logger,
                           DryRunMode dryRunMode,
                           String anypointOrganizationName,

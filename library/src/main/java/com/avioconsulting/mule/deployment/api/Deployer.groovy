@@ -1,11 +1,11 @@
 package com.avioconsulting.mule.deployment.api
 
 
-import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.credentials.Credential
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
@@ -31,24 +31,21 @@ class Deployer implements IDeployer {
 
     /**
      *
-     * @param username anypoint creds to deploy with
-     * @param password anypoint creds to deploy with
+     * @param credential {@link Credential } to access anypoint platform.
      * @param logger all messages will be logged like this. This is Jenkins plugins friendly (or you can supply System.out)
      * @param dryRunMode Should we do a real run?
      * @param anypointOrganizationName Optional parameter. If null, the default organization/biz group for the user will be used. Otherwise supply name (NOT GUID) of the biz group or organization you want to use
      * @param baseUrl Base URL, optional
      * @param environmentsToDoDesignCenterDeploymentOn Normally workflow wise you'd only want to do this on DEV
      */
-    Deployer(String username,
-             String password,
+    Deployer(Credential credential,
              ILogger logger,
              DryRunMode dryRunMode,
              String anypointOrganizationName = null,
              String baseUrl = 'https://anypoint.mulesoft.com',
              List<String> environmentsToDoDesignCenterDeploymentOn = ['DEV']) {
         this(new HttpClientWrapper(baseUrl,
-                                   username,
-                                   password,
+                                   credential,
                                    logger,
                                    anypointOrganizationName),
              dryRunMode,
@@ -117,13 +114,16 @@ class Deployer implements IDeployer {
             deployer = onPremDeployer
             description = 'On-prem app deployment'
         }
-        performCommonDeploymentTasks(apiSpecifications,
+        def isSoapApi = apiSpecifications.any { spec -> spec.soapApi }
+        performCommonDeploymentTasks(isSoapApi,
+                                     apiSpecifications,
                                      desiredPolicies,
                                      appDeploymentRequest,
                                      appDeploymentRequest.environment,
                                      enabledFeatures,
                                      deployer)
-        def skipReason = getFeatureSkipReason(enabledFeatures,
+        def skipReason = getFeatureSkipReason(isSoapApi,
+                                              enabledFeatures,
                                               Features.AppDeployment)
         executeStep(description,
                     skipReason) {
@@ -152,20 +152,26 @@ class Deployer implements IDeployer {
         }
     }
 
-    private static String getFeatureSkipReason(List<Features> enabledFeatures,
+    private static String getFeatureSkipReason(boolean isSoapApi,
+                                               List<Features> enabledFeatures,
                                                Features feature) {
+        if (isSoapApi && feature == Features.DesignCenterSync) {
+            return 'DesignCenterSync disabled because a SOAP API is in use'
+        }
         def enabled = enabledFeatures.contains(Features.All) || enabledFeatures.contains(feature)
         enabled ? null : "Feature ${feature} was not supplied"
     }
 
-    private def performCommonDeploymentTasks(ApiSpecificationList apiSpecifications,
+    private def performCommonDeploymentTasks(boolean isSoapApi,
+                                             ApiSpecificationList apiSpecifications,
                                              List<Policy> desiredPolicies,
                                              FileBasedAppDeploymentRequest appDeploymentRequest,
                                              String environment,
                                              List<Features> enabledFeatures,
                                              ISubDeployer deployer) {
         def isFeatureDisabled = { Features feature ->
-            getFeatureSkipReason(enabledFeatures,
+            getFeatureSkipReason(isSoapApi,
+                                 enabledFeatures,
                                  feature)
         }
         String skipReason

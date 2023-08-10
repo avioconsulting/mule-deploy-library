@@ -1,5 +1,7 @@
 package com.avioconsulting.mule.deployment
 
+import com.avioconsulting.mule.deployment.api.models.credentials.ConnectedAppCredential
+import com.avioconsulting.mule.deployment.api.models.credentials.UsernamePasswordCredential
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import groovy.json.JsonOutput
@@ -19,6 +21,7 @@ import java.util.concurrent.CompletableFuture
 class BaseTest {
     protected HttpServer httpServer
     protected HttpClientWrapper clientWrapper
+    protected HttpClientWrapper clientWrapperConnectedApp
     protected EnvironmentLocator environmentLocator
     protected Handler<HttpServerRequest> closure
 
@@ -40,10 +43,16 @@ class BaseTest {
         httpServer = createServer()
         closure = null
         clientWrapper = new HttpClientWrapper("http://localhost:${httpServer.actualPort()}",
-                                              'the user',
-                                              'the password',
+                                              new UsernamePasswordCredential('the user',
+                                              'the password'),
                                               new TestConsoleLogger(),
                                               'the-org-name')
+        clientWrapperConnectedApp = new HttpClientWrapper("http://localhost:${httpServer.actualPort()}",
+                new ConnectedAppCredential(
+                'the client',
+                'the secret'),
+                new TestConsoleLogger(),
+                'the-org-name')
         environmentLocator = new EnvironmentLocator(clientWrapper,
                                                     new TestConsoleLogger())
     }

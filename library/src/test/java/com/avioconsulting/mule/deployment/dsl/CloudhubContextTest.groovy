@@ -62,6 +62,8 @@ class CloudhubContextTest implements MavenInvoke {
                 assertThat objectStoreV2Enabled,
                            is(equalTo(true))
             }
+            assertThat analyticsAgentEnabled,
+                       is(equalTo(true))
             assertThat file,
                        is(equalTo(builtFile))
             assertThat cryptoKey,
@@ -140,7 +142,7 @@ class CloudhubContextTest implements MavenInvoke {
                 staticIpEnabled true
                 objectStoreV2Enabled false
             }
-            analyticsAgentEnabled true
+            analyticsAgentEnabled false
             file 'path/to/file.jar'
             cryptoKey 'theKey'
             autoDiscovery {
@@ -192,7 +194,7 @@ class CloudhubContextTest implements MavenInvoke {
                            is(equalTo(false))
             }
             assertThat analyticsAgentEnabled,
-                       is(equalTo(true))
+                       is(equalTo(false))
             assertThat file,
                        is(equalTo(new File('path/to/file.jar')))
             assertThat cryptoKey,

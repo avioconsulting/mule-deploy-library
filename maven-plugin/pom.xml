@@ -4,31 +4,15 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.avioconsulting.mule</groupId>
     <artifactId>mule-deploy-maven-plugin</artifactId>
-    <version>1.0.1-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
     <name>Mule deployment Maven plugin</name>
     <description>Deploys Mule applications via Runtime Manager APIs</description>
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>https://opensource.org/licenses/MIT</url>
-        </license>
-    </licenses>
-    
-    <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <groovy.compiler.version>3.0.7</groovy.compiler.version>
-    </properties>
+    <parent>
+        <groupId>com.avioconsulting.mule</groupId>
+        <artifactId>mule-deploy-parent</artifactId>
+        <version>1.2.1-SNAPSHOT</version>
+    </parent>
 
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <name>GitHub OWNER Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/avioconsulting/public-packages</url>
-            <layout>default</layout>
-        </repository>
-    </distributionManagement>
 
     <build>
         <plugins>
@@ -36,6 +20,16 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-plugin-plugin</artifactId>
                 <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <!--Enables to run help goal and print all parameter values
+                        `mvn com.avioconsulting.mule:mule-deploy-maven-plugin:{version}:help -Ddetail=true`-->
+                        <id>generated-helpmojo</id>
+                        <goals>
+                            <goal>helpmojo</goal>
+                        </goals>
+                    </execution>
+                </executions>
                 <configuration>
                     <!-- We don't want to scan this plugin's dependencies because 1) we're only
                      exposing our own mojos and 2) the scanner chokes on some of the JSON schema validator libs

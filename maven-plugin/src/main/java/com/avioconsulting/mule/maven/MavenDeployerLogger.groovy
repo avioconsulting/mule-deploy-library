@@ -24,20 +24,25 @@ class MavenDeployerLogger implements ILogger {
 
     @Override
     def println(String message) {
-        doLog(message,
-              false)
+        doLog(message)
     }
 
-    def error(String message) {
+    def error(String message,
+              Throwable error = null) {
         doLog(message,
-              true)
+                true,
+                error)
     }
 
     private def doLog(String message,
-                      boolean error) {
+                      boolean isError = false,
+                      Throwable exception = null) {
         def prefix = logContext.join('/')
         message = "${prefix ? prefix + ' - ' : ''}${message}".toString()
-        if (error) {
+        if (isError && exception) {
+            mavenLogger.error(message,
+                    exception)
+        } else if (isError && !exception) {
             mavenLogger.error(message)
         } else {
             mavenLogger.info(message)
