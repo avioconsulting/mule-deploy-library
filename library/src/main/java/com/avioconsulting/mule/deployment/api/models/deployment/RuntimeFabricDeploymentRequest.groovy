@@ -113,6 +113,8 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
     }
 
     Map<String, String> getCloudhubBaseAppInfo() {
+        def props = this.autoDiscoveries
+
         def result = [
                 // CloudHub's v2 API calls the Mule application the 'domain'
                 name: normalizedAppName,
@@ -126,7 +128,8 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
                         desiredState: "STARTED",
                         configuration: [
                                 "mule.agent.application.properties.service": [
-                                        applicationName: appName
+                                        applicationName: appName,
+                                        properties: props
                                 ]
                         ]
                 ],
