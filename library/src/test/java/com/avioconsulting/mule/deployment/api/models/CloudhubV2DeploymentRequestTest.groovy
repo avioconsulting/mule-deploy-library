@@ -17,8 +17,12 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
         buildApp()
     }
 
+    /**
+     * This test case validates that after creating a CloudhubV2DeploymentRequest object this
+     * is valid according to it's contructor.
+     */
     @Test
-    void explicit() {
+    void test_deploymentRequest_creation_ok() {
 
         def request = new CloudhubV2DeploymentRequest('DEV',
                                                     new WorkerSpecRequest('us-west-2',
@@ -45,8 +49,11 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
         }
     }
 
+    /**
+     * Think this is redundant
+     */
     @Test
-    void derived_app_version_and_name_normal() {
+    void test_deploymentRequest_creation_name_and_version_ok() {
 
         def request = new CloudhubV2DeploymentRequest('DEV',
                                                     new WorkerSpecRequest('us-west-2', '4.3.0'),
@@ -78,8 +85,12 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
         }
     }
 
+    /**
+     * This case validates that the application to deploy doesn't contain spaces in it's name
+     * example: appName="some app name" is not a valid name. appName="my-app" is a valid one.
+     */
     @Test
-    void spaces_in_name() {
+    void test_deploymentRequest_appName_should_not_contain_spaces() {
 
         def exception = shouldFail {
             new CloudhubV2DeploymentRequest('DEV',
@@ -97,8 +108,11 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                    is(equalTo("Runtime Manager does not like spaces in app names and you specified 'some app name'!"))
     }
 
+    /**
+     * Think it's redundant, next case is better,
+     */
     @Test
-    void getCloudhubAppInfo_only_required() {
+    void test_deploymentRequest_get_only_required_appInfo() {
 
         def request = new CloudhubV2DeploymentRequest('DEV',
                                                     new WorkerSpecRequest('us-west-2', '4.3.0'),
@@ -150,8 +164,12 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                    ]))
     }
 
+    /**
+     * This case validates that a new CloudhubV2DeploymentRequest contains all the attributes correctly set by using
+     * getCloudhubAppInfo() method.
+     */
     @Test
-    void getCloudhubAppInfo_all_properties() {
+    void test_deploymentRequest_getCloudhubAppInfo_ok() {
 
         def request = new CloudhubV2DeploymentRequest('DEV',
                 new WorkerSpecRequest('us-west-2',
@@ -174,9 +192,8 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                 '1.2.3',
                 'new-group-id')
 
-        def appInfo = request.getCloudhubAppInfo()
-
         request.setAutoDiscoveryId("apiId", "123")
+        def appInfo = request.getCloudhubAppInfo()
 
         assertThat appInfo,
                    is(equalTo([
@@ -218,23 +235,33 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                    ]))
     }
 
+    /**
+     * This case validates that the name of application to deploy is not larger that the maximum required of 42 characters.
+     * however, this validation happens after build the final appName (normalizedAppName) like this: ${cloudhubAppprefix}-${appName}-${env} length should not larger than 42 characters.
+     * example: cloudhubPrefix=someprefix , appName=myVeryVeryVeryLargeApplicationName, env=prod -> someprefix-myVeryVeryLargeApplicationName-prod is larger than 42 characters, it's not a valid name
+     * ${cloudhubAppprefix} could be null so: myVeryVeryVeryLargeApplicationName-prod is a valid name
+     */
     @Test
-    void appNameBiggerThanSupported() {
+    void test_deploymentRequest_appName_should_not_larger_than_required() {
 
+        def appName = 'app-myVeryVeryVeryLargeApplicationName'
+        def cloudHubPrefix = 'client'
+        def environment = 'DEV'
         def exception = shouldFail {
-            new CloudhubV2DeploymentRequest('DEV',
+            new CloudhubV2DeploymentRequest(environment,
                     new WorkerSpecRequest('us-west-2'),
                     'theKey',
                     'theClientId',
                     'theSecret',
-                    'client',
-                    'app-name-should-not-have-more-than-42-characters',
+                    cloudHubPrefix,
+                    appName,
                     '4.2.2',
                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
         }
 
+        def finalAppName = cloudHubPrefix+"-"+appName+"-"+environment
         MatcherAssert.assertThat exception.message,
-                is(equalTo("Maximum size of application name is 42 and the provided name has 59 characters"))
+                is(equalTo("Maximum size of application name is 42 and the provided name has "+finalAppName.length()+" characters"))
     }
 
 }

@@ -69,7 +69,9 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
 
     /**
      * Construct a "standard" request. See properties for parameter info.
+     *
      */
+    //TODO logic should be moved to parent class
     RuntimeFabricDeploymentRequest(String environment,
                                    WorkerSpecRequest workerSpecRequest,
                                    String cryptoKey,

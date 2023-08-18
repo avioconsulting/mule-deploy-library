@@ -5,7 +5,10 @@ import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.Deployer
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.*
+import com.avioconsulting.mule.deployment.api.models.credentials.ConnectedAppCredential
+import com.avioconsulting.mule.deployment.api.models.credentials.Credential
 import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubV2DeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.policies.MulesoftPolicy
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
@@ -46,6 +49,7 @@ class IntegrationTest implements MavenInvoke {
     private Deployer overallDeployer
     private HttpClientWrapper clientWrapper
     private CloudhubDeploymentRequest cloudhubDeploymentRequest
+    private CloudhubV2DeploymentRequest cloudhubV2DeploymentRequest
     private OnPremDeploymentRequest onPremDeploymentRequest
 
 
@@ -132,12 +136,23 @@ class IntegrationTest implements MavenInvoke {
                                                                   ANYPOINT_CLIENT_ID,
                                                                   ANYPOINT_CLIENT_SECRET,
                                                                   CLOUDHUB_APP_PREFIX)
+
+        cloudhubV2DeploymentRequest = new CloudhubV2DeploymentRequest(AVIO_ENVIRONMENT_DEV,
+                new WorkerSpecRequest('Cloudhub-US-West-2', '4.4.0'),
+                builtFile,
+                ANYPOINT_CLIENT_ID,
+                ANYPOINT_CLIENT_SECRET,
+                CLOUDHUB_APP_PREFIX,
+                null,
+                "mule-deploy-design-center-test-project",
+                '2.0.0',
+                null,
+                null
+                )
+
         def logger = new TestConsoleLogger()
         clientWrapper = new HttpClientWrapper('https://anypoint.mulesoft.com',
-                                              ANYPOINT_USERNAME,
-                                              ANYPOINT_PASSWORD,
-                                              ANYPOINT_CONNECTED_APP_ID,
-                                              ANYPOINT_CONNECTED_APP_SECRET,
+                new ConnectedAppCredential(ANYPOINT_CONNECTED_APP_ID,ANYPOINT_CONNECTED_APP_SECRET),
                                               logger,
                                               AVIO_SANDBOX_BIZ_GROUP_NAME)
         def environmentLocator = new EnvironmentLocator(this.clientWrapper,
@@ -210,6 +225,61 @@ class IntegrationTest implements MavenInvoke {
             hitEndpoint('john',
                         'doe',
                         "http://${cloudhubDeploymentRequest.normalizedAppName}.us-w2.cloudhub.io/")
+        }
+        finally {
+            println 'test has finished one way or the other, now cleaning up our mess'
+            // don't be dirty!
+            try {
+                deleteCloudHubApp(cloudhubDeploymentRequest)
+            } catch (e) {
+                println "Unable to cleanup ${e}"
+            }
+        }
+    }
+
+
+    @Test
+    //TODO fix name
+    void cloudhubv2_sharedspace() {
+        // arrange
+        /*def apiSpec1 = new ApiSpecification('Mule Deploy Design Center Test Project',
+                cloudhubV2DeploymentRequest.getRamlFilesFromApp('/api',
+                        true),
+                'mule-deploy-design-center-test-project-v2.raml',
+                null,
+                null,
+                'auto.disc.1',
+                null,
+                '/api')*/
+
+        def apiSpec2 = new ApiSpecification('Mule Deploy Design Center Test Project',
+                cloudhubV2DeploymentRequest.getRamlFilesFromApp('/api_v1',
+                        true),
+                    'mule-deploy-design-center-test-project.raml',
+                null,
+                null,
+                'auto.disc.prop.1',
+                'v1',
+                '/api_v1')
+
+        // act
+        try {
+            overallDeployer.deployApplication(cloudhubV2DeploymentRequest,
+                    new ApiSpecificationList([apiSpec2]),
+                    [
+                            new MulesoftPolicy('http-basic-authentication',
+                                    '1.2.1',
+                                    [
+                                            username: 'john',
+                                            password: 'doe'
+                                    ])
+                    ])
+            println 'test: app deployed OK, now trying to hit its HTTP listener'
+
+            // assert
+            hitEndpoint('john',
+                    'doe',
+                    "http://${cloudhubDeploymentRequest.normalizedAppName}.us-w2.cloudhub.io/")
         }
         finally {
             println 'test has finished one way or the other, now cleaning up our mess'

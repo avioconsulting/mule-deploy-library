@@ -16,7 +16,7 @@ import static org.hamcrest.Matchers.*
 class CloudhubV2ContextTest implements MavenInvoke {
     @BeforeClass
     static void setup() {
-        buildApp()
+        buildApp("4.4.0","mule-deploy-design-center-test-project")
     }
 
     @Test

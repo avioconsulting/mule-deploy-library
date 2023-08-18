@@ -41,11 +41,14 @@ class CloudHubV2Deployer extends RuntimeFabricDeployer implements ICloudHubV2Dep
     }
 
     def deploy(CloudhubV2DeploymentRequest deploymentRequest) {
-        def groupId = deploymentRequest.groupId
+        //TODO check it
+        deploymentRequest.setGroupId(clientWrapper.getAnypointOrganizationId())
+        def groupId = clientWrapper.getAnypointOrganizationId()
         def envId = environmentLocator.getEnvironmentId(deploymentRequest.environment, groupId)
-        def appName = deploymentRequest.normalizedAppName
+        //TODO change this
+        def appName = deploymentRequest.getAppName()
         def targetId = getTargetId(deploymentRequest.target, groupId)
-        deploymentRequest.setTargetId(targetId)
+        deploymentRequest.setProperty("targetId",targetId)
 
         DeploymentItem appInfo = getAppInfo(envId, groupId, appName)
         AppStatusPackage appStatus = getAppStatus(appInfo)
@@ -71,7 +74,8 @@ class CloudHubV2Deployer extends RuntimeFabricDeployer implements ICloudHubV2Dep
     }
 
     private def doDeployment(CloudhubV2DeploymentRequest deploymentRequest, String envId, DeploymentItem appInfo) {
-        def groupId = deploymentRequest.groupId
+        //TODO look at this
+        def groupId = clientWrapper.getAnypointOrganizationId()
 
         if (appInfo == null) {
             logger.println "Starting new deployment for application '${deploymentRequest.appName}'."
@@ -85,6 +89,7 @@ class CloudHubV2Deployer extends RuntimeFabricDeployer implements ICloudHubV2Dep
     private def createApp(CloudhubV2DeploymentRequest deploymentRequest,
                                   String envId,
                                   String groupId) {
+        groupId = clientWrapper.getAnypointOrganizationId()
         def request = new HttpPost("${clientWrapper.baseUrl}/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments")
         def prettyJson = JsonOutput.prettyPrint(deploymentRequest.cloudhubAppInfoAsJson)
         if (dryRunMode != DryRunMode.Run) {
@@ -108,6 +113,7 @@ class CloudHubV2Deployer extends RuntimeFabricDeployer implements ICloudHubV2Dep
                           DeploymentItem appInfo,
                           String envId,
                           String groupId) {
+        groupId = clientWrapper.getAnypointOrganizationId()
         def request = new HttpPatch("${clientWrapper.baseUrl}/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments/${appInfo.getId()}")
         def prettyJson = JsonOutput.prettyPrint(deploymentRequest.cloudhubAppInfoAsJson)
         if (dryRunMode != DryRunMode.Run) {
