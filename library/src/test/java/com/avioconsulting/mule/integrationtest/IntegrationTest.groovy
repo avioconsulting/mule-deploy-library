@@ -4,28 +4,23 @@ import com.avioconsulting.mule.MavenInvoke
 import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.Deployer
 import com.avioconsulting.mule.deployment.api.DryRunMode
-import com.avioconsulting.mule.deployment.api.models.*
+import com.avioconsulting.mule.deployment.api.models.ApiSpecification
+import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
+import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
+import com.avioconsulting.mule.deployment.api.models.credentials.ConnectedAppCredential
 import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.policies.MulesoftPolicy
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
-import com.avioconsulting.mule.deployment.internal.models.AppStatus
-import com.avioconsulting.mule.deployment.internal.models.AppStatusPackage
 import com.avioconsulting.mule.deployment.internal.subdeployers.CloudHubDeployer
 import com.avioconsulting.mule.deployment.internal.subdeployers.OnPremDeployer
-import org.apache.http.auth.AuthScope
-import org.apache.http.auth.UsernamePasswordCredentials
-import org.apache.http.client.methods.HttpGet
-import org.apache.http.impl.client.BasicCredentialsProvider
-import org.apache.http.impl.client.HttpClientBuilder
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.core.config.Configurator
 import org.junit.*
 
-import static org.hamcrest.MatcherAssert.assertThat
-import static org.hamcrest.Matchers.equalTo
-import static org.hamcrest.Matchers.is
+import static com.avioconsulting.mule.integrationtest.TestUtils.hitEndpointAndAssert
+import static com.avioconsulting.mule.integrationtest.TestUtils.waitForAppDeletion
 import static org.junit.Assume.assumeTrue
 
 @Ignore
@@ -53,7 +48,7 @@ class IntegrationTest implements MavenInvoke {
     static void setup() {
         Assume.assumeTrue('skip it',
                           System.getProperty('skip.integration.test') == null)
-        buildApp()
+        buildApp("4.4.0")
         // cut down on the unit test noise here
         Configurator.setLevel('org.apache.http.wire',
                               Level.INFO)
@@ -76,7 +71,7 @@ class IntegrationTest implements MavenInvoke {
                                    'integration test app cleanup')
         println 'Waiting for app deletion to finish'
         waitForAppDeletion(request.environment,
-                           appName)
+                           appName,null)
     }
 
     def deleteOnPremApp(OnPremDeploymentRequest request) {
@@ -85,35 +80,6 @@ class IntegrationTest implements MavenInvoke {
         if (existingAppId) {
             onPremDeployer.deleteApp(request.environment,
                                      existingAppId)
-        }
-    }
-
-    def waitForAppDeletion(String environment,
-                           String appName) {
-        def tries = 0
-        def deleted = false
-        def failed = false
-        println 'Now checking to see if app has been deleted'
-        while (!deleted && tries < 10) {
-            tries++
-            println "*** Try ${tries} ***"
-            AppStatusPackage status = cloudHubDeployer.getAppStatus(environment,
-                                                                    appName)
-            println "Received status of ${status}"
-            if (status.appStatus == AppStatus.NotFound) {
-                println 'App removed successfully!'
-                deleted = true
-                break
-            }
-            def retryIntervalInMs = 10000
-            println "Sleeping for ${retryIntervalInMs / 1000} seconds and will recheck..."
-            Thread.sleep(retryIntervalInMs)
-        }
-        if (!deleted && failed) {
-            throw new Exception('Deletion failed on 1 or more nodes. Please see logs and messages as to why app did not start')
-        }
-        if (!deleted) {
-            throw new Exception("Deletion has not completed after ${tries} tries!")
         }
     }
 
@@ -134,10 +100,7 @@ class IntegrationTest implements MavenInvoke {
                                                                   CLOUDHUB_APP_PREFIX)
         def logger = new TestConsoleLogger()
         clientWrapper = new HttpClientWrapper('https://anypoint.mulesoft.com',
-                                              ANYPOINT_USERNAME,
-                                              ANYPOINT_PASSWORD,
-                                              ANYPOINT_CONNECTED_APP_ID,
-                                              ANYPOINT_CONNECTED_APP_SECRET,
+                new ConnectedAppCredential(ANYPOINT_CONNECTED_APP_ID,ANYPOINT_CONNECTED_APP_SECRET),
                                               logger,
                                               AVIO_SANDBOX_BIZ_GROUP_NAME)
         def environmentLocator = new EnvironmentLocator(this.clientWrapper,
@@ -207,9 +170,10 @@ class IntegrationTest implements MavenInvoke {
             println 'test: app deployed OK, now trying to hit its HTTP listener'
 
             // assert
-            hitEndpoint('john',
+            hitEndpointAndAssert('john',
                         'doe',
-                        "http://${cloudhubDeploymentRequest.normalizedAppName}.us-w2.cloudhub.io/")
+                        "http://${cloudhubDeploymentRequest.normalizedAppName}.us-w2.cloudhub.io/",
+                        'hello there')
         }
         finally {
             println 'test has finished one way or the other, now cleaning up our mess'
@@ -218,46 +182,6 @@ class IntegrationTest implements MavenInvoke {
                 deleteCloudHubApp(cloudhubDeploymentRequest)
             } catch (e) {
                 println "Unable to cleanup ${e}"
-            }
-        }
-    }
-
-    static def hitEndpoint(String username,
-                           String password,
-                           String url) {
-        def credsProvider = new BasicCredentialsProvider().with {
-            setCredentials(AuthScope.ANY,
-                           new UsernamePasswordCredentials(username,
-                                                           password))
-            it
-        }
-        HttpClientBuilder.create()
-                .setDefaultCredentialsProvider(credsProvider)
-                .build().withCloseable { client ->
-            Throwable exception = null
-            10.times {
-                try {
-                    def request = new HttpGet(url)
-                    println "Hitting app @ ${request}"
-                    client.execute(request).withCloseable { response ->
-                        assertThat response.statusLine.statusCode,
-                                   is(equalTo(200))
-                        assertThat response.entity.content.text,
-                                   is(equalTo('hello there'))
-                        exception = null
-                    }
-
-                }
-                catch (AssertionError e) {
-                    println 'Test failed, waiting 500 ms and trying again'
-                    exception = e
-                    Thread.sleep(500)
-                }
-            }
-            if (exception) {
-                throw exception
-            } else {
-                println 'test passed'
             }
         }
     }
@@ -290,9 +214,10 @@ class IntegrationTest implements MavenInvoke {
 
         // assert
         try {
-            hitEndpoint('john',
+            hitEndpointAndAssert('john',
                         'doe',
-                        'http://localhost:8081/')
+                        'http://localhost:8081/',
+                        'hello there')
         }
         finally {
             println 'test has finished one way or the other, now cleaning up our mess'
