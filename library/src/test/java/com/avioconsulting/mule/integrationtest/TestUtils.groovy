@@ -71,8 +71,6 @@ class TestUtils {
         while (!deleted && tries < 10) {
             tries++
             println "*** Try ${tries} ***"
-            //TODO cahnge it
-
             AppStatusPackage status
 
             if (deployer instanceof CloudHubDeployer) {
