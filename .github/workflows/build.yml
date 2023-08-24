@@ -47,7 +47,7 @@ jobs:
         run: ./mvnw compile
 
       - name: Verify
-        run: ./mvnw --batch-mode verify
+        run: ./mvnw --batch-mode verify -Danypoint.client.id=${{secrets.ANYPOINT_CLIENT_ID}} -Danypoint.client.secret=${{secrets.ANYPOINT_CLIENT_SECRET}} -Danypoint.connected-app.id=${{secrets.ANYPOINT_CONNECTED_APP_ID}} -Danypoint.connected-app.secret=${{secrets.ANYPOINT_CONNECTED_APP_SECRET}} -Danypoint.username=${{secrets.ANYPOINT_USERNAME}} -Danypoint.password=${{secrets.ANYPOINT_PASSWORD}}
 
       - name: Publish Unit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2

@@ -134,25 +134,25 @@ class CloudHubV2Deployer extends RuntimeFabricDeployer implements ICloudHubV2Dep
     }
 
     def deleteApp(CloudhubV2DeploymentRequest deploymentRequest ,
-                  String defaultFailReason = 'remove failed app deployment') {
+                  String failReason = 'remove failed app deployment') {
 
         def groupId = deploymentRequest.groupId
         def envId = environmentLocator.getEnvironmentId(deploymentRequest.environment, groupId)
-        def appName2 = deploymentRequest.normalizedAppName
-        DeploymentItem appInfo = getAppInfo(envId, groupId, appName2)
+        def appName = deploymentRequest.normalizedAppName
+        DeploymentItem appInfo = getAppInfo(envId, groupId, appName)
 
         if(appInfo != null) {
             def request = new HttpDelete("${clientWrapper.baseUrl}/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments/${appInfo.getId()}")
             def response = clientWrapper.execute(request)
             try {
                 clientWrapper.assertSuccessfulResponse(response,
-                        defaultFailReason)
+                        failReason)
             }
             finally {
                 response.close()
             }
         }else {
-            throw new Exception("No application available for deletion: ${appName2}")
+            throw new Exception("No application available for deletion: ${appName}")
         }
 
     }

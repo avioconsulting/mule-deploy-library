@@ -1,22 +1,19 @@
 muleDeploy {
-    // version of the tool
-    version '1.0'
     apiSpecification {
-        name 'Mule Deploy Cloudhub v2 Test Project'
+        name 'app display tittle'
     }
     cloudHubV2Application {
-        environment params.env
-        applicationName 'hello-world-test'
-        appVersion '1.0.0-SNAPSHOT'
+        environment "Name of the environment as it is in anypoint (DEV/PROD/DESIGN)"
+        applicationName 'should be the same app name of the app already deployed in Anypoint Exchange'
+        appVersion 'should be the same app version of the app already deployed in Anypoint Exchange'
         workerSpecs {
-            target 'US West (Oregon)'
-            muleVersion '4.4.0'
-            replicas '1'
-            vCores '0.1'
-            updateStrategy 'recreate'
+            target 'CloudHub V2 region name to deploy the app to'
+            muleVersion 'mule runtime version'
+            replicas 'number of replicas to deploy. Maximun 8'
+            vCores 'type of core to use'
+            updateStrategy 'recreate/rolling'
         }
-        environment 'DEV'
-        businessGroup 'AVIO Sandbox'
-        businessGroupId 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee'
+        businessGroup 'businnes group name as it is in Anypoint'
+        businessGroupId 'businnes group Id as it is in Anypoint'
     }
 }
