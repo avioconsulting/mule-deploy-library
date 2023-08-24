@@ -7,8 +7,8 @@ muleDeploy {
 
     apiSpecification {
         name 'Test API'
-        designCenterBranchName 'master'
         // everything else in this closure is optional
+        designCenterBranchName 'master'
         exchangeAssetId 'test-api-1'
         mainRamlFile 'test-api.raml'
         endpoint 'https://foobar'
@@ -17,11 +17,7 @@ muleDeploy {
 
     apiSpecification {
         name 'Test API 2'
-        designCenterBranchName 'master'
-        // everything else in this closure is optional
-        exchangeAssetId 'test-api-2'
-        mainRamlFile 'test-api.raml'
-        endpoint 'https://foobar'
+        // when using more than one apiSpecification, is required to specify the properties below to avoid duplication
         autoDiscoveryPropertyName 'apiId2'
         sourceDirectory '/api2/'
     }

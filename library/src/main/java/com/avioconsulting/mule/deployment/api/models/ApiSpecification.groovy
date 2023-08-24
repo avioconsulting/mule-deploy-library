@@ -71,11 +71,11 @@ class ApiSpecification {
         this.autoDiscoveryPropertyName = autoDiscoveryPropertyName ?: 'auto-discovery.api-id'
         this.name = name
         sourceDirectory = getSourceDirectoryOrDefault(sourceDirectory)
-        this.mainRamlFile = mainRamlFile ?: findMainRamlFile(ramlFiles)
+        this.mainRamlFile = getMainRamlFileOrDefault(mainRamlFile, ramlFiles)
         // SOAP will not have a main RAML file, just use v1 in that case
         this.apiMajorVersion = this.mainRamlFile ? getApiVersion(this.mainRamlFile,
-                                                                 ramlFiles,
-                                                                 sourceDirectory) : 'v1'
+                                                                    ramlFiles,
+                                                                    sourceDirectory) : 'v1'
         this.exchangeAssetId = exchangeAssetId ?: name.toLowerCase().replace(' ',
                                                                              '-')
         this.endpoint = endpoint
@@ -111,30 +111,56 @@ class ApiSpecification {
         sourceDirectory ?: '/api'
     }
 
+    static String getMainRamlFileOrDefault(String mainRamlFile, List<RamlFile> ramlFiles) {
+        // in case mainRamlFile was specified, assume it
+        if (mainRamlFile) {
+            return mainRamlFile
+        }
+
+        // in case list of raml files was populated (even is empty), find the main raml file inside it
+        if (ramlFiles != null) {
+            return findMainRamlFileName(ramlFiles)
+        }
+
+        // if none of conditions were matched, return null to the caller
+        return null
+    }
+
     private static String getApiVersion(String mainRamlFile,
                                         List<RamlFile> ramlFiles,
                                         String sourceDirectory) {
-        def mainFile = ramlFiles.find { f ->
-            f.fileName == mainRamlFile
+        def version = null
+
+        if (ramlFiles != null) {
+            def mainFile = findMainRamlFile(mainRamlFile, ramlFiles)
+            if (!mainFile) {
+                throw new Exception("You specified '${mainRamlFile}' as your main RAML file but it does not exist in your application under ${sourceDirectory}!")
+            }
+            def resourceLoader = new FromStringRamlResourceLoader(ramlFiles)
+            def parserService = new ParserService()
+            def apiRef = ApiReference.create(mainFile.fileName,
+                                             resourceLoader)
+            def parseResult = parserService.parse(apiRef)
+            if (!parseResult.success()) {
+                throw new Exception("RAML ${mainRamlFile} is invalid. ${parseResult.errors}")
+            }
+            version = parseResult.get().version
         }
-        if (!mainFile) {
-            throw new Exception("You specified '${mainRamlFile}' as your main RAML file but it does not exist in your application under ${sourceDirectory}!")
-        }
-        def resourceLoader = new FromStringRamlResourceLoader(ramlFiles)
-        def parserService = new ParserService()
-        def apiRef = ApiReference.create(mainFile.fileName,
-                                         resourceLoader)
-        def parseResult = parserService.parse(apiRef)
-        if (!parseResult.success()) {
-            throw new Exception("RAML ${mainRamlFile} is invalid. ${parseResult.errors}")
-        }
-        def version = parseResult.get().version
-        version ?: 'v1'
+
+        return version ?: 'v1'
     }
 
-    private static String findMainRamlFile(List<RamlFile> ramlFiles) {
+    private static String findMainRamlFileName(List<RamlFile> ramlFiles) {
         ramlFiles.find { ramlFile ->
             new File(ramlFile.fileName).parentFile == null
         }?.fileName
+    }
+
+
+    private static RamlFile findMainRamlFile(String mainRamlFile, List<RamlFile> ramlFiles) {
+        def mainFile = ramlFiles.find { f ->
+            f.fileName == mainRamlFile
+        }
+        return mainFile
     }
 }

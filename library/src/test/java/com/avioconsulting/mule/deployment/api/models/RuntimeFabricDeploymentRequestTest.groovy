@@ -125,7 +125,8 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                    desiredState: "STARTED",
                                    configuration: [
                                            "mule.agent.application.properties.service": [
-                                                   applicationName: 'new-app'
+                                                   applicationName: 'new-app',
+                                                   properties: [:]
                                            ]
                                    ]
                            ],
@@ -182,6 +183,8 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                         '1.2.3',
                         'new-group-id')
 
+        request.setAutoDiscoveryId("apiId", "123")
+
         def appInfo = request.getCloudhubAppInfo()
 
         assertThat appInfo,
@@ -198,6 +201,9 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                    configuration: [
                                            "mule.agent.application.properties.service": [
                                                    applicationName: 'new-app',
+                                                   properties     : [
+                                                           apiId : '123'
+                                                   ]
                                            ]
                                    ]
                            ],

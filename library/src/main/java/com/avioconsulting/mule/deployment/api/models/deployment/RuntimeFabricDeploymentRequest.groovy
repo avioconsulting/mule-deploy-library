@@ -1,5 +1,6 @@
 package com.avioconsulting.mule.deployment.api.models.deployment
 
+
 import com.avioconsulting.mule.deployment.api.models.WorkerSpecRequest
 import com.avioconsulting.mule.deployment.internal.models.CloudhubAppProperties
 import groovy.json.JsonOutput
@@ -112,6 +113,8 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
     }
 
     Map<String, String> getCloudhubBaseAppInfo() {
+        def props = this.autoDiscoveries
+
         def result = [
                 // CloudHub's v2 API calls the Mule application the 'domain'
                 name: normalizedAppName,
@@ -125,7 +128,8 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
                         desiredState: "STARTED",
                         configuration: [
                                 "mule.agent.application.properties.service": [
-                                        applicationName: appName
+                                        applicationName: appName,
+                                        properties: props
                                 ]
                         ]
                 ],
@@ -168,4 +172,5 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
     void setTargetId(String targetId) {
         this.targetId = targetId
     }
+
 }

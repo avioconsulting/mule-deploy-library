@@ -1,5 +1,8 @@
 package com.avioconsulting.mule.deployment.api.models.deployment
 
+import com.avioconsulting.mule.deployment.api.models.Features
+import com.avioconsulting.mule.deployment.internal.models.RamlFile
+
 abstract class AppDeploymentRequest {
 
     protected final Map<String, String> autoDiscoveries = [:]
@@ -53,4 +56,15 @@ abstract class AppDeploymentRequest {
     String getAppVersion() {
         return appVersion
     }
+
+    /**
+     * This method returns the list of features that is still not supported for the deployment type. This list
+     * will excluded from execution in {@link com.avioconsulting.mule.deployment.api.Deployer} class
+     * @return List of {@link Features}
+     */
+    List<Features> getUnsupportedFeatures() {
+        return Collections.emptyList()
+    }
+
+    abstract List<RamlFile> getRamlFilesFromApp(String rootRamlDirectory, boolean ignoreExchange)
 }

@@ -1,9 +1,7 @@
 package com.avioconsulting.mule.deployment.dsl
 
-
 import com.avioconsulting.mule.deployment.api.models.Features
-import com.avioconsulting.mule.deployment.api.models.deployment.ExchangeAppDeploymentRequest
-import com.avioconsulting.mule.deployment.api.models.deployment.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.AppDeploymentRequest
 import com.avioconsulting.mule.deployment.dsl.policies.PolicyListContext
 
 class MuleDeployContext extends BaseContext {
@@ -48,12 +46,21 @@ class MuleDeployContext extends BaseContext {
         apiSpecifications.apiSpecification(closure)
     }
 
+    static def removeFeatures(List<Features> featuresToRemove,
+                             List<Features> currentFeatures) {
+        if (!featuresToRemove.isEmpty()) {
+            if (currentFeatures == [Features.All]) {
+                currentFeatures = Features.values() - [Features.All]
+            }
+            currentFeatures = currentFeatures - featuresToRemove
+        }
+
+        currentFeatures
+    }
+
     static def removeFeature(Features feature,
                              List<Features> currentFeatures) {
-        if (currentFeatures == [Features.All]) {
-            currentFeatures = Features.values() - [Features.All]
-        }
-        currentFeatures - [feature]
+        removeFeatures([feature], currentFeatures)
     }
 
     DeploymentPackage createDeploymentPackage() {
@@ -73,29 +80,27 @@ class MuleDeployContext extends BaseContext {
                                      features)
         }
 
-        if (cloudHubSet || onPremSet) {
-            FileBasedAppDeploymentRequest deploymentRequest;
-            if (cloudHubSet) {
-                deploymentRequest = cloudHubApplication.createDeploymentRequest()
-            } else {
-                deploymentRequest = onPremApplication.createDeploymentRequest()
-            }
-            return new DeploymentPackage(deploymentRequest,
-                    apiSpecifications.createApiSpecList(deploymentRequest),
-                    policyList,
-                    features)
+        AppDeploymentRequest deploymentRequest
+
+        if (cloudHubSet) {
+            deploymentRequest = cloudHubApplication.createDeploymentRequest()
+        } else if (onPremSet) {
+            deploymentRequest = onPremApplication.createDeploymentRequest()
+        } else if (cloudHubV2Set) {
+            deploymentRequest = cloudHubV2Application.createDeploymentRequest()
+        } else if (runtimeFabricApplication) {
+            deploymentRequest = runtimeFabricApplication.createDeploymentRequest()
         } else {
-            ExchangeAppDeploymentRequest deploymentRequest
-            if (cloudHubV2Set) {
-                deploymentRequest = cloudHubV2Application.createDeploymentRequest()
-            } else {
-                deploymentRequest = runtimeFabricApplication.createDeploymentRequest()
-            }
-            return new DeploymentPackage(deploymentRequest,
-                    null,
-                    policyList,
-                    features)
+            // if the code falls here, you should go to findErrors method and add the missing condition
+            throw new Exception("No application deployment was supplied!")
         }
+
+        features = removeFeatures(deploymentRequest.getUnsupportedFeatures(), features)
+
+        return new DeploymentPackage(deploymentRequest,
+                apiSpecifications.createApiSpecList(deploymentRequest),
+                policyList,
+                features)
     }
 
     def version(String version) {
