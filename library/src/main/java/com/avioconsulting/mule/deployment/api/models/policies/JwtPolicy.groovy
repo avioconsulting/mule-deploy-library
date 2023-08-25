@@ -23,7 +23,7 @@ class JwtPolicy extends MulesoftPolicy {
               Integer jwksCachingTtlInMinutes = null,
               String version = null) {
         super('jwt-validation',
-              version ?: '1.1.4',
+              version ?: '1.3.1',
               getConfig(jwksUrl,
                         expectedAudience,
                         expectedIssuer,
