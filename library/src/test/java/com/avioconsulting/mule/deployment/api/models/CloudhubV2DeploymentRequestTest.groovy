@@ -124,6 +124,14 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                                                    ]
                                            ]
                                    ],
+                                   integrations:[
+                                           services : [
+                                                   objectStoreV2: [
+                                                           enabled: true
+                                                   ]
+                                           ]
+                                   ],
+                                   objectStoreV2Enabled:true,
                                    "vCores": VCoresSize.vCore15GB.vCoresSize
                            ],
                            target: [
