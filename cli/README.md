@@ -30,6 +30,12 @@ Option 2 is probably the preferred route for most use cases. Both options 2 and 
 
 You'll need a service account user/password to run this. See the README.md file inside the library directory for what permissions the user needs.
 
+## Custom Policies
+
+Most of the common security policies are accounted for in the DSL. A custom policy can be used for any additional options or customization that is necessary. For an example, see the `mulesoftPolicy` sample in `library/examples/allOptions.groovy`.
+
+To help populate the JSON config object of the desired custom policy, use the network inspector in chrome while manually configuring the policy.
+
 # Running
 
 If you read the DSL section, you should have a DSL file that's ready to go.
