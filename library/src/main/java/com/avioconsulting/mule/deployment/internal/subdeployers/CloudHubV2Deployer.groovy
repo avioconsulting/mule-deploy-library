@@ -133,12 +133,12 @@ class CloudHubV2Deployer extends RuntimeFabricDeployer implements ICloudHubV2Dep
         true
     }
 
-    def deleteApp(CloudhubV2DeploymentRequest deploymentRequest ,
+    def deleteApp(String groupId,
+                  String envId,
+                  String normalizedAppName,
                   String failReason = 'remove failed app deployment') {
 
-        def groupId = deploymentRequest.groupId
-        def envId = environmentLocator.getEnvironmentId(deploymentRequest.environment, groupId)
-        def appName = deploymentRequest.normalizedAppName
+        def appName = normalizedAppName
         DeploymentItem appInfo = getAppInfo(envId, groupId, appName)
 
         if(appInfo != null) {

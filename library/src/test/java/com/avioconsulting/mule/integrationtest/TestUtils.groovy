@@ -18,7 +18,6 @@ import static org.hamcrest.Matchers.is
 
 class TestUtils {
 
-
     static def hitEndpointAndAssert(String username,
                                     String password,
                                     String url,

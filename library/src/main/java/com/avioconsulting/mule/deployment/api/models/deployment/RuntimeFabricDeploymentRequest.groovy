@@ -131,7 +131,15 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
                                         applicationName: appName,
                                         properties: props
                                 ]
-                        ]
+                        ],
+                        integrations: [
+                                services: [
+                                        objectStoreV2: [
+                                                enabled: workerSpecRequest.persistentObjectStore
+                                        ]
+                                ]
+                        ],
+                        "objectStoreV2Enabled": workerSpecRequest.persistentObjectStore,
                 ],
                 target: [
                         targetId: targetId,
