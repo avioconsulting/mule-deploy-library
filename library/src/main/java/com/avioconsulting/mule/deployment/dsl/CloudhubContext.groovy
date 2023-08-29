@@ -3,7 +3,7 @@ package com.avioconsulting.mule.deployment.dsl
 import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 
 class CloudhubContext extends BaseContext {
-    String environment, applicationName, appVersion, file, cryptoKey, cloudHubAppPrefix
+    String environment, applicationName, appVersion, file, cryptoKey, cloudHubAppPrefix, cloudHubAppSuffix
     // make API visualizer, etc. more easy by default
     boolean analyticsAgentEnabled = true
     private WorkerSpecContext workerSpecs = new WorkerSpecContext()
@@ -28,6 +28,7 @@ class CloudhubContext extends BaseContext {
                                       autoDiscovery.clientId,
                                       autoDiscovery.clientSecret,
                                       this.cloudHubAppPrefix,
+                                      this.cloudHubAppSuffix,
                                       this.applicationName,
                                       this.appVersion,
                                       this.appProperties,
@@ -37,6 +38,6 @@ class CloudhubContext extends BaseContext {
 
     @Override
     List<String> findOptionalProperties() {
-        ['appVersion', 'applicationName', 'workerSpecs', 'analyticsAgentEnabled']
+        ['cloudHubAppSuffix', 'appVersion', 'applicationName', 'workerSpecs', 'analyticsAgentEnabled']
     }
 }

@@ -3,6 +3,7 @@ package com.avioconsulting.mule.deployment.dsl
 import com.avioconsulting.mule.MavenInvoke
 import com.avioconsulting.mule.deployment.api.models.AwsRegions
 import com.avioconsulting.mule.deployment.api.models.WorkerTypes
+import org.hamcrest.MatcherAssert
 import org.junit.BeforeClass
 import org.junit.Test
 
@@ -89,6 +90,7 @@ class CloudhubContextTest implements MavenInvoke {
                 clientSecret 'the_client_secret'
             }
             cloudHubAppPrefix 'AVI'
+            cloudHubAppSuffix 'DEV'
         }
         closure.delegate = context
 
@@ -149,6 +151,7 @@ class CloudhubContextTest implements MavenInvoke {
             }
             cloudHubAppPrefix 'AVI'
             // optional from here on out
+            cloudHubAppSuffix 'd'
             appProperties([
                     someProp: 'someValue'
             ])
@@ -202,6 +205,8 @@ class CloudhubContextTest implements MavenInvoke {
                        is(equalTo('the_client_secret'))
             assertThat cloudHubAppPrefix,
                        is(equalTo('AVI'))
+            assertThat cloudHubAppSuffix,
+                    is(equalTo('d'))
             assertThat appProperties,
                        is(equalTo([
                                someProp: 'someValue'
@@ -235,6 +240,7 @@ class CloudhubContextTest implements MavenInvoke {
                 clientSecret 'the_client_secret'
             }
             cloudHubAppPrefix 'AVI'
+            cloudHubAppSuffix 'DEV'
         }
         closure.delegate = context
 
@@ -273,7 +279,7 @@ class CloudhubContextTest implements MavenInvoke {
         }
 
         // assert
-        assertThat exception.message,
+        MatcherAssert.assertThat exception.message,
                    is(equalTo("""Your deployment request is not complete. The following errors exist:
 - cloudHubAppPrefix missing
 - cryptoKey missing
@@ -302,6 +308,7 @@ class CloudhubContextTest implements MavenInvoke {
                 clientSecret 'the_client_secret'
             }
             cloudHubAppPrefix 'AVI'
+            cloudHubAppSuffix 'DEV'
         }
         closure.delegate = context
 
@@ -311,7 +318,7 @@ class CloudhubContextTest implements MavenInvoke {
         }
 
         // assert
-        assertThat exception.message,
+        MatcherAssert.assertThat exception.message,
                    is(equalTo("Field 'environment' has already been set!"))
     }
 
@@ -345,7 +352,7 @@ class CloudhubContextTest implements MavenInvoke {
         }
 
         // assert
-        assertThat exception.message,
+        MatcherAssert.assertThat exception.message,
                    is(equalTo("Field 'workerSpecs' has already been set!"))
     }
 }

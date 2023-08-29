@@ -4,6 +4,7 @@ import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.AppBuilding
+import org.hamcrest.MatcherAssert
 import org.junit.Before
 import org.junit.Test
 
@@ -51,6 +52,7 @@ class MuleDeployContextTest implements AppBuilding {
                     clientSecret 'the_client_secret'
                 }
                 cloudHubAppPrefix 'AVI'
+                cloudHubAppSuffix 'DEV'
             }
         }
         closure.delegate = context
@@ -144,7 +146,7 @@ class MuleDeployContextTest implements AppBuilding {
         }
 
         // assert
-        assertThat exception.message,
+        MatcherAssert.assertThat exception.message,
                    is(containsString('Only version 1.0 of the DSL is supported and you are using 0.5'))
     }
 
@@ -195,7 +197,7 @@ class MuleDeployContextTest implements AppBuilding {
         }
 
         // assert
-        assertThat exception.message,
+        MatcherAssert.assertThat exception.message,
                    is(containsString('You cannot deploy both a CloudHub and on-prem application!'))
     }
 
@@ -214,7 +216,7 @@ class MuleDeployContextTest implements AppBuilding {
         }
 
         // assert
-        assertThat exception.message,
+        MatcherAssert.assertThat exception.message,
                    is(equalTo("""Your file is not complete. The following errors exist:
 - version missing
 - Either onPremApplication or cloudHubApplication should be supplied

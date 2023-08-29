@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.api.models
 
 import com.avioconsulting.mule.MavenInvoke
+import org.hamcrest.MatcherAssert
 import org.junit.BeforeClass
 import org.junit.Test
 
@@ -28,6 +29,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -53,7 +55,8 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client')
+                                                    'client',
+                                                    'DEV')
 
         // assert
         request.with {
@@ -82,7 +85,8 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                         'theKey',
                                                         'theClientId',
                                                         'theSecret',
-                                                        'client')
+                                                        'client',
+                                                        'DEV')
 
             // assert
             assertThat 'app.runtime in the POM',
@@ -113,12 +117,13 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                           'theClientId',
                                           'theSecret',
                                           'client',
+                                            'DEV',
                                           'some app name',
                                           '1.2.3')
         }
 
         // assert
-        assertThat exception.message,
+        MatcherAssert.assertThat exception.message,
                    is(equalTo("Runtime Manager does not like spaces in app names and you specified 'some app name'!"))
     }
 
@@ -132,7 +137,8 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client')
+                                                    'client',
+                                                    'DEV')
 
         // act
         def appInfo = request.getCloudhubAppInfo()
@@ -179,6 +185,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     null,
                                                     null,
                                                     [prop1: 'foo', prop2: 'bar'])
@@ -231,7 +238,8 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client')
+                                                    'client',
+                                                    'DEV')
 
         // act
         def appInfo = request.getCloudhubAppInfo()
@@ -281,6 +289,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     null,
                                                     null,
                                                     [:],
@@ -330,6 +339,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     null,
                                                     null,
                                                     [:],
@@ -383,6 +393,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     null,
                                                     null,
                                                     [prop1: 'foo', prop2: 'bar'],
@@ -431,6 +442,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'NEW-APP',
                                                     '1.2.3')
 
@@ -484,6 +496,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     null,
                                                     null,
                                                     [:],

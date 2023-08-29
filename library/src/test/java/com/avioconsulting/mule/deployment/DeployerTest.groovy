@@ -9,6 +9,7 @@ import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import com.avioconsulting.mule.deployment.internal.subdeployers.*
 import groovy.transform.Canonical
+import org.hamcrest.MatcherAssert
 import org.junit.Before
 import org.junit.Test
 
@@ -143,6 +144,7 @@ class DeployerTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3',)
         def apiSpec = new ApiSpecification('Hello API',
@@ -155,7 +157,7 @@ class DeployerTest {
         }
 
         // assert
-        assertThat exception.cause.message,
+        MatcherAssert.assertThat exception.cause.message,
                    is(containsString('something did not work'))
     }
 
@@ -174,6 +176,7 @@ class DeployerTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app-mule3',
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
@@ -214,7 +217,7 @@ class DeployerTest {
             }
 
         }
-        assertThat deployedChApps[0].cloudhubAppInfo.properties,
+        MatcherAssert.assertThat deployedChApps[0].cloudhubAppInfo.properties,
                    is(equalTo([
                            env                                               : 'dev',
                            'auto-discovery.api-id'                           : 'api1234',
@@ -226,7 +229,7 @@ class DeployerTest {
         assertThat designCenterSyncs.size(),
                    is(equalTo(1))
         def sync = designCenterSyncs[0]
-        assertThat sync.appFileInfo.appVersion,
+        MatcherAssert.assertThat sync.appFileInfo.appVersion,
                    is(equalTo('1.2.3'))
         assertThat sync.apiSpec,
                    is(equalTo(apiSpec))
@@ -235,7 +238,7 @@ class DeployerTest {
         assertThat policySyncCalls.size(),
                    is(equalTo(1))
         def policySync = policySyncCalls[0]
-        assertThat policySync.apiSpec.id,
+        MatcherAssert.assertThat policySync.apiSpec.id,
                    is(equalTo('api1234'))
         assertThat policySync.desiredPolicies.size(),
                    is(equalTo(1))
@@ -256,6 +259,7 @@ class DeployerTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app-mule4',
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
@@ -294,6 +298,7 @@ class DeployerTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
@@ -388,6 +393,7 @@ class DeployerTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
 
@@ -424,6 +430,7 @@ class DeployerTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
@@ -461,6 +468,7 @@ class DeployerTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app',
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
@@ -488,34 +496,35 @@ class DeployerTest {
         // arrange
         def file = new File('src/test/resources/some_file.txt')
         def request = new CloudhubDeploymentRequest('DEV',
-                                                    new CloudhubWorkerSpecRequest('3.9.1',
-                                                                                  false,
-                                                                                  1,
-                                                                                  WorkerTypes.Micro,
-                                                                                  AwsRegions.UsEast1),
-                                                    file,
-                                                    'theKey',
-                                                    'theClientId',
-                                                    'theSecret',
-                                                    'client',
-                                                    'new-app',
-                                                    '1.2.3')
+                new CloudhubWorkerSpecRequest('3.9.1',
+                        false,
+                        1,
+                        WorkerTypes.Micro,
+                        AwsRegions.UsEast1),
+                file,
+                'theKey',
+                'theClientId',
+                'theSecret',
+                'client',
+                "suff",
+                'new-app',
+                '1.2.3')
         def apiSpec = new ApiSpecification('Hello SOAP API',
-                                           'v1')
+                'v1')
 
         // act
         deployer.deployApplication(request,
-                                   new ApiSpecificationList([apiSpec]))
+                new ApiSpecificationList([apiSpec]))
 
         // assert
         assertThat deployedChApps.size(),
-                   is(equalTo(1))
+                is(equalTo(1))
         assertThat 'API sync should still happen',
-                   apiSyncs.size(),
-                   is(equalTo(1))
+                apiSyncs.size(),
+                is(equalTo(1))
         assertThat 'If a SOAP API is in use, we should not sync to DC',
-                   designCenterSyncs.size(),
-                   is(equalTo(0))
+                designCenterSyncs.size(),
+                is(equalTo(0))
     }
 
     @Test
@@ -533,6 +542,7 @@ class DeployerTest {
                                                     'theClientId',
                                                     'theSecret',
                                                     'client',
+                                                    'DEV',
                                                     'new-app-mule4',
                                                     '1.2.3')
         def apiSpec1 = new ApiSpecification('Hello API v1',
