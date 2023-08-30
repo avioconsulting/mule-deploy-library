@@ -520,4 +520,47 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                            ]
                    ]))
     }
+
+    @Test
+    void test_obfuscate_properties() {
+        def request = new CloudhubDeploymentRequest('DEV',
+                new CloudhubWorkerSpecRequest(),
+                builtFile,
+                'theKey',
+                'theClientId',
+                'theSecret',
+                'client')
+
+        // act
+        def appInfo = request.getCloudAppInfoAsObfuscatedJson()
+
+        // assert
+        assertThat appInfo,
+                is(equalTo([
+                        domain                   : 'client-mule-deploy-lib-v4-test-app-dev',
+                        muleVersion              : [
+                                version: '4.3.0'
+                        ],
+                        monitoringAutoRestart    : true,
+                        workers                  : [
+                                type  : [
+                                        name: 'Micro'
+                                ],
+                                amount: 1
+                        ],
+                        staticIPsEnabled         : false,
+                        loggingCustomLog4JEnabled: false,
+                        objectStoreV1            : false,
+                        persistentQueues         : false,
+                        properties               : [
+                                env                                               : 'dev',
+                                'crypto.key'                                      : '**************',
+                                'anypoint.platform.client_id'                     : '**************',
+                                'anypoint.platform.client_secret'                 : '**************',
+                                'anypoint.platform.config.analytics.agent.enabled': true
+                        ]
+                ]))
+
+
+    }
 }
