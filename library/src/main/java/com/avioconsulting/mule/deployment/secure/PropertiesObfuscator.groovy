@@ -20,7 +20,7 @@ class PropertiesObfuscator {
     static Map<String,String> obfuscateMap(Map<String,String> mapToObfuscate, String propertiesEntryKey){
         def appInfo = mapToObfuscate
         if(appInfo.containsKey(propertiesEntryKey)){
-            def propsToObfuscate = appInfo[propertiesEntryKey]
+            Map<String,String> propsToObfuscate = appInfo[propertiesEntryKey]
             appInfo.remove(propertiesEntryKey)
             appInfo[propertiesEntryKey] = PropertiesObfuscator.obfuscateProperties(propsToObfuscate)
         }
