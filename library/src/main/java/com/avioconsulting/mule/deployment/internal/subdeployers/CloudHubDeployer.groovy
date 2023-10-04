@@ -82,7 +82,7 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
 
     private def doDeployment(HttpEntityEnclosingRequestBase request,
                              CloudhubDeploymentRequest deploymentRequest) {
-        def prettyJson = JsonOutput.prettyPrint(deploymentRequest.cloudhubAppInfoAsJson)
+        def prettyJson = JsonOutput.prettyPrint(JsonOutput.toJson(deploymentRequest.getCloudAppInfoAsObfuscatedJson()))
         if (dryRunMode != DryRunMode.Run) {
             logger.println "WOULD deploy using settings but in dry-run mode: ${prettyJson}"
             return

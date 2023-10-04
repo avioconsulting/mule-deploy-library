@@ -2,6 +2,7 @@ package com.avioconsulting.mule.deployment.api.models.deployment
 
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.internal.models.CloudhubAppProperties
+import com.avioconsulting.mule.deployment.secure.PropertiesObfuscator
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import groovy.transform.ToString
@@ -157,4 +158,9 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
     String getCloudhubAppInfoAsJson() {
         JsonOutput.toJson(cloudhubAppInfo)
     }
+
+    Map<String,String> getCloudAppInfoAsObfuscatedJson() {
+        PropertiesObfuscator.obfuscateMap(cloudhubAppInfo,"properties")
+    }
+
 }
