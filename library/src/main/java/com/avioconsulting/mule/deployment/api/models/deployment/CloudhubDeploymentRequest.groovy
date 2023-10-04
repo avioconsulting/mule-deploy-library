@@ -30,10 +30,6 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     final String anypointClientSecret
     /**
-     * Your "DNS prefix" for Cloudhub app uniqueness, usually a 3 letter customer ID to ensure app uniqueness.
-     */
-    final String cloudHubAppPrefix
-    /**
      * Mule app property overrides (the stuff in the properties tab)
      */
     final Map<String, String> appProperties
@@ -41,10 +37,6 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
      * CloudHub level property overrides (e.g. region type stuff)
      */
     final Map<String, String> otherCloudHubProperties
-    /**
-     * Get only property, derived from app, environment, and prefix, this the real application name that will be used in CloudHub to ensure uniqueness.
-     */
-    final String normalizedAppName
 
     /***
      * Sets anypoint.platform.config.analytics.agent.enabled to true in CH props
@@ -63,13 +55,12 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                               String cryptoKey,
                               String anypointClientId,
                               String anypointClientSecret,
-                              String cloudHubAppPrefix,
-                              String appName = null,
+                              ApplicationName applicationName,
                               String appVersion = null,
                               Map<String, String> appProperties = [:],
                               Map<String, String> otherCloudHubProperties = [:],
                               boolean analyticsAgentEnabled = true) {
-        super(file, appName, appVersion, environment)
+        super(file, applicationName, appVersion, environment)
         if (!workerSpecRequest.muleVersion) {
             def propertyToUse = mule4Request ? 'app.runtime' : 'mule.version'
             def rawVersion = parsedPomProperties.props[propertyToUse]
@@ -83,19 +74,13 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
         this.cryptoKey = cryptoKey
         this.anypointClientId = anypointClientId
         this.anypointClientSecret = anypointClientSecret
-        this.cloudHubAppPrefix = cloudHubAppPrefix
         this.appProperties = appProperties
         this.otherCloudHubProperties = otherCloudHubProperties
-        if (this.appName.contains(' ')) {
-            throw new Exception("Runtime Manager does not like spaces in app names and you specified '${this.appName}'!")
-        }
-        def newAppName = "${cloudHubAppPrefix}-${this.appName}-${environment}"
-        def appNameLowerCase = newAppName.toLowerCase()
-        if (appNameLowerCase != newAppName) {
-            newAppName = appNameLowerCase
-        }
-        normalizedAppName = newAppName
-        this.cloudhubAppProperties = new CloudhubAppProperties(this.appName,
+
+        //normalize name
+
+        //
+        this.cloudhubAppProperties = new CloudhubAppProperties(applicationName.baseAppName,
                                                                environment.toLowerCase(),
                                                                cryptoKey,
                                                                anypointClientId,
@@ -126,7 +111,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
         props += this.autoDiscoveries
         def result = [
                 // CloudHub's API calls the Mule application the 'domain'
-                domain                   : normalizedAppName,
+                domain                   : this.applicationName.normalizedAppName,
                 muleVersion              : workerSpecRequest.versionInfo,
                 region                   : workerSpecRequest.awsRegion?.awsCode,
                 monitoringAutoRestart    : true,

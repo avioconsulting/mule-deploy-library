@@ -25,14 +25,17 @@ abstract class FileBasedAppDeploymentRequest extends AppDeploymentRequest {
      */
     final File file
 
-    FileBasedAppDeploymentRequest(File file, String appName, String appVersion, String environment) {
-        super(appName, appVersion, environment)
+    FileBasedAppDeploymentRequest(File file, ApplicationName applicationName, String appVersion, String environment) {
+        super(applicationName, appVersion, environment)
 
         this.file = file
 
+        // TODO look at this!!
+
         // Properties are not passed then extract the artifactId and version from the pom.xml
-        if(!appName) {
-            setAppName(this.parsedPomProperties.artifactId)
+        if(!applicationName) {
+            setAppName(new ApplicationName(this.parsedPomProperties.artifactId,false,false,null,null))
+
         }
         if(!appVersion) {
             setAppVersion(parsedPomProperties.version)

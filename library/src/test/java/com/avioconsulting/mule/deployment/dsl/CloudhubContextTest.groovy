@@ -31,7 +31,12 @@ class CloudhubContextTest implements MavenInvoke {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
+            applicationName {
+                baseAppName 'the-app'
+                usePrefix true
+                useSuffix false
+                prefix 'AVI'
+            }
         }
         closure.delegate = context
 
@@ -88,7 +93,7 @@ class CloudhubContextTest implements MavenInvoke {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
+            applicationName {}
         }
         closure.delegate = context
 
@@ -127,7 +132,9 @@ class CloudhubContextTest implements MavenInvoke {
         def context = new CloudhubContext()
         def closure = {
             environment 'DEV'
-            applicationName 'the-app'
+            applicationName {
+
+            }
             appVersion '1.2.3'
             workerSpecs {
                 muleVersion '4.2.2'
@@ -147,7 +154,6 @@ class CloudhubContextTest implements MavenInvoke {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
             // optional from here on out
             appProperties([
                     someProp: 'someValue'
@@ -200,8 +206,7 @@ class CloudhubContextTest implements MavenInvoke {
                        is(equalTo('the_client_id'))
             assertThat anypointClientSecret,
                        is(equalTo('the_client_secret'))
-            assertThat cloudHubAppPrefix,
-                       is(equalTo('AVI'))
+            //TODO validate app name
             assertThat appProperties,
                        is(equalTo([
                                someProp: 'someValue'
@@ -219,7 +224,6 @@ class CloudhubContextTest implements MavenInvoke {
         def context = new CloudhubContext()
         def closure = {
             environment 'DEV'
-            applicationName 'the-app'
             appVersion '1.2.3'
             workerSpecs {
                 muleVersion '4.2.2'
@@ -234,7 +238,13 @@ class CloudhubContextTest implements MavenInvoke {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
+            applicationName {
+                baseAppName 'the-app'
+                usePrefix true
+                useSuffix false
+                prefix 'AVI'
+            }
+
         }
         closure.delegate = context
 
@@ -272,10 +282,10 @@ class CloudhubContextTest implements MavenInvoke {
             context.createDeploymentRequest()
         }
 
+        //TODO fix here
         // assert
         assertThat exception.message,
                    is(equalTo("""Your deployment request is not complete. The following errors exist:
-- cloudHubAppPrefix missing
 - cryptoKey missing
 - environment missing
 - file missing
@@ -290,7 +300,6 @@ class CloudhubContextTest implements MavenInvoke {
         def closure = {
             environment 'DEV'
             environment 'DEV'
-            applicationName 'the-app'
             appVersion '1.2.3'
             workerSpecs {
                 muleVersion '4.2.2'
@@ -321,7 +330,12 @@ class CloudhubContextTest implements MavenInvoke {
         def context = new CloudhubContext()
         def closure = {
             environment 'DEV'
-            applicationName 'the-app'
+            applicationName {
+                baseAppName 'the-app'
+                usePrefix true
+                useSuffix false
+                prefix 'AVI'
+            }
             appVersion '1.2.3'
             workerSpecs {
                 muleVersion '4.2.2'
@@ -332,10 +346,9 @@ class CloudhubContextTest implements MavenInvoke {
             file 'path/to/file.jar'
             cryptoKey 'theKey'
             autoDiscovery {
-                clientId 'the_client_id'
+                clien4tId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
         }
         closure.delegate = context
 

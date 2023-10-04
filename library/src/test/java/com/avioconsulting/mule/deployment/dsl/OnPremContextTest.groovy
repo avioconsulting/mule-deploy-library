@@ -24,6 +24,13 @@ class OnPremContextTest implements MavenInvoke {
             environment 'DEV'
             file builtFile.absolutePath
             targetServerOrClusterName 'server1'
+            applicationName {
+                baseAppName 'the-app'
+                usePrefix true
+                useSuffix false
+                prefix 'AVI'
+                applicationName 'the-app-dev'
+            }
         }
         closure.delegate = context
         closure.call()
@@ -35,7 +42,7 @@ class OnPremContextTest implements MavenInvoke {
         request.with {
             assertThat environment,
                        is(equalTo('DEV'))
-            assertThat appName,
+            assertThat appName.baseAppName,
                        is(equalTo('mule-deploy-lib-v4-test-app'))
             assertThat appVersion,
                        is(equalTo('2.2.9'))

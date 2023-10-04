@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.api.models
 
 import com.avioconsulting.mule.MavenInvoke
+import com.avioconsulting.mule.deployment.api.models.deployment.ApplicationName
 import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubV2DeploymentRequest
 import org.hamcrest.MatcherAssert
 import org.junit.BeforeClass
@@ -30,16 +31,15 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'prefix',
-                                                    'new-app',
+                                                    new ApplicationName('new-app',true,false,'prefix',null),
                                                     '1.2.3',
                                                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
 
         request.with {
-            assertThat appName,
+            assertThat appName.baseAppName,
                        is(equalTo('new-app'))
             assertThat normalizedAppName,
-                       is(equalTo('prefix-new-app-dev'))
+                       is(equalTo('prefix-new-app'))
             assertThat appVersion,
                        is(equalTo('1.2.3'))
             assertThat groupId,
@@ -58,20 +58,17 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
 
         def exception = shouldFail {
             new CloudhubV2DeploymentRequest('DEV',
-                                          new WorkerSpecRequest('us-west-2'),
-                                          'theKey',
-                                          'theClientId',
-                                          'theSecret',
-                                          'client',
-                                          'some app name',
-                                          '4.2.2',
-                                          'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
+                    new WorkerSpecRequest('us-west-2'),
+                    'theKey',
+                    'theClientId',
+                    'theSecret',
+                    new ApplicationName('some app name', true, false, 'client', null),
+                    '4.2.2',
+                    'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
         }
 
-        MatcherAssert.assertThat exception.message,
-                   is(equalTo("Runtime Manager does not like spaces in app names and you specified 'some app name'!"))
+        MatcherAssert.assertThat('fail', exception.message.contains("you should specify an non-empty baseAppName. It shouldn't contain spaces as well"))
     }
-
 
     /**
      * This case validates that a new CloudhubV2DeploymentRequest contains all the attributes correctly set by using
@@ -96,8 +93,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'prefix',
-                'new-app',
+                new ApplicationName('new-app',true,false,'prefix',null),
                 '1.2.3',
                 'new-group-id')
 
@@ -107,7 +103,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
 
         assertThat appInfo,
                    is(equalTo([
-                           name: 'prefix-new-app-dev',
+                           name: 'prefix-new-app',
                            application: [
                                    ref: [
                                            groupId: 'new-group-id',
@@ -171,16 +167,13 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                     'theKey',
                     'theClientId',
                     'theSecret',
-                    cloudHubPrefix,
-                    appName,
+                    new ApplicationName(appName,true,false,'cloudHubPrefix',null),
                     '4.2.2',
                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
         }
 
-        def finalAppName = cloudHubPrefix+"-"+appName+"-"+environment
-
         MatcherAssert.assertThat exception.message,
-                is(equalTo("Maximum size of application name is 42 and the provided name has "+finalAppName.length()+" characters"))
+                is(equalTo("Maximum size of application name is 42 and the provided name has 53 characters"))
     }
 
 }

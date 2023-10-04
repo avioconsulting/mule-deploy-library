@@ -1,16 +1,17 @@
 package com.avioconsulting.mule.deployment.dsl
 
+import com.avioconsulting.mule.deployment.api.models.deployment.ApplicationName
 import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
 
 class CloudhubContext extends BaseContext {
-    String environment, applicationName, appVersion, file, cryptoKey, cloudHubAppPrefix
+    String environment, appVersion, file, cryptoKey
     // make API visualizer, etc. more easy by default
     boolean analyticsAgentEnabled = true
     private WorkerSpecContext workerSpecs = new WorkerSpecContext()
     private AutodiscoveryContext autoDiscovery = new AutodiscoveryContext()
     Map<String, String> appProperties = [:]
     Map<String, String> otherCloudHubProperties = [:]
-
+    private ApplicationNameContext applicationNameContext = new ApplicationNameContext()
     CloudhubDeploymentRequest createDeploymentRequest() {
         validateContext()
         new CloudhubDeploymentRequest(this.environment,
@@ -19,8 +20,7 @@ class CloudhubContext extends BaseContext {
                                       this.cryptoKey,
                                       autoDiscovery.clientId,
                                       autoDiscovery.clientSecret,
-                                      this.cloudHubAppPrefix,
-                                      this.applicationName,
+                                      this.applicationNameContext.createApplicationName(),
                                       this.appVersion,
                                       this.appProperties,
                                       this.otherCloudHubProperties,

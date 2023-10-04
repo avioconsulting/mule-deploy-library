@@ -22,14 +22,10 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
     OnPremDeploymentRequest(String environment,
                             String targetServerOrClusterName,
                             File file,
-                            String appName = null,
+                            ApplicationName appName,
                             String appVersion = null,
                             Map<String, String> appProperties = [:]) {
         super(file, appName, appVersion, environment)
-
-        if (this.appName.contains(' ')) {
-            throw new Exception("Runtime Manager does not like spaces in app names and you specified '${appName}'!")
-        }
         this.targetServerOrClusterName = targetServerOrClusterName
         this.appProperties = appProperties
     }
@@ -37,7 +33,7 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
     private String getConfigJson() {
         def map = [
                 'mule.agent.application.properties.service': [
-                        applicationName: appName,
+                        applicationName: appName.baseAppName,
                         properties     : appProperties + this.autoDiscoveries
                 ]
         ]
@@ -64,7 +60,7 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
                 .addTextBody('targetId',
                              serverId)
                 .addTextBody('artifactName',
-                             appName)
+                             appName.baseAppName)
                 .addTextBody('configuration',
                              configJson)
                 .addBinaryBody('file',

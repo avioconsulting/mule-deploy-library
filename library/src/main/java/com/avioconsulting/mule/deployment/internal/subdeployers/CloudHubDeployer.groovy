@@ -43,7 +43,7 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
 
     def deploy(CloudhubDeploymentRequest deploymentRequest) {
         def existingAppStatus = getAppStatus(deploymentRequest.environment,
-                                             deploymentRequest.normalizedAppName)
+                                             deploymentRequest.getAppName().normalizedAppName)
         def request = getDeploymentHttpRequest(existingAppStatus.getAppStatus(),
                                                deploymentRequest)
         doDeployment(request,
@@ -54,20 +54,20 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
             } else {
                 logger.println "Since existing app was in '${existingAppStatus}' status before the deployment we just did, we will now try and start the app manually"
                 startApplication(deploymentRequest.environment,
-                                 deploymentRequest.normalizedAppName)
+                                 deploymentRequest.getAppName().normalizedAppName)
             }
         }
         if (dryRunMode != DryRunMode.Run) {
             return
         }
         waitForAppToStart(deploymentRequest.environment,
-                          deploymentRequest.normalizedAppName,
+                          deploymentRequest.getAppName().normalizedAppName,
                           existingAppStatus)
     }
 
     private HttpEntityEnclosingRequestBase getDeploymentHttpRequest(AppStatus existingAppStatus,
                                                                     CloudhubDeploymentRequest deploymentRequest) {
-        def appName = deploymentRequest.normalizedAppName
+        def appName = deploymentRequest.getAppName().normalizedAppName
         def fileName = deploymentRequest.file.name
         HttpEntityEnclosingRequestBase request
         if (existingAppStatus == AppStatus.NotFound) {
@@ -99,7 +99,7 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
         try {
             def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
                                                                              'deploy application')
-            logger.println("Application '${deploymentRequest.normalizedAppName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
+            logger.println("Application '${deploymentRequest.getAppName().normalizedAppName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
         }
         finally {
             response.close()

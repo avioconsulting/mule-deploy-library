@@ -1,7 +1,9 @@
 package com.avioconsulting.mule.deployment.api.models
 
 import com.avioconsulting.mule.MavenInvoke
+import com.avioconsulting.mule.deployment.api.models.deployment.ApplicationName
 import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
+import org.hamcrest.MatcherAssert
 import org.junit.BeforeClass
 import org.junit.Test
 
@@ -28,16 +30,15 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
-                                                    'new-app',
+                                                    new ApplicationName('new-app',true,false,'client',null),
                                                     '1.2.3')
 
         // assert
         request.with {
-            assertThat appName,
+            assertThat appName.baseAppName,
                        is(equalTo('new-app'))
-            assertThat normalizedAppName,
-                       is(equalTo('client-new-app-dev'))
+            assertThat appName.normalizedAppName,
+                       is(equalTo('client-new-app'))
             assertThat appVersion,
                        is(equalTo('1.2.3'))
         }
@@ -54,13 +55,14 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client')
+                                                    new ApplicationName('mule-deploy-lib-v4-test-app',true,true,'client','DEV')
+        )
 
         // assert
         request.with {
-            assertThat appName,
+            assertThat appName.baseAppName,
                        is(equalTo('mule-deploy-lib-v4-test-app'))
-            assertThat normalizedAppName,
+            assertThat appName.normalizedAppName,
                        is(equalTo('client-mule-deploy-lib-v4-test-app-dev'))
             assertThat appVersion,
                        is(equalTo('2.2.9'))
@@ -83,7 +85,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                         'theKey',
                                                         'theClientId',
                                                         'theSecret',
-                                                        'client')
+                                                         new ApplicationName('new-app',true,false,'client',null))
 
             // assert
             assertThat 'app.runtime in the POM',
@@ -113,14 +115,11 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                           'theKey',
                                           'theClientId',
                                           'theSecret',
-                                          'client',
-                                          'some app name',
+                                          new ApplicationName('some app name',true,false,'client',null),
                                           '1.2.3')
         }
-
         // assert
-        assertThat exception.message,
-                   is(equalTo("Runtime Manager does not like spaces in app names and you specified 'some app name'!"))
+        MatcherAssert.assertThat('fail', exception.message.contains("you should specify an non-empty baseAppName. It shouldn't contain spaces as well"))
     }
 
     @Test
@@ -133,7 +132,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client')
+                                                    new ApplicationName('mule-deploy-lib-v4-test-app',true,true,'client','DEV'),)
 
         // act
         def appInfo = request.getCloudhubAppInfo()
@@ -179,9 +178,8 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
-                                                    null,
-                                                    null,
+                                                    new ApplicationName('mule-deploy-lib-v4-test-app',true,true,'client','DEV'),
+                                         null,
                                                     [prop1: 'foo', prop2: 'bar'])
 
         // act
@@ -232,7 +230,8 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client')
+                                                    new ApplicationName('mule-deploy-lib-v4-test-app',true,true,'client','dev')
+                                                    )
 
         // act
         def appInfo = request.getCloudhubAppInfo()
@@ -281,9 +280,8 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
-                                                    null,
-                                                    null,
+                                                    new ApplicationName('mule-deploy-lib-v4-test-app',true,true,'client','dev'),
+                                         null,
                                                     [:],
                                                     otherProperties)
 
@@ -330,8 +328,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
-                                                    null,
+                                                    new ApplicationName('mule-deploy-lib-v4-test-app',true,true,'client','dev'),
                                                     null,
                                                     [:],
                                                     otherProperties)
@@ -383,9 +380,8 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
-                                                    null,
-                                                    null,
+                                                    new ApplicationName('mule-deploy-lib-v4-test-app',true,true,'client','dev'),
+                                          null,
                                                     [prop1: 'foo', prop2: 'bar'],
                                                     otherProperties)
 
@@ -431,8 +427,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
-                                                    'NEW-APP',
+                                                    new ApplicationName('NEW-APP',true,true,'client','dev'),
                                                     '1.2.3')
 
         // act
@@ -484,8 +479,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
-                                                    null,
+                                                    new ApplicationName('mule-deploy-lib-v4-test-app',true,true,'client','dev'),
                                                     null,
                                                     [:],
                                                     [:],
