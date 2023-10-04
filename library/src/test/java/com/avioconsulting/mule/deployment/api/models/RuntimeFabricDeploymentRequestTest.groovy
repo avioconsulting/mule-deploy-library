@@ -128,7 +128,15 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                                    applicationName: 'new-app',
                                                    properties: [:]
                                            ]
-                                   ]
+                                   ],
+                                   integrations:[
+                                           services : [
+                                               objectStoreV2: [
+                                                       enabled: false
+                                               ]
+                                           ]
+                                   ],
+                                   objectStoreV2Enabled:false
                            ],
                            target: [
                                    targetId: null,
@@ -205,7 +213,15 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                                            apiId : '123'
                                                    ]
                                            ]
-                                   ]
+                                   ],
+                                   integrations:[
+                                           services : [
+                                                   objectStoreV2: [
+                                                           enabled: true
+                                                   ]
+                                           ]
+                                   ],
+                                   objectStoreV2Enabled:true
                            ],
                            target: [
                                    targetId: null,
