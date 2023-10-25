@@ -47,7 +47,14 @@ muleDeploy {
             groupId 'stuff'
         }
         mulesoftPolicy {
-            version '1.2.1'
+            // Sample using the client id enforcement with header properties
+            assetId 'client-id-enforcement'
+            version '1.2.3'
+            config([
+                    credentialsOriginHasHttpBasicAuthenticationHeader: 'customExpression',
+                    clientIdExpression: '#[attributes.headers["client_id"]]',
+                    clientSecretExpression: '#[attributes.headers["client_secret"]]'
+            ])
         }
         azureAdJwtPolicy {
             azureAdTenantId 'abcd'
