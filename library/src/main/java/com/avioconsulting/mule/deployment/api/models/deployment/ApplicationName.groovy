@@ -17,7 +17,7 @@ class ApplicationName {
         this.useSuffix = useSuffix
         this.prefix = prefix
         this.suffix = suffix
-        getNormalizedAppName()
+//        getNormalizedAppName()
     }
 
     String getBaseAppName(){

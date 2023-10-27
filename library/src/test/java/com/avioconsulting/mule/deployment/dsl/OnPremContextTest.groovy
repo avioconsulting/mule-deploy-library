@@ -27,9 +27,9 @@ class OnPremContextTest implements MavenInvoke {
             applicationName {
                 baseAppName 'the-app'
                 usePrefix true
-                useSuffix false
+                useSuffix true
                 prefix 'AVI'
-                applicationName 'the-app-dev'
+                suffix 'dev'
             }
         }
         closure.delegate = context
@@ -42,8 +42,8 @@ class OnPremContextTest implements MavenInvoke {
         request.with {
             assertThat environment,
                        is(equalTo('DEV'))
-            assertThat appName.baseAppName,
-                       is(equalTo('mule-deploy-lib-v4-test-app'))
+            assertThat applicationName.normalizedAppName,
+                       is(equalTo('avi-the-app-dev'))
             assertThat appVersion,
                        is(equalTo('2.2.9'))
             assertThat file,
@@ -59,7 +59,13 @@ class OnPremContextTest implements MavenInvoke {
         def context = new OnPremContext()
         def closure = {
             environment 'DEV'
-            applicationName 'the-app'
+            applicationName {
+                baseAppName 'the-app'
+                usePrefix true
+                useSuffix false
+                prefix 'AVI'
+                suffix 'dev'
+            }
             appVersion '1.2.3'
             file 'path/to/file.jar'
             targetServerOrClusterName 'server1'
@@ -75,8 +81,8 @@ class OnPremContextTest implements MavenInvoke {
         request.with {
             assertThat environment,
                        is(equalTo('DEV'))
-            assertThat appName,
-                       is(equalTo('the-app'))
+            assertThat applicationName.normalizedAppName,
+                       is(equalTo('avi-the-app'))
             assertThat appVersion,
                        is(equalTo('1.2.3'))
             assertThat file,

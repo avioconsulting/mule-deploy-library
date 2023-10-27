@@ -11,7 +11,7 @@ class CloudhubContext extends BaseContext {
     private AutodiscoveryContext autoDiscovery = new AutodiscoveryContext()
     Map<String, String> appProperties = [:]
     Map<String, String> otherCloudHubProperties = [:]
-    private ApplicationNameContext applicationNameContext = new ApplicationNameContext()
+    private ApplicationNameContext applicationName = new ApplicationNameContext()
     CloudhubDeploymentRequest createDeploymentRequest() {
         validateContext()
         new CloudhubDeploymentRequest(this.environment,
@@ -20,7 +20,7 @@ class CloudhubContext extends BaseContext {
                                       this.cryptoKey,
                                       autoDiscovery.clientId,
                                       autoDiscovery.clientSecret,
-                                      this.applicationNameContext.createApplicationName(),
+                                      this.applicationName.createApplicationName(),
                                       this.appVersion,
                                       this.appProperties,
                                       this.otherCloudHubProperties,

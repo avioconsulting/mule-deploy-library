@@ -3,10 +3,11 @@ package com.avioconsulting.mule.deployment.dsl
 import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
 
 class RuntimeFabricContext extends BaseContext {
-    String environment, applicationName, appVersion, cryptoKey, cloudHubAppPrefix, businessGroupId
+    String environment, appVersion, cryptoKey, businessGroupId
     // make API visualizer, etc. more easy by default
     WorkerSpecV2Context workerSpecs = new WorkerSpecV2Context()
     AutodiscoveryContext autoDiscovery = new AutodiscoveryContext()
+    ApplicationNameContext applicationName = new ApplicationNameContext()
     Map<String, String> appProperties = [:]
     Map<String, String> otherCloudHubProperties = [:]
 
@@ -17,8 +18,7 @@ class RuntimeFabricContext extends BaseContext {
                                            this.cryptoKey,
                                            autoDiscovery.clientId,
                                            autoDiscovery.clientSecret,
-                                           this.cloudHubAppPrefix,
-                                           this.applicationName,
+                                           applicationName.createApplicationName(),
                                            this.appVersion,
                                            this.businessGroupId,
                                            this.appProperties,
@@ -34,6 +34,6 @@ class RuntimeFabricContext extends BaseContext {
 
     @Override
     List<String> findOptionalProperties() {
-        ['cloudHubAppPrefix']
+        ['applicationName']
     }
 }

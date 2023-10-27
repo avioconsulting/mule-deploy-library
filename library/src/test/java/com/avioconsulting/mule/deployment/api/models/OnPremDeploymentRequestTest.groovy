@@ -63,11 +63,7 @@ class OnPremDeploymentRequestTest implements MavenInvoke {
 
         // act
         def exception = shouldFail {
-            new OnPremDeploymentRequest('DEV',
-                                        'clustera',
-                                        file,
-                                        new ApplicationName('some app name',false,false,null,null),
-                                        '1.2.3')
+            (new ApplicationName('some app name',false,false,null,null)).normalizedAppName
         }
 
         // assert

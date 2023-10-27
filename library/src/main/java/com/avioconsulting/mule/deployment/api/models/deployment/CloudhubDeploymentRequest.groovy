@@ -1,15 +1,22 @@
 package com.avioconsulting.mule.deployment.api.models.deployment
 
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
+import com.avioconsulting.mule.deployment.api.models.PomInfo
 import com.avioconsulting.mule.deployment.internal.models.CloudhubAppProperties
 import com.avioconsulting.mule.deployment.secure.PropertiesObfuscator
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import groovy.transform.ToString
+import groovy.xml.XmlSlurper
+import groovy.xml.slurpersupport.NodeChild
 import org.apache.http.HttpEntity
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
+
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.nio.file.Path
 
 @ToString
 class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
@@ -78,7 +85,9 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
         this.otherCloudHubProperties = otherCloudHubProperties
 
         //normalize name
-
+        if(!applicationName.baseAppName){
+            applicationName.baseAppName = parsedPomProperties.artifactId
+        }
         //
         this.cloudhubAppProperties = new CloudhubAppProperties(applicationName.baseAppName,
                                                                environment.toLowerCase(),
@@ -148,4 +157,27 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
         PropertiesObfuscator.obfuscateMap(cloudhubAppInfo,"properties")
     }
 
+    @Lazy
+    protected PomInfo parsedPomProperties = {
+        def zipOrJarPath = getFile().toPath()
+        FileSystems.newFileSystem(zipOrJarPath,
+                new HashMap()).withCloseable { fs ->
+            def pomXmlPath = Files.walk(fs.getPath('/META-INF/maven')).find { p ->
+                p.endsWith('pom.xml')
+            } as Path
+            assert pomXmlPath: 'Was not able to find pom.xml in ZIP/JAR'
+            def parser = new XmlSlurper().parseText(pomXmlPath.text)
+            def props = parser.properties.children().collectEntries { NodeChild node ->
+                [node.name(), node.text()]
+            }
+            def textFromNode = { String element ->
+                def res = parser[element][0] as NodeChild
+                res.text()
+            }
+            return new PomInfo(textFromNode('groupId'),
+                    textFromNode('artifactId'),
+                    textFromNode('version'),
+                    props)
+        } as PomInfo
+    }()
 }

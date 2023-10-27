@@ -105,18 +105,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
 
         // act
         def exception = shouldFail {
-            new CloudhubDeploymentRequest('DEV',
-                                          new CloudhubWorkerSpecRequest('3.9.1',
-                                                                        false,
-                                                                        1,
-                                                                        WorkerTypes.Micro,
-                                                                        AwsRegions.UsEast1),
-                                          file,
-                                          'theKey',
-                                          'theClientId',
-                                          'theSecret',
-                                          new ApplicationName('some app name',true,false,'client',null),
-                                          '1.2.3')
+            (new ApplicationName('some app name',true,false,'client',null)).normalizedAppName
         }
         // assert
         MatcherAssert.assertThat('fail', exception.message.contains("you should specify an non-empty baseAppName. It shouldn't contain spaces as well"))
@@ -523,7 +512,8 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client')
+                new ApplicationName('mule-deploy-lib-v4-test-app',true,true,'client','dev'),
+                '1.2.3')
 
         // act
         def appInfo = request.getCloudAppInfoAsObfuscatedJson()

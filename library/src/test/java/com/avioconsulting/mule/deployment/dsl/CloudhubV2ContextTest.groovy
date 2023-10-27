@@ -32,7 +32,13 @@ class CloudhubV2ContextTest implements MavenInvoke {
             }
             businessGroupId '123-456-789'
             appVersion '2.2.9'
-            applicationName 'new-app'
+            applicationName {
+                baseAppName 'the-app'
+                usePrefix true
+                useSuffix true
+                prefix 'AVI'
+                suffix 'dev'
+            }
             workerSpecs {
                 target 'target_name'
                 muleVersion '4.3.0'
@@ -48,8 +54,8 @@ class CloudhubV2ContextTest implements MavenInvoke {
         request.with {
             assertThat environment,
                        is(equalTo('DEV'))
-            assertThat request.appName,
-                       is(equalTo('new-app'))
+            assertThat applicationName.normalizedAppName,
+                       is(equalTo('avi-the-app-dev'))
             assertThat appVersion,
                        is(equalTo('2.2.9'))
             assertThat cryptoKey,
@@ -89,7 +95,6 @@ class CloudhubV2ContextTest implements MavenInvoke {
         def context = new CloudhubV2Context()
         def closure = {
             appVersion '1.2.3'
-            applicationName 'the-app'
         }
         closure.delegate = context
 
@@ -117,7 +122,13 @@ class CloudhubV2ContextTest implements MavenInvoke {
         def context = new CloudhubV2Context()
         def closure = {
             environment 'DEV'
-            applicationName 'the-app'
+            applicationName {
+                baseAppName 'the-app'
+                usePrefix true
+                useSuffix false
+                prefix 'AVI'
+                suffix 'dev'
+            }
             appVersion '2.2.9'
             cryptoKey 'theKey'
             autoDiscovery {
@@ -125,7 +136,6 @@ class CloudhubV2ContextTest implements MavenInvoke {
                 clientSecret 'the_client_secret'
             }
             businessGroupId '123-456-789'
-            cloudHubAppPrefix 'AVI'
             workerSpecs {
                 target 'target_name'
                 muleVersion '4.3.0'
@@ -149,8 +159,6 @@ class CloudhubV2ContextTest implements MavenInvoke {
         request.with {
             assertThat environment,
                     is(equalTo('DEV'))
-            assertThat request.appName,
-                    is(equalTo('the-app'))
             assertThat appVersion,
                     is(equalTo('2.2.9'))
             assertThat cryptoKey,
@@ -159,8 +167,8 @@ class CloudhubV2ContextTest implements MavenInvoke {
                     is(equalTo('the_client_id'))
             assertThat anypointClientSecret,
                     is(equalTo('the_client_secret'))
-            assertThat cloudHubAppPrefix,
-                    is(equalTo('AVI'))
+            assertThat applicationName.normalizedAppName,
+                    is(equalTo('avi-the-app'))
             workerSpecRequest.with {
                 assertThat target,
                         is(equalTo('target_name'))
@@ -224,7 +232,6 @@ class CloudhubV2ContextTest implements MavenInvoke {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
             workerSpecs { target 'target_name'}
             workerSpecs { target 'target_name2'}
         }
@@ -251,7 +258,6 @@ class CloudhubV2ContextTest implements MavenInvoke {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
             workerSpecs {
                 target 'target_name'
                 target 'target_name_2'

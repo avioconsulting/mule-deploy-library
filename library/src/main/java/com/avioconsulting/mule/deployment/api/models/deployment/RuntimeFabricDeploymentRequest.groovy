@@ -87,6 +87,9 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
         this.appProperties = appProperties
         this.otherCloudHubProperties = otherCloudHubProperties
 
+        if(!applicationName.baseAppName){
+            applicationName.baseAppName = parsedPomProperties.artifactId
+        }
 
         normalizedAppName = applicationName.getNormalizedAppName()
         this.cloudhubAppProperties = new CloudhubAppProperties(applicationName.baseAppName,

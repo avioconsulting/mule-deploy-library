@@ -7,12 +7,11 @@ class CloudhubV2Context extends RuntimeFabricContext {
     CloudhubV2DeploymentRequest createDeploymentRequest() {
         validateContext()
         new CloudhubV2DeploymentRequest(this.environment,
-                                      workerSpecs.createRequest(),
+                                      this.workerSpecs.createRequest(),
                                       this.cryptoKey,
                                       autoDiscovery.clientId,
                                       autoDiscovery.clientSecret,
-                                      this.cloudHubAppPrefix,
-                                      this.applicationName,
+                                      this.applicationName.createApplicationName(),
                                       this.appVersion,
                                       this.businessGroupId,
                                       this.appProperties,

@@ -35,7 +35,6 @@ abstract class FileBasedAppDeploymentRequest extends AppDeploymentRequest {
         // Properties are not passed then extract the artifactId and version from the pom.xml
         if(!applicationName) {
             setAppName(new ApplicationName(this.parsedPomProperties.artifactId,false,false,null,null))
-
         }
         if(!appVersion) {
             setAppVersion(parsedPomProperties.version)
@@ -60,7 +59,7 @@ abstract class FileBasedAppDeploymentRequest extends AppDeploymentRequest {
     protected PomInfo parsedPomProperties = {
         def zipOrJarPath = getFile().toPath()
         FileSystems.newFileSystem(zipOrJarPath,
-                                  null).withCloseable { fs ->
+                                  new HashMap()).withCloseable { fs ->
             def pomXmlPath = Files.walk(fs.getPath('/META-INF/maven')).find { p ->
                 p.endsWith('pom.xml')
             } as Path
@@ -96,7 +95,7 @@ abstract class FileBasedAppDeploymentRequest extends AppDeploymentRequest {
     List<RamlFile> getRamlFilesFromApp(String rootRamlDirectory,
                                        boolean ignoreExchange) {
         return FileSystems.newFileSystem(file.toPath(),
-                                         null).withCloseable { fs ->
+                                         new HashMap()).withCloseable { fs ->
             def apiPath = fs.getPath(rootRamlDirectory)
             if (!Files.exists(apiPath)) {
                 return []

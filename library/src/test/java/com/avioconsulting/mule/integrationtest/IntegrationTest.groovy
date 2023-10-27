@@ -8,6 +8,7 @@ import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.credentials.ConnectedAppCredential
+import com.avioconsulting.mule.deployment.api.models.deployment.ApplicationName
 import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.policies.MulesoftPolicy
@@ -57,10 +58,10 @@ class IntegrationTest implements MavenInvoke {
     }
 
     def deleteCloudHubApp(CloudhubDeploymentRequest request) {
-        def appName = request.normalizedAppName
+        def appName = request.appName.normalizedAppName
         println "Attempting to clean out existing app ${appName}"
         cloudHubDeployer.deleteApp(request.environment,
-                                   request.normalizedAppName,
+                                   request.appName.normalizedAppName,
                                    'integration test app cleanup')
         println 'Waiting for app deletion to finish'
         waitForAppDeletion(request.environment,
@@ -90,7 +91,9 @@ class IntegrationTest implements MavenInvoke {
                                                                   'abcdefg',
                                                                   ANYPOINT_CLIENT_ID,
                                                                   ANYPOINT_CLIENT_SECRET,
-                                                                  CLOUDHUB_APP_PREFIX)
+                                                                  new ApplicationName(null, false, false, '', ''),
+                                                                  null,
+                                                                  [:])
         def logger = new TestConsoleLogger()
         clientWrapper = new HttpClientWrapper('https://anypoint.mulesoft.com',
                 new ConnectedAppCredential(ANYPOINT_CONNECTED_APP_ID,ANYPOINT_CONNECTED_APP_SECRET),
@@ -165,7 +168,7 @@ class IntegrationTest implements MavenInvoke {
             // assert
             hitEndpointAndAssert('john',
                         'doe',
-                        "http://${cloudhubDeploymentRequest.normalizedAppName}.us-w2.cloudhub.io/",
+                        "http://${cloudhubDeploymentRequest.appName.normalizedAppName}.us-w2.cloudhub.io/",
                         'hello there')
         }
         finally {

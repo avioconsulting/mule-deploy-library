@@ -41,7 +41,13 @@ class MuleDeployContextTest implements AppBuilding {
 
             cloudHubApplication {
                 environment 'DEV'
-                applicationName 'the-app'
+                applicationName {
+                    baseAppName 'the-app'
+                    usePrefix true
+                    useSuffix true
+                    prefix 'AVI'
+                    suffix 'dev'
+                }
                 appVersion '1.2.3'
                 workerSpecs {
                     muleVersion '4.2.2'
@@ -52,7 +58,6 @@ class MuleDeployContextTest implements AppBuilding {
                     clientId 'the_client_id'
                     clientSecret 'the_client_secret'
                 }
-                cloudHubAppPrefix 'AVI'
             }
         }
         closure.delegate = context
@@ -91,7 +96,13 @@ class MuleDeployContextTest implements AppBuilding {
 
             onPremApplication {
                 environment 'DEV'
-                applicationName 'the-app'
+                applicationName {
+                    baseAppName 'the-app'
+                    usePrefix true
+                    useSuffix true
+                    prefix 'AVI'
+                    suffix 'dev'
+                }
                 appVersion '1.2.3'
                 file tempRequest.file.path
                 targetServerOrClusterName 'theServer'
@@ -128,7 +139,13 @@ class MuleDeployContextTest implements AppBuilding {
 
             cloudHubV2Application {
                 environment 'DEV'
-                applicationName 'the-app'
+                applicationName {
+                    baseAppName 'the-app'
+                    usePrefix true
+                    useSuffix true
+                    prefix 'AVI'
+                    suffix 'dev'
+                }
                 appVersion '1.2.3'
                 businessGroupId 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee'
                 workerSpecs {
@@ -140,7 +157,6 @@ class MuleDeployContextTest implements AppBuilding {
                     clientId 'the_client_id'
                     clientSecret 'the_client_secret'
                 }
-                cloudHubAppPrefix 'AVI'
             }
         }
         closure.delegate = context
@@ -174,7 +190,13 @@ class MuleDeployContextTest implements AppBuilding {
 
             runtimeFabricApplication {
                 environment 'DEV'
-                applicationName 'the-app'
+                applicationName {
+                    baseAppName 'the-app'
+                    usePrefix true
+                    useSuffix true
+                    prefix 'AVI'
+                    suffix 'dev'
+                }
                 appVersion '1.2.3'
                 businessGroupId 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee'
                 workerSpecs {
@@ -186,7 +208,6 @@ class MuleDeployContextTest implements AppBuilding {
                     clientId 'the_client_id'
                     clientSecret 'the_client_secret'
                 }
-                cloudHubAppPrefix 'AVI'
             }
         }
         closure.delegate = context
@@ -257,7 +278,13 @@ class MuleDeployContextTest implements AppBuilding {
 
             onPremApplication {
                 environment 'DEV'
-                applicationName 'the-app'
+                applicationName {
+                    baseAppName 'the-app'
+                    usePrefix true
+                    useSuffix true
+                    prefix 'AVI'
+                    suffix 'dev'
+                }
                 appVersion '1.2.3'
                 file 'path/to/file.jar'
                 targetServerOrClusterName 'theServer'
@@ -265,7 +292,13 @@ class MuleDeployContextTest implements AppBuilding {
 
             cloudHubApplication {
                 environment 'DEV'
-                applicationName 'the-app'
+                applicationName {
+                    baseAppName 'the-app'
+                    usePrefix true
+                    useSuffix true
+                    prefix 'AVI'
+                    suffix 'dev'
+                }
                 appVersion '1.2.3'
                 workerSpecs {
                     muleVersion '4.2.2'
@@ -276,7 +309,6 @@ class MuleDeployContextTest implements AppBuilding {
                     clientId 'the_client_id'
                     clientSecret 'the_client_secret'
                 }
-                cloudHubAppPrefix 'AVI'
             }
         }
         closure.delegate = context
@@ -308,7 +340,13 @@ class MuleDeployContextTest implements AppBuilding {
 
             onPremApplication {
                 environment 'DEV'
-                applicationName 'the-app'
+                applicationName {
+                    baseAppName 'the-app'
+                    usePrefix true
+                    useSuffix true
+                    prefix 'AVI'
+                    suffix 'dev'
+                }
                 appVersion '1.2.3'
                 file 'path/to/file.jar'
                 targetServerOrClusterName 'theServer'
@@ -316,7 +354,13 @@ class MuleDeployContextTest implements AppBuilding {
 
             cloudHubV2Application {
                 environment 'DEV'
-                applicationName 'the-app'
+                applicationName {
+                    baseAppName 'the-app'
+                    usePrefix true
+                    useSuffix true
+                    prefix 'AVI'
+                    suffix 'dev'
+                }
                 appVersion '1.2.3'
                 workerSpecs {
                     muleVersion '4.2.2'
@@ -326,7 +370,6 @@ class MuleDeployContextTest implements AppBuilding {
                     clientId 'the_client_id'
                     clientSecret 'the_client_secret'
                 }
-                cloudHubAppPrefix 'AVI'
             }
         }
         closure.delegate = context
@@ -358,7 +401,13 @@ class MuleDeployContextTest implements AppBuilding {
 
             onPremApplication {
                 environment 'DEV'
-                applicationName 'the-app'
+                applicationName {
+                    baseAppName 'the-app'
+                    usePrefix true
+                    useSuffix true
+                    prefix 'AVI'
+                    suffix 'dev'
+                }
                 appVersion '1.2.3'
                 file 'path/to/file.jar'
                 targetServerOrClusterName 'theServer'
@@ -366,7 +415,13 @@ class MuleDeployContextTest implements AppBuilding {
 
             runtimeFabricApplication {
                 environment 'DEV'
-                applicationName 'the-app'
+                applicationName {
+                    baseAppName 'the-app'
+                    usePrefix true
+                    useSuffix true
+                    prefix 'AVI'
+                    suffix 'dev'
+                }
                 appVersion '1.2.3'
                 workerSpecs {
                     muleVersion '4.2.2'
@@ -376,7 +431,6 @@ class MuleDeployContextTest implements AppBuilding {
                     clientId 'the_client_id'
                     clientSecret 'the_client_secret'
                 }
-                cloudHubAppPrefix 'AVI'
             }
         }
         closure.delegate = context
@@ -423,7 +477,13 @@ class MuleDeployContextTest implements AppBuilding {
 
             onPremApplication {
                 environment 'DEV'
-                applicationName 'the-app'
+                applicationName {
+                    baseAppName 'the-app'
+                    usePrefix true
+                    useSuffix true
+                    prefix 'AVI'
+                    suffix 'dev'
+                }
                 appVersion '1.2.3'
                 file tempRequest.file.path
                 targetServerOrClusterName 'theServer'
@@ -465,7 +525,13 @@ class MuleDeployContextTest implements AppBuilding {
 
             onPremApplication {
                 environment 'DEV'
-                applicationName 'the-app'
+                applicationName {
+                    baseAppName 'the-app'
+                    usePrefix true
+                    useSuffix true
+                    prefix 'AVI'
+                    suffix 'dev'
+                }
                 appVersion '1.2.3'
                 file tempRequest.file.path
                 targetServerOrClusterName 'theServer'
@@ -504,7 +570,13 @@ class MuleDeployContextTest implements AppBuilding {
 
             onPremApplication {
                 environment 'DEV'
-                applicationName 'the-app'
+                applicationName {
+                    baseAppName 'the-app'
+                    usePrefix true
+                    useSuffix false
+                    prefix 'AVI'
+                    suffix 'dev'
+                }
                 appVersion '1.2.3'
                 file tempRequest.file.path
                 targetServerOrClusterName 'theServer'
@@ -540,7 +612,13 @@ class MuleDeployContextTest implements AppBuilding {
 
             onPremApplication {
                 environment 'DEV'
-                applicationName 'the-app'
+                applicationName {
+                    baseAppName 'the-app'
+                    usePrefix true
+                    useSuffix true
+                    prefix 'AVI'
+                    suffix 'dev'
+                }
                 appVersion '1.2.3'
                 file tempRequest.file.path
                 targetServerOrClusterName 'theServer'
@@ -578,7 +656,13 @@ class MuleDeployContextTest implements AppBuilding {
 
             cloudHubV2Application {
                 environment 'DEV'
-                applicationName 'the-app'
+                applicationName {
+                    baseAppName 'the-app'
+                    usePrefix true
+                    useSuffix true
+                    prefix 'AVI'
+                    suffix 'dev'
+                }
                 appVersion '1.2.3'
                 businessGroupId 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee'
                 workerSpecs {
@@ -590,7 +674,6 @@ class MuleDeployContextTest implements AppBuilding {
                     clientId 'the_client_id'
                     clientSecret 'the_client_secret'
                 }
-                cloudHubAppPrefix 'AVI'
             }
         }
         closure.delegate = context

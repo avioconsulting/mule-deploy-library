@@ -4,7 +4,7 @@ import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeployment
 
 class OnPremContext extends BaseContext {
     String environment, appVersion, file, targetServerOrClusterName
-    ApplicationNameContext applicationNameContext = new ApplicationNameContext()
+    ApplicationNameContext applicationName = new ApplicationNameContext()
     Map<String, String> appProperties = [:]
 
     OnPremDeploymentRequest createDeploymentRequest() {
@@ -12,7 +12,7 @@ class OnPremContext extends BaseContext {
         new OnPremDeploymentRequest(this.environment,
                                     this.targetServerOrClusterName,
                                     new File(this.file),
-                                    this.applicationNameContext.createApplicationName(),
+                                    this.applicationName.createApplicationName(),
                                     this.appVersion,
                                     this.appProperties)
     }
