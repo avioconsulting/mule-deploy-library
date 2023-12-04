@@ -1,12 +1,13 @@
 package com.avioconsulting.mule.deployment.internal
 
+import com.avioconsulting.mule.deployment.api.models.deployment.ApplicationName
 import com.avioconsulting.mule.deployment.api.models.deployment.FileBasedAppDeploymentRequest
 
 class TestFileBasedRequest extends FileBasedAppDeploymentRequest {
     private final File zipFile
 
     TestFileBasedRequest(File zipFile, String appName, String appVersion, String environment) {
-        super(zipFile, appName, appVersion, environment)
+        super(zipFile, new ApplicationName(appName,false,false,null,null), appVersion, environment)
         this.zipFile = zipFile
     }
 

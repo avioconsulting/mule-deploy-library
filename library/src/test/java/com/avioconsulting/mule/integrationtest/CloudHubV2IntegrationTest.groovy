@@ -8,6 +8,7 @@ import com.avioconsulting.mule.deployment.api.models.UpdateStrategy
 import com.avioconsulting.mule.deployment.api.models.VCoresSize
 import com.avioconsulting.mule.deployment.api.models.WorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.credentials.ConnectedAppCredential
+import com.avioconsulting.mule.deployment.api.models.deployment.ApplicationName
 import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubV2DeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
@@ -176,8 +177,7 @@ class CloudHubV2IntegrationTest {
                 null,
                 ANYPOINT_CLIENT_ID,
                 ANYPOINT_CLIENT_SECRET,
-                null,
-                APP_NAME,
+                new ApplicationName(APP_NAME, false, true, 'AVI', 'dev'),
                 APP_VERSION,
                 GROUP_ID,
                 null,
@@ -201,8 +201,7 @@ class CloudHubV2IntegrationTest {
                 null,
                 ANYPOINT_CLIENT_ID,
                 ANYPOINT_CLIENT_SECRET,
-                null,
-                APP_NAME,
+                new ApplicationName(APP_NAME, false, true, 'AVI', 'dev'),
                 APP_VERSION,
                 GROUP_ID,
                 null,
@@ -231,8 +230,7 @@ class CloudHubV2IntegrationTest {
                   null ,
                   ANYPOINT_CLIENT_ID,
                   ANYPOINT_CLIENT_SECRET,
-                null,
-                  APP_NAME,
+                  new ApplicationName(APP_NAME, false, true, 'AVI', 'dev'),
                   APP_VERSION,
                   GROUP_ID,
                 null,

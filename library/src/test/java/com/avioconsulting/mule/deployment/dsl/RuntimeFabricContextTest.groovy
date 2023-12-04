@@ -33,7 +33,13 @@ class RuntimeFabricContextTest implements MavenInvoke {
             }
             businessGroupId '123-456-789'
             appVersion '2.2.9'
-            applicationName 'new-app'
+            applicationName {
+                baseAppName 'the-app'
+                usePrefix true
+                useSuffix true
+                prefix 'AVI'
+                suffix 'dev'
+            }
             workerSpecs {
                 target 'target_name'
                 muleVersion '4.3.0'
@@ -49,8 +55,8 @@ class RuntimeFabricContextTest implements MavenInvoke {
         request.with {
             assertThat environment,
                        is(equalTo('DEV'))
-            assertThat request.appName,
-                       is(equalTo('new-app'))
+            assertThat applicationName.normalizedAppName,
+                       is(equalTo('avi-the-app-dev'))
             assertThat appVersion,
                        is(equalTo('2.2.9'))
             assertThat cryptoKey,
@@ -90,7 +96,6 @@ class RuntimeFabricContextTest implements MavenInvoke {
         def context = new RuntimeFabricContext()
         def closure = {
             appVersion '1.2.3'
-            applicationName 'the-app'
         }
         closure.delegate = context
 
@@ -118,7 +123,13 @@ class RuntimeFabricContextTest implements MavenInvoke {
         def context = new RuntimeFabricContext()
         def closure = {
             environment 'DEV'
-            applicationName 'the-app'
+            applicationName {
+                baseAppName 'the-app'
+                usePrefix false
+                useSuffix false
+                prefix 'AVI'
+                suffix 'dev'
+            }
             appVersion '2.2.9'
             cryptoKey 'theKey'
             autoDiscovery {
@@ -126,7 +137,6 @@ class RuntimeFabricContextTest implements MavenInvoke {
                 clientSecret 'the_client_secret'
             }
             businessGroupId '123-456-789'
-            cloudHubAppPrefix 'AVI'
             workerSpecs {
                 target 'target_name'
                 muleVersion '4.3.0'
@@ -152,7 +162,7 @@ class RuntimeFabricContextTest implements MavenInvoke {
         request.with {
             assertThat environment,
                     is(equalTo('DEV'))
-            assertThat request.appName,
+            assertThat applicationName.normalizedAppName,
                     is(equalTo('the-app'))
             assertThat appVersion,
                     is(equalTo('2.2.9'))
@@ -162,8 +172,6 @@ class RuntimeFabricContextTest implements MavenInvoke {
                     is(equalTo('the_client_id'))
             assertThat anypointClientSecret,
                     is(equalTo('the_client_secret'))
-            assertThat cloudHubAppPrefix,
-                    is(equalTo('AVI'))
             workerSpecRequest.with {
                 assertThat target,
                         is(equalTo('target_name'))
@@ -231,7 +239,6 @@ class RuntimeFabricContextTest implements MavenInvoke {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
             workerSpecs { target 'target_name'}
             workerSpecs { target 'target_name2'}
         }

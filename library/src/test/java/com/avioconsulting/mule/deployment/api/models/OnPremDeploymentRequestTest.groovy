@@ -1,7 +1,9 @@
 package com.avioconsulting.mule.deployment.api.models
 
 import com.avioconsulting.mule.MavenInvoke
+import com.avioconsulting.mule.deployment.api.models.deployment.ApplicationName
 import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeploymentRequest
+import org.hamcrest.MatcherAssert
 import org.junit.BeforeClass
 import org.junit.Test
 
@@ -25,11 +27,11 @@ class OnPremDeploymentRequestTest implements MavenInvoke {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                                                  'some-app-name',
+                                                  new ApplicationName('some-app-name',false,false,null,null),
                                                   '1.2.3')
 
         // assert
-        assertThat request.appName,
+        assertThat request.appName.baseAppName,
                    is(equalTo('some-app-name'))
         assertThat request.appVersion,
                    is(equalTo('1.2.3'))
@@ -42,11 +44,12 @@ class OnPremDeploymentRequestTest implements MavenInvoke {
         // act
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
-                                                  builtFile)
+                                                  builtFile,
+                                                  new ApplicationName('mule-deploy-lib-v4-test-app',false,false,null,null),)
 
         // assert
         request.with {
-            assertThat appName,
+            assertThat appName.baseAppName,
                        is(equalTo('mule-deploy-lib-v4-test-app'))
             assertThat appVersion,
                        is(equalTo('2.2.9'))
@@ -60,15 +63,10 @@ class OnPremDeploymentRequestTest implements MavenInvoke {
 
         // act
         def exception = shouldFail {
-            new OnPremDeploymentRequest('DEV',
-                                        'clustera',
-                                        file,
-                                        'some app name',
-                                        '1.2.3')
+            (new ApplicationName('some app name',false,false,null,null)).normalizedAppName
         }
 
         // assert
-        assertThat exception.message,
-                   is(equalTo("Runtime Manager does not like spaces in app names and you specified 'some app name'!"))
+        MatcherAssert.assertThat('fail', exception.message.contains("you should specify an non-empty baseAppName. It shouldn't contain spaces as well"))
     }
 }

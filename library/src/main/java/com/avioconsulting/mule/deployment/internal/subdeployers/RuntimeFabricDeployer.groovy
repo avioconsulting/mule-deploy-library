@@ -230,8 +230,9 @@ class RuntimeFabricDeployer extends BaseDeployer implements IRuntimeFabricDeploy
                                app.name,
                                app.status,
                                app.application.status,
-                               app.target.id)
+                               app.target.targetId)
         ]}
+
         def app = apps[appName]
         try {
             return app

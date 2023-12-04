@@ -27,10 +27,6 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
      */
     final String anypointClientSecret
     /**
-     * Your "DNS prefix" for Cloudhub app uniqueness, usually a 3 letter customer ID to ensure app uniqueness.
-     */
-    final String cloudHubAppPrefix
-    /**
      * Mule app property overrides (the stuff in the properties tab)
      */
     final Map<String, String> appProperties
@@ -75,13 +71,12 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
                                    String cryptoKey,
                                    String anypointClientId,
                                    String anypointClientSecret,
-                                   String cloudHubAppPrefix,
-                                   String appName,
+                                   ApplicationName applicationName,
                                    String appVersion,
                                    String groupId,
                                    Map<String, String> appProperties = [:],
                                    Map<String, String> otherCloudHubProperties = [:]) {
-        super(appName, appVersion, environment)
+        super(applicationName, appVersion, environment)
         this.groupId = groupId
         this.target = workerSpecRequest.target
         this.workerSpecRequest = workerSpecRequest
@@ -89,22 +84,15 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
         this.cryptoKey = cryptoKey
         this.anypointClientId = anypointClientId
         this.anypointClientSecret = anypointClientSecret
-        this.cloudHubAppPrefix = cloudHubAppPrefix
         this.appProperties = appProperties
         this.otherCloudHubProperties = otherCloudHubProperties
-        if (this.appName.contains(' ')) {
-            throw new Exception("Runtime Manager does not like spaces in app names and you specified '${this.appName}'!")
+
+        if(!applicationName.baseAppName){
+            applicationName.baseAppName = parsedPomProperties.artifactId
         }
-        def newAppName = cloudHubAppPrefix == null ? "${this.appName}-${environment}" : "${cloudHubAppPrefix}-${this.appName}-${environment}"
-        def appNameLowerCase = newAppName.toLowerCase()
-        if (appNameLowerCase != newAppName) {
-            newAppName = appNameLowerCase
-        }
-        if (newAppName.size() > MAX_SIZE_APPLICATION_NAME) {
-            throw new Exception("Maximum size of application name is ${MAX_SIZE_APPLICATION_NAME} and the provided name has ${newAppName.size()} characters")
-        }
-        normalizedAppName = newAppName
-        this.cloudhubAppProperties = new CloudhubAppProperties(this.appName,
+
+        normalizedAppName = applicationName.getNormalizedAppName()
+        this.cloudhubAppProperties = new CloudhubAppProperties(applicationName.baseAppName,
                                                                environment.toLowerCase(),
                                                                cryptoKey,
                                                                anypointClientId,
@@ -121,14 +109,14 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
                 application: [
                         ref: [
                                 groupId: groupId,
-                                artifactId : appName,
+                                artifactId : applicationName.baseAppName,
                                 version: appVersion,
                                 packaging: "jar"
                         ],
                         desiredState: "STARTED",
                         configuration: [
                                 "mule.agent.application.properties.service": [
-                                        applicationName: appName,
+                                        applicationName: applicationName.baseAppName,
                                         properties: props
                                 ]
                         ],

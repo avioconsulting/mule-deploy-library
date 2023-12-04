@@ -3,7 +3,8 @@ package com.avioconsulting.mule.deployment.dsl
 import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeploymentRequest
 
 class OnPremContext extends BaseContext {
-    String environment, applicationName, appVersion, file, targetServerOrClusterName
+    String environment, appVersion, file, targetServerOrClusterName
+    ApplicationNameContext applicationName = new ApplicationNameContext()
     Map<String, String> appProperties = [:]
 
     OnPremDeploymentRequest createDeploymentRequest() {
@@ -11,7 +12,7 @@ class OnPremContext extends BaseContext {
         new OnPremDeploymentRequest(this.environment,
                                     this.targetServerOrClusterName,
                                     new File(this.file),
-                                    this.applicationName,
+                                    this.applicationName.createApplicationName(),
                                     this.appVersion,
                                     this.appProperties)
     }

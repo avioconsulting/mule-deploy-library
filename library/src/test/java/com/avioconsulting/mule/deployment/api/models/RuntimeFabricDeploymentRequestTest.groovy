@@ -1,6 +1,7 @@
 package com.avioconsulting.mule.deployment.api.models
 
 import com.avioconsulting.mule.MavenInvoke
+import com.avioconsulting.mule.deployment.api.models.deployment.ApplicationName
 import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
 import org.hamcrest.MatcherAssert
 import org.junit.BeforeClass
@@ -26,16 +27,15 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'prefix',
-                                                    'new-app',
+                                                    new ApplicationName('new-app',true,false,'prefix',null),
                                                     '1.2.3',
                                                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
 
         request.with {
-            assertThat appName,
+            assertThat appName.baseAppName,
                        is(equalTo('new-app'))
             assertThat normalizedAppName,
-                       is(equalTo('prefix-new-app-dev'))
+                       is(equalTo('prefix-new-app'))
             assertThat appVersion,
                        is(equalTo('1.2.3'))
             assertThat groupId,
@@ -53,16 +53,15 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'prefix',
-                                                    'new-app',
+                                                    new ApplicationName('new-app',true,false,'prefix',null),
                                                     '2.2.9',
                                                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
 
         request.with {
-            assertThat appName,
+            assertThat appName.baseAppName,
                        is(equalTo('new-app'))
             assertThat normalizedAppName,
-                       is(equalTo('prefix-new-app-dev'))
+                       is(equalTo('prefix-new-app'))
             assertThat appVersion,
                        is(equalTo('2.2.9'))
             assertThat groupId,
@@ -70,7 +69,7 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
             assertThat target,
                     is(equalTo('us-west-2'))
             assertThat 'artifactId in the POM',
-                       appName,
+                       appName.baseAppName,
                        is(equalTo('new-app'))
             assertThat 'app.runtime in the POM',
                     workerSpecRequest.muleVersion,
@@ -87,14 +86,11 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                             'theKey',
                                             'theClientId',
                                             'theSecret',
-                                            'prefix',
-                                            'some app name',
+                                            new ApplicationName('some app name',true,false,'prefix','DEV'),
                                             '1.2.3',
                                             'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
         }
-
-        MatcherAssert.assertThat exception.message,
-                   is(equalTo("Runtime Manager does not like spaces in app names and you specified 'some app name'!"))
+        MatcherAssert.assertThat('fail', exception.message.contains("you should specify an non-empty baseAppName. It shouldn't contain spaces as well"))
     }
 
     @Test
@@ -105,8 +101,7 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    null,
-                                                    'new-app',
+                                                    new ApplicationName('new-app',false,true,null,'DEV'),
                                                     '2.2.9',
                                                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
 
@@ -186,8 +181,7 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                         'theKey',
                         'theClientId',
                         'theSecret',
-                        'prefix',
-                        'new-app',
+                        new ApplicationName('new-app',true,true,'prefix','DEV'),
                         '1.2.3',
                         'new-group-id')
 

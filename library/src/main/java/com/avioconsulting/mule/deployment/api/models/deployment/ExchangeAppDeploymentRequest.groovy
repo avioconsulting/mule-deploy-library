@@ -5,8 +5,8 @@ import com.avioconsulting.mule.deployment.internal.models.RamlFile
 
 abstract class ExchangeAppDeploymentRequest extends AppDeploymentRequest {
 
-    ExchangeAppDeploymentRequest(String appName, String appVersion, String environment) {
-        super(appName, appVersion, environment)
+    ExchangeAppDeploymentRequest(ApplicationName applicationName, String appVersion, String environment) {
+        super(applicationName, appVersion, environment)
     }
 
     @Override

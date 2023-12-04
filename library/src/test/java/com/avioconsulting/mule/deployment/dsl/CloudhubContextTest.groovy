@@ -31,7 +31,6 @@ class CloudhubContextTest implements MavenInvoke {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
         }
         closure.delegate = context
 
@@ -43,7 +42,7 @@ class CloudhubContextTest implements MavenInvoke {
         request.with {
             assertThat environment,
                        is(equalTo('DEV'))
-            assertThat request.appName,
+            assertThat request.appName.normalizedAppName,
                        is(equalTo('mule-deploy-lib-v4-test-app'))
             assertThat appVersion,
                        is(equalTo('2.2.9'))
@@ -71,8 +70,8 @@ class CloudhubContextTest implements MavenInvoke {
                        is(equalTo('the_client_id'))
             assertThat anypointClientSecret,
                        is(equalTo('the_client_secret'))
-            assertThat cloudHubAppPrefix,
-                       is(equalTo('AVI'))
+//            assertThat cloudHubAppPrefix,
+//                       is(equalTo('AVI'))
         }
     }
 
@@ -88,7 +87,7 @@ class CloudhubContextTest implements MavenInvoke {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
+            applicationName {}
         }
         closure.delegate = context
 
@@ -127,7 +126,6 @@ class CloudhubContextTest implements MavenInvoke {
         def context = new CloudhubContext()
         def closure = {
             environment 'DEV'
-            applicationName 'the-app'
             appVersion '1.2.3'
             workerSpecs {
                 muleVersion '4.2.2'
@@ -140,14 +138,20 @@ class CloudhubContextTest implements MavenInvoke {
                 staticIpEnabled true
                 objectStoreV2Enabled false
             }
+            applicationName {
+                baseAppName 'the-app'
+                usePrefix true
+                useSuffix false
+                prefix 'AVI'
+                suffix 'dev'
+            }
             analyticsAgentEnabled false
-            file 'path/to/file.jar'
+            file builtFile.absolutePath
             cryptoKey 'theKey'
             autoDiscovery {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
             // optional from here on out
             appProperties([
                     someProp: 'someValue'
@@ -166,8 +170,8 @@ class CloudhubContextTest implements MavenInvoke {
         request.with {
             assertThat environment,
                        is(equalTo('DEV'))
-            assertThat appName,
-                       is(equalTo('the-app'))
+            assertThat appName.normalizedAppName,
+                       is(equalTo('avi-the-app'))
             assertThat appVersion,
                        is(equalTo('1.2.3'))
             workerSpecRequest.with {
@@ -192,16 +196,15 @@ class CloudhubContextTest implements MavenInvoke {
             }
             assertThat analyticsAgentEnabled,
                        is(equalTo(false))
-            assertThat file,
-                       is(equalTo(new File('path/to/file.jar')))
+            assertThat file.name,
+                       is(equalTo('mule-deploy-lib-v4-test-app-2.2.9-mule-application.jar'))
             assertThat cryptoKey,
                        is(equalTo('theKey'))
             assertThat anypointClientId,
                        is(equalTo('the_client_id'))
             assertThat anypointClientSecret,
                        is(equalTo('the_client_secret'))
-            assertThat cloudHubAppPrefix,
-                       is(equalTo('AVI'))
+            //TODO validate app name
             assertThat appProperties,
                        is(equalTo([
                                someProp: 'someValue'
@@ -219,7 +222,6 @@ class CloudhubContextTest implements MavenInvoke {
         def context = new CloudhubContext()
         def closure = {
             environment 'DEV'
-            applicationName 'the-app'
             appVersion '1.2.3'
             workerSpecs {
                 muleVersion '4.2.2'
@@ -228,13 +230,12 @@ class CloudhubContextTest implements MavenInvoke {
                 workerCount 22
                 awsRegion AwsRegions().useast1
             }
-            file 'path/to/file.jar'
+            file builtFile.absolutePath
             cryptoKey 'theKey'
             autoDiscovery {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
         }
         closure.delegate = context
 
@@ -272,10 +273,10 @@ class CloudhubContextTest implements MavenInvoke {
             context.createDeploymentRequest()
         }
 
+        //TODO fix here
         // assert
         assertThat exception.message,
                    is(equalTo("""Your deployment request is not complete. The following errors exist:
-- cloudHubAppPrefix missing
 - cryptoKey missing
 - environment missing
 - file missing
@@ -290,7 +291,6 @@ class CloudhubContextTest implements MavenInvoke {
         def closure = {
             environment 'DEV'
             environment 'DEV'
-            applicationName 'the-app'
             appVersion '1.2.3'
             workerSpecs {
                 muleVersion '4.2.2'
@@ -321,7 +321,12 @@ class CloudhubContextTest implements MavenInvoke {
         def context = new CloudhubContext()
         def closure = {
             environment 'DEV'
-            applicationName 'the-app'
+            applicationName {
+                baseAppName 'the-app'
+                usePrefix true
+                useSuffix false
+                prefix 'AVI'
+            }
             appVersion '1.2.3'
             workerSpecs {
                 muleVersion '4.2.2'
@@ -335,7 +340,6 @@ class CloudhubContextTest implements MavenInvoke {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
         }
         closure.delegate = context
 

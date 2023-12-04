@@ -3,6 +3,7 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 import com.avioconsulting.mule.MavenInvoke
 import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.DryRunMode
+import com.avioconsulting.mule.deployment.api.models.deployment.ApplicationName
 import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubV2DeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.WorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.UpdateStrategy
@@ -92,8 +93,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
                 'theKey',
                 'theClientId',
                 'theSecret',
-                null,
-                'new-app',
+                new ApplicationName("new-app",false,true,null,ENV),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -162,8 +162,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
                 'theKey',
                 'theClientId',
                 'theSecret',
-                null,
-                'new-app',
+                new ApplicationName("new-app",false,false,null,null),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -231,8 +230,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
                 'theKey',
                 'theClientId',
                 'theSecret',
-                null,
-                APP_NAME,
+                new ApplicationName(APP_NAME,false,true,null,ENV),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -301,8 +299,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
                 'theKey',
                 'theClientId',
                 'theSecret',
-                null,
-                APP_NAME,
+                new ApplicationName(APP_NAME,false,true,null,ENV),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -345,8 +342,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
                 'theKey',
                 'theClientId',
                 'theSecret',
-                null,
-                APP_NAME,
+                new ApplicationName(APP_NAME,false,true,null,ENV),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -392,8 +388,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
                 'theKey',
                 'theClientId',
                 'theSecret',
-                null,
-                APP_NAME,
+                new ApplicationName(APP_NAME,false,true,null,ENV),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -439,8 +434,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
                 'theKey',
                 'theClientId',
                 'theSecret',
-                null,
-                APP_NAME,
+                new ApplicationName(APP_NAME,false,true,null,ENV),
                 APP_VERSION,
                 GROUP_ID)
 

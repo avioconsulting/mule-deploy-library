@@ -4,6 +4,7 @@ import com.avioconsulting.mule.MavenInvoke
 import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.DryRunMode
+import com.avioconsulting.mule.deployment.api.models.deployment.ApplicationName
 import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.UpdateStrategy
 import com.avioconsulting.mule.deployment.api.models.VCoresSize
@@ -106,8 +107,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 'theKey',
                 'theClientId',
                 'theSecret',
-                null,
-                'new-app',
+                new ApplicationName(APP_NAME,false,true,null,'dev'),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -175,8 +175,8 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 'theKey',
                 'theClientId',
                 'theSecret',
-                null,
-                'new-app',
+                new ApplicationName(APP_NAME,false,false,null,null),
+
                 APP_VERSION,
                 GROUP_ID)
 
@@ -244,8 +244,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 'theKey',
                 'theClientId',
                 'theSecret',
-                null,
-                APP_NAME,
+                new ApplicationName(APP_NAME,false,true,null,'dev'),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -314,8 +313,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 'theKey',
                 'theClientId',
                 'theSecret',
-                null,
-                APP_NAME,
+                new ApplicationName(APP_NAME,false,true,null,'dev'),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -358,8 +356,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 'theKey',
                 'theClientId',
                 'theSecret',
-                null,
-                APP_NAME,
+                new ApplicationName(APP_NAME,false,false,null,null),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -405,8 +402,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
-                APP_NAME,
+                new ApplicationName(APP_NAME,true,false,'client',null),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -452,8 +448,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 'theKey',
                 'theClientId',
                 'theSecret',
-                'client',
-                APP_NAME,
+                new ApplicationName(APP_NAME,true,false,'client',null),
                 APP_VERSION,
                 GROUP_ID)
 

@@ -12,18 +12,19 @@ abstract class AppDeploymentRequest {
      */
     protected String environment
     /**
+     * TODO change this
      * Actual name of your application WITHOUT any kind of customer/environment prefix or suffix. Spaces in the name are not allowed and will be rejected.
      * This parameter is optional. If you don't supply it, the <artifactId> from your app's POM will be used.
      */
-    protected String appName
+    protected ApplicationName applicationName
     /**
      * Version of the app you are deploying (e.g. <version> from the POM). This parameter is optional and if it's not supplied
      * then it will be derived from the <version> parameter in the project's POM based on the JAR/ZIP
      */
     protected String appVersion
 
-    AppDeploymentRequest(String appName, String appVersion, String environment) {
-        this.appName = appName
+    AppDeploymentRequest(ApplicationName applicationName, String appVersion, String environment) {
+        this.applicationName = applicationName
         this.appVersion = appVersion
         this.environment = environment
     }
@@ -37,8 +38,8 @@ abstract class AppDeploymentRequest {
         this.environment = environment
     }
 
-    protected void setAppName(String appName) {
-        this.appName = appName
+    protected void setAppName(ApplicationName appName) {
+        this.applicationName = appName
     }
 
     protected void setAppVersion(String appVersion) {
@@ -49,8 +50,8 @@ abstract class AppDeploymentRequest {
         return environment
     }
 
-    String getAppName() {
-        return appName
+    ApplicationName getAppName() {
+        return this.applicationName
     }
 
     String getAppVersion() {
