@@ -2,7 +2,6 @@ package com.avioconsulting.mule.deployment.api.models.deployment
 
 import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
-import scala.App
 
 abstract class AppDeploymentRequest {
 

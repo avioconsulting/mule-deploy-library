@@ -337,7 +337,7 @@ class CloudhubContextTest implements MavenInvoke {
             file 'path/to/file.jar'
             cryptoKey 'theKey'
             autoDiscovery {
-                clien4tId 'the_client_id'
+                clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
         }

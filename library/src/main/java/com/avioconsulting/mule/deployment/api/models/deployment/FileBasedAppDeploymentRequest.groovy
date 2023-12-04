@@ -30,8 +30,6 @@ abstract class FileBasedAppDeploymentRequest extends AppDeploymentRequest {
 
         this.file = file
 
-        // TODO look at this!!
-
         // Properties are not passed then extract the artifactId and version from the pom.xml
         if(!applicationName) {
             setAppName(new ApplicationName(this.parsedPomProperties.artifactId,false,false,null,null))

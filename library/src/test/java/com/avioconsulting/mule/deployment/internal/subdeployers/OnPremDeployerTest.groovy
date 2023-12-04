@@ -12,7 +12,6 @@ import io.vertx.core.MultiMap
 import io.vertx.core.http.HttpServerRequest
 import org.junit.Before
 import org.junit.Test
-import scala.App
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
