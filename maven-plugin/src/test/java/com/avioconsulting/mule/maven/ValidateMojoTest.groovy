@@ -63,7 +63,13 @@ muleDeploy {
     
     onPremApplication {
         environment 'DEV'
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+            prefix 'AVI'
+            suffix 'xxx'
+            usePrefix false
+            useSuffix false
+        }
         appVersion '1.2.3'
         file '${builtFile}'
         targetServerOrClusterName 'theServer'
@@ -85,11 +91,16 @@ muleDeploy {
         def dslText = """
 muleDeploy {
     version '1.0'
-    
+    d
     onPremApplication {
         environment 'DEV'
-        d
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+            prefix 'AVI'
+            suffix 'xxx'
+            usePrefix false
+            useSuffix false
+        }
         appVersion '1.2.3'
         file '${builtFile}'
         targetServerOrClusterName 'theServer'
@@ -132,7 +143,13 @@ muleDeploy {
     
     onPremApplication {
         environment params.env
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+            prefix 'AVI'
+            suffix 'xxx'
+            usePrefix false
+            useSuffix false
+        }
         appVersion versionsForEnvironments[params.env]
         file '${builtFile}'
         targetServerOrClusterName serverForEnvironments[params.env]
