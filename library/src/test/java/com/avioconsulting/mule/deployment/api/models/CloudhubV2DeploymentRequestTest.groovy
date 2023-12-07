@@ -82,8 +82,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    null,
-                                                    new ApplicationName('new-app',true,false,'prefix',null),
+                                                    new ApplicationName('new-app',false,false,null,null),
                                                     '2.2.9',
                                                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
 
@@ -91,7 +90,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
 
         assertThat appInfo,
                    is(equalTo([
-                           name: 'new-app-dev',
+                           name: 'new-app',
                            application: [
                                    ref: [
                                            groupId: 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee',
@@ -106,6 +105,14 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                                                    properties: [:]
                                            ]
                                    ],
+                                   integrations:[
+                                           services : [
+                                                   objectStoreV2: [
+                                                           enabled: false
+                                                   ]
+                                           ]
+                                   ],
+                                   objectStoreV2Enabled: false,
                                    "vCores": VCoresSize.vCore1GB.vCoresSize
                            ],
                            target: [
