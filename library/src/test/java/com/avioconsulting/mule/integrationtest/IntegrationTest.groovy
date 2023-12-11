@@ -31,7 +31,6 @@ class IntegrationTest implements MavenInvoke {
     private static final String ANYPOINT_CLIENT_ID = System.getProperty('anypoint.client.id')
     private static final String ANYPOINT_CLIENT_SECRET = System.getProperty('anypoint.client.secret')
     private static final String ON_PREM_SERVER_NAME = System.getProperty('mule4.onprem.server.name')
-    private static final String CLOUDHUB_APP_PREFIX = 'avio'
 
     public static final String AVIO_ENVIRONMENT_DEV = 'DEV'
     private CloudHubDeployer cloudHubDeployer
@@ -64,8 +63,7 @@ class IntegrationTest implements MavenInvoke {
                                    request.appName.normalizedAppName,
                                    'integration test app cleanup')
         println 'Waiting for app deletion to finish'
-        waitForAppDeletion(request.environment,
-                           appName,null)
+        waitForAppDeletion(cloudhubDeploymentRequest, request.environment, appName, null)
     }
 
     def deleteOnPremApp(OnPremDeploymentRequest request) {

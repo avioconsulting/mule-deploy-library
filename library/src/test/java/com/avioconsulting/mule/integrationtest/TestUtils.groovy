@@ -3,7 +3,6 @@ package com.avioconsulting.mule.integrationtest
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
 import com.avioconsulting.mule.deployment.internal.models.AppStatusPackage
 import com.avioconsulting.mule.deployment.internal.models.DeploymentItem
-import com.avioconsulting.mule.deployment.internal.subdeployers.BaseDeployer
 import com.avioconsulting.mule.deployment.internal.subdeployers.CloudHubDeployer
 import com.avioconsulting.mule.deployment.internal.subdeployers.CloudHubV2Deployer
 import org.apache.http.auth.AuthScope
@@ -59,10 +58,10 @@ class TestUtils {
         }
     }
 
-    static waitForAppDeletion(BaseDeployer deployer,
+    static waitForAppDeletion(def deployer,
                               String environment,
                               String appName,
-                              String groupId) {
+                              String groupId = null) {
         def tries = 0
         def deleted = false
         def failed = false
