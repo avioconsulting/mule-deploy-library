@@ -88,7 +88,7 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
         this.otherCloudHubProperties = otherCloudHubProperties
 
         if(!applicationName.baseAppName){
-            applicationName.baseAppName = parsedPomProperties.artifactId
+            throw new Exception("Property applicationName.baseAppName is required for CloudHub 2.0 and RTF applications");
         }
 
         normalizedAppName = applicationName.getNormalizedAppName()

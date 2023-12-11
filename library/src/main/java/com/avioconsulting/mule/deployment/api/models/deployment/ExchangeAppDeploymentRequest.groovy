@@ -18,5 +18,4 @@ abstract class ExchangeAppDeploymentRequest extends AppDeploymentRequest {
     List<Features> getUnsupportedFeatures() {
         return [Features.DesignCenterSync]
     }
-
 }
