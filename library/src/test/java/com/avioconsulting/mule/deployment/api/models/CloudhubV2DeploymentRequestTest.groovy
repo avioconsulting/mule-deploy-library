@@ -75,7 +75,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
      * getCloudhubAppInfo() method.
      */
     @Test
-    void getCloudhubAppInfo_only_required() {
+    void test_getCloudhubAppInfo_only_required() {
 
         def request = new CloudhubV2DeploymentRequest('DEV',
                                                     new WorkerSpecRequest('us-west-2', '4.3.0'),
@@ -234,6 +234,27 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
 
         MatcherAssert.assertThat exception.message,
                 is(equalTo("Maximum size of application name is 42 and the provided name has 53 characters"))
+    }
+
+    @Test
+    void test_deploymentRequest_appName_empty() {
+
+        def appName = null
+        def cloudHubPrefix = 'client'
+        def environment = 'DEV'
+        def exception = shouldFail {
+            new CloudhubV2DeploymentRequest(environment,
+                    new WorkerSpecRequest('us-west-2'),
+                    'theKey',
+                    'theClientId',
+                    'theSecret',
+                    new ApplicationName(appName, false, false, null, null),
+                    '4.2.2',
+                    'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
+        }
+
+        MatcherAssert.assertThat exception.message,
+                is(equalTo("Property applicationName.baseAppName is required for CloudHub 2.0 and RTF applications"))
     }
 
 }
