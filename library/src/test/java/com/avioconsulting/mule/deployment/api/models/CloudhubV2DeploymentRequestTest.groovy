@@ -75,6 +75,66 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
      * getCloudhubAppInfo() method.
      */
     @Test
+    void test_getCloudhubAppInfo_only_required() {
+
+        def request = new CloudhubV2DeploymentRequest('DEV',
+                                                    new WorkerSpecRequest('us-west-2', '4.3.0'),
+                                                    'theKey',
+                                                    'theClientId',
+                                                    'theSecret',
+                                                    new ApplicationName('new-app',false,false,null,null),
+                                                    '2.2.9',
+                                                    'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
+
+        def appInfo = request.getCloudhubAppInfo()
+
+        assertThat appInfo,
+                   is(equalTo([
+                           name: 'new-app',
+                           application: [
+                                   ref: [
+                                           groupId: 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee',
+                                           artifactId : 'new-app',
+                                           version: '2.2.9',
+                                           packaging: "jar"
+                                   ],
+                                   desiredState: "STARTED",
+                                   configuration: [
+                                           "mule.agent.application.properties.service": [
+                                                   applicationName: 'new-app',
+                                                   properties: [:]
+                                           ]
+                                   ],
+                                   integrations:[
+                                           services : [
+                                                   objectStoreV2: [
+                                                           enabled: false
+                                                   ]
+                                           ]
+                                   ],
+                                   objectStoreV2Enabled: false,
+                                   "vCores": VCoresSize.vCore1GB.vCoresSize
+                           ],
+                           target: [
+                                   targetId: null,
+                                   provider: "MC",
+                                   deploymentSettings: [
+                                           runtimeVersion: '4.3.0',
+                                           lastMileSecurity: false,
+                                           persistentObjectStore: false,
+                                           clustered: false,
+                                           updateStrategy: UpdateStrategy.rolling,
+                                           enforceDeployingReplicasAcrossNodes: false,
+                                           forwardSslSession: false,
+                                           disableAmLogForwarding: true,
+                                           generateDefaultPublicUrl: false
+                                   ],
+                                   replicas: 1
+                           ]
+                   ]))
+    }
+
+    @Test
     void test_deploymentRequest_getCloudhubAppInfo_ok() {
 
         def request = new CloudhubV2DeploymentRequest('DEV',
@@ -174,6 +234,27 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
 
         MatcherAssert.assertThat exception.message,
                 is(equalTo("Maximum size of application name is 42 and the provided name has 53 characters"))
+    }
+
+    @Test
+    void test_deploymentRequest_appName_empty() {
+
+        def appName = null
+        def cloudHubPrefix = 'client'
+        def environment = 'DEV'
+        def exception = shouldFail {
+            new CloudhubV2DeploymentRequest(environment,
+                    new WorkerSpecRequest('us-west-2'),
+                    'theKey',
+                    'theClientId',
+                    'theSecret',
+                    new ApplicationName(appName, false, false, null, null),
+                    '4.2.2',
+                    'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
+        }
+
+        MatcherAssert.assertThat exception.message,
+                is(equalTo("Property applicationName.baseAppName is required for CloudHub 2.0 and RTF applications"))
     }
 
 }
