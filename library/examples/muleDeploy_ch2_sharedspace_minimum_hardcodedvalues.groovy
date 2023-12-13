@@ -4,7 +4,9 @@ muleDeploy {
     }
     cloudHubV2Application {
         environment 'DEV'
-        applicationName 'hello-world-test'
+        applicationName {
+            baseAppName 'hello-world-test'
+        }
         appVersion '1.0.0-SNAPSHOT'
         workerSpecs {
             target 'US West (Oregon)'

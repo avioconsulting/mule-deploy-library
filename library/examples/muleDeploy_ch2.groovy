@@ -16,7 +16,9 @@ muleDeploy {
 
     cloudHubV2Application {
         environment params.env
-        applicationName 'hello-world-test'
+        applicationName {
+            baseAppName 'hello-world-test'
+        }
         appVersion '1.0.0-SNAPSHOT'
         cryptoKey params.cryptoKey
         autoDiscovery {

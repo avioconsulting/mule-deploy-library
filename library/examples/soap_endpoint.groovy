@@ -26,7 +26,9 @@ muleDeploy {
 
     cloudHubApplication {
         environment params.environment
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+        }
         appVersion '1.2.3'
         // mule version for workerSpecs will be derived from POM
         file 'something.jar'
