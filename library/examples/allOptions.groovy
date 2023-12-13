@@ -80,7 +80,13 @@ muleDeploy {
 
     onPremApplication {
         environment 'DEV'
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+            usePrefix true
+            useSuffix true
+            prefix params.env
+            suffix params.env
+        }
         appVersion '1.2.3'
         file 'path/to/file.jar'
         targetServerOrClusterName 'theServer'
@@ -88,7 +94,13 @@ muleDeploy {
 
     cloudHubApplication {
         environment 'DEV'
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+            usePrefix true
+            useSuffix true
+            prefix params.env
+            suffix params.env
+        }
         appVersion '1.2.3'
         workerSpecs {
             muleVersion '4.2.2'

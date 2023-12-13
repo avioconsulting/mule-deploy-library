@@ -16,7 +16,9 @@ muleDeploy {
 
     runtimeFabricApplication {
         environment params.env
-        applicationName 'hello-world-test'
+        applicationName {
+            baseAppName 'hello-world-test'
+        }
         appVersion '1.0.0-SNAPSHOT'
         cryptoKey params.cryptoKey
         autoDiscovery {
@@ -26,7 +28,9 @@ muleDeploy {
         cloudHubAppPrefix 'AVI'
 
         // Cloudhub v2 specific params
-        applicationName '${project.name}'
+        applicationName {
+            baseAppName '${project.name}'
+        }
 
         workerSpecs {
             muleVersion '4.4.0'

@@ -15,7 +15,9 @@ muleDeploy {
 
     cloudHubV2Application {
         environment params.env
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+        }
         // appVersion is also the version of artifact in Exchange for API Manager/Policies logic
         appVersion '1.0.0'
         cryptoKey params.cryptoKey

@@ -24,7 +24,9 @@ muleDeploy {
 
     cloudHubApplication {
         environment params.env
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+        }
         appVersion '1.0.0'
         workerSpecs {
             muleVersion params.env == 'DEV' ? '4.4.0' : '4.3.0'
