@@ -213,7 +213,6 @@ class RuntimeFabricContextTest implements MavenInvoke {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
             workerSpecs { target 'target_name'}
         }
         closure.delegate = context
