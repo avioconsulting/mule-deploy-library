@@ -212,14 +212,14 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
     /**
      * This case validates that the name of application to deploy is not larger that the maximum required of 42 characters.
      * however, this validation happens after build the final appName (normalizedAppName) like this: ${cloudhubAppprefix}-${appName}-${env} length should not larger than 42 characters.
-     * example: cloudhubPrefix=someprefix , appName=myVeryVeryVeryLargeApplicationName, env=prod -> someprefix-myVeryVeryLargeApplicationName-prod is larger than 42 characters, it's not a valid name
-     * ${cloudhubAppprefix} could be null so: myVeryVeryVeryLargeApplicationName-prod is a valid name
+     * example: ApplicationName{ baseName=myVeryVeryVeryLargeApplicationName, usePrefix=true, useSuffix=true, prefix=someprefix, suffix=prod -> someprefix-myVeryVeryLargeApplicationName-prod is larger than 42 characters, it's not a valid name
+     * ${usePrefix} could be false so: myVeryVeryVeryLargeApplicationName-prod is a valid name
      */
     @Test
     void test_deploymentRequest_appName_should_not_larger_than_required() {
 
         def appName = 'app-myVeryVeryVeryLargeApplicationName'
-        def cloudHubPrefix = 'client'
+        def prefix = 'client'
         def environment = 'DEV'
         def exception = shouldFail {
             new CloudhubV2DeploymentRequest(environment,
@@ -227,20 +227,19 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                     'theKey',
                     'theClientId',
                     'theSecret',
-                    new ApplicationName(appName,true,false,'cloudHubPrefix',null),
+                    new ApplicationName(appName,true,true, prefix, environment),
                     '4.2.2',
                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
         }
 
         MatcherAssert.assertThat exception.message,
-                is(equalTo("Maximum size of application name is 42 and the provided name has 53 characters"))
+                is(equalTo("Maximum size of application name is 42 and the provided name has 49 characters"))
     }
 
     @Test
     void test_deploymentRequest_appName_empty() {
 
         def appName = null
-        def cloudHubPrefix = 'client'
         def environment = 'DEV'
         def exception = shouldFail {
             new CloudhubV2DeploymentRequest(environment,

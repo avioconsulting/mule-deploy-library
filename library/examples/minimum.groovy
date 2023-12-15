@@ -33,6 +33,5 @@ muleDeploy {
             clientId params.autoDiscClientId
             clientSecret params.autoDiscClientSecret
         }
-        cloudHubAppPrefix 'AVI'
     }
 }
