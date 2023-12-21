@@ -2,19 +2,10 @@ muleDeploy {
     // version of the tool
     version '1.0'
 
-    policies {
-        clientEnforcementPolicyBasic {
-            // version is optional (will use version in this library by default)
-            version '1.2.1'
-            // can supply paths just like above if necessary
-        }
-    }
-
     cloudHubV2Application {
         environment params.env
-        applicationName 'hello-world-test'
         applicationName {
-            baseAppName 'the-app'
+            baseAppName 'hello-world-test'
         }
         appVersion '1.0.0-SNAPSHOT'
         cryptoKey params.cryptoKey

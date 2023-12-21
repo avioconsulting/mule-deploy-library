@@ -25,6 +25,7 @@ muleDeploy {
             clientId params.autoDiscClientId
             clientSecret params.autoDiscClientSecret
         }
+        businessGroupId 'the-group-id'
         workerSpecs {
             target 'Cloudhub-US-West-2'
             muleVersion '4.4.0'

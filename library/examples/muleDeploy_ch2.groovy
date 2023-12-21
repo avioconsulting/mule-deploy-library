@@ -25,7 +25,6 @@ muleDeploy {
             clientId params.autoDiscClientId
             clientSecret params.autoDiscClientSecret
         }
-        cloudHubAppPrefix 'AVI'
 
         // Cloudhub v2 specific params
         applicationName '${project.name}'

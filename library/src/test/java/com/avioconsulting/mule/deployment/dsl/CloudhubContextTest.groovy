@@ -70,8 +70,6 @@ class CloudhubContextTest implements MavenInvoke {
                        is(equalTo('the_client_id'))
             assertThat anypointClientSecret,
                        is(equalTo('the_client_secret'))
-//            assertThat cloudHubAppPrefix,
-//                       is(equalTo('AVI'))
         }
     }
 
@@ -301,7 +299,6 @@ class CloudhubContextTest implements MavenInvoke {
                 clientId 'the_client_id'
                 clientSecret 'the_client_secret'
             }
-            cloudHubAppPrefix 'AVI'
         }
         closure.delegate = context
 

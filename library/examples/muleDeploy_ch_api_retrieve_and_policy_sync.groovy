@@ -50,6 +50,5 @@ muleDeploy {
             clientId 'the_client_id'
             clientSecret 'the_client_secret'
         }
-        cloudHubAppPrefix 'AVI'
     }
 }
