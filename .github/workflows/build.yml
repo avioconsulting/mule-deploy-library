@@ -44,7 +44,7 @@ jobs:
         run: echo "Version ${{ steps.set-version.outputs.version }}"
 
       - name: Set test suite
-        if: ${{ github.ref != 'refs/heads/chore/**' }}
+        if: ${{ github.ref != 'refs/heads/chore/gh-action-unit-test-suite' }}
         run: echo "GITHUB_TEST_SUITE=UnitTestSuite" >> $GITHUB_ENV
 
       - name: Compile
