@@ -3,9 +3,9 @@ package com.avioconsulting.mule.maven
 import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.ArtifactHandler
 import org.apache.maven.project.MavenProject
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
@@ -14,12 +14,12 @@ import static org.hamcrest.Matchers.*
 class ValidateMojoTest implements MavenInvoke {
     def logger = new TestLogger()
 
-    @BeforeClass
+    @BeforeAll
     static void setupApp() {
         buildApp()
     }
 
-    @Before
+    @BeforeEach
     void cleanup() {
         logger.errors.clear()
     }

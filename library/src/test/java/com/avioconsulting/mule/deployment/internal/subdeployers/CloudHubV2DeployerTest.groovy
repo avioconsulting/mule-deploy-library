@@ -11,8 +11,8 @@ import com.avioconsulting.mule.deployment.api.models.VCoresSize
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
 import io.vertx.core.http.HttpServerRequest
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
@@ -24,7 +24,7 @@ import static org.hamcrest.Matchers.is
 class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenInvoke {
     private CloudHubV2Deployer deployer
 
-    @Before
+    @BeforeEach
     void clean() {
         statusCheckCount = 0
         maxTries = 10

@@ -11,8 +11,8 @@ import com.avioconsulting.mule.deployment.api.models.deployment.FileBasedAppDepl
 import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import org.apache.commons.io.FileUtils
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import picocli.CommandLine
 
 import static groovy.test.GroovyAssert.shouldFail
@@ -20,7 +20,8 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
 class DeployerCommandLineTest implements MavenInvoke {
-    @BeforeClass
+
+    @BeforeAll
     static void setupApp() {
         buildApp()
     }

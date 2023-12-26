@@ -13,8 +13,8 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
 import io.vertx.core.http.HttpServerRequest
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
@@ -38,7 +38,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
     protected final String APP_VERSION = '1.2.3'
     protected final String GROUP_ID = 'the-org-id'
 
-    @Before
+    @BeforeEach
     void clean() {
         statusCheckCount = 0
         maxTries = 10

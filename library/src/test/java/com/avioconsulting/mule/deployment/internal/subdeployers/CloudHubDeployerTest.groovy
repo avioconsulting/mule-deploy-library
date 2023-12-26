@@ -4,10 +4,10 @@ import com.avioconsulting.mule.deployment.BaseTest
 import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.AwsRegions
-import com.avioconsulting.mule.deployment.api.models.deployment.ApplicationName
-import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.WorkerTypes
+import com.avioconsulting.mule.deployment.api.models.deployment.ApplicationName
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
 import com.avioconsulting.mule.deployment.internal.models.AppStatusPackage
 import com.avioconsulting.mule.deployment.internal.models.DeploymentUpdateStatus
@@ -16,8 +16,8 @@ import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
@@ -29,7 +29,7 @@ class CloudHubDeployerTest extends BaseTest {
     private int statusCheckCount
     private int maxTries
 
-    @Before
+    @BeforeEach
     void clean() {
         statusCheckCount = 0
         maxTries = 10

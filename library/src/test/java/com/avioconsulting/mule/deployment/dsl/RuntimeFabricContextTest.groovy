@@ -4,8 +4,8 @@ import com.avioconsulting.mule.MavenInvoke
 import com.avioconsulting.mule.deployment.api.models.UpdateStrategy
 import com.avioconsulting.mule.deployment.api.models.VCoresSize
 import org.hamcrest.MatcherAssert
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
@@ -15,7 +15,8 @@ import static org.hamcrest.Matchers.is
 // optimizing refs would prevent us from testing DSL resolution
 @SuppressWarnings(['GroovyAssignabilityCheck'])
 class RuntimeFabricContextTest implements MavenInvoke {
-    @BeforeClass
+
+    @BeforeAll
     static void setup() {
         buildApp()
     }

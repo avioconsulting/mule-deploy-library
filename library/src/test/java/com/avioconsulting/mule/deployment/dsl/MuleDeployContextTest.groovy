@@ -6,8 +6,8 @@ import com.avioconsulting.mule.deployment.api.models.Features
 import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.AppBuilding
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
@@ -18,7 +18,7 @@ class MuleDeployContextTest implements AppBuilding {
     private MuleDeployContext context
     private Map params
 
-    @Before
+    @BeforeEach
     void setup() {
         this.params = [:]
         context = new MuleDeployContext(this.params)

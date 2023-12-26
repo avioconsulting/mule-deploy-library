@@ -3,7 +3,7 @@ package com.avioconsulting.mule.deployment.api.models
 import com.avioconsulting.mule.deployment.internal.AppBuilding
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import org.apache.commons.io.FileUtils
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo

@@ -1,8 +1,8 @@
 package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.MavenInvoke
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
@@ -11,7 +11,8 @@ import static org.hamcrest.Matchers.is
 
 @SuppressWarnings(["UnnecessaryQualifiedReference", "GroovyAssignabilityCheck"])
 class OnPremContextTest implements MavenInvoke {
-    @BeforeClass
+
+    @BeforeAll
     static void setup() {
         buildApp()
     }

@@ -3,7 +3,6 @@ package com.avioconsulting.mule.integrationtest
 import com.avioconsulting.mule.deployment.TestConsoleLogger
 import com.avioconsulting.mule.deployment.api.Deployer
 import com.avioconsulting.mule.deployment.api.DryRunMode
-import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.api.models.UpdateStrategy
 import com.avioconsulting.mule.deployment.api.models.VCoresSize
 import com.avioconsulting.mule.deployment.api.models.WorkerSpecRequest
@@ -15,10 +14,9 @@ import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.subdeployers.CloudHubV2Deployer
 import org.apache.groovy.json.internal.LazyMap
 import org.apache.http.client.methods.HttpGet
-import org.junit.After
-import org.junit.BeforeClass
-import org.junit.Ignore
-import org.junit.Test
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 
 import static com.avioconsulting.mule.integrationtest.TestUtils.waitForAppDeletion
 import static org.hamcrest.MatcherAssert.assertThat
@@ -49,7 +47,7 @@ class CloudHubV2IntegrationTest {
     public static final String MULE_VERSION = "4.4.0"
     public static final String ENV = "DEV"
 
-    @BeforeClass
+    @BeforeAll
     static void setup() {
 
         checkCredentialsComeFromArgs()
@@ -61,7 +59,7 @@ class CloudHubV2IntegrationTest {
 
     }
 
-    @After
+    @AfterEach
     void afterEachTestInvocation() {
         deleteApp(GROUP_ID,environmentLocator.getEnvironmentId(ENV,GROUP_ID),NORMALIZED_APP_NAME)
     }
