@@ -10,8 +10,8 @@ import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
 import io.vertx.core.http.HttpMethod
 import io.vertx.core.http.HttpServerRequest
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
@@ -21,7 +21,7 @@ import static org.junit.Assert.assertEquals
 class DesignCenterDeployerTest extends BaseTest implements AppBuilding {
     private DesignCenterDeployer deployer
 
-    @Before
+    @BeforeEach
     void clean() {
         setupDeployer(DryRunMode.Run)
     }

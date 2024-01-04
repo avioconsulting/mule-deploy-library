@@ -15,8 +15,8 @@ import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import com.avioconsulting.mule.deployment.internal.subdeployers.*
 import groovy.transform.Canonical
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
@@ -52,7 +52,7 @@ class DeployerTest {
         List<Policy> desiredPolicies
     }
 
-    @Before
+    @BeforeEach
     void cleanup() {
         deployedChApps = []
         deployedChV2Apps = []

@@ -1,7 +1,7 @@
 package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.deployment.internal.AppBuilding
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat

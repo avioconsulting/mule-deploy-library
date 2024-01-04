@@ -4,8 +4,8 @@ import com.avioconsulting.mule.MavenInvoke
 import com.avioconsulting.mule.deployment.api.models.deployment.ApplicationName
 import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
 import org.hamcrest.MatcherAssert
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
@@ -13,7 +13,8 @@ import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
 class CloudhubDeploymentRequestTest implements MavenInvoke {
-    @BeforeClass
+
+    @BeforeAll
     static void setup() {
         buildApp()
     }

@@ -9,9 +9,9 @@ import io.vertx.core.Handler
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpServer
 import io.vertx.core.http.HttpServerRequest
-import org.junit.After
-import org.junit.Before
 import org.junit.Rule
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.rules.TestRule
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
@@ -38,7 +38,7 @@ class BaseTest {
         }
     }
 
-    @Before
+    @BeforeEach
     void startServer() {
         httpServer = createServer()
         closure = null
@@ -57,7 +57,7 @@ class BaseTest {
                                                     new TestConsoleLogger())
     }
 
-    @After
+    @AfterEach
     void stopServer() {
         try {
             if (clientWrapper) {

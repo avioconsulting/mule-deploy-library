@@ -1,41 +1,32 @@
 package com.avioconsulting.mule.deployment.internal.models
 
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
+import java.util.stream.Stream
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
-
-@RunWith(Parameterized)
 class CloudhubAppPropertiesTest {
-    private final String expectedLayer
-    private final String appName
 
-    @Parameterized.Parameters(name = "{0}")
-    static Collection getData() {
-        [
-                ['Experience', 'exp-stuff'],
-                ['Process', 'prc-stuff'],
-                ['System', 'sys-stuff'],
-                [null, 'unknownapp']
-        ].collect { it.toArray(new Object[0]) }
+    private static Stream<Arguments> getData() {
+        Stream.of(
+                Arguments.of('Experience', 'exp-stuff'),
+                Arguments.of('Process', 'prc-stuff'),
+                Arguments.of('System', 'sys-stuff'),
+                Arguments.of(null, 'unknownapp')
+        )
     }
 
-    CloudhubAppPropertiesTest(String expectedLayer,
-                              String appName) {
-        this.appName = appName
-        this.expectedLayer = expectedLayer
-    }
-
-    @Test
-    void layer_is_correct() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getData")
+    void layer_is_correct(String expectedLayer, String appName) {
         // arrange
 
         // act
-        def props = new CloudhubAppProperties(this.appName,
+        def props = new CloudhubAppProperties(appName,
                                               'dev',
                                               'abc',
                                               'the_id',
@@ -43,6 +34,6 @@ class CloudhubAppPropertiesTest {
 
         // assert
         assertThat props.apiVisualizerLayer,
-                   is(equalTo(this.expectedLayer))
+                   is(equalTo(expectedLayer))
     }
 }

@@ -1,13 +1,13 @@
 package com.avioconsulting.mule.deployment.api.models.policies
 
-
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
 class AzureAdJwtPolicyTest {
+
     @Test
     void standard() {
         // arrange + act
