@@ -1,7 +1,6 @@
 muleDeploy {
     cloudHubV2Application {
         environment params.env
-        applicationName
         applicationName {
             baseAppName 'the-app'
         }
