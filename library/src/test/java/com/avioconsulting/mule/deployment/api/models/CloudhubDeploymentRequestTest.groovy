@@ -109,7 +109,7 @@ class CloudhubDeploymentRequestTest implements MavenInvoke {
             (new ApplicationName('some app name',true,false,'client',null)).normalizedAppName
         }
         // assert
-        MatcherAssert.assertThat('fail', exception.message.contains("you should specify an non-empty baseAppName. It shouldn't contain spaces as well"))
+        MatcherAssert.assertThat('fail', exception.message.contains("name must be alphanumeric and can include dash"))
     }
 
     @Test

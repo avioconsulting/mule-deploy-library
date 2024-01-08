@@ -68,6 +68,6 @@ class OnPremDeploymentRequestTest implements MavenInvoke {
         }
 
         // assert
-        MatcherAssert.assertThat('fail', exception.message.contains("you should specify an non-empty baseAppName. It shouldn't contain spaces as well"))
+        MatcherAssert.assertThat('fail', exception.message.contains("name must be alphanumeric and can include dash"))
     }
 }
