@@ -44,8 +44,9 @@ class ApplicationName {
 
     }
 
-    private boolean validName(String name) {
-        return name != null && !name.isBlank() && name ==~ /[a-zA-Z0-9-]*/
+    private void validateName(String name, String kind) {
+        boolean valid = (name != null && !name.isBlank() && name ==~ /^[^-][a-zA-Z0-9-]*[^-]$/)
+        assert valid : kind ++ " must be alphanumeric with dashes allowed within"
     }
 
     private void runNameLengthGuard(String normalizedAppName){
