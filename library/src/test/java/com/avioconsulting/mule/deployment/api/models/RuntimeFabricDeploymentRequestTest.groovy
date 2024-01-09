@@ -91,7 +91,7 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                             '1.2.3',
                                             'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
         }
-        MatcherAssert.assertThat('fail', exception.message.contains("name must be alphanumeric and can include dash"))
+        MatcherAssert.assertThat('fail', exception.message.contains("Name must be alphanumeric with dashes allowed within"))
     }
 
     @Test

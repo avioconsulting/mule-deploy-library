@@ -27,7 +27,31 @@ class ApplicationNameTest {
             (new ApplicationName('avio consulting', true, true, 'app-prefix', 'app-suffix')).normalizedAppName
         }
         // assert
-        MatcherAssert.assertThat('fail', exception.message.contains("name must be alphanumeric and can include dash"))
+        MatcherAssert.assertThat('fail', exception.message.contains("Name must be alphanumeric with dashes allowed within"))
+    }
+
+    @Test
+    void name_starting_with_dash() {
+        // arrange
+
+        // act
+        def exception = shouldFail {
+            (new ApplicationName('-avio-consulting', true, true, 'app-prefix', 'app-suffix')).normalizedAppName
+        }
+        // assert
+        MatcherAssert.assertThat('fail', exception.message.contains("Name must be alphanumeric with dashes allowed within"))
+    }
+
+    @Test
+    void name_ending_with_dash() {
+        // arrange
+
+        // act
+        def exception = shouldFail {
+            (new ApplicationName('avio-consulting-', true, true, 'app-prefix', 'app-suffix')).normalizedAppName
+        }
+        // assert
+        MatcherAssert.assertThat('fail', exception.message.contains("Name must be alphanumeric with dashes allowed within"))
     }
 
     @Test
@@ -39,7 +63,7 @@ class ApplicationNameTest {
             (new ApplicationName('avio-consulting', true, true, 'app@prefix', 'app-suffix')).normalizedAppName
         }
         // assert
-        MatcherAssert.assertThat('fail', exception.message.contains("as you going to use a prefix, the prefix must be alphanumeric and can include dash"))
+        MatcherAssert.assertThat('fail', exception.message.contains("Prefix must be alphanumeric with dashes allowed within"))
     }
 
     @Test
@@ -51,7 +75,7 @@ class ApplicationNameTest {
             (new ApplicationName('avio-consulting', true, true, 'app-prefix', 'app$suffix')).normalizedAppName
         }
         // assert
-        MatcherAssert.assertThat('fail', exception.message.contains("as you going to use a suffix, the suffix must be alphanumeric and can include dash"))
+        MatcherAssert.assertThat('fail', exception.message.contains("Suffix must be alphanumeric with dashes allowed within"))
     }
 
 }

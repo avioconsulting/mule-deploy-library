@@ -68,6 +68,6 @@ class OnPremDeploymentRequestTest implements MavenInvoke {
         }
 
         // assert
-        MatcherAssert.assertThat('fail', exception.message.contains("name must be alphanumeric and can include dash"))
+        MatcherAssert.assertThat('fail', exception.message.contains("Name must be alphanumeric with dashes allowed within"))
     }
 }
