@@ -38,10 +38,15 @@ class ApplicationName {
     }
 
     private void runGuards(){
-        assert (baseAppName != null && !baseAppName.isBlank() && !baseAppName.contains(" ")) : "you should specify an non-empty baseAppName. It shouldn't contain spaces as well"
-        if (usePrefix == true) assert (prefix != null && !prefix.isBlank() && !prefix.contains(" "))  : "as you going to use a prefix, you should specify a non-empty one. Prefix should not contain spaces"
-        if (useSuffix == true) assert (suffix != null && !suffix.isBlank() && !suffix.contains(" "))  : "as you going to use a suffix, you should specify a non-empty one. Prefix should not contain spaces"
+        validateName(baseAppName, "Name")
+        if (usePrefix == true) validateName(prefix, "Prefix")
+        if (useSuffix == true) validateName(suffix, "Suffix")
 
+    }
+
+    private void validateName(String name, String kind) {
+        boolean valid = (name != null && !name.isBlank() && name ==~ /^[^-][a-zA-Z0-9-]*[^-]$/)
+        assert valid : kind + " must be alphanumeric with dashes allowed within"
     }
 
     private void runNameLengthGuard(String normalizedAppName){
