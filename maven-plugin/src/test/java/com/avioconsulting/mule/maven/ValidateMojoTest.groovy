@@ -67,8 +67,6 @@ muleDeploy {
             baseAppName 'the-app'
             prefix 'AVI'
             suffix 'xxx'
-            usePrefix false
-            useSuffix false
         }
         appVersion '1.2.3'
         file '${builtFile}'
@@ -98,8 +96,6 @@ muleDeploy {
             baseAppName 'the-app'
             prefix 'AVI'
             suffix 'xxx'
-            usePrefix false
-            useSuffix false
         }
         appVersion '1.2.3'
         file '${builtFile}'
@@ -147,8 +143,6 @@ muleDeploy {
             baseAppName 'the-app'
             prefix 'AVI'
             suffix 'xxx'
-            usePrefix false
-            useSuffix false
         }
         appVersion versionsForEnvironments[params.env]
         file '${builtFile}'

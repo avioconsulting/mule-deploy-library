@@ -186,7 +186,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3',)
         def apiSpec = new ApiSpecification('Hello API',
                                            simpleRamlFiles)
@@ -216,7 +216,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app-mule3',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app-mule3', 'client', 'DEV'),
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
                                            simpleRamlFiles,
@@ -297,7 +297,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app-mule4',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app-mule4', 'client', 'DEV'),
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
                                            simpleRamlFiles,
@@ -334,7 +334,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
                                            simpleRamlFiles)
@@ -360,7 +360,7 @@ class DeployerTest {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                                                    new ApplicationName('new-app-mule3',false,false,null,null),
+                                                    new ApplicationName('new-app-mule3', null, null),
                                                   '1.2.3')
 
         // act
@@ -391,7 +391,7 @@ class DeployerTest {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                                                  new ApplicationName('new-app-mule4',true,true,'client','DEV'),
+                                                  new ApplicationName('new-app-mule4', 'client', 'DEV'),
                                                   '1.2.3')
 
         // act
@@ -427,7 +427,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
 
         // act
@@ -462,7 +462,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
                                            simpleRamlFiles)
@@ -498,7 +498,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
                                            simpleRamlFiles)
@@ -534,7 +534,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello SOAP API',
                                            'v1')
@@ -568,7 +568,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app-mule4',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app-mule4', 'client', 'DEV'),
                                                     '1.2.3')
         def apiSpec1 = new ApiSpecification('Hello API v1',
                                             simpleRamlFiles)

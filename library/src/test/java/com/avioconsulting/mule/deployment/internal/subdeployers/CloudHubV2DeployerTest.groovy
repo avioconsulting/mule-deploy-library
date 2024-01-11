@@ -93,7 +93,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
                 'theKey',
                 'theClientId',
                 'theSecret',
-                new ApplicationName("new-app",false,true,null,ENV),
+                new ApplicationName("new-app", null, ENV),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -162,7 +162,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
                 'theKey',
                 'theClientId',
                 'theSecret',
-                new ApplicationName("new-app",false,false,null,null),
+                new ApplicationName("new-app", null, null),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -230,7 +230,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
                 'theKey',
                 'theClientId',
                 'theSecret',
-                new ApplicationName(APP_NAME,false,true,null,ENV),
+                new ApplicationName(APP_NAME, null, ENV),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -299,7 +299,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
                 'theKey',
                 'theClientId',
                 'theSecret',
-                new ApplicationName(APP_NAME,false,true,null,ENV),
+                new ApplicationName(APP_NAME, null, ENV),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -342,7 +342,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
                 'theKey',
                 'theClientId',
                 'theSecret',
-                new ApplicationName(APP_NAME,false,true,null,ENV),
+                new ApplicationName(APP_NAME, null, ENV),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -388,7 +388,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
                 'theKey',
                 'theClientId',
                 'theSecret',
-                new ApplicationName(APP_NAME,false,true,null,ENV),
+                new ApplicationName(APP_NAME, null, ENV),
                 APP_VERSION,
                 GROUP_ID)
 
@@ -434,7 +434,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
                 'theKey',
                 'theClientId',
                 'theSecret',
-                new ApplicationName(APP_NAME,false,true,null,ENV),
+                new ApplicationName(APP_NAME, null, ENV),
                 APP_VERSION,
                 GROUP_ID)
 

@@ -28,7 +28,7 @@ class OnPremDeploymentRequestTest implements MavenInvoke {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                                                  new ApplicationName('some-app-name',false,false,null,null),
+                                                  new ApplicationName('some-app-name', null, null),
                                                   '1.2.3')
 
         // assert
@@ -46,7 +46,7 @@ class OnPremDeploymentRequestTest implements MavenInvoke {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   builtFile,
-                                                  new ApplicationName('mule-deploy-lib-v4-test-app',false,false,null,null),)
+                                                  new ApplicationName('mule-deploy-lib-v4-test-app', null, null),)
 
         // assert
         request.with {
@@ -64,7 +64,7 @@ class OnPremDeploymentRequestTest implements MavenInvoke {
 
         // act
         def exception = shouldFail {
-            (new ApplicationName('some app name',false,false,null,null)).normalizedAppName
+            (new ApplicationName('some app name', null, null)).normalizedAppName
         }
 
         // assert

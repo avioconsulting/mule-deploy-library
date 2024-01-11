@@ -138,8 +138,6 @@ class CloudhubContextTest implements MavenInvoke {
             }
             applicationName {
                 baseAppName 'the-app'
-                usePrefix true
-                useSuffix false
                 prefix 'AVI'
                 suffix 'dev'
             }
@@ -169,7 +167,7 @@ class CloudhubContextTest implements MavenInvoke {
             assertThat environment,
                        is(equalTo('DEV'))
             assertThat appName.normalizedAppName,
-                       is(equalTo('avi-the-app'))
+                       is(equalTo('avi-the-app-dev'))
             assertThat appVersion,
                        is(equalTo('1.2.3'))
             workerSpecRequest.with {
@@ -320,8 +318,6 @@ class CloudhubContextTest implements MavenInvoke {
             environment 'DEV'
             applicationName {
                 baseAppName 'the-app'
-                usePrefix true
-                useSuffix false
                 prefix 'AVI'
             }
             appVersion '1.2.3'

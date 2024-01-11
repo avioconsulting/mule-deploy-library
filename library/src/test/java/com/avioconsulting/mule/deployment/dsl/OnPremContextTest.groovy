@@ -27,8 +27,6 @@ class OnPremContextTest implements MavenInvoke {
             targetServerOrClusterName 'server1'
             applicationName {
                 baseAppName 'the-app'
-                usePrefix true
-                useSuffix true
                 prefix 'AVI'
                 suffix 'dev'
             }
@@ -62,8 +60,6 @@ class OnPremContextTest implements MavenInvoke {
             environment 'DEV'
             applicationName {
                 baseAppName 'the-app'
-                usePrefix true
-                useSuffix false
                 prefix 'AVI'
                 suffix 'dev'
             }
@@ -83,7 +79,7 @@ class OnPremContextTest implements MavenInvoke {
             assertThat environment,
                        is(equalTo('DEV'))
             assertThat applicationName.normalizedAppName,
-                       is(equalTo('avi-the-app'))
+                       is(equalTo('avi-the-app-dev'))
             assertThat appVersion,
                        is(equalTo('1.2.3'))
             assertThat file,

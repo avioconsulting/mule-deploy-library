@@ -113,7 +113,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('sys-new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('sys-new-app', 'client', 'DEV'),
                                                     '1.2.3')
         request.setAutoDiscoveryId('the.auto.disc.prop',
                                    '1234')
@@ -220,7 +220,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
 
         // act
@@ -305,7 +305,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
 
         // act
@@ -353,7 +353,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
 
         // act
@@ -399,7 +399,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
 
         // act
@@ -447,7 +447,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
 
         // act
@@ -510,7 +510,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
 
         // act
@@ -573,7 +573,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
 
         // act
@@ -639,7 +639,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
 
         // act
@@ -736,7 +736,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                         '1.2.3')
 
         // act
@@ -784,7 +784,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
 
         // act
@@ -842,7 +842,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
 
         // act
@@ -888,7 +888,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
 
         // act
@@ -942,7 +942,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
 
         // act
@@ -995,7 +995,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,true,'client','DEV'),
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3',)
         // act
         deployer.deploy(request)
@@ -1090,7 +1090,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,false,'client',null),
+                                                    new ApplicationName('new-app', 'client', null),
                                                     '1.2.3')
 
         // act
@@ -1115,7 +1115,7 @@ class CloudHubDeployerTest extends BaseTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,false,'client',null),
+                                                    new ApplicationName('new-app', 'client', null),
                                                     '1.2.3')
 
         // act

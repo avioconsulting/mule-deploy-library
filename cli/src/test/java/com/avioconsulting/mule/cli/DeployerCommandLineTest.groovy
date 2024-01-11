@@ -114,8 +114,6 @@ muleDeploy {
             baseAppName 'the-app'
             prefix 'AVI'
             suffix 'xxx'
-            usePrefix false
-            useSuffix false
         }
         appVersion '1.2.3'
         file '${builtFile}'
@@ -178,8 +176,6 @@ muleDeploy {
             baseAppName 'the-app'
             prefix 'AVI'
             suffix 'xxx'
-            usePrefix false
-            useSuffix false
         }
         appVersion '1.2.3'
         file '${builtFile}'
@@ -238,8 +234,6 @@ muleDeploy {
             baseAppName 'the-app'
             prefix 'AVI'
             suffix 'xxx'
-            usePrefix false
-            useSuffix false
         }
         appVersion '1.2.3'
         file '${builtFile}'
@@ -292,8 +286,6 @@ muleDeploy {
             baseAppName 'the-app'
             prefix 'AVI'
             suffix 'xxx'
-            usePrefix true
-            useSuffix false
         }
         appVersion '1.2.3'
         workerSpecs {
@@ -391,8 +383,6 @@ muleDeploy {
             baseAppName 'the-app'
             prefix 'AVI'
             suffix 'xxx'
-            usePrefix false
-            useSuffix false
         }
         appVersion '1.2.3'
         file '${builtFile}'
