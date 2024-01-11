@@ -280,7 +280,7 @@ muleDeploy {
         assert actualApp instanceof OnPremDeploymentRequest
         actualApp.with {
             assertThat it.appName.normalizedAppName,
-                       is(equalTo('the-app'))
+                       is(equalTo('avi-the-app-xxx'))
             assertThat it.environment,
                        is(equalTo('DEV'))
         }
