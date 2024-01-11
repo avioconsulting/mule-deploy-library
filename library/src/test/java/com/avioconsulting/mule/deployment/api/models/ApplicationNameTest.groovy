@@ -31,6 +31,18 @@ class ApplicationNameTest {
     }
 
     @Test
+    void empty_names() {
+        // arrange
+
+        // act
+        def exception = shouldFail {
+            (new ApplicationName(null, false, false, null, null)).normalizedAppName
+        }
+        // assert
+        MatcherAssert.assertThat('fail', exception.message.contains("Name must be alphanumeric with dashes allowed within"))
+    }
+
+    @Test
     void name_starting_with_dash() {
         // arrange
 
