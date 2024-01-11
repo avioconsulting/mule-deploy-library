@@ -11,10 +11,10 @@ class ApplicationName {
     private static final String EMPTY_STRING=''
     private static final MAX_SIZE_APPLICATION_NAME = 42
 
-    ApplicationName(String baseAppName, Boolean usePrefix, Boolean useSuffix, String prefix, String suffix) {
+    ApplicationName(String baseAppName, String prefix, String suffix) {
         this.baseAppName = baseAppName
-        this.usePrefix = usePrefix
-        this.useSuffix = useSuffix
+        this.usePrefix = prefix != null && !prefix.isBlank()
+        this.useSuffix = suffix != null && !suffix.isBlank()
         this.prefix = prefix
         this.suffix = suffix
 //        getNormalizedAppName()
