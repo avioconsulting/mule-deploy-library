@@ -82,8 +82,6 @@ muleDeploy {
         environment 'DEV'
         applicationName {
             baseAppName 'the-app'
-            usePrefix true
-            useSuffix true
             prefix params.env
             suffix params.env
         }
@@ -96,8 +94,6 @@ muleDeploy {
         environment 'DEV'
         applicationName {
             baseAppName 'the-app'
-            usePrefix true
-            useSuffix true
             prefix params.env
             suffix params.env
         }
