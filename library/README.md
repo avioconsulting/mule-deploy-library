@@ -70,12 +70,10 @@ In all cases, the library is capable of either doing a new deployment or updatin
 Starting in version 2.0.0, the application name can be composed of a base app name, prefix, and suffix. The base app name is mandatory, but the prefix and suffix are optional.
 For those three fields, the allowed characters are any letter (lower and uppercase), any number, and dashes (except at the beginning and end), which means that no special characters are allowed in the names.
 
-To use prefix and suffix you should specify the attribute that tells the application you want to use it, and then also provide which would be the string for prefix/suffix. Below is an example of how to specify the application using the prefix and suffix together.
+Below is an example of how to specify the application using the prefix and suffix together.
 ```Groovy
     applicationName {
         baseAppName 'the-app'
-        usePrefix true
-        useSuffix true
         prefix params.env
         suffix 'api'
     }
