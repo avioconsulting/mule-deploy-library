@@ -124,8 +124,8 @@ class RuntimeFabricContextTest implements MavenInvoke {
             environment 'DEV'
             applicationName {
                 baseAppName 'the-app'
-                prefix 'AVI'
-                suffix 'dev'
+                prefix ''
+                suffix ''
             }
             appVersion '2.2.9'
             cryptoKey 'theKey'
@@ -160,7 +160,7 @@ class RuntimeFabricContextTest implements MavenInvoke {
             assertThat environment,
                     is(equalTo('DEV'))
             assertThat applicationName.normalizedAppName,
-                    is(equalTo('avi-the-app-dev'))
+                    is(equalTo('the-app'))
             assertThat appVersion,
                     is(equalTo('2.2.9'))
             assertThat cryptoKey,

@@ -138,8 +138,6 @@ class CloudhubContextTest implements MavenInvoke {
             }
             applicationName {
                 baseAppName 'the-app'
-                prefix 'AVI'
-                suffix 'dev'
             }
             analyticsAgentEnabled false
             file builtFile.absolutePath
@@ -167,7 +165,7 @@ class CloudhubContextTest implements MavenInvoke {
             assertThat environment,
                        is(equalTo('DEV'))
             assertThat appName.normalizedAppName,
-                       is(equalTo('avi-the-app-dev'))
+                       is(equalTo('the-app'))
             assertThat appVersion,
                        is(equalTo('1.2.3'))
             workerSpecRequest.with {

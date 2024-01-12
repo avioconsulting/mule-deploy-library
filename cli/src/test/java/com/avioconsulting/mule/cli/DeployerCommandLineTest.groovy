@@ -112,8 +112,8 @@ muleDeploy {
         environment 'DEV'
         applicationName {
             baseAppName 'the-app'
-            prefix 'AVI'
-            suffix 'xxx'
+            prefix ''
+            suffix ''
         }
         appVersion '1.2.3'
         file '${builtFile}'
@@ -135,7 +135,7 @@ muleDeploy {
         assert actualApp instanceof OnPremDeploymentRequest
         actualApp.with {
             assertThat it.appName.normalizedAppName,
-                       is(equalTo('avi-the-app-xxx'))
+                       is(equalTo('the-app'))
             assertThat it.environment,
                        is(equalTo('DEV'))
         }
@@ -174,8 +174,8 @@ muleDeploy {
         environment 'DEV'
         applicationName {
             baseAppName 'the-app'
-            prefix 'AVI'
-            suffix 'xxx'
+            prefix ''
+            suffix ''
         }
         appVersion '1.2.3'
         file '${builtFile}'
@@ -197,7 +197,7 @@ muleDeploy {
         assert actualApp instanceof OnPremDeploymentRequest
         actualApp.with {
             assertThat it.appName.normalizedAppName,
-                    is(equalTo('avi-the-app-xxx'))
+                    is(equalTo('the-app'))
             assertThat it.environment,
                     is(equalTo('DEV'))
         }
