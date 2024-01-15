@@ -123,8 +123,7 @@ class CloudhubV2ContextTest implements MavenInvoke {
             environment 'DEV'
             applicationName {
                 baseAppName 'the-app'
-                prefix ''
-                suffix ''
+                suffix 'dev'
             }
             appVersion '2.2.9'
             cryptoKey 'theKey'
@@ -165,7 +164,7 @@ class CloudhubV2ContextTest implements MavenInvoke {
             assertThat anypointClientSecret,
                     is(equalTo('the_client_secret'))
             assertThat applicationName.normalizedAppName,
-                    is(equalTo('the-app'))
+                    is(equalTo('the-app-dev'))
             workerSpecRequest.with {
                 assertThat target,
                         is(equalTo('target_name'))

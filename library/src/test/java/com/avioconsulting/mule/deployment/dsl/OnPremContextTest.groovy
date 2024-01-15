@@ -60,6 +60,7 @@ class OnPremContextTest implements MavenInvoke {
             environment 'DEV'
             applicationName {
                 baseAppName 'the-app'
+                prefix 'AVI'
             }
             appVersion '1.2.3'
             file 'path/to/file.jar'
@@ -77,7 +78,7 @@ class OnPremContextTest implements MavenInvoke {
             assertThat environment,
                        is(equalTo('DEV'))
             assertThat applicationName.normalizedAppName,
-                       is(equalTo('the-app'))
+                       is(equalTo('avi-the-app'))
             assertThat appVersion,
                        is(equalTo('1.2.3'))
             assertThat file,
