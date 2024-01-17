@@ -66,6 +66,20 @@ For CloudHub version 2 and RTF deployment, the application only sends the GAV in
 
 In all cases, the library is capable of either doing a new deployment or updating an existing deployed application. 
 
+#### ApplicationName
+Starting in version 2.0.0, the application name can be composed of a base app name, prefix, and suffix. The base app name is mandatory, but the prefix and suffix are optional.
+For those three fields, the allowed characters are any letter (lower and uppercase), any number, and dashes (except at the beginning and end), which means that no special characters are allowed in the names.
+
+Below is an example of how to specify the application using the prefix and suffix together.
+```Groovy
+    applicationName {
+        baseAppName 'the-app'
+        prefix params.env
+        suffix 'api'
+    }
+```
+The applicationName section should be listed within the deployment type, such as cloudHubApplication, onPremApplication, etc.
+
 ### DesignCenterSync
 Using this flag, the library will extract all RAML files from the source directory (provided in `apiSpec`), find the project in the design center by the name to be able to retrieve the current content in the server,
 then will perform a comparison in the files, to find new, changed, and deleted files locally, and finally will do the synchronization with the server for all changes.
