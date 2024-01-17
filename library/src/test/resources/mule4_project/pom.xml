@@ -5,7 +5,7 @@
 
 	<groupId>f2ea2cb4-c600-4bb5-88e8-e952ff5591ee</groupId>
 	<artifactId>mule-deploy-lib-v4-test-app</artifactId>
-    <version>replaceme</version>
+    <version>2.2.9</version>
     <packaging>mule-application</packaging>
 
 	<name>mule-deploy-lib-v4-test-app</name>
@@ -14,8 +14,8 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<app.runtime>replaceme</app.runtime>
-		<mule.maven.plugin.version>3.1.6</mule.maven.plugin.version>
+		<app.runtime>4.3.0</app.runtime>
+		<mule.maven.plugin.version>3.5.4</mule.maven.plugin.version>
 	</properties>
 
 	<build>

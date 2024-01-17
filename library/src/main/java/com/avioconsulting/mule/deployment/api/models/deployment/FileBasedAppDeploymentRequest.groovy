@@ -1,5 +1,6 @@
-package com.avioconsulting.mule.deployment.api.models
+package com.avioconsulting.mule.deployment.api.models.deployment
 
+import com.avioconsulting.mule.deployment.api.models.PomInfo
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import groovy.xml.XmlSlurper
 import groovy.xml.slurpersupport.NodeChild
@@ -8,8 +9,7 @@ import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
 
-abstract class FileBasedAppDeploymentRequest {
-    protected final Map<String, String> autoDiscoveries = [:]
+abstract class FileBasedAppDeploymentRequest extends AppDeploymentRequest {
 
     static final List<String> IGNORE_DC_FILES = [
             'exchange_modules', // we don't deal with Exchange dependencies
@@ -19,6 +19,25 @@ abstract class FileBasedAppDeploymentRequest {
     ]
 
     static List<String> IGNORE_DC_FILES_EXCEPT_EXCHANGE = IGNORE_DC_FILES - ['exchange_modules']
+
+    /**
+     * The file to deploy. The name of this file will also be used for the Runtime Manager settings pane
+     */
+    final File file
+
+    FileBasedAppDeploymentRequest(File file, ApplicationName applicationName, String appVersion, String environment) {
+        super(applicationName, appVersion, environment)
+
+        this.file = file
+
+        // Properties are not passed then extract the artifactId and version from the pom.xml
+        if(!applicationName) {
+            setAppName(new ApplicationName(this.parsedPomProperties.artifactId, null, null))
+        }
+        if(!appVersion) {
+            setAppVersion(parsedPomProperties.version)
+        }
+    }
 
     static boolean isIgnored(Path something,
                              boolean ignoreExchange = true) {
@@ -66,17 +85,11 @@ abstract class FileBasedAppDeploymentRequest {
         file.name.endsWith('.jar')
     }
 
-    abstract File getFile()
-
-    def setAutoDiscoveryId(String propertyName,
-                           String autoDiscoveryId) {
-        this.autoDiscoveries[propertyName] = autoDiscoveryId
+    File getFile() {
+        this.file
     }
 
-    abstract String getAppVersion()
-
-    abstract String getEnvironment()
-
+    @Override
     List<RamlFile> getRamlFilesFromApp(String rootRamlDirectory,
                                        boolean ignoreExchange) {
         return FileSystems.newFileSystem(file.toPath(),

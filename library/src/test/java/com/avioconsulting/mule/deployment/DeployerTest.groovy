@@ -3,14 +3,20 @@ package com.avioconsulting.mule.deployment
 import com.avioconsulting.mule.deployment.api.Deployer
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.models.*
+import com.avioconsulting.mule.deployment.api.models.deployment.ApplicationName
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubV2DeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.internal.models.ApiSpec
 import com.avioconsulting.mule.deployment.internal.models.ExistingApiSpec
 import com.avioconsulting.mule.deployment.internal.models.RamlFile
 import com.avioconsulting.mule.deployment.internal.subdeployers.*
 import groovy.transform.Canonical
-import org.junit.Before
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
@@ -20,6 +26,8 @@ import static org.hamcrest.Matchers.*
 class DeployerTest {
     private Deployer deployer
     private List<CloudhubDeploymentRequest> deployedChApps
+    private List<CloudhubV2DeploymentRequest> deployedChV2Apps
+    private List<RuntimeFabricDeploymentRequest> deployedRtfApps
     private List<OnPremDeploymentRequest> deployedOnPremApps
     private List<DesignCenterSync> designCenterSyncs
     private List<ApiSyncCalls> apiSyncs
@@ -44,9 +52,11 @@ class DeployerTest {
         List<Policy> desiredPolicies
     }
 
-    @Before
+    @BeforeEach
     void cleanup() {
         deployedChApps = []
+        deployedChV2Apps = []
+        deployedRtfApps = []
         deployedOnPremApps = []
         designCenterSyncs = []
         apiSyncs = []
@@ -75,15 +85,37 @@ class DeployerTest {
                     deployedChApps << request
                 },
                 isMule4Request: { CloudhubDeploymentRequest deploymentRequest ->
-                    deploymentRequest.appName.contains('mule4')
+                    deploymentRequest.appName.getNormalizedAppName().contains('mule4')
                 }
         ] as ICloudHubDeployer
+        def mockCloudHubV2Deployer = [
+                deploy        : { CloudhubV2DeploymentRequest request ->
+                    if (failDeployment) {
+                        throw new Exception('something did not work')
+                    }
+                    deployedChApps << request
+                },
+                isMule4Request: { CloudhubV2DeploymentRequest deploymentRequest ->
+                    deploymentRequest.appName.contains('mule4')
+                }
+        ] as ICloudHubV2Deployer
+        def mockRuntimeFabricDeployer = [
+                deploy        : { RuntimeFabricDeploymentRequest request ->
+                    if (failDeployment) {
+                        throw new Exception('something did not work')
+                    }
+                    deployedChApps << request
+                },
+                isMule4Request: { RuntimeFabricDeploymentRequest deploymentRequest ->
+                    deploymentRequest.appName.contains('mule4')
+                }
+        ] as IRuntimeFabricDeployer
         def mockOnPremDeployer = [
                 deploy        : { OnPremDeploymentRequest request ->
                     deployedOnPremApps << request
                 },
                 isMule4Request: { OnPremDeploymentRequest deploymentRequest ->
-                    deploymentRequest.appName.contains('mule4')
+                    deploymentRequest.appName.normalizedAppName.contains('mule4')
                 }
         ] as IOnPremDeployer
         def mockDcDeployer = [
@@ -105,6 +137,16 @@ class DeployerTest {
                                                'DEV',
                                                'v1',
                                                true)
+                },
+                getExistingApiDefinition: { ApiSpec desiredApiManagerDefinition ->
+                    apiSyncs << new ApiSyncCalls(desiredApiManagerDefinition)
+                    return new ExistingApiSpec('api1234',
+                            'the-asset-id',
+                            '1.2.3',
+                            'https://foo',
+                            'DEV',
+                            'v1',
+                            true)
                 }
         ] as IApiManagerDeployer
         def mockPolicyDeployer = [
@@ -121,6 +163,8 @@ class DeployerTest {
                                 null,
                                 // shouldn't need this since we mock so much
                                 mockCloudHubDeployer,
+                                mockCloudHubV2Deployer,
+                                mockRuntimeFabricDeployer,
                                 mockOnPremDeployer,
                                 mockDcDeployer,
                                 mockApiDeployer,
@@ -142,8 +186,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
-                                                    'new-app',
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3',)
         def apiSpec = new ApiSpecification('Hello API',
                                            simpleRamlFiles)
@@ -173,8 +216,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
-                                                    'new-app-mule3',
+                                                    new ApplicationName('new-app-mule3', 'client', 'DEV'),
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
                                            simpleRamlFiles,
@@ -255,8 +297,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
-                                                    'new-app-mule4',
+                                                    new ApplicationName('new-app-mule4', 'client', 'DEV'),
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
                                            simpleRamlFiles,
@@ -293,8 +334,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
-                                                    'new-app',
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
                                            simpleRamlFiles)
@@ -320,7 +360,7 @@ class DeployerTest {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                                                  'new-app-mule3',
+                                                    new ApplicationName('new-app-mule3', null, null),
                                                   '1.2.3')
 
         // act
@@ -351,7 +391,7 @@ class DeployerTest {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                                                  'new-ap-mule4',
+                                                  new ApplicationName('new-app-mule4', 'client', 'DEV'),
                                                   '1.2.3')
 
         // act
@@ -387,8 +427,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
-                                                    'new-app',
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
 
         // act
@@ -423,8 +462,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
-                                                    'new-app',
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
                                            simpleRamlFiles)
@@ -443,7 +481,7 @@ class DeployerTest {
                    is(equalTo(1))
         assertThat 'no feature supplied',
                    apiSyncs.size(),
-                   is(equalTo(0))
+                   is(equalTo(1)) // 1 for getExistingApiDefinition that is always called
     }
 
     @Test
@@ -460,8 +498,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
-                                                    'new-app',
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello API',
                                            simpleRamlFiles)
@@ -480,7 +517,7 @@ class DeployerTest {
                    is(equalTo(0))
         assertThat 'no feature supplied',
                    apiSyncs.size(),
-                   is(equalTo(0))
+                   is(equalTo(1)) // 1 for getExistingApiDefinition that is always called
     }
 
     @Test
@@ -497,8 +534,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
-                                                    'new-app',
+                                                    new ApplicationName('new-app', 'client', 'DEV'),
                                                     '1.2.3')
         def apiSpec = new ApiSpecification('Hello SOAP API',
                                            'v1')
@@ -532,8 +568,7 @@ class DeployerTest {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    'client',
-                                                    'new-app-mule4',
+                                                    new ApplicationName('new-app-mule4', 'client', 'DEV'),
                                                     '1.2.3')
         def apiSpec1 = new ApiSpecification('Hello API v1',
                                             simpleRamlFiles)

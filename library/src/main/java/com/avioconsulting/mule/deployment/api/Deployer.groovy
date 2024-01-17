@@ -2,9 +2,11 @@ package com.avioconsulting.mule.deployment.api
 
 
 import com.avioconsulting.mule.deployment.api.models.ApiSpecificationList
-import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.AppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubV2DeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Features
-import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.credentials.Credential
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
@@ -21,6 +23,8 @@ class Deployer implements IDeployer {
     private final EnvironmentLocator environmentLocator
     private final HttpClientWrapper clientWrapper
     private final ICloudHubDeployer cloudHubDeployer
+    private final ICloudHubV2Deployer cloudHubV2Deployer
+    private final IRuntimeFabricDeployer runtimeFabricDeployer
     private final IOnPremDeployer onPremDeployer
     private final IDesignCenterDeployer designCenterDeployer
     private final IApiManagerDeployer apiManagerDeployer
@@ -60,6 +64,8 @@ class Deployer implements IDeployer {
                      List<String> environmentsToDoDesignCenterDeploymentOn,
                      EnvironmentLocator environmentLocator = null,
                      ICloudHubDeployer cloudHubDeployer = null,
+                     ICloudHubV2Deployer cloudHubV2Deployer = null,
+                     IRuntimeFabricDeployer runtimeFabricDeployer = null,
                      IOnPremDeployer onPremDeployer = null,
                      IDesignCenterDeployer designCenterDeployer = null,
                      IApiManagerDeployer apiManagerDeployer = null,
@@ -74,6 +80,14 @@ class Deployer implements IDeployer {
                                                                          this.environmentLocator,
                                                                          logger,
                                                                          dryRunMode)
+        this.cloudHubV2Deployer = cloudHubV2Deployer ?: new CloudHubV2Deployer(this.clientWrapper,
+                                                                               this.environmentLocator,
+                                                                               logger,
+                                                                               dryRunMode)
+        this.runtimeFabricDeployer = runtimeFabricDeployer ?: new RuntimeFabricDeployer(this.clientWrapper,
+                                                                                this.environmentLocator,
+                                                                                logger,
+                                                                                dryRunMode)
         this.onPremDeployer = onPremDeployer ?: new OnPremDeployer(this.clientWrapper,
                                                                    this.environmentLocator,
                                                                    logger,
@@ -93,13 +107,13 @@ class Deployer implements IDeployer {
     }
 
     /**
-     * Deploys a CloudHub or on-prem application, end to end
+     * Deploys a CloudHub v1 or v2, RTF or on-prem application, end to end
      * @param appDeploymentRequest Details about how to deploy your app
      * @param apiSpecification How API specification details work. This can be optional. Doing so will automatically remove Design Center sync and policy sync from enabled features
      * @param desiredPolicies Which policies to apply. The default value is empty, which means apply no policies and remove any policies already there
      * @param enabledFeatures Which features of this tool to turn on. All by default.
      */
-    def deployApplication(FileBasedAppDeploymentRequest appDeploymentRequest,
+    def deployApplication(AppDeploymentRequest appDeploymentRequest,
                           ApiSpecificationList apiSpecifications = null,
                           List<Policy> desiredPolicies = [],
                           List<Features> enabledFeatures = [Features.All]) {
@@ -110,6 +124,12 @@ class Deployer implements IDeployer {
         if (appDeploymentRequest instanceof CloudhubDeploymentRequest) {
             deployer = cloudHubDeployer
             description = 'CloudHub app deployment'
+        } else if (appDeploymentRequest instanceof CloudhubV2DeploymentRequest) {
+            deployer = cloudHubV2Deployer
+            description = 'CloudHub v2 app deployment'
+        } else if (appDeploymentRequest instanceof RuntimeFabricDeploymentRequest) {
+            deployer = runtimeFabricDeployer
+            description = 'Runtime Fabric app deployment'
         } else {
             deployer = onPremDeployer
             description = 'On-prem app deployment'
@@ -165,7 +185,7 @@ class Deployer implements IDeployer {
     private def performCommonDeploymentTasks(boolean isSoapApi,
                                              ApiSpecificationList apiSpecifications,
                                              List<Policy> desiredPolicies,
-                                             FileBasedAppDeploymentRequest appDeploymentRequest,
+                                             AppDeploymentRequest appDeploymentRequest,
                                              String environment,
                                              List<Features> enabledFeatures,
                                              ISubDeployer deployer) {
@@ -174,37 +194,43 @@ class Deployer implements IDeployer {
                                  enabledFeatures,
                                  feature)
         }
-        String skipReason
-        if (!apiSpecifications) {
-            skipReason = "no API spec(s) were provided"
-        } else if (!this.environmentsToDoDesignCenterDeploymentOn.contains(environment)) {
-            skipReason = "Deploying to '${environment}', only ${this.environmentsToDoDesignCenterDeploymentOn} triggers Design Center deploys"
-        } else {
-            skipReason = isFeatureDisabled(Features.DesignCenterSync)
-        }
+
         apiSpecifications.each { apiSpecification ->
+
+            String skipReason
+            if (!this.environmentsToDoDesignCenterDeploymentOn.contains(environment)) {
+                skipReason = "Deploying to '${environment}', only ${this.environmentsToDoDesignCenterDeploymentOn} triggers Design Center deploys"
+            } else {
+                skipReason = isFeatureDisabled(Features.DesignCenterSync)
+            }
+
             def apiHeader = "${apiSpecification.name}/branch ${apiSpecification.designCenterBranchName}"
             executeStep("Design Center Deployment - ${apiHeader}",
                         skipReason) {
                 designCenterDeployer.synchronizeDesignCenterFromApp(apiSpecification,
                                                                     appDeploymentRequest)
             }
-            if (!apiSpecifications) {
-                skipReason = "no API spec(s) were provided"
-            } else {
-                skipReason = isFeatureDisabled(Features.ApiManagerDefinitions)
-            }
+
+            skipReason = isFeatureDisabled(Features.ApiManagerDefinitions)
+
+            def isMule4 = deployer.isMule4Request(appDeploymentRequest)
+            def internalSpec = new ApiSpec(apiSpecification.exchangeAssetId,
+                    apiSpecification.endpoint,
+                    environment,
+                    apiSpecification.apiMajorVersion,
+                    isMule4)
+
             ExistingApiSpec existingApiManagerDefinition = executeStep("API Manager Definition - ${apiHeader}",
                                                                        skipReason) {
-                def isMule4 = deployer.isMule4Request(appDeploymentRequest)
-                def internalSpec = new ApiSpec(apiSpecification.exchangeAssetId,
-                                               apiSpecification.endpoint,
-                                               environment,
-                                               apiSpecification.apiMajorVersion,
-                                               isMule4)
+
                 apiManagerDeployer.synchronizeApiDefinition(internalSpec,
                                                             appDeploymentRequest.appVersion)
             } as ExistingApiSpec
+
+            if (!existingApiManagerDefinition && apiSpecification.exchangeAssetId) {
+                existingApiManagerDefinition = apiManagerDeployer.getExistingApiDefinition(internalSpec)
+            }
+
             if (existingApiManagerDefinition) {
                 appDeploymentRequest.setAutoDiscoveryId(apiSpecification.autoDiscoveryPropertyName,
                                                         existingApiManagerDefinition.id)

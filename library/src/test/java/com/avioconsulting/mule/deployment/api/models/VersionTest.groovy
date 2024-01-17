@@ -1,6 +1,6 @@
 package com.avioconsulting.mule.deployment.api.models
 
-import org.junit.Test
+import org.junit.jupiter.api.Test
 import static org.junit.Assert.*
 
 class VersionTest {

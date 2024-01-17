@@ -72,7 +72,8 @@ trait ApiManagerFunctionality {
             def source = Okio.source(response.entity.content)
             def bufferedSource = Okio.buffer(source)
             def dataOptional = query.parse(bufferedSource).data()
-            dataOptional.isPresent() ? dataOptional.get().assets : []
+            //dataOptional.isPresent() ? dataOptional.get().assets : []
+            dataOptional.isPresent() ? dataOptional.get().assets.get() : []
         }
     }
 }

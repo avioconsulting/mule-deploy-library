@@ -1,12 +1,12 @@
 package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
-import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.AppDeploymentRequest
 
 class ApiSpecContext extends BaseContext {
     String name, exchangeAssetId, mainRamlFile, endpoint, autoDiscoveryPropertyName, designCenterBranchName, sourceDirectory, soapEndpointWithVersion
 
-    ApiSpecification createRequest(FileBasedAppDeploymentRequest request) {
+    ApiSpecification createRequest(AppDeploymentRequest request) {
         def errors = findErrors()
         if (errors.any()) {
             def errorList = errors.join('\n')
@@ -29,7 +29,7 @@ class ApiSpecContext extends BaseContext {
                                     this.autoDiscoveryPropertyName)
     }
 
-    private ApiSpecification createRestSpec(FileBasedAppDeploymentRequest request) {
+    private ApiSpecification createRestSpec(AppDeploymentRequest request) {
         // This might sort of be a circular/weird dependency between ApiSpecification and FileBasedAppDeploymentRequest
         // but not sure of the best way to handle this
         def sourceDirectory = ApiSpecification.getSourceDirectoryOrDefault(this.sourceDirectory)

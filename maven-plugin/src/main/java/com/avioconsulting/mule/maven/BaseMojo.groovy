@@ -22,6 +22,10 @@ abstract class BaseMojo extends AbstractMojo {
         [:]
     }
 
+    /**
+     * Remove the prefix "muleDeploy." from all command-line parameters that starts with this string
+     * @return #{ParamsWrapper} - All properties from command-line (already formatted) plus the additionalProperties var
+     */
     protected ParamsWrapper getParamsWrapper() {
         def artifact = mavenProject.attachedArtifacts.find { a ->
             a.classifier == 'mule-application'

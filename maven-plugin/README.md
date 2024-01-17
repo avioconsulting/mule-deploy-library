@@ -22,8 +22,8 @@ In your project's POM, add the following snippet -
                 <artifactId>mule-deploy-maven-plugin</artifactId>
                 <version>${mule-deploy-maven-plugin.version}</version>
                 <configuration>
-                    <!-- this is optional, deploySpec.groovy is te default if you do not specify -->
-                    <groovyFile>deploySpec.groovy</groovyFile>
+                    <!-- this is optional, muleDeploy.groovy is the default if you do not specify -->
+                    <groovyFile>muleDeploy.groovy</groovyFile>
                 </configuration>
                 <executions>
                     <execution>

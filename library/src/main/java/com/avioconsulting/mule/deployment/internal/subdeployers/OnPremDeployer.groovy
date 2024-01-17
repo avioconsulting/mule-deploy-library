@@ -2,7 +2,8 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.ILogger
-import com.avioconsulting.mule.deployment.api.models.OnPremDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.ApplicationName
+import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.OnPremDeploymentStatus
@@ -234,7 +235,7 @@ class OnPremDeployer extends BaseDeployer implements IOnPremDeployer {
     }
 
     String locateApplication(String environmentName,
-                             String appName) {
+                             ApplicationName appName) {
         def request = new HttpGet("${clientWrapper.baseUrl}/hybrid/api/v1/applications").with {
             addStandardStuff(it,
                              environmentName)
@@ -246,7 +247,7 @@ class OnPremDeployer extends BaseDeployer implements IOnPremDeployer {
                                                                              'Retrieve applications')
             def listing = result.data
             def app = listing.find { app ->
-                app.name == appName
+                app.name == appName.baseAppName
             }
             app?.id
         }

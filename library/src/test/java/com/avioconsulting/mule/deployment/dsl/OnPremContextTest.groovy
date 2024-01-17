@@ -1,8 +1,8 @@
 package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.MavenInvoke
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
@@ -11,7 +11,8 @@ import static org.hamcrest.Matchers.is
 
 @SuppressWarnings(["UnnecessaryQualifiedReference", "GroovyAssignabilityCheck"])
 class OnPremContextTest implements MavenInvoke {
-    @BeforeClass
+
+    @BeforeAll
     static void setup() {
         buildApp()
     }
@@ -24,6 +25,11 @@ class OnPremContextTest implements MavenInvoke {
             environment 'DEV'
             file builtFile.absolutePath
             targetServerOrClusterName 'server1'
+            applicationName {
+                baseAppName 'the-app'
+                prefix 'AVI'
+                suffix 'dev'
+            }
         }
         closure.delegate = context
         closure.call()
@@ -35,8 +41,8 @@ class OnPremContextTest implements MavenInvoke {
         request.with {
             assertThat environment,
                        is(equalTo('DEV'))
-            assertThat appName,
-                       is(equalTo('mule-deploy-lib-v4-test-app'))
+            assertThat applicationName.normalizedAppName,
+                       is(equalTo('avi-the-app-dev'))
             assertThat appVersion,
                        is(equalTo('2.2.9'))
             assertThat file,
@@ -52,7 +58,10 @@ class OnPremContextTest implements MavenInvoke {
         def context = new OnPremContext()
         def closure = {
             environment 'DEV'
-            applicationName 'the-app'
+            applicationName {
+                baseAppName 'the-app'
+                prefix 'AVI'
+            }
             appVersion '1.2.3'
             file 'path/to/file.jar'
             targetServerOrClusterName 'server1'
@@ -68,8 +77,8 @@ class OnPremContextTest implements MavenInvoke {
         request.with {
             assertThat environment,
                        is(equalTo('DEV'))
-            assertThat appName,
-                       is(equalTo('the-app'))
+            assertThat applicationName.normalizedAppName,
+                       is(equalTo('avi-the-app'))
             assertThat appVersion,
                        is(equalTo('1.2.3'))
             assertThat file,

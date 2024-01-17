@@ -1,33 +1,29 @@
-package com.avioconsulting.mule.deployment.api.models
+package com.avioconsulting.mule.deployment.api.models.deployment
 
+import com.avioconsulting.mule.deployment.api.models.CloudhubWorkerSpecRequest
+import com.avioconsulting.mule.deployment.api.models.PomInfo
 import com.avioconsulting.mule.deployment.internal.models.CloudhubAppProperties
+import com.avioconsulting.mule.deployment.secure.PropertiesObfuscator
 import com.fasterxml.jackson.databind.ObjectMapper
 import groovy.json.JsonOutput
 import groovy.transform.ToString
+import groovy.xml.XmlSlurper
+import groovy.xml.slurpersupport.NodeChild
 import org.apache.http.HttpEntity
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.HttpMultipartMode
 import org.apache.http.entity.mime.MultipartEntityBuilder
 
+import java.nio.file.FileSystems
+import java.nio.file.Files
+import java.nio.file.Path
+
 @ToString
 class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
-    /**
-     * environment name (e.g. DEV, not GUID)
-     */
-    final String environment
-    /**
-     * Actual name of your application WITHOUT any kind of customer/environment prefix or suffix. Spaces in the name are not allowed and will be rejected.
-     * This parameter is optional. If you don't supply it, the <artifactId> from your app's POM will be used.
-     */
-    final String appName
     /**
      * CloudHub specs
      */
     final CloudhubWorkerSpecRequest workerSpecRequest
-    /**
-     * The file to deploy. The name of this file will also be used for the Runtime Manager settings pane
-     */
-    final File file
     /**
      * Will be set in the 'crypto.key' CloudHub property
      */
@@ -41,10 +37,6 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
      */
     final String anypointClientSecret
     /**
-     * Your "DNS prefix" for Cloudhub app uniqueness, usually a 3 letter customer ID to ensure app uniqueness.
-     */
-    final String cloudHubAppPrefix
-    /**
      * Mule app property overrides (the stuff in the properties tab)
      */
     final Map<String, String> appProperties
@@ -52,15 +44,6 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
      * CloudHub level property overrides (e.g. region type stuff)
      */
     final Map<String, String> otherCloudHubProperties
-    /**
-     * Get only property, derived from app, environment, and prefix, this the real application name that will be used in CloudHub to ensure uniqueness.
-     */
-    final String normalizedAppName
-    /**
-     * Version of the app you are deploying (e.g. <version> from the POM). This parameter is optional and if it's not supplied
-     * then it will be derived from the <version> parameter in the project's POM based on the JAR/ZIP
-     */
-    final String appVersion
 
     /***
      * Sets anypoint.platform.config.analytics.agent.enabled to true in CH props
@@ -79,16 +62,12 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                               String cryptoKey,
                               String anypointClientId,
                               String anypointClientSecret,
-                              String cloudHubAppPrefix,
-                              String appName = null,
+                              ApplicationName applicationName,
                               String appVersion = null,
                               Map<String, String> appProperties = [:],
                               Map<String, String> otherCloudHubProperties = [:],
                               boolean analyticsAgentEnabled = true) {
-        this.file = file
-        this.environment = environment
-        this.appName = appName ?: parsedPomProperties.artifactId
-        this.appVersion = appVersion ?: parsedPomProperties.version
+        super(file, applicationName, appVersion, environment)
         if (!workerSpecRequest.muleVersion) {
             def propertyToUse = mule4Request ? 'app.runtime' : 'mule.version'
             def rawVersion = parsedPomProperties.props[propertyToUse]
@@ -102,19 +81,15 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
         this.cryptoKey = cryptoKey
         this.anypointClientId = anypointClientId
         this.anypointClientSecret = anypointClientSecret
-        this.cloudHubAppPrefix = cloudHubAppPrefix
         this.appProperties = appProperties
         this.otherCloudHubProperties = otherCloudHubProperties
-        if (this.appName.contains(' ')) {
-            throw new Exception("Runtime Manager does not like spaces in app names and you specified '${this.appName}'!")
+
+        //normalize name
+        if(!applicationName.baseAppName){
+            applicationName.baseAppName = parsedPomProperties.artifactId
         }
-        def newAppName = "${cloudHubAppPrefix}-${this.appName}-${environment}"
-        def appNameLowerCase = newAppName.toLowerCase()
-        if (appNameLowerCase != newAppName) {
-            newAppName = appNameLowerCase
-        }
-        normalizedAppName = newAppName
-        this.cloudhubAppProperties = new CloudhubAppProperties(this.appName,
+        //
+        this.cloudhubAppProperties = new CloudhubAppProperties(applicationName.baseAppName,
                                                                environment.toLowerCase(),
                                                                cryptoKey,
                                                                anypointClientId,
@@ -145,7 +120,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
         props += this.autoDiscoveries
         def result = [
                 // CloudHub's API calls the Mule application the 'domain'
-                domain                   : normalizedAppName,
+                domain                   : this.applicationName.normalizedAppName,
                 muleVersion              : workerSpecRequest.versionInfo,
                 region                   : workerSpecRequest.awsRegion?.awsCode,
                 monitoringAutoRestart    : true,
@@ -177,4 +152,32 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
     String getCloudhubAppInfoAsJson() {
         JsonOutput.toJson(cloudhubAppInfo)
     }
+
+    Map<String,String> getCloudAppInfoAsObfuscatedJson() {
+        PropertiesObfuscator.obfuscateMap(cloudhubAppInfo,"properties")
+    }
+
+    @Lazy
+    protected PomInfo parsedPomProperties = {
+        def zipOrJarPath = getFile().toPath()
+        FileSystems.newFileSystem(zipOrJarPath,
+                null).withCloseable { fs ->
+            def pomXmlPath = Files.walk(fs.getPath('/META-INF/maven')).find { p ->
+                p.endsWith('pom.xml')
+            } as Path
+            assert pomXmlPath: 'Was not able to find pom.xml in ZIP/JAR'
+            def parser = new XmlSlurper().parseText(pomXmlPath.text)
+            def props = parser.properties.children().collectEntries { NodeChild node ->
+                [node.name(), node.text()]
+            }
+            def textFromNode = { String element ->
+                def res = parser[element][0] as NodeChild
+                res.text()
+            }
+            return new PomInfo(textFromNode('groupId'),
+                    textFromNode('artifactId'),
+                    textFromNode('version'),
+                    props)
+        } as PomInfo
+    }()
 }

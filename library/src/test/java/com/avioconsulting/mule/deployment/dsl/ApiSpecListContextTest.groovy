@@ -2,7 +2,7 @@ package com.avioconsulting.mule.deployment.dsl
 
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
 import com.avioconsulting.mule.deployment.internal.AppBuilding
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
@@ -12,7 +12,7 @@ class ApiSpecListContextTest implements AppBuilding {
     @Test
     void list_single() {
         // arrange
-        def appRequest = buildFullApp()
+        def appRequest = buildFullFileBasedApp()
         def context = new ApiSpecListContext()
         def closure = {
             apiSpecification {
@@ -35,7 +35,7 @@ class ApiSpecListContextTest implements AppBuilding {
     @Test
     void list_multiple_missing_auto_disc() {
         // arrange
-        def appRequest = buildFullApp()
+        def appRequest = buildFullFileBasedApp()
         def context = new ApiSpecListContext()
         def closure = {
             apiSpecification {
@@ -61,7 +61,7 @@ class ApiSpecListContextTest implements AppBuilding {
     @Test
     void list_multiple_missing_auto_disc_unique_props() {
         // arrange
-        def appRequest = buildFullApp()
+        def appRequest = buildFullFileBasedApp()
         def context = new ApiSpecListContext()
         def closure = {
             apiSpecification {
@@ -89,7 +89,7 @@ class ApiSpecListContextTest implements AppBuilding {
     @Test
     void list_multiple_same_name_missing_branch() {
         // arrange
-        def appRequest = buildFullApp()
+        def appRequest = buildFullFileBasedApp()
         def context = new ApiSpecListContext()
         def closure = {
             apiSpecification {
@@ -117,7 +117,7 @@ class ApiSpecListContextTest implements AppBuilding {
     @Test
     void list_multiple_different_project_names_missing_source_directory() {
         // arrange
-        def appRequest = buildFullApp()
+        def appRequest = buildFullFileBasedApp()
         def context = new ApiSpecListContext()
         def closure = {
             apiSpecification {
@@ -146,7 +146,7 @@ class ApiSpecListContextTest implements AppBuilding {
     @Test
     void list_multiple_different_project_names_ok() {
         // arrange
-        def appRequest = buildFullApp()
+        def appRequest = buildFullFileBasedApp()
         def context = new ApiSpecListContext()
         def closure = {
             apiSpecification {
@@ -177,7 +177,7 @@ class ApiSpecListContextTest implements AppBuilding {
     @Test
     void list_multiple_different_branches_missing_source_directory() {
         // arrange
-        def appRequest = buildFullApp()
+        def appRequest = buildFullFileBasedApp()
         def context = new ApiSpecListContext()
         def closure = {
             apiSpecification {
@@ -206,7 +206,7 @@ class ApiSpecListContextTest implements AppBuilding {
     @Test
     void list_multiple_different_branches_ok() {
         // arrange
-        def appRequest = buildFullApp()
+        def appRequest = buildFullFileBasedApp()
         def context = new ApiSpecListContext()
         def closure = {
             apiSpecification {

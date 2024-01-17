@@ -28,6 +28,7 @@ class CloudhubAppProperties {
         this.clientId = clientId
         this.clientSecret = clientSecret
         this.analyticsEnabled = analyticsEnabled
+        //TODO logic need to be improved.
         this.apiVisualizerLayer = {
             switch(appName) {
                 case ~/prc.*/:

@@ -1,8 +1,7 @@
 package com.avioconsulting.mule.deployment.dsl
 
-
 import com.avioconsulting.mule.deployment.api.models.Features
-import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.AppDeploymentRequest
 import com.avioconsulting.mule.deployment.dsl.policies.PolicyListContext
 
 class MuleDeployContext extends BaseContext {
@@ -10,19 +9,29 @@ class MuleDeployContext extends BaseContext {
     private ApiSpecListContext apiSpecifications = new ApiSpecListContext()
     private PolicyListContext policies = new PolicyListContext()
     private CloudhubContext cloudHubApplication = new CloudhubContext()
+    private CloudhubV2Context cloudHubV2Application = new CloudhubV2Context()
+    private RuntimeFabricContext runtimeFabricApplication = new RuntimeFabricContext()
     private OnPremContext onPremApplication = new OnPremContext()
     private FeaturesContext enabledFeatures = new FeaturesContext()
 
     def findErrors() {
         List<String> errors = super.findErrors()
-        if (!cloudHubSet && !onPremSet) {
-            errors << '- Either onPremApplication or cloudHubApplication should be supplied'
+        if (!cloudHubSet && !cloudHubV2Set && !onPremSet && !runtimeFabricSet) {
+            errors << '- Either onPremApplication, cloudHubApplication, cloudHubV2Application or runtimeFabricApplication should be supplied'
         }
         return errors
     }
 
     private boolean isCloudHubSet() {
         hasFieldBeenSet('cloudHubApplication')
+    }
+
+    private boolean isCloudHubV2Set() {
+        hasFieldBeenSet('cloudHubV2Application')
+    }
+
+    private boolean isRuntimeFabricSet() {
+        hasFieldBeenSet('runtimeFabricApplication')
     }
 
     private boolean isOnPremSet() {
@@ -37,12 +46,21 @@ class MuleDeployContext extends BaseContext {
         apiSpecifications.apiSpecification(closure)
     }
 
+    static def removeFeatures(List<Features> featuresToRemove,
+                             List<Features> currentFeatures) {
+        if (!featuresToRemove.isEmpty()) {
+            if (currentFeatures == [Features.All]) {
+                currentFeatures = Features.values() - [Features.All]
+            }
+            currentFeatures = currentFeatures - featuresToRemove
+        }
+
+        currentFeatures
+    }
+
     static def removeFeature(Features feature,
                              List<Features> currentFeatures) {
-        if (currentFeatures == [Features.All]) {
-            currentFeatures = Features.values() - [Features.All]
-        }
-        currentFeatures - [feature]
+        removeFeatures([feature], currentFeatures)
     }
 
     DeploymentPackage createDeploymentPackage() {
@@ -51,7 +69,7 @@ class MuleDeployContext extends BaseContext {
             def errorList = errors.join('\n')
             throw new Exception("Your file is not complete. The following errors exist:\n${errorList}")
         }
-        if (onPremSet && cloudHubSet) {
+        if (onPremSet && (cloudHubSet || cloudHubV2Set || runtimeFabricSet)) {
             throw new Exception('You cannot deploy both a CloudHub and on-prem application!')
         }
         def policyList = policies.createPolicyList()
@@ -61,13 +79,28 @@ class MuleDeployContext extends BaseContext {
             features = removeFeature(Features.PolicySync,
                                      features)
         }
-        FileBasedAppDeploymentRequest deploymentRequest = cloudHubSet ?
-                cloudHubApplication.createDeploymentRequest() :
-                onPremApplication.createDeploymentRequest()
+
+        AppDeploymentRequest deploymentRequest
+
+        if (cloudHubSet) {
+            deploymentRequest = cloudHubApplication.createDeploymentRequest()
+        } else if (onPremSet) {
+            deploymentRequest = onPremApplication.createDeploymentRequest()
+        } else if (cloudHubV2Set) {
+            deploymentRequest = cloudHubV2Application.createDeploymentRequest()
+        } else if (runtimeFabricApplication) {
+            deploymentRequest = runtimeFabricApplication.createDeploymentRequest()
+        } else {
+            // if the code falls here, you should go to findErrors method and add the missing condition
+            throw new Exception("No application deployment was supplied!")
+        }
+
+        features = removeFeatures(deploymentRequest.getUnsupportedFeatures(), features)
+
         return new DeploymentPackage(deploymentRequest,
-                                     apiSpecifications.createApiSpecList(deploymentRequest),
-                                     policyList,
-                                     features)
+                apiSpecifications.createApiSpecList(deploymentRequest),
+                policyList,
+                features)
     }
 
     def version(String version) {

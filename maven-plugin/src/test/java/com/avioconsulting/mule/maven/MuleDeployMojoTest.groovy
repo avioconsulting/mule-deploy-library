@@ -6,13 +6,16 @@ import com.avioconsulting.mule.deployment.api.IDeployerFactory
 import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.api.models.*
 import com.avioconsulting.mule.deployment.api.models.credentials.Credential
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
 import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.ArtifactHandler
 import org.apache.maven.project.MavenProject
-import org.junit.Before
-import org.junit.BeforeClass
-import org.junit.Test
+import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
@@ -22,12 +25,12 @@ import static org.hamcrest.Matchers.*
 class MuleDeployMojoTest implements MavenInvoke {
     def logger = new TestLogger()
 
-    @BeforeClass
+    @BeforeAll
     static void setupApp() {
         buildApp()
     }
 
-    @Before
+    @BeforeEach
     void cleanup() {
         logger.errors.clear()
     }
@@ -67,7 +70,11 @@ muleDeploy {
     
     onPremApplication {
         environment 'DEV'
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+            prefix 'AVI'
+            suffix 'xxx'
+        }
         appVersion '1.2.3'
         file '${builtFile}'
         targetServerOrClusterName 'theServer'
@@ -142,7 +149,11 @@ muleDeploy {
     
     onPremApplication {
         environment 'DEV'
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+            prefix 'AVI'
+            suffix 'xxx'
+        }
         appVersion '1.2.3'
         file '${builtFile}'
         targetServerOrClusterName 'theServer'
@@ -241,7 +252,11 @@ muleDeploy {
     
     onPremApplication {
         environment 'DEV'
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+            prefix ''
+            suffix ''
+        }
         appVersion '1.2.3'
         file '${builtFile}'
         targetServerOrClusterName 'theServer'
@@ -264,7 +279,7 @@ muleDeploy {
                    is(equalTo([]))
         assert actualApp instanceof OnPremDeploymentRequest
         actualApp.with {
-            assertThat it.appName,
+            assertThat it.appName.normalizedAppName,
                        is(equalTo('the-app'))
             assertThat it.environment,
                        is(equalTo('DEV'))
@@ -299,7 +314,11 @@ muleDeploy {
     
     onPremApplication {
         environment 'DEV'
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+            prefix 'AVI'
+            suffix 'xxx'
+        }
         appVersion '1.2.3'
         file '${builtFile}'
         targetServerOrClusterName 'theServer'
@@ -349,7 +368,11 @@ muleDeploy {
     
     onPremApplication {
         environment 'DEV'
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+            prefix 'AVI'
+            suffix 'xxx'
+        }
         appVersion '1.2.3'
         file '${builtFile}'
         targetServerOrClusterName 'theServer'
@@ -404,7 +427,11 @@ muleDeploy {
     
     cloudHubApplication {
         environment params.env
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+            prefix 'AVI'
+            suffix 'xxx'
+        }
         appVersion '1.2.3'
         workerSpecs {
             muleVersion params.env == 'DEV' ? '4.2.2' : '4.1.5'
@@ -415,7 +442,6 @@ muleDeploy {
             clientId 'the_client_id'
             clientSecret 'the_client_secret'
         }
-        cloudHubAppPrefix 'AVI'
     }
 }
 """
@@ -487,7 +513,11 @@ muleDeploy {
     
     onPremApplication {
         environment 'DEV'
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+            prefix 'AVI'
+            suffix 'xxx'
+        }
         appVersion '1.2.3'
         file '${builtFile}'
         targetServerOrClusterName 'theServer'
@@ -540,7 +570,11 @@ muleDeploy {
     
     onPremApplication {
         environment 'DEV'
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+            prefix 'AVI'
+            suffix 'xxx'
+        }
         appVersion '1.2.3'
         file '${builtFile}'
         targetServerOrClusterName 'theServer'

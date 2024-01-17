@@ -3,7 +3,7 @@ package com.avioconsulting.mule.deployment.internal.http
 import com.avioconsulting.mule.deployment.BaseTest
 import groovy.json.JsonOutput
 import io.vertx.core.http.HttpServerRequest
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat

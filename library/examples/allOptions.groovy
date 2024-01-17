@@ -7,7 +7,7 @@ muleDeploy {
     // Separate DC project to same exchange asset, works OK
     apiSpecification {
         name 'Design Center Project Name v1'
-        branchName 'v1'
+        designCenterBranchName 'v1'
         // everything else in this closure is optional
         exchangeAssetId 'the-asset-id'
         mainRamlFile 'stuff.raml'
@@ -80,7 +80,11 @@ muleDeploy {
 
     onPremApplication {
         environment 'DEV'
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+            prefix params.env
+            suffix params.env
+        }
         appVersion '1.2.3'
         file 'path/to/file.jar'
         targetServerOrClusterName 'theServer'
@@ -88,7 +92,11 @@ muleDeploy {
 
     cloudHubApplication {
         environment 'DEV'
-        applicationName 'the-app'
+        applicationName {
+            baseAppName 'the-app'
+            prefix params.env
+            suffix params.env
+        }
         appVersion '1.2.3'
         workerSpecs {
             muleVersion '4.2.2'
@@ -109,7 +117,6 @@ muleDeploy {
             clientId 'the_client_id'
             clientSecret 'the_client_secret'
         }
-        cloudHubAppPrefix 'AVI'
         // optional from here on out
         appProperties([
                 someProp: 'someValue'

@@ -2,7 +2,7 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.ILogger
-import com.avioconsulting.mule.deployment.api.models.CloudhubDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
@@ -43,7 +43,7 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
 
     def deploy(CloudhubDeploymentRequest deploymentRequest) {
         def existingAppStatus = getAppStatus(deploymentRequest.environment,
-                                             deploymentRequest.normalizedAppName)
+                                             deploymentRequest.getAppName().normalizedAppName)
         def request = getDeploymentHttpRequest(existingAppStatus.getAppStatus(),
                                                deploymentRequest)
         doDeployment(request,
@@ -54,20 +54,20 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
             } else {
                 logger.println "Since existing app was in '${existingAppStatus}' status before the deployment we just did, we will now try and start the app manually"
                 startApplication(deploymentRequest.environment,
-                                 deploymentRequest.normalizedAppName)
+                                 deploymentRequest.getAppName().normalizedAppName)
             }
         }
         if (dryRunMode != DryRunMode.Run) {
             return
         }
         waitForAppToStart(deploymentRequest.environment,
-                          deploymentRequest.normalizedAppName,
+                          deploymentRequest.getAppName().normalizedAppName,
                           existingAppStatus)
     }
 
     private HttpEntityEnclosingRequestBase getDeploymentHttpRequest(AppStatus existingAppStatus,
                                                                     CloudhubDeploymentRequest deploymentRequest) {
-        def appName = deploymentRequest.normalizedAppName
+        def appName = deploymentRequest.getAppName().normalizedAppName
         def fileName = deploymentRequest.file.name
         HttpEntityEnclosingRequestBase request
         if (existingAppStatus == AppStatus.NotFound) {
@@ -82,7 +82,7 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
 
     private def doDeployment(HttpEntityEnclosingRequestBase request,
                              CloudhubDeploymentRequest deploymentRequest) {
-        def prettyJson = JsonOutput.prettyPrint(deploymentRequest.cloudhubAppInfoAsJson)
+        def prettyJson = JsonOutput.prettyPrint(JsonOutput.toJson(deploymentRequest.getCloudAppInfoAsObfuscatedJson()))
         if (dryRunMode != DryRunMode.Run) {
             logger.println "WOULD deploy using settings but in dry-run mode: ${prettyJson}"
             return
@@ -99,7 +99,7 @@ class CloudHubDeployer extends BaseDeployer implements ICloudHubDeployer {
         try {
             def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,
                                                                              'deploy application')
-            logger.println("Application '${deploymentRequest.normalizedAppName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
+            logger.println("Application '${deploymentRequest.getAppName().normalizedAppName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
         }
         finally {
             response.close()

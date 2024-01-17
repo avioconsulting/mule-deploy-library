@@ -21,15 +21,17 @@ muleDeploy {
 
     cloudHubApplication {
         environment params.environment
-        applicationName 'the-app'
-        appVersion '1.2.3'
-        // mule version for workerSpecs will be derived from POM
+        // For on-prem and CH v1, applicationName and appVersion will be retrieved from POM file if not specified
+        // applicationName {
+        //     baseAppName 'the-app'
+        // }
+        // appVersion '1.2.3'
+        // mule version for workerSpecs will be derived from POM property app.runtime
         file 'something.jar'
         cryptoKey params.cryptoKey
         autoDiscovery {
             clientId params.autoDiscClientId
             clientSecret params.autoDiscClientSecret
         }
-        cloudHubAppPrefix 'AVI'
     }
 }

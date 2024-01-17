@@ -3,7 +3,7 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.ILogger
 import com.avioconsulting.mule.deployment.api.models.ApiSpecification
-import com.avioconsulting.mule.deployment.api.models.FileBasedAppDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.Version
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
@@ -180,14 +180,14 @@ class DesignCenterDeployer implements DesignCenterHttpFunctionality, IDesignCent
     }
 
     def synchronizeDesignCenterFromApp(ApiSpecification apiSpec,
-                                       FileBasedAppDeploymentRequest appFileInfo) {
+                                       FileBasedAppDeploymentRequest deploymentRequest) {
         // For now this library ignores Exchange modules/does not try and maintain or sync them
         // both the app and the remote/DC comparison should therefore exclude them
-        def ramlFilesFromApp = appFileInfo.getRamlFilesFromApp(apiSpec.sourceDirectory,
+        def ramlFilesFromApp = deploymentRequest.getRamlFilesFromApp(apiSpec.sourceDirectory,
                                                                true)
         synchronizeDesignCenter(apiSpec,
                                 ramlFilesFromApp,
-                                appFileInfo.appVersion)
+                                deploymentRequest.appVersion)
     }
 
     def synchronizeDesignCenter(ApiSpecification apiSpec,

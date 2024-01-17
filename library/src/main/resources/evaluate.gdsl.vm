@@ -86,21 +86,20 @@ contributor([closureScopeContext]) {
     call = enclosingCall('cloudHubApplication')
     if (call) {
         #stringParam('environment')
-        #stringParam('applicationName')
+        #closureParam('applicationName')
         #stringParam('appVersion')
         #closureParam('workerSpecs')
         #stringParam('file')
         #stringParam('cryptoKey')
         #boolParam('analyticsAgentEnabled')
         #closureParam('autoDiscovery')
-        #stringParam('cloudHubAppPrefix')
         #mapParam('appProperties')
         #mapParam('otherCloudHubProperties')
     }
     call = enclosingCall('onPremApplication')
     if (call) {
         #stringParam('environment')
-        #stringParam('applicationName')
+        #closureParam('applicationName')
         #stringParam('appVersion')
         #stringParam('file')
         #stringParam('targetServerOrClusterName')
@@ -210,5 +209,12 @@ contributor([closureScopeContext]) {
     if (call) {
         #stringParam('clientId')
         #stringParam('clientSecret')
+    }
+    call = enclosingCall('applicationName')
+    if (call) {
+        #stringParam('baseAppName')
+        #stringParam('prefix')
+        #stringParam('suffix')
+        #stringParam('normalizedAppName')
     }
 }

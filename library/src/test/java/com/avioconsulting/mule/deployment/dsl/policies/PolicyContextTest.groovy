@@ -2,7 +2,7 @@ package com.avioconsulting.mule.deployment.dsl.policies
 
 import com.avioconsulting.mule.deployment.api.models.HttpMethod
 import com.avioconsulting.mule.deployment.api.models.policies.*
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
