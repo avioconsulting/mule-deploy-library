@@ -32,7 +32,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,false,'prefix',null),
+                                                    new ApplicationName('new-app', 'prefix', null),
                                                     '1.2.3',
                                                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
 
@@ -63,7 +63,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                     'theKey',
                     'theClientId',
                     'theSecret',
-                    new ApplicationName('some app name', true, false, 'client', null),
+                    new ApplicationName('some app name', 'client', null),
                     '4.2.2',
                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
         }
@@ -83,7 +83,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',false,false,null,null),
+                                                    new ApplicationName('new-app', null, null),
                                                     '2.2.9',
                                                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
 
@@ -154,7 +154,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                 'theKey',
                 'theClientId',
                 'theSecret',
-                new ApplicationName('new-app',true,false,'prefix',null),
+                new ApplicationName('new-app', 'prefix', null),
                 '1.2.3',
                 'new-group-id')
 
@@ -213,8 +213,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
     /**
      * This case validates that the name of application to deploy is not larger that the maximum required of 42 characters.
      * however, this validation happens after build the final appName (normalizedAppName) like this: ${cloudhubAppprefix}-${appName}-${env} length should not larger than 42 characters.
-     * example: ApplicationName{ baseName=myVeryVeryVeryLargeApplicationName, usePrefix=true, useSuffix=true, prefix=someprefix, suffix=prod -> someprefix-myVeryVeryLargeApplicationName-prod is larger than 42 characters, it's not a valid name
-     * ${usePrefix} could be false so: myVeryVeryVeryLargeApplicationName-prod is a valid name
+     * example: ApplicationName{ baseName=myVeryVeryVeryLargeApplicationName, prefix=someprefix, suffix=prod -> someprefix-myVeryVeryLargeApplicationName-prod is larger than 42 characters, it's not a valid name
      */
     @Test
     void test_deploymentRequest_appName_should_not_larger_than_required() {
@@ -228,7 +227,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                     'theKey',
                     'theClientId',
                     'theSecret',
-                    new ApplicationName(appName,true,true, prefix, environment),
+                    new ApplicationName(appName, prefix, environment),
                     '4.2.2',
                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
         }
@@ -248,7 +247,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                     'theKey',
                     'theClientId',
                     'theSecret',
-                    new ApplicationName(appName, false, false, null, null),
+                    new ApplicationName(appName, null, null),
                     '4.2.2',
                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
         }

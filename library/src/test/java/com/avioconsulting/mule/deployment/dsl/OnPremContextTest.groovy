@@ -27,8 +27,6 @@ class OnPremContextTest implements MavenInvoke {
             targetServerOrClusterName 'server1'
             applicationName {
                 baseAppName 'the-app'
-                usePrefix true
-                useSuffix true
                 prefix 'AVI'
                 suffix 'dev'
             }
@@ -62,10 +60,7 @@ class OnPremContextTest implements MavenInvoke {
             environment 'DEV'
             applicationName {
                 baseAppName 'the-app'
-                usePrefix true
-                useSuffix false
                 prefix 'AVI'
-                suffix 'dev'
             }
             appVersion '1.2.3'
             file 'path/to/file.jar'

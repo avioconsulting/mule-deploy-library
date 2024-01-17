@@ -247,7 +247,7 @@ class OnPremDeployerTest extends BaseTest {
 
         // act
         deployer.locateApplication('DEV',
-                new ApplicationName('the-app',false,false,null,null))
+                new ApplicationName('the-app', null, null))
 
         // assert
         assertThat url,
@@ -293,7 +293,7 @@ class OnPremDeployerTest extends BaseTest {
 
         // act
         def appId = deployer.locateApplication('DEV',
-                                               new ApplicationName('non-existent-app',false,false,null,null))
+                                               new ApplicationName('non-existent-app', null, null))
 
         // assert
         assertThat 'app not being there is not an exception',
@@ -332,7 +332,7 @@ class OnPremDeployerTest extends BaseTest {
 
         // act
         def appId = deployer.locateApplication('DEV',
-                new ApplicationName('the-app',false,false,null,null))
+                new ApplicationName('the-app', null, null))
 
         // assert
         assertThat appId,
@@ -427,7 +427,7 @@ class OnPremDeployerTest extends BaseTest {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                new ApplicationName('new-app',false,false,null,null),
+                new ApplicationName('new-app', null, null),
                                                   '1.2.3')
 
         // act
@@ -538,7 +538,7 @@ class OnPremDeployerTest extends BaseTest {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                new ApplicationName('new-app',false,false,null,null),
+                new ApplicationName('new-app', null, null),
                                                   '1.2.3')
         request.setAutoDiscoveryId('the.auto.disc.prop',
                                    '1234')
@@ -647,7 +647,7 @@ class OnPremDeployerTest extends BaseTest {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                new ApplicationName('new-app',false,false,null,null),
+                new ApplicationName('new-app', null, null),
                                                   '1.2.3',
                                                   [prop1: 'foo', prop2: 'bar'])
 
@@ -774,7 +774,7 @@ class OnPremDeployerTest extends BaseTest {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                new ApplicationName('the-app',false,false,null,null),
+                new ApplicationName('the-app', null, null),
                                                   '1.2.3')
 
         // act
@@ -893,7 +893,7 @@ class OnPremDeployerTest extends BaseTest {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                new ApplicationName('the-app',false,false,null,null),
+                new ApplicationName('the-app', null, null),
                                                   '1.2.3',
                                                   [prop1: 'foo', prop2: 'bar'])
 
@@ -1324,7 +1324,7 @@ class OnPremDeployerTest extends BaseTest {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                                                  new ApplicationName('new-app',false,false,null,null),
+                                                  new ApplicationName('new-app', null, null),
                                                   '1.2.3')
 
         // act
@@ -1371,7 +1371,7 @@ class OnPremDeployerTest extends BaseTest {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                new ApplicationName('new-app',false,false,null,null),
+                new ApplicationName('new-app', null, null),
                                                   '1.2.3')
 
         // act
@@ -1408,7 +1408,7 @@ class OnPremDeployerTest extends BaseTest {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                new ApplicationName('new-app',false,false,null,null),
+                new ApplicationName('new-app', null, null),
                                                   '1.2.3')
 
         // act
@@ -1451,7 +1451,7 @@ class OnPremDeployerTest extends BaseTest {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                new ApplicationName('new-app',false,false,null,null),
+                new ApplicationName('new-app', null, null),
                                                   '1.2.3')
 
         // act
@@ -1471,7 +1471,7 @@ class OnPremDeployerTest extends BaseTest {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                new ApplicationName('new-app',false,false,null,null),
+                new ApplicationName('new-app', null, null),
                                                   '1.2.3')
 
         // act
@@ -1489,7 +1489,7 @@ class OnPremDeployerTest extends BaseTest {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                new ApplicationName('new-app',false,false,null,null),
+                new ApplicationName('new-app', null, null),
                                                   '1.2.3')
 
         // act
@@ -1577,7 +1577,7 @@ class OnPremDeployerTest extends BaseTest {
         def request = new OnPremDeploymentRequest('DEV',
                                                   'clustera',
                                                   file,
-                                                    new ApplicationName('new-app',false,false,null,null),
+                                                    new ApplicationName('new-app', null, null),
                                                   '1.2.3')
         // act
         deployer.deploy(request)

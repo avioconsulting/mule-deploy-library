@@ -36,8 +36,6 @@ class RuntimeFabricContextTest implements MavenInvoke {
             appVersion '2.2.9'
             applicationName {
                 baseAppName 'the-app'
-                usePrefix true
-                useSuffix true
                 prefix 'AVI'
                 suffix 'dev'
             }
@@ -126,10 +124,8 @@ class RuntimeFabricContextTest implements MavenInvoke {
             environment 'DEV'
             applicationName {
                 baseAppName 'the-app'
-                usePrefix false
-                useSuffix false
-                prefix 'AVI'
-                suffix 'dev'
+                prefix ''
+                suffix ''
             }
             appVersion '2.2.9'
             cryptoKey 'theKey'

@@ -213,8 +213,6 @@ contributor([closureScopeContext]) {
     call = enclosingCall('applicationName')
     if (call) {
         #stringParam('baseAppName')
-        #boolParam('usePrefix')
-        #boolParam('useSuffix')
         #stringParam('prefix')
         #stringParam('suffix')
         #stringParam('normalizedAppName')

@@ -28,7 +28,7 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,false,'prefix',null),
+                                                    new ApplicationName('new-app','prefix',null),
                                                     '1.2.3',
                                                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
 
@@ -54,7 +54,7 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',true,false,'prefix',null),
+                                                    new ApplicationName('new-app','prefix',null),
                                                     '2.2.9',
                                                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
 
@@ -87,7 +87,7 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                             'theKey',
                                             'theClientId',
                                             'theSecret',
-                                            new ApplicationName('some app name',true,false,'prefix','DEV'),
+                                            new ApplicationName('some app name','prefix','DEV'),
                                             '1.2.3',
                                             'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
         }
@@ -102,7 +102,7 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
-                                                    new ApplicationName('new-app',false,true,null,'DEV'),
+                                                    new ApplicationName('new-app',null,'DEV'),
                                                     '2.2.9',
                                                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
 
@@ -182,7 +182,7 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                         'theKey',
                         'theClientId',
                         'theSecret',
-                        new ApplicationName('new-app',true,true,'prefix','DEV'),
+                        new ApplicationName('new-app','prefix','DEV'),
                         '1.2.3',
                         'new-group-id')
 

@@ -89,7 +89,7 @@ class IntegrationTest implements MavenInvoke {
                                                                   'abcdefg',
                                                                   ANYPOINT_CLIENT_ID,
                                                                   ANYPOINT_CLIENT_SECRET,
-                                                                  new ApplicationName(null, false, false, '', ''),
+                                                                  new ApplicationName(null, '', ''),
                                                                   null,
                                                                   [:])
         def logger = new TestConsoleLogger()

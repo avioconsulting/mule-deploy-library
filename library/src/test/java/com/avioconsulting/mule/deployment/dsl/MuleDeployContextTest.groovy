@@ -43,8 +43,6 @@ class MuleDeployContextTest implements AppBuilding {
                 environment 'DEV'
                 applicationName {
                     baseAppName 'the-app'
-                    usePrefix true
-                    useSuffix true
                     prefix 'AVI'
                     suffix 'dev'
                 }
@@ -98,8 +96,6 @@ class MuleDeployContextTest implements AppBuilding {
                 environment 'DEV'
                 applicationName {
                     baseAppName 'the-app'
-                    usePrefix true
-                    useSuffix true
                     prefix 'AVI'
                     suffix 'dev'
                 }
@@ -141,8 +137,6 @@ class MuleDeployContextTest implements AppBuilding {
                 environment 'DEV'
                 applicationName {
                     baseAppName 'the-app'
-                    usePrefix true
-                    useSuffix true
                     prefix 'AVI'
                     suffix 'dev'
                 }
@@ -192,8 +186,6 @@ class MuleDeployContextTest implements AppBuilding {
                 environment 'DEV'
                 applicationName {
                     baseAppName 'the-app'
-                    usePrefix true
-                    useSuffix true
                     prefix 'AVI'
                     suffix 'dev'
                 }
@@ -280,8 +272,6 @@ class MuleDeployContextTest implements AppBuilding {
                 environment 'DEV'
                 applicationName {
                     baseAppName 'the-app'
-                    usePrefix true
-                    useSuffix true
                     prefix 'AVI'
                     suffix 'dev'
                 }
@@ -294,8 +284,6 @@ class MuleDeployContextTest implements AppBuilding {
                 environment 'DEV'
                 applicationName {
                     baseAppName 'the-app'
-                    usePrefix true
-                    useSuffix true
                     prefix 'AVI'
                     suffix 'dev'
                 }
@@ -342,8 +330,6 @@ class MuleDeployContextTest implements AppBuilding {
                 environment 'DEV'
                 applicationName {
                     baseAppName 'the-app'
-                    usePrefix true
-                    useSuffix true
                     prefix 'AVI'
                     suffix 'dev'
                 }
@@ -356,8 +342,6 @@ class MuleDeployContextTest implements AppBuilding {
                 environment 'DEV'
                 applicationName {
                     baseAppName 'the-app'
-                    usePrefix true
-                    useSuffix true
                     prefix 'AVI'
                     suffix 'dev'
                 }
@@ -403,8 +387,6 @@ class MuleDeployContextTest implements AppBuilding {
                 environment 'DEV'
                 applicationName {
                     baseAppName 'the-app'
-                    usePrefix true
-                    useSuffix true
                     prefix 'AVI'
                     suffix 'dev'
                 }
@@ -417,8 +399,6 @@ class MuleDeployContextTest implements AppBuilding {
                 environment 'DEV'
                 applicationName {
                     baseAppName 'the-app'
-                    usePrefix true
-                    useSuffix true
                     prefix 'AVI'
                     suffix 'dev'
                 }
@@ -479,8 +459,6 @@ class MuleDeployContextTest implements AppBuilding {
                 environment 'DEV'
                 applicationName {
                     baseAppName 'the-app'
-                    usePrefix true
-                    useSuffix true
                     prefix 'AVI'
                     suffix 'dev'
                 }
@@ -527,8 +505,6 @@ class MuleDeployContextTest implements AppBuilding {
                 environment 'DEV'
                 applicationName {
                     baseAppName 'the-app'
-                    usePrefix true
-                    useSuffix true
                     prefix 'AVI'
                     suffix 'dev'
                 }
@@ -572,8 +548,6 @@ class MuleDeployContextTest implements AppBuilding {
                 environment 'DEV'
                 applicationName {
                     baseAppName 'the-app'
-                    usePrefix true
-                    useSuffix false
                     prefix 'AVI'
                     suffix 'dev'
                 }
@@ -614,8 +588,6 @@ class MuleDeployContextTest implements AppBuilding {
                 environment 'DEV'
                 applicationName {
                     baseAppName 'the-app'
-                    usePrefix true
-                    useSuffix true
                     prefix 'AVI'
                     suffix 'dev'
                 }
@@ -658,8 +630,6 @@ class MuleDeployContextTest implements AppBuilding {
                 environment 'DEV'
                 applicationName {
                     baseAppName 'the-app'
-                    usePrefix true
-                    useSuffix true
                     prefix 'AVI'
                     suffix 'dev'
                 }

@@ -13,7 +13,7 @@ class ApplicationNameTest {
         // arrange
 
         // act
-        def name = (new ApplicationName('avio-consulting', true, true, 'app-prefix', 'app-suffix')).normalizedAppName
+        def name = (new ApplicationName('avio-consulting', 'app-prefix', 'app-suffix')).normalizedAppName
         // assert
         assert name == 'app-prefix-avio-consulting-app-suffix'
     }
@@ -24,7 +24,7 @@ class ApplicationNameTest {
 
         // act
         def exception = shouldFail {
-            (new ApplicationName('avio consulting', true, true, 'app-prefix', 'app-suffix')).normalizedAppName
+            (new ApplicationName('avio consulting', 'app-prefix', 'app-suffix')).normalizedAppName
         }
         // assert
         MatcherAssert.assertThat('fail', exception.message.contains("Name must be alphanumeric with dashes allowed within"))
@@ -36,7 +36,7 @@ class ApplicationNameTest {
 
         // act
         def exception = shouldFail {
-            (new ApplicationName(null, false, false, null, null)).normalizedAppName
+            (new ApplicationName(null, null, null)).normalizedAppName
         }
         // assert
         MatcherAssert.assertThat('fail', exception.message.contains("Name must be alphanumeric with dashes allowed within"))
@@ -48,7 +48,7 @@ class ApplicationNameTest {
 
         // act
         def exception = shouldFail {
-            (new ApplicationName('-avio-consulting', true, true, 'app-prefix', 'app-suffix')).normalizedAppName
+            (new ApplicationName('-avio-consulting', 'app-prefix', 'app-suffix')).normalizedAppName
         }
         // assert
         MatcherAssert.assertThat('fail', exception.message.contains("Name must be alphanumeric with dashes allowed within"))
@@ -60,7 +60,7 @@ class ApplicationNameTest {
 
         // act
         def exception = shouldFail {
-            (new ApplicationName('avio-consulting-', true, true, 'app-prefix', 'app-suffix')).normalizedAppName
+            (new ApplicationName('avio-consulting-', 'app-prefix', 'app-suffix')).normalizedAppName
         }
         // assert
         MatcherAssert.assertThat('fail', exception.message.contains("Name must be alphanumeric with dashes allowed within"))
@@ -72,7 +72,7 @@ class ApplicationNameTest {
 
         // act
         def exception = shouldFail {
-            (new ApplicationName('avio-consulting', true, true, 'app@prefix', 'app-suffix')).normalizedAppName
+            (new ApplicationName('avio-consulting', 'app@prefix', 'app-suffix')).normalizedAppName
         }
         // assert
         MatcherAssert.assertThat('fail', exception.message.contains("Prefix must be alphanumeric with dashes allowed within"))
@@ -84,7 +84,7 @@ class ApplicationNameTest {
 
         // act
         def exception = shouldFail {
-            (new ApplicationName('avio-consulting', true, true, 'app-prefix', 'app$suffix')).normalizedAppName
+            (new ApplicationName('avio-consulting', 'app-prefix', 'app$suffix')).normalizedAppName
         }
         // assert
         MatcherAssert.assertThat('fail', exception.message.contains("Suffix must be alphanumeric with dashes allowed within"))

@@ -35,8 +35,6 @@ class CloudhubV2ContextTest implements MavenInvoke {
             appVersion '2.2.9'
             applicationName {
                 baseAppName 'the-app'
-                usePrefix true
-                useSuffix true
                 prefix 'AVI'
                 suffix 'dev'
             }
@@ -125,9 +123,6 @@ class CloudhubV2ContextTest implements MavenInvoke {
             environment 'DEV'
             applicationName {
                 baseAppName 'the-app'
-                usePrefix true
-                useSuffix false
-                prefix 'AVI'
                 suffix 'dev'
             }
             appVersion '2.2.9'
@@ -169,7 +164,7 @@ class CloudhubV2ContextTest implements MavenInvoke {
             assertThat anypointClientSecret,
                     is(equalTo('the_client_secret'))
             assertThat applicationName.normalizedAppName,
-                    is(equalTo('avi-the-app'))
+                    is(equalTo('the-app-dev'))
             workerSpecRequest.with {
                 assertThat target,
                         is(equalTo('target_name'))

@@ -138,10 +138,7 @@ class CloudhubContextTest implements MavenInvoke {
             }
             applicationName {
                 baseAppName 'the-app'
-                usePrefix true
-                useSuffix false
                 prefix 'AVI'
-                suffix 'dev'
             }
             analyticsAgentEnabled false
             file builtFile.absolutePath
@@ -320,8 +317,6 @@ class CloudhubContextTest implements MavenInvoke {
             environment 'DEV'
             applicationName {
                 baseAppName 'the-app'
-                usePrefix true
-                useSuffix false
                 prefix 'AVI'
             }
             appVersion '1.2.3'
