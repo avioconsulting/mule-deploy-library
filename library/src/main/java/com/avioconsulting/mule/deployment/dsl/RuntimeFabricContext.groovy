@@ -9,6 +9,7 @@ class RuntimeFabricContext extends BaseContext {
     AutodiscoveryContext autoDiscovery = new AutodiscoveryContext()
     ApplicationNameContext applicationName = new ApplicationNameContext()
     Map<String, String> appProperties = [:]
+    Map<String, String> appSecureProperties = [:]
     Map<String, String> otherCloudHubProperties = [:]
 
     RuntimeFabricDeploymentRequest createDeploymentRequest() {
@@ -22,6 +23,7 @@ class RuntimeFabricContext extends BaseContext {
                                            this.appVersion,
                                            this.businessGroupId,
                                            this.appProperties,
+                                           this.appSecureProperties,
                                            this.otherCloudHubProperties)
     }
 

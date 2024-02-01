@@ -19,8 +19,9 @@ class CloudhubV2DeploymentRequest extends RuntimeFabricDeploymentRequest {
                                 String appVersion,
                                 String groupId,
                                 Map<String, String> appProperties = [:],
+                                Map<String, String> appSecureProperties = [:],
                                 Map<String, String> otherCloudHubProperties = [:]) {
-        super(environment, workerSpecRequest, cryptoKey, anypointClientId, anypointClientSecret, applicationName, appVersion, groupId, appProperties, otherCloudHubProperties)
+        super(environment, workerSpecRequest, cryptoKey, anypointClientId, anypointClientSecret, applicationName, appVersion, groupId, appProperties, appSecureProperties, otherCloudHubProperties)
     }
 
     Map<String, String> getCloudhubAppInfo() {
