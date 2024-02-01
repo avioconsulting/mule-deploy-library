@@ -108,7 +108,7 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
 
     Map<String, String> getCloudhubBaseAppInfo() {
         def props = this.autoDiscoveries
-        props += this.appProperties
+        props += (this.appProperties ?: [:])
 
         def secureProps = this.appSecureProperties
 
@@ -157,7 +157,7 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
                 ]
         ] as Map<String, String>
 
-        def appInfo = result + otherCloudHubProperties
+        def appInfo = result + (this.otherCloudHubProperties ?: [:])
         appInfo
 
     }
