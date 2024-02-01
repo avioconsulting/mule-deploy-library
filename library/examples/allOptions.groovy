@@ -1,6 +1,3 @@
-import com.avioconsulting.mule.deployment.api.models.UpdateStrategy
-import com.avioconsulting.mule.deployment.api.models.VCoresSize
-
 muleDeploy {
     // version of the tool
     version '1.0'
