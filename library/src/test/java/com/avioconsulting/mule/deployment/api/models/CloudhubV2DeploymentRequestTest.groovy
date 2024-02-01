@@ -103,7 +103,8 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                                    configuration: [
                                            "mule.agent.application.properties.service": [
                                                    applicationName: 'new-app',
-                                                   properties: [:]
+                                                   properties: [:],
+                                                   secureProperties: [:]
                                            ]
                                    ],
                                    integrations:[
@@ -156,7 +157,9 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                 'theSecret',
                 new ApplicationName('new-app', 'prefix', null),
                 '1.2.3',
-                'new-group-id')
+                'new-group-id',
+                ["prop1": "value1", "prop2": "value2"],
+                ["secureProp1": "secureValue1", "secureProp2": "secureValue2"])
 
         request.setAutoDiscoveryId("apiId", "123")
 
@@ -177,7 +180,13 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                                            "mule.agent.application.properties.service": [
                                                    applicationName: 'new-app',
                                                    properties     : [
-                                                           apiId : '123'
+                                                           apiId : '123',
+                                                           prop1: 'value1',
+                                                           prop2: 'value2'
+                                                   ],
+                                                   secureProperties: [
+                                                           secureProp1: 'secureValue1',
+                                                           secureProp2: 'secureValue2'
                                                    ]
                                            ]
                                    ],

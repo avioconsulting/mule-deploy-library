@@ -55,11 +55,13 @@ class WorkerSpecRequest {
 
     /**
      * Specifies the number of cores to allocate for each application replica. The default value is 0.5 vCores
+     * Valid only for RTF deployment, not for CloudHub 2.0
      */
     final String cpuReserved
 
     /**
      * Specifies the amount of memory to allocate for each application replica. The default value is 700 MB
+     * Valid only for RTF deployment, not for CloudHub 2.0
      */
     final String memoryReserved
 

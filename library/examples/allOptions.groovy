@@ -125,4 +125,44 @@ muleDeploy {
                 some_ch_value_we_havent_covered_yet: true
         ])
     }
+
+    cloudHubV2Application {
+        environment params.env
+        applicationName {
+            baseAppName 'the-app'
+            prefix params.env
+            suffix params.env
+        }
+        appVersion '${project.version}'
+        workerSpecs {
+            target 'Cloudhub-US-West-2'
+            muleVersion '4.4.0'
+            persistentObjectStore false
+            lastMileSecurity false
+            clustered false
+            updateStrategy UpdateStrategy.recreate
+            replicasAcrossNodes false
+            publicURL false
+            replicaSize VCoresSize.vCore1GB
+            workerCount 1
+            forwardSslSession false
+            disableAmLogForwarding true
+        }
+        businessGroupId '${project.groupId}'
+        autoDiscovery {
+            clientId 'the_client_id'
+            clientSecret 'the_client_secret'
+        }
+        // optional from here on out
+        appProperties([
+            someProp: 'someValue'
+        ])
+        appSecureProperties([
+            firstSecureProp: true,
+            secondSecureProp: 'second'
+        ])
+        otherCloudHubProperties([
+            some_ch_value_we_havent_covered_yet: true
+        ])
+    }
 }

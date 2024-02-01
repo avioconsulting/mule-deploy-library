@@ -15,6 +15,7 @@ class CloudhubV2Context extends RuntimeFabricContext {
                                       this.appVersion,
                                       this.businessGroupId,
                                       this.appProperties,
+                                      this.appSecureProperties,
                                       this.otherCloudHubProperties)
     }
 

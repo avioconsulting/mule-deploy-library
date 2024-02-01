@@ -144,6 +144,13 @@ class CloudhubV2ContextTest implements MavenInvoke {
                 replicaSize VCoresSize.vCore15GB
                 workerCount 13
             }
+            appProperties ([
+                someProp: 'someValue',
+            ])
+            appSecureProperties ([
+                secureProp1: "123",
+                secureProp2: "456"
+            ])
         }
         closure.delegate = context
 
@@ -187,6 +194,12 @@ class CloudhubV2ContextTest implements MavenInvoke {
                 assertThat workerCount,
                         is(equalTo(13))
             }
+            assertThat appProperties.someProp,
+                    is(equalTo('someValue'))
+            assertThat appSecureProperties.secureProp1,
+                    is(equalTo('123'))
+            assertThat appSecureProperties.secureProp2,
+                    is(equalTo('456'))
         }
     }
 

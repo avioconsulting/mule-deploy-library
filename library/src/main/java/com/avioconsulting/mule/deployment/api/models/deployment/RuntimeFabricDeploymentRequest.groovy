@@ -31,6 +31,10 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
      */
     final Map<String, String> appProperties
     /**
+     * Mule secure app property overrides (the stuff in the properties tab that will hide the value)
+     */
+    final Map<String, String> appSecureProperties
+    /**
      * CloudHub level property overrides (e.g. region type stuff)
      */
     final Map<String, String> otherCloudHubProperties
@@ -75,6 +79,7 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
                                    String appVersion,
                                    String groupId,
                                    Map<String, String> appProperties = [:],
+                                   Map<String, String> appSecureProperties = [:],
                                    Map<String, String> otherCloudHubProperties = [:]) {
         super(applicationName, appVersion, environment)
         this.groupId = groupId
@@ -85,6 +90,7 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
         this.anypointClientId = anypointClientId
         this.anypointClientSecret = anypointClientSecret
         this.appProperties = appProperties
+        this.appSecureProperties = appSecureProperties
         this.otherCloudHubProperties = otherCloudHubProperties
 
         if(!applicationName.baseAppName){
@@ -102,6 +108,9 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
 
     Map<String, String> getCloudhubBaseAppInfo() {
         def props = this.autoDiscoveries
+        props += this.appProperties
+
+        def secureProps = this.appSecureProperties
 
         def result = [
                 // CloudHub's v2 API calls the Mule application the 'domain'
@@ -117,7 +126,8 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
                         configuration: [
                                 "mule.agent.application.properties.service": [
                                         applicationName: applicationName.baseAppName,
-                                        properties: props
+                                        properties: props,
+                                        secureProperties: secureProps
                                 ]
                         ],
                         integrations: [
@@ -146,7 +156,10 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
                         replicas: workerSpecRequest.workerCount
                 ]
         ] as Map<String, String>
-        result
+
+        def appInfo = result + otherCloudHubProperties
+        appInfo
+
     }
 
     Map<String, String> getCloudhubAppInfo() {

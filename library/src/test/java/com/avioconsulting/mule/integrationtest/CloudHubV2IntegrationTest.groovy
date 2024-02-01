@@ -179,6 +179,7 @@ class CloudHubV2IntegrationTest {
                 APP_VERSION,
                 GROUP_ID,
                 null,
+                null,
                 null
         )
     }
@@ -202,6 +203,7 @@ class CloudHubV2IntegrationTest {
                 new ApplicationName(APP_NAME, 'AVI', 'dev'),
                 APP_VERSION,
                 GROUP_ID,
+                null,
                 null,
                 null
         )
@@ -231,8 +233,9 @@ class CloudHubV2IntegrationTest {
                   new ApplicationName(APP_NAME, 'AVI', 'dev'),
                   APP_VERSION,
                   GROUP_ID,
-                null,
-                null
+                  null,
+                  null,
+                  null
         )
     }
 
