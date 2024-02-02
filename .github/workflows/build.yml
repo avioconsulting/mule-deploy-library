@@ -44,7 +44,7 @@ jobs:
         run: echo "Version ${{ steps.set-version.outputs.version }}"
 
       - name: Set test suite
-        if: ${{ github.ref != 'refs/heads/master' }}
+        if: github.ref != 'refs/heads/master' && github.event_name != 'pull_request'
         run: echo "GITHUB_TEST_SUITE=UnitTestSuite" >> $GITHUB_ENV
 
       - name: Compile
