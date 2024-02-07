@@ -47,10 +47,6 @@ abstract class BaseMojo extends AbstractMojo {
             logger.println "Adding ${artifact.file} path as appArtifact in your DSL"
             props['appArtifact'] = artifact.file.absolutePath
         }
-//        else if (primaryArtifact) {
-//            logger.println "Adding ${primaryArtifact} path as appArtifact in your DSL"
-//            props['appArtifact'] = primaryArtifact.absolutePath
-//        }
         new ParamsWrapper(props + additionalProperties)
     }
 
