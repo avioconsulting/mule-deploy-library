@@ -27,9 +27,15 @@ abstract class BaseMojo extends AbstractMojo {
      * @return #{ParamsWrapper} - All properties from command-line (already formatted) plus the additionalProperties var
      */
     protected ParamsWrapper getParamsWrapper() {
-        def artifact = mavenProject.attachedArtifacts.find { a ->
-            a.classifier == 'mule-application'
-        }?.file
+        def artifact = mavenProject.artifact
+
+        if (artifact == null || artifact.classifier != 'mule-application') {
+            logger.println "Didn't find mavenProject.artifact with appropriate classifier. Falling back to attached artifacts."
+            artifact = mavenProject.attachedArtifacts.find { a ->
+                a.classifier == 'mule-application'
+            }
+        }
+
         def props = System.getProperties().findAll { String k, v ->
             (k as String).startsWith('muleDeploy.')
         }.collectEntries { k, v ->
@@ -38,8 +44,8 @@ abstract class BaseMojo extends AbstractMojo {
             [withoutPrefix, v]
         }
         if (artifact) {
-            logger.println "Adding ${artifact} path as appArtifact in your DSL"
-            props['appArtifact'] = artifact.absolutePath
+            logger.println "Adding ${artifact.file} path as appArtifact in your DSL"
+            props['appArtifact'] = artifact.file.absolutePath
         }
         new ParamsWrapper(props + additionalProperties)
     }
