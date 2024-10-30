@@ -516,6 +516,23 @@ class PolicyContextTest {
     }
 
     @Test
+    void client_enforcement_policy_custom_minimum() {
+        // arrange
+        def context = new ClientEnforcementPolicyCustomContext()
+        def closure = {
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createPolicyModel()
+
+        // assert
+        assertThat request,
+                is(equalTo(new ClientEnforcementPolicyCustomAuth()))
+    }
+
+    @Test
     void client_enforcement_policy_full() {
         // arrange
         def context = new ClientEnforcementPolicyBasicContext()
