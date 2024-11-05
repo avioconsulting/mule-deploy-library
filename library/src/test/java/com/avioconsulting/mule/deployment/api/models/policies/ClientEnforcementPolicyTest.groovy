@@ -42,7 +42,7 @@ class ClientEnforcementPolicyTest {
         // arrange
 
         // act
-        def model = new ClientEnforcementPolicyCustom()
+        def model = new ClientEnforcementPolicyCustomAuth()
 
         // assert
         assertThat model.groupId,

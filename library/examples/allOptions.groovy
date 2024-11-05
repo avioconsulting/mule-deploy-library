@@ -65,6 +65,11 @@ muleDeploy {
             version '1.2.1'
             // can supply paths just like above if necessary
         }
+        clientEnforcementPolicyCustom {
+            // version is optional (will use version in this library by default)
+            version '1.2.1'
+            // can supply paths just like above if necessary
+        }
         DLBIPWhiteListPolicy {
             ipsToAllow ['192.168.1.1']
         }
