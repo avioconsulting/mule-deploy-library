@@ -17,6 +17,8 @@ class WorkerSpecV2Context extends BaseContext {
     VCoresSize replicaSize = VCoresSize.vCore1GB
     int workerCount = 1
     int cpuReserved, memoryReserved
+    String publicUrl, releaseChannel, javaVersion
+    boolean pathRewrite, tracingEnabled
 
     WorkerSpecRequest createRequest() {
         new WorkerSpecRequest(this.target,
@@ -32,7 +34,12 @@ class WorkerSpecV2Context extends BaseContext {
                               this.forwardSslSession,
                               this.disableAmLogForwarding,
                               this.cpuReserved,
-                              this.memoryReserved)
+                              this.memoryReserved,
+                              this.publicUrl,
+                              this.pathRewrite,
+                              this.releaseChannel,
+                              this.javaVersion,
+                              this.tracingEnabled)
     }
 
     @Override
@@ -40,7 +47,8 @@ class WorkerSpecV2Context extends BaseContext {
         [
             'lastMileSecurity', 'persistentObjectStore', 'clustered',
             'updateStrategy', 'replicasAcrossNodes', 'publicURL', 'replicaSize',
-            'workerCount', 'cpuReserved', 'memoryReserved'
+            'workerCount', 'cpuReserved', 'memoryReserved', 'publicUrl', 'pathRewrite',
+            'releaseChannel', 'javaVersion', 'tracingEnabled'
         ]
     }
 }
