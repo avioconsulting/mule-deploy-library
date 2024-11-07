@@ -133,21 +133,34 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                                ]
                                            ]
                                    ],
-                                   objectStoreV2Enabled:false
+                                   "vCores": VCoresSize.vCore1GB
                            ],
                            target: [
                                    targetId: null,
                                    provider: "MC",
                                    deploymentSettings: [
-                                           runtimeVersion: '4.2.2',
-                                           lastMileSecurity: false,
                                            persistentObjectStore: false,
                                            clustered: false,
                                            updateStrategy: UpdateStrategy.rolling,
                                            enforceDeployingReplicasAcrossNodes: false,
-                                           forwardSslSession: false,
                                            disableAmLogForwarding: true,
                                            generateDefaultPublicUrl: false,
+                                           http: [
+                                                   inbound: [
+                                                           publicUrl : null,
+                                                           pathRewrite: false,
+                                                           forwardSslSession: false,
+                                                           lastMileSecurity: false,
+                                                   ]
+                                           ],
+                                           jvm: [:],
+                                           outbound: [:],
+                                           runtime : [
+                                                   version: '4.2.2',
+                                                   releaseChannel: 'LTS',
+                                                   java: '8'
+                                           ],
+                                           tracingEnabled : false,
                                            resources: [
                                                    cpu: [
                                                            reserved: "20m"
@@ -179,7 +192,12 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                         true,
                         false,
                         456,
-                        789),
+                        789,
+                        "testUrl",
+                        false,
+                        "EDGE",
+                        "17",
+                        true),
                         'theKey',
                         'theClientId',
                         'theSecret',
@@ -225,21 +243,34 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                                    ]
                                            ]
                                    ],
-                                   objectStoreV2Enabled:true
+                                   "vCores": VCoresSize.vCore15GB
                            ],
                            target: [
                                    targetId: null,
                                    provider: "MC",
                                    deploymentSettings: [
-                                           runtimeVersion: '4.2.2',
-                                           lastMileSecurity: true,
                                            persistentObjectStore: true,
                                            clustered: true,
                                            updateStrategy: UpdateStrategy.recreate,
                                            enforceDeployingReplicasAcrossNodes: true,
-                                           forwardSslSession: true,
                                            disableAmLogForwarding: false,
                                            generateDefaultPublicUrl: true,
+                                           http: [
+                                                   inbound: [
+                                                           publicUrl : 'testUrl',
+                                                           pathRewrite: false,
+                                                           forwardSslSession: true,
+                                                           lastMileSecurity: true
+                                                   ]
+                                           ],
+                                           jvm: [:],
+                                           outbound: [:],
+                                           runtime : [
+                                                   version: '4.2.2',
+                                                   releaseChannel: 'EDGE',
+                                                   java: '17'
+                                           ],
+                                           tracingEnabled : true,
                                            resources: [
                                                    cpu: [
                                                            reserved: "456m"
