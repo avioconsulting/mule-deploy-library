@@ -95,7 +95,7 @@ class WorkerSpecRequest {
     /***
      * The Java Version, this is either 8 or 17
      */
-    final String java
+    final String javaVersion
     /***
      * Tracing Enabled flag, this defaults to false
      */
@@ -120,7 +120,7 @@ class WorkerSpecRequest {
                       String publicUrl = null,
                       boolean pathRewrite = null,
                       String releaseChannel = "LTS",
-                      String java = "8",
+                      String javaVersion = "8",
                       Boolean tracingEnabled = false) {
         this.muleVersion = muleVersion
         this.lastMileSecurity = lastMileSecurity
@@ -139,7 +139,7 @@ class WorkerSpecRequest {
         this.publicUrl = publicUrl
         this.pathRewrite = pathRewrite
         this.releaseChannel = releaseChannel
-        this.java = java
+        this.javaVersion = javaVersion
         this.tracingEnabled = tracingEnabled
     }
 

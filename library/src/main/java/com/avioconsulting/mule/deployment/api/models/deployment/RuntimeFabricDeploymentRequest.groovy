@@ -162,7 +162,7 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
                                 runtime: [
                                         version : workerSpecRequest.muleVersion,
                                         releaseChannel : workerSpecRequest.releaseChannel,
-                                        java : workerSpecRequest.java
+                                        java : workerSpecRequest.javaVersion
                                 ],
                                 tracingEnabled : workerSpecRequest.tracingEnabled
 
