@@ -79,14 +79,13 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
     void test_getCloudhubAppInfo_only_required() {
 
         def request = new CloudhubV2DeploymentRequest('DEV',
-                                                    new WorkerSpecRequest('us-west-2', '4.3.0'),
+                                                    new WorkerSpecRequest('us-west-2', '4.3.0' ),
                                                     'theKey',
                                                     'theClientId',
                                                     'theSecret',
                                                     new ApplicationName('new-app', null, null),
                                                     '2.2.9',
                                                     'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
-
         def appInfo = request.getCloudhubAppInfo()
 
         assertThat appInfo,
@@ -114,26 +113,38 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                                                    ]
                                            ]
                                    ],
-                                   objectStoreV2Enabled: false,
                                    "vCores": VCoresSize.vCore1GB.vCoresSize
                            ],
                            target: [
                                    targetId: null,
                                    provider: "MC",
                                    deploymentSettings: [
-                                           runtimeVersion: '4.3.0',
-                                           lastMileSecurity: false,
                                            persistentObjectStore: false,
                                            clustered: false,
                                            updateStrategy: UpdateStrategy.rolling,
-                                           enforceDeployingReplicasAcrossNodes: false,
-                                           forwardSslSession: false,
+                                           enforceDeployingReplicasAcrossNodes: true,
                                            disableAmLogForwarding: true,
-                                           generateDefaultPublicUrl: false
+                                           generateDefaultPublicUrl: false,
+                                           http: [
+                                                   inbound: [
+                                                           publicUrl : null,
+                                                           pathRewrite: false,
+                                                           forwardSslSession: false,
+                                                           lastMileSecurity: false,
+                                                   ]
+                                           ],
+                                           jvm : [:],
+                                           outbound: [:],
+                                           runtime : [
+                                                   version: '4.3.0',
+                                                   releaseChannel: 'LTS',
+                                                   java: '8'
+                                           ],
+                                           tracingEnabled : false
                                    ],
                                    replicas: 1
-                           ]
-                   ]))
+                           ]]
+                   ))
     }
 
     @Test
@@ -151,7 +162,14 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                         VCoresSize.vCore15GB,
                         13,
                         true,
-                        false),
+                        false,
+                        20,
+                        700,
+                        "testUrl",
+                        false,
+                        "EDGE",
+                        "17",
+                        true),
                 'theKey',
                 'theClientId',
                 'theSecret',
@@ -197,26 +215,37 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                                                    ]
                                            ]
                                    ],
-                                   objectStoreV2Enabled:true,
                                    "vCores": VCoresSize.vCore15GB.vCoresSize
                            ],
                            target: [
                                    targetId: null,
                                    provider: "MC",
                                    deploymentSettings: [
-                                           runtimeVersion: '4.2.2',
-                                           lastMileSecurity: true,
-                                           persistentObjectStore: true,
+                                           persistentObjectStore: false,
                                            clustered: true,
                                            updateStrategy: UpdateStrategy.recreate,
                                            enforceDeployingReplicasAcrossNodes: true,
-                                           forwardSslSession: true,
                                            disableAmLogForwarding: false,
-                                           generateDefaultPublicUrl: true
-                                   ],
-                                   replicas: 13
-                           ]
-                   ]))
+                                           generateDefaultPublicUrl: true,
+                                           http: [
+                                                   inbound: [
+                                                           publicUrl : 'testUrl',
+                                                           pathRewrite: false,
+                                                           forwardSslSession: true,
+                                                           lastMileSecurity: true
+                                                   ]
+                                           ],
+                                           jvm: [:],
+                                            outbound: [:],
+                                            runtime : [
+                                                version: '4.2.2',
+                                                releaseChannel: 'EDGE',
+                                                java: '17'
+                                            ],
+                                            tracingEnabled : true
+                           ],
+                           replicas: 13
+                   ]]))
     }
 
     /**

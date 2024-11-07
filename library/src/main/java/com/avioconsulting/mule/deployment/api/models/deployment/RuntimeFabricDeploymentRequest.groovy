@@ -137,21 +137,35 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
                                         ]
                                 ]
                         ],
-                        "objectStoreV2Enabled": workerSpecRequest.persistentObjectStore,
+                        vCores: workerSpecRequest.replicaSize
                 ],
                 target: [
                         targetId: targetId,
                         provider: provider,
                         deploymentSettings: [
-                                runtimeVersion: workerSpecRequest.muleVersion,
-                                lastMileSecurity: workerSpecRequest.lastMileSecurity,
                                 persistentObjectStore: workerSpecRequest.persistentObjectStore,
                                 clustered: workerSpecRequest.clustered,
                                 updateStrategy: workerSpecRequest.updateStrategy,
                                 enforceDeployingReplicasAcrossNodes: workerSpecRequest.replicasAcrossNodes,
-                                forwardSslSession: workerSpecRequest.forwardSslSession,
                                 disableAmLogForwarding: workerSpecRequest.disableAmLogForwarding,
-                                generateDefaultPublicUrl: workerSpecRequest.publicURL
+                                generateDefaultPublicUrl: workerSpecRequest.publicURL,
+                                http: [
+                                        inbound: [
+                                                publicUrl: workerSpecRequest.publicUrl,
+                                                pathRewrite: workerSpecRequest.pathRewrite,
+                                                lastMileSecurity: workerSpecRequest.lastMileSecurity,
+                                                forwardSslSession: workerSpecRequest.forwardSslSession
+                                        ]
+                                ],
+                                jvm : [:],
+                                outbound: [:],
+                                runtime: [
+                                        version : workerSpecRequest.muleVersion,
+                                        releaseChannel : workerSpecRequest.releaseChannel,
+                                        java : workerSpecRequest.java
+                                ],
+                                tracingEnabled : workerSpecRequest.tracingEnabled
+
                         ],
                         replicas: workerSpecRequest.workerCount
                 ]

@@ -80,7 +80,26 @@ class WorkerSpecRequest {
      * Specify either a shared space or a private space available in your Deployment Target values in CloudHub 2.0
      */
     final String target
-
+    /***
+     * The publicUrl, this is defined when the user wishes to deploy an API with a public ingress endpoint available
+     */
+    final String publicUrl
+    /***
+     * Overwriting the publicUrl, this is defined and publicUrl is null when a User wishes to overwrite their custom url for the API
+     */
+    final boolean pathRewrite
+    /***
+     * The releaseChannel, this is either LTS or EDGE
+     */
+    final String releaseChannel
+    /***
+     * The Java Version, this is either 8 or 17
+     */
+    final String java
+    /***
+     * Tracing Enabled flag, this defaults to false
+     */
+    final Boolean tracingEnabled
     /***
      * Standard request, see properties for parameter info.
      */
@@ -97,7 +116,12 @@ class WorkerSpecRequest {
                       boolean forwardSslSession = false,
                       boolean disableAmLogForwarding = true,
                       int cpuReserved = 20,
-                      int memoryReserved = 700) {
+                      int memoryReserved = 700,
+                      String publicUrl = null,
+                      boolean pathRewrite = null,
+                      String releaseChannel = "LTS",
+                      String java = "8",
+                      Boolean tracingEnabled = false) {
         this.muleVersion = muleVersion
         this.lastMileSecurity = lastMileSecurity
         this.persistentObjectStore = persistentObjectStore
@@ -112,6 +136,11 @@ class WorkerSpecRequest {
         this.replicaSize = replicaSize
         this.workerCount = workerCount
         this.target = target
+        this.publicUrl = publicUrl
+        this.pathRewrite = pathRewrite
+        this.releaseChannel = releaseChannel
+        this.java = java
+        this.tracingEnabled = tracingEnabled
     }
 
 }

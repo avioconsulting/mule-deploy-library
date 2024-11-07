@@ -26,6 +26,8 @@ class CloudhubV2DeploymentRequest extends RuntimeFabricDeploymentRequest {
 
     Map<String, String> getCloudhubAppInfo() {
         def result = super.getCloudhubBaseAppInfo()
+        result.target.deploymentSettings.enforceDeployingReplicasAcrossNodes = true
+        result.target.deploymentSettings.persistentObjectStore = false
         def vCores = ["vCores": workerSpecRequest.replicaSize.vCoresSize]
         result.application << vCores
         result
