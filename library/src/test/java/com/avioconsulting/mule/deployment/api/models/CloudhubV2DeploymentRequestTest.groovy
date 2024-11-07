@@ -110,6 +110,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                                            services : [
                                                    objectStoreV2: [
                                                            enabled: false
+
                                                    ]
                                            ]
                                    ],
@@ -124,7 +125,7 @@ class CloudhubV2DeploymentRequestTest implements MavenInvoke {
                                            updateStrategy: UpdateStrategy.rolling,
                                            enforceDeployingReplicasAcrossNodes: true,
                                            disableAmLogForwarding: true,
-                                           generateDefaultPublicUrl: false,
+                                           generateDefaultPublicUrl: true,
                                            http: [
                                                    inbound: [
                                                            publicUrl : null,

@@ -51,7 +51,7 @@ class WorkerSpecRequest {
     /***
      * When this parameter is set to true, CloudHub 2.0 generates a public URL for the deployed application. Default to false
      */
-    final boolean publicURL
+    final boolean generateDefaultPublicUrl
 
     /**
      * Specifies the number of cores to allocate for each application replica. The default value is 0.5 vCores
@@ -110,7 +110,7 @@ class WorkerSpecRequest {
                       boolean clustered = false,
                       UpdateStrategy updateStrategy = UpdateStrategy.rolling,
                       boolean replicasAcrossNodes = false,
-                      boolean publicURL = false,
+                      boolean generateDefaultPublicUrl = true,
                       VCoresSize replicaSize = VCoresSize.vCore1GB,
                       int workerCount = 1,
                       boolean forwardSslSession = false,
@@ -128,7 +128,7 @@ class WorkerSpecRequest {
         this.clustered = clustered
         this.updateStrategy = updateStrategy
         this.replicasAcrossNodes = replicasAcrossNodes
-        this.publicURL = publicURL
+        this.generateDefaultPublicUrl = generateDefaultPublicUrl
         this.forwardSslSession = forwardSslSession
         this.disableAmLogForwarding = disableAmLogForwarding
         this.cpuReserved = "${cpuReserved}m"

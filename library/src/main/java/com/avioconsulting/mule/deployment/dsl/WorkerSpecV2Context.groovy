@@ -11,14 +11,17 @@ class WorkerSpecV2Context extends BaseContext {
     boolean clustered = false
     UpdateStrategy updateStrategy = UpdateStrategy.rolling
     boolean replicasAcrossNodes = false
-    boolean publicURL = false
+    boolean generateDefaultPublicUrl = true
     boolean forwardSslSession = false
     boolean disableAmLogForwarding = true
     VCoresSize replicaSize = VCoresSize.vCore1GB
     int workerCount = 1
     int cpuReserved, memoryReserved
-    String publicUrl, releaseChannel, javaVersion
-    boolean pathRewrite, tracingEnabled
+    String publicUrl
+    String releaseChannel
+    String javaVersion
+    boolean pathRewrite
+    boolean tracingEnabled
 
     WorkerSpecRequest createRequest() {
         new WorkerSpecRequest(this.target,
@@ -28,7 +31,7 @@ class WorkerSpecV2Context extends BaseContext {
                               this.clustered,
                               this.updateStrategy,
                               this.replicasAcrossNodes,
-                              this.publicURL,
+                              this.generateDefaultPublicUrl,
                               this.replicaSize,
                               this.workerCount,
                               this.forwardSslSession,

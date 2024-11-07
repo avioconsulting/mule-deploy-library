@@ -41,6 +41,11 @@ muleDeploy {
             updateStrategy 'recreate'
             forwardSslSession 'true'
             publicUrl 'myapp.anypoint.com'
+            pathRewrite '/test'
+            releaseChannel 'EDGE'
+            javaVersion '17'
+            tracingEnabled 'true'
+            generateDefaultPublicUrl 'false'
         }
 
         environment 'DEV'

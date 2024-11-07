@@ -148,7 +148,7 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
                                 updateStrategy: workerSpecRequest.updateStrategy,
                                 enforceDeployingReplicasAcrossNodes: workerSpecRequest.replicasAcrossNodes,
                                 disableAmLogForwarding: workerSpecRequest.disableAmLogForwarding,
-                                generateDefaultPublicUrl: workerSpecRequest.publicURL,
+                                generateDefaultPublicUrl: workerSpecRequest.generateDefaultPublicUrl,
                                 http: [
                                         inbound: [
                                                 publicUrl: workerSpecRequest.publicUrl,

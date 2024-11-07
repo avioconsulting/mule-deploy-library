@@ -144,7 +144,7 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                            updateStrategy: UpdateStrategy.rolling,
                                            enforceDeployingReplicasAcrossNodes: false,
                                            disableAmLogForwarding: true,
-                                           generateDefaultPublicUrl: false,
+                                           generateDefaultPublicUrl: true,
                                            http: [
                                                    inbound: [
                                                            publicUrl : null,
