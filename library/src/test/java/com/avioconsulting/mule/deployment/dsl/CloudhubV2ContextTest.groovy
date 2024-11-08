@@ -15,11 +15,6 @@ import static org.hamcrest.Matchers.*
 @SuppressWarnings(['GroovyAssignabilityCheck'])
 class CloudhubV2ContextTest implements MavenInvoke {
 
-    @BeforeAll
-    static void setup() {
-        buildApp()
-    }
-
     @Test
     void required_only() {
         // arrange
@@ -35,12 +30,9 @@ class CloudhubV2ContextTest implements MavenInvoke {
             appVersion '2.2.9'
             applicationName {
                 baseAppName 'the-app'
-                prefix 'AVI'
-                suffix 'dev'
             }
             workerSpecs {
                 target 'target_name'
-                muleVersion '4.3.0'
             }
         }
         closure.delegate = context
@@ -54,7 +46,7 @@ class CloudhubV2ContextTest implements MavenInvoke {
             assertThat environment,
                        is(equalTo('DEV'))
             assertThat applicationName.normalizedAppName,
-                       is(equalTo('avi-the-app-dev'))
+                       is(equalTo('the-app'))
             assertThat appVersion,
                        is(equalTo('2.2.9'))
             assertThat cryptoKey,
@@ -66,20 +58,18 @@ class CloudhubV2ContextTest implements MavenInvoke {
             workerSpecRequest.with {
                 assertThat target,
                         is(equalTo('target_name'))
-                assertThat muleVersion,
-                        is(equalTo('4.3.0'))
                 assertThat lastMileSecurity,
                         is(equalTo(false))
-                assertThat persistentObjectStore,
-                        is(equalTo(false))
+                assertThat objectStoreV2,
+                        is(equalTo(true))
                 assertThat clustered,
-                        is(equalTo(false))
+                        is(equalTo(true))
                 assertThat updateStrategy,
                         is(equalTo(UpdateStrategy.rolling))
                 assertThat replicasAcrossNodes,
-                        is(equalTo(false))
-                assertThat publicURL,
-                        is(equalTo(false))
+                        is(equalTo(true))
+                assertThat publicUrl,
+                        is(equalTo(null))
                 assertThat replicaSize,
                         is(equalTo(VCoresSize.vCore1GB))
                 assertThat workerCount,
@@ -108,7 +98,6 @@ class CloudhubV2ContextTest implements MavenInvoke {
 - businessGroupId missing
 - cryptoKey missing
 - environment missing
-- workerSpecs.muleVersion missing
 - workerSpecs.target missing
 - autoDiscovery.clientId missing
 - autoDiscovery.clientSecret missing
@@ -123,7 +112,8 @@ class CloudhubV2ContextTest implements MavenInvoke {
             environment 'DEV'
             applicationName {
                 baseAppName 'the-app'
-                suffix 'dev'
+                prefix 'prefix'
+                suffix 'suffix'
             }
             appVersion '2.2.9'
             cryptoKey 'theKey'
@@ -133,23 +123,35 @@ class CloudhubV2ContextTest implements MavenInvoke {
             }
             businessGroupId '123-456-789'
             workerSpecs {
+                muleVersion '4.6.9'
+                releaseChannel 'LTS'
+                javaVersion '17'
+
                 target 'target_name'
-                muleVersion '4.3.0'
-                lastMileSecurity true
-                persistentObjectStore true
-                clustered true
+                workerCount 2
+                replicaSize VCoresSize.vCore2GB
+                cpuReserved 30
+                memoryReserved 800
+                replicasAcrossNodes false
+                clustered false
                 updateStrategy UpdateStrategy.recreate
-                replicasAcrossNodes true
-                publicURL true
-                replicaSize VCoresSize.vCore15GB
-                workerCount 13
+
+                publicUrl 'https://api.mycompany.com/my-api'
+                generateDefaultPublicUrl false
+                pathRewrite 'newpath'
+                lastMileSecurity true
+                forwardSslSession true
+
+                objectStoreV2 false
+                disableAmLogForwarding true
+                tracingEnabled true
             }
             appProperties ([
-                someProp: 'someValue',
+                    someProp: 'someValue',
             ])
             appSecureProperties ([
-                secureProp1: "123",
-                secureProp2: "456"
+                    secureProp1: "123",
+                    secureProp2: "456"
             ])
         }
         closure.delegate = context
@@ -171,28 +173,32 @@ class CloudhubV2ContextTest implements MavenInvoke {
             assertThat anypointClientSecret,
                     is(equalTo('the_client_secret'))
             assertThat applicationName.normalizedAppName,
-                    is(equalTo('the-app-dev'))
+                    is(equalTo('prefix-the-app-suffix'))
             workerSpecRequest.with {
                 assertThat target,
                         is(equalTo('target_name'))
                 assertThat muleVersion,
-                        is(equalTo('4.3.0'))
+                        is(equalTo('4.6.9'))
                 assertThat lastMileSecurity,
                         is(equalTo(true))
-                assertThat persistentObjectStore,
-                        is(equalTo(true))
+                assertThat objectStoreV2,
+                        is(equalTo(false))
                 assertThat clustered,
-                        is(equalTo(true))
+                        is(equalTo(false))
                 assertThat updateStrategy,
                         is(equalTo(UpdateStrategy.recreate))
                 assertThat replicasAcrossNodes,
-                        is(equalTo(true))
-                assertThat publicURL,
-                        is(equalTo(true))
+                        is(equalTo(false))
+                assertThat publicUrl,
+                        is(equalTo('https://api.mycompany.com/my-api'))
                 assertThat replicaSize,
-                        is(equalTo(VCoresSize.vCore15GB))
+                        is(equalTo(VCoresSize.vCore2GB))
                 assertThat workerCount,
-                        is(equalTo(13))
+                        is(equalTo(2))
+                assertThat cpuReserved,
+                        is(equalTo("30m"))
+                assertThat memoryReserved,
+                        is(equalTo("800Mi"))
             }
             assertThat appProperties.someProp,
                     is(equalTo('someValue'))

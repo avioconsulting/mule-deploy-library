@@ -12,6 +12,10 @@ abstract class AppDeploymentRequest {
      */
     protected String environment
     /**
+     Property to set the environment in at deployment time
+     */
+    protected String environmentProperty
+    /**
      * TODO change this
      * Actual name of your application WITHOUT any kind of customer/environment prefix or suffix. Spaces in the name are not allowed and will be rejected.
      * This parameter is optional. If you don't supply it, the <artifactId> from your app's POM will be used.
@@ -23,10 +27,13 @@ abstract class AppDeploymentRequest {
      */
     protected String appVersion
 
-    AppDeploymentRequest(ApplicationName applicationName, String appVersion, String environment) {
+    AppDeploymentRequest(ApplicationName applicationName, String appVersion, String environment, String environmentProperty) {
         this.applicationName = applicationName
         this.appVersion = appVersion
         this.environment = environment
+        if(environmentProperty != null) {
+            this.environmentProperty = environmentProperty
+        }
     }
 
     def setAutoDiscoveryId(String propertyName,

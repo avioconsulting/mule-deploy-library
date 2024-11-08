@@ -3,8 +3,12 @@ package com.avioconsulting.mule.deployment.dsl
 import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
 
 class RuntimeFabricContext extends BaseContext {
-    String environment, appVersion, cryptoKey, businessGroupId
-    // make API visualizer, etc. more easy by default
+    String environment
+    String environmentProperty
+    String appVersion
+    String cryptoKey
+    String cryptoKeyProperty
+    String businessGroupId
     WorkerSpecV2Context workerSpecs = new WorkerSpecV2Context()
     AutodiscoveryContext autoDiscovery = new AutodiscoveryContext()
     ApplicationNameContext applicationName = new ApplicationNameContext()
@@ -14,17 +18,19 @@ class RuntimeFabricContext extends BaseContext {
 
     RuntimeFabricDeploymentRequest createDeploymentRequest() {
         validateContext()
-        new RuntimeFabricDeploymentRequest(this.environment,
-                                           workerSpecs.createRequest(),
-                                           this.cryptoKey,
-                                           autoDiscovery.clientId,
-                                           autoDiscovery.clientSecret,
-                                           applicationName.createApplicationName(),
-                                           this.appVersion,
-                                           this.businessGroupId,
-                                           this.appProperties,
-                                           this.appSecureProperties,
-                                           this.otherCloudHubProperties)
+        new RuntimeFabricDeploymentRequest(environment,
+                environmentProperty,
+                workerSpecs.createRequest(),
+                cryptoKey,
+                cryptoKeyProperty,
+                autoDiscovery.clientId,
+                autoDiscovery.clientSecret,
+                applicationName.createApplicationName(),
+                appVersion,
+                businessGroupId,
+                appProperties,
+                appSecureProperties,
+                otherCloudHubProperties)
     }
 
     /**
@@ -36,6 +42,6 @@ class RuntimeFabricContext extends BaseContext {
 
     @Override
     List<String> findOptionalProperties() {
-        ['applicationName']
+        ['applicationName', 'environmentProperty', 'cryptoKeyProperty']
     }
 }

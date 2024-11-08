@@ -88,6 +88,7 @@
                         <configuration>
                             <excludes>
                                 <exclude>**/IntegrationTest.java</exclude>
+                                <exclude>com.avioconsulting.mule.integrationtest.CloudHubV2IntegrationTest</exclude>
                             </excludes>
                         </configuration>
                     </execution>

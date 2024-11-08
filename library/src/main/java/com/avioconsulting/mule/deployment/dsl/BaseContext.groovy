@@ -29,7 +29,9 @@ abstract class BaseContext {
     }
 
     def invokeMethod(String name, def args) {
-        def isField = this.class.declaredFields.find { f -> f.name == name }
+        def isField = this.class.declaredFields.find { f ->
+            f.name == name
+        }
         if (!this.getProperties().containsKey(name) && !isField) {
             throw new MissingMethodException(name,
                                              this.class)
