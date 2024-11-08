@@ -12,6 +12,7 @@ import static org.hamcrest.Matchers.is
 @SuppressWarnings(["UnnecessaryQualifiedReference", "GroovyAssignabilityCheck"])
 class OnPremContextTest implements MavenInvoke {
 
+    // TODO:  This shouldn't need to run maven to test the context, this is also testing the deployment request
     @BeforeAll
     static void setup() {
         buildApp()

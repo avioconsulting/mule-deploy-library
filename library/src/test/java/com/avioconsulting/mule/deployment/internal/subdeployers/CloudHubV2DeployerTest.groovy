@@ -8,6 +8,7 @@ import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubV2Deploy
 import com.avioconsulting.mule.deployment.api.models.WorkerSpecRequest
 import com.avioconsulting.mule.deployment.api.models.UpdateStrategy
 import com.avioconsulting.mule.deployment.api.models.VCoresSize
+import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
 import groovy.json.JsonSlurper
 import io.vertx.core.MultiMap
 import io.vertx.core.http.HttpServerRequest
@@ -39,6 +40,38 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
                 maxTries,
                 new TestConsoleLogger(),
                 dryRunMode)
+    }
+
+    CloudhubV2DeploymentRequest getStandardDeploymentRequest() {
+        def request = new CloudhubV2DeploymentRequest(ENV, null,
+                new WorkerSpecRequest(TARGET_NAME,
+                        VERSION,
+                        false,
+                        true,
+                        true,
+                        UpdateStrategy.recreate,
+                        true,
+                        true,
+                        VCoresSize.vCore15GB,
+                        2,
+                        false,
+                        false,
+                        30,
+                        800,
+                        null,
+                        null,
+                        'LTS',
+                        '17',
+                        false),
+                CRYPTO_KEY, null,
+                CLIENT_ID,
+                CLIENT_SECRET,
+                new ApplicationName(APP_NAME, null, 'dev'),
+                APP_VERSION,
+                GROUP_ID)
+
+        request.setAutoDiscoveryId('the.auto.disc.prop', '1234')
+        return request
     }
 
     @Test
@@ -77,28 +110,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
             }
         }
 
-        def request = new CloudhubV2DeploymentRequest(ENV,
-                new WorkerSpecRequest(TARGET_NAME,
-                        VERSION,
-                        true,
-                        true,
-                        true,
-                        UpdateStrategy.recreate,
-                        true,
-                        true,
-                        VCoresSize.vCore15GB,
-                        13,
-                        true,
-                        false),
-                'theKey',
-                'theClientId',
-                'theSecret',
-                new ApplicationName("new-app", null, ENV),
-                APP_VERSION,
-                GROUP_ID)
-
-        request.setAutoDiscoveryId('the.auto.disc.prop',
-                '1234')
+        def request = getStandardDeploymentRequest()
 
         // act
 
@@ -146,28 +158,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
             }
         }
 
-        def request = new CloudhubV2DeploymentRequest(ENV,
-                new WorkerSpecRequest(TARGET_NAME,
-                        VERSION,
-                        true,
-                        true,
-                        true,
-                        UpdateStrategy.recreate,
-                        true,
-                        true,
-                        VCoresSize.vCore15GB,
-                        13,
-                        true,
-                        false),
-                'theKey',
-                'theClientId',
-                'theSecret',
-                new ApplicationName("new-app", null, null),
-                APP_VERSION,
-                GROUP_ID)
-
-        request.setAutoDiscoveryId('the.auto.disc.prop',
-                '1234')
+        def request = getStandardDeploymentRequest()
 
         def exception = shouldFail {
             deployer.deploy(request)
@@ -214,28 +205,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
             }
         }
 
-        def request = new CloudhubV2DeploymentRequest(ENV,
-                new WorkerSpecRequest(TARGET_NAME,
-                        VERSION,
-                        true,
-                        true,
-                        true,
-                        UpdateStrategy.recreate,
-                        true,
-                        true,
-                        VCoresSize.vCore15GB,
-                        13,
-                        true,
-                        false),
-                'theKey',
-                'theClientId',
-                'theSecret',
-                new ApplicationName(APP_NAME, null, ENV),
-                APP_VERSION,
-                GROUP_ID)
-
-        request.setAutoDiscoveryId('the.auto.disc.prop',
-                '1234')
+        def request = getStandardDeploymentRequest()
 
         // act
         deployer.deploy(request)
@@ -283,28 +253,7 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
             }
         }
 
-        def request = new CloudhubV2DeploymentRequest(ENV,
-                new WorkerSpecRequest(TARGET_NAME,
-                        VERSION,
-                        true,
-                        true,
-                        true,
-                        UpdateStrategy.recreate,
-                        true,
-                        true,
-                        VCoresSize.vCore15GB,
-                        13,
-                        true,
-                        false),
-                'theKey',
-                'theClientId',
-                'theSecret',
-                new ApplicationName(APP_NAME, null, ENV),
-                APP_VERSION,
-                GROUP_ID)
-
-        request.setAutoDiscoveryId('the.auto.disc.prop',
-                '1234')
+        def request = getStandardDeploymentRequest()
 
         def exception = shouldFail {
             deployer.deploy(request)
@@ -326,28 +275,8 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
             }
         }
 
-        def request = new CloudhubV2DeploymentRequest('INVALID_ENV',
-                new WorkerSpecRequest(TARGET_NAME,
-                        VERSION,
-                        true,
-                        true,
-                        true,
-                        UpdateStrategy.recreate,
-                        true,
-                        true,
-                        VCoresSize.vCore15GB,
-                        13,
-                        true,
-                        false),
-                'theKey',
-                'theClientId',
-                'theSecret',
-                new ApplicationName(APP_NAME, null, ENV),
-                APP_VERSION,
-                GROUP_ID)
-
-        request.setAutoDiscoveryId('the.auto.disc.prop',
-                '1234')
+        def request = getStandardDeploymentRequest()
+        request.environment = 'INVALID_ENV'
 
         def exception = shouldFail {
             deployer.deploy(request)
@@ -372,28 +301,8 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
             }
         }
 
-        def request = new CloudhubV2DeploymentRequest(ENV,
-                new WorkerSpecRequest('INVALID_TARGET_NAME',
-                        VERSION,
-                        true,
-                        true,
-                        true,
-                        UpdateStrategy.recreate,
-                        true,
-                        true,
-                        VCoresSize.vCore15GB,
-                        13,
-                        true,
-                        false),
-                'theKey',
-                'theClientId',
-                'theSecret',
-                new ApplicationName(APP_NAME, null, ENV),
-                APP_VERSION,
-                GROUP_ID)
-
-        request.setAutoDiscoveryId('the.auto.disc.prop',
-                '1234')
+        def request = getStandardDeploymentRequest()
+        request.target = 'INVALID_TARGET_NAME'
 
         def exception = shouldFail {
             deployer.deploy(request)
@@ -418,28 +327,8 @@ class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenI
             }
         }
 
-        def request = new CloudhubV2DeploymentRequest(ENV,
-                new WorkerSpecRequest('INVALID_TARGET_NAME',
-                        VERSION,
-                        true,
-                        true,
-                        true,
-                        UpdateStrategy.recreate,
-                        true,
-                        true,
-                        VCoresSize.vCore15GB,
-                        13,
-                        true,
-                        false),
-                'theKey',
-                'theClientId',
-                'theSecret',
-                new ApplicationName(APP_NAME, null, ENV),
-                APP_VERSION,
-                GROUP_ID)
-
-        request.setAutoDiscoveryId('the.auto.disc.prop',
-                '1234')
+        def request = getStandardDeploymentRequest()
+        request.target = 'INVALID_TARGET_NAME'
 
         def exception = shouldFail {
             deployer.deploy(request)

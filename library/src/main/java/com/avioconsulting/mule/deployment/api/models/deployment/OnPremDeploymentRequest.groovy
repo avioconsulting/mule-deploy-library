@@ -25,7 +25,8 @@ class OnPremDeploymentRequest extends FileBasedAppDeploymentRequest {
                             ApplicationName appName,
                             String appVersion = null,
                             Map<String, String> appProperties = [:]) {
-        super(file, appName, appVersion, environment)
+        // TODO: Do we need to support environment property here?
+        super(file, appName, appVersion, environment, null)
         this.targetServerOrClusterName = targetServerOrClusterName
         this.appProperties = appProperties
     }

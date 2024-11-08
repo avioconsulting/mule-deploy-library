@@ -13,52 +13,52 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
     /**
      * CloudHub specs
      */
-    final WorkerSpecRequest workerSpecRequest
+    WorkerSpecRequest workerSpecRequest
     /**
-     * Will be set in the 'crypto.key' CloudHub property
+     * Will be set in the 'crypto.key' CloudHub property unless cryptoKeyProperty is specified
      */
-    final String cryptoKey
+    String cryptoKey
     /**
      * will be set in the anypoint.platform.client_id CloudHub property
      */
-    final String anypointClientId
+    String anypointClientId
     /**
      * will be set in the anypoint.platform.client_secret CloudHub property
      */
-    final String anypointClientSecret
+    String anypointClientSecret
     /**
      * Mule app property overrides (the stuff in the properties tab)
      */
-    final Map<String, String> appProperties
+    Map<String, String> appProperties
     /**
      * Mule secure app property overrides (the stuff in the properties tab that will hide the value)
      */
-    final Map<String, String> appSecureProperties
+    Map<String, String> appSecureProperties
     /**
      * CloudHub level property overrides (e.g. region type stuff)
      */
-    final Map<String, String> otherCloudHubProperties
+    Map<String, String> otherCloudHubProperties
     /**
      * Get only property, derived from app, environment, and prefix, this the real application name that will be used in CloudHub to ensure uniqueness.
      */
-    final String normalizedAppName
+    String normalizedAppName
 
     /**
      * The Business group ID of the deployment
      * The Business group ID is a mandatory parameter when you have access only to a specific Business group but not to the parent organization
      */
-    final String groupId
+    String groupId
 
     /**
      * The CloudHub 2.0 target name to deploy the app to.
      * Specify either a shared space or a private space available in your Deployment Target values in CloudHub 2.0
      */
-    final String target
+    String target
 
     /**
      * As per the documentation, set to MC, for Runtime Fabric.
      */
-    final String provider = "MC"
+    String provider = "MC"
 
     /**
      * Id of target based on the target name
@@ -71,8 +71,10 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
      * Construct a "standard" request. See properties for parameter info.
      */
     RuntimeFabricDeploymentRequest(String environment,
+                                   String environmentProperty,
                                    WorkerSpecRequest workerSpecRequest,
                                    String cryptoKey,
+                                   String cryptoKeyProperty,
                                    String anypointClientId,
                                    String anypointClientSecret,
                                    ApplicationName applicationName,
@@ -81,7 +83,7 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
                                    Map<String, String> appProperties = [:],
                                    Map<String, String> appSecureProperties = [:],
                                    Map<String, String> otherCloudHubProperties = [:]) {
-        super(applicationName, appVersion, environment)
+        super(applicationName, appVersion, environment, environmentProperty)
         this.groupId = groupId
         this.target = workerSpecRequest.target
         this.workerSpecRequest = workerSpecRequest
@@ -93,81 +95,92 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
         this.appSecureProperties = appSecureProperties
         this.otherCloudHubProperties = otherCloudHubProperties
 
-        if(!applicationName.baseAppName){
+        if (!applicationName.baseAppName) {
             throw new Exception("Property applicationName.baseAppName is required for CloudHub 2.0 and RTF applications");
         }
 
         normalizedAppName = applicationName.getNormalizedAppName()
         this.cloudhubAppProperties = new CloudhubAppProperties(applicationName.baseAppName,
-                                                               environment.toLowerCase(),
-                                                               cryptoKey,
-                                                               anypointClientId,
-                                                               anypointClientSecret,
-                                                               null)
+                environment.toLowerCase(),
+                environmentProperty,
+                cryptoKey,
+                cryptoKeyProperty,
+                anypointClientId,
+                anypointClientSecret,
+                null)
     }
 
     Map<String, String> getCloudhubBaseAppInfo() {
         def props = this.autoDiscoveries
-        props += (this.appProperties ?: [:])
+        props[CloudhubAppProperties.ANYPOINT_PLATFORM_CLIENT_ID] = anypointClientId
+        props[cloudhubAppProperties.environmentProperty] = environment.toLowerCase()
+        props[CloudhubAppProperties.ANYPOINT_PLATFORM_VISUALIZATION_LAYER] = cloudhubAppProperties.apiVisualizerLayer
 
-        def secureProps = this.appSecureProperties
+        if (appProperties) {
+            props += appProperties
+        }
+
+
+        def secureProps = [:]
+        secureProps[CloudhubAppProperties.ANYPOINT_PLATFORM_CLIENT_SECRET] = anypointClientSecret
+        secureProps[cloudhubAppProperties.cryptoKeyProperty] = cryptoKey
+        this.appSecureProperties
 
         def result = [
                 // CloudHub's v2 API calls the Mule application the 'domain'
-                name: normalizedAppName,
+                name       : normalizedAppName,
                 application: [
-                        ref: [
-                                groupId: groupId,
-                                artifactId : applicationName.baseAppName,
-                                version: appVersion,
-                                packaging: "jar"
+                        ref          : [
+                                groupId   : groupId,
+                                artifactId: applicationName.baseAppName,
+                                version   : appVersion,
+                                packaging : "jar"
                         ],
-                        desiredState: "STARTED",
+                        desiredState : "STARTED",
                         configuration: [
                                 "mule.agent.application.properties.service": [
-                                        applicationName: applicationName.baseAppName,
-                                        properties: props,
+                                        applicationName : applicationName.baseAppName,
+                                        properties      : props,
                                         secureProperties: secureProps
                                 ]
                         ],
-                        integrations: [
+                        integrations : [
                                 services: [
                                         objectStoreV2: [
-                                                enabled: workerSpecRequest.persistentObjectStore
+                                                enabled: workerSpecRequest.objectStoreV2
                                         ]
                                 ]
                         ],
-                        vCores: workerSpecRequest.replicaSize
+                        vCores       : workerSpecRequest.replicaSize
                 ],
-                target: [
-                        targetId: targetId,
-                        provider: provider,
+                target     : [
+                        targetId          : targetId,
+                        provider          : provider,
                         deploymentSettings: [
-                                persistentObjectStore: workerSpecRequest.persistentObjectStore,
-                                clustered: workerSpecRequest.clustered,
-                                updateStrategy: workerSpecRequest.updateStrategy,
+                                clustered                          : workerSpecRequest.clustered,
+                                updateStrategy                     : workerSpecRequest.updateStrategy,
                                 enforceDeployingReplicasAcrossNodes: workerSpecRequest.replicasAcrossNodes,
-                                disableAmLogForwarding: workerSpecRequest.disableAmLogForwarding,
-                                generateDefaultPublicUrl: workerSpecRequest.generateDefaultPublicUrl,
-                                http: [
+                                disableAmLogForwarding             : workerSpecRequest.disableAmLogForwarding,
+                                generateDefaultPublicUrl           : workerSpecRequest.generateDefaultPublicUrl,
+                                http                               : [
                                         inbound: [
-                                                publicUrl: workerSpecRequest.publicUrl,
-                                                pathRewrite: workerSpecRequest.pathRewrite,
-                                                lastMileSecurity: workerSpecRequest.lastMileSecurity,
+                                                publicUrl        : workerSpecRequest.publicUrl,
+                                                pathRewrite      : workerSpecRequest.pathRewrite,
+                                                lastMileSecurity : workerSpecRequest.lastMileSecurity,
                                                 forwardSslSession: workerSpecRequest.forwardSslSession
                                         ]
                                 ],
-                                jvm : [:],
-                                outbound: [:],
-                                runtime: [
-                                        version : workerSpecRequest.muleVersion,
-                                        releaseChannel : workerSpecRequest.releaseChannel,
-                                        java : workerSpecRequest.javaVersion
+                                jvm                                : [:],
+                                outbound                           : [:],
+                                runtime                            : [
+                                        version       : workerSpecRequest.muleVersion,
+                                        releaseChannel: workerSpecRequest.releaseChannel,
+                                        java          : workerSpecRequest.javaVersion
                                 ],
-                                tracingEnabled : workerSpecRequest.tracingEnabled
+                                tracingEnabled                     : workerSpecRequest.tracingEnabled
 
                         ],
-                        replicas: workerSpecRequest.workerCount
+                        replicas          : workerSpecRequest.workerCount
                 ]
         ] as Map<String, String>
 
@@ -180,8 +193,8 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
         def result = cloudhubBaseAppInfo
         def resources = [
                 resources: [
-                    cpu: [ reserved: workerSpecRequest.cpuReserved ],
-                    memory: [ reserved: workerSpecRequest.memoryReserved ]
+                        cpu   : [reserved: workerSpecRequest.cpuReserved],
+                        memory: [reserved: workerSpecRequest.memoryReserved]
                 ]
         ]
         result.target.deploymentSettings << resources

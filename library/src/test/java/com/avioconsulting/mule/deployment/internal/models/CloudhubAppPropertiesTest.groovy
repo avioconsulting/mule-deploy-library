@@ -27,8 +27,8 @@ class CloudhubAppPropertiesTest {
 
         // act
         def props = new CloudhubAppProperties(appName,
-                                              'dev',
-                                              'abc',
+                                              'dev', null,
+                                              'crypto_key', null,
                                               'the_id',
                                               'the_secret')
 

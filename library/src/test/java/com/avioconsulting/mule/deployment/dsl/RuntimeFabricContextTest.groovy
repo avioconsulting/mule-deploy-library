@@ -36,12 +36,9 @@ class RuntimeFabricContextTest implements MavenInvoke {
             appVersion '2.2.9'
             applicationName {
                 baseAppName 'the-app'
-                prefix 'AVI'
-                suffix 'dev'
             }
             workerSpecs {
                 target 'target_name'
-                muleVersion '4.3.0'
             }
         }
         closure.delegate = context
@@ -55,7 +52,7 @@ class RuntimeFabricContextTest implements MavenInvoke {
             assertThat environment,
                        is(equalTo('DEV'))
             assertThat applicationName.normalizedAppName,
-                       is(equalTo('avi-the-app-dev'))
+                       is(equalTo('the-app'))
             assertThat appVersion,
                        is(equalTo('2.2.9'))
             assertThat cryptoKey,
@@ -67,20 +64,18 @@ class RuntimeFabricContextTest implements MavenInvoke {
             workerSpecRequest.with {
                 assertThat target,
                         is(equalTo('target_name'))
-                assertThat muleVersion,
-                        is(equalTo('4.3.0'))
                 assertThat lastMileSecurity,
                         is(equalTo(false))
-                assertThat persistentObjectStore,
-                        is(equalTo(false))
+                assertThat objectStoreV2,
+                        is(equalTo(true))
                 assertThat clustered,
-                        is(equalTo(false))
+                        is(equalTo(true))
                 assertThat updateStrategy,
                         is(equalTo(UpdateStrategy.rolling))
                 assertThat replicasAcrossNodes,
-                        is(equalTo(false))
-                assertThat publicURL,
-                        is(equalTo(false))
+                        is(equalTo(true))
+                assertThat publicUrl,
+                        is(equalTo(null))
                 assertThat replicaSize,
                         is(equalTo(VCoresSize.vCore1GB))
                 assertThat workerCount,
@@ -109,7 +104,6 @@ class RuntimeFabricContextTest implements MavenInvoke {
 - businessGroupId missing
 - cryptoKey missing
 - environment missing
-- workerSpecs.muleVersion missing
 - workerSpecs.target missing
 - autoDiscovery.clientId missing
 - autoDiscovery.clientSecret missing
@@ -124,8 +118,8 @@ class RuntimeFabricContextTest implements MavenInvoke {
             environment 'DEV'
             applicationName {
                 baseAppName 'the-app'
-                prefix ''
-                suffix ''
+                prefix 'prefix'
+                suffix 'suffix'
             }
             appVersion '2.2.9'
             cryptoKey 'theKey'
@@ -135,18 +129,28 @@ class RuntimeFabricContextTest implements MavenInvoke {
             }
             businessGroupId '123-456-789'
             workerSpecs {
+                muleVersion '4.6.9'
+                releaseChannel 'LTS'
+                javaVersion '17'
+
                 target 'target_name'
-                muleVersion '4.3.0'
-                lastMileSecurity true
-                persistentObjectStore true
-                clustered true
-                updateStrategy UpdateStrategy.recreate
-                replicasAcrossNodes true
-                publicURL true
-                replicaSize VCoresSize.vCore15GB
-                workerCount 13
+                workerCount 2
+                replicaSize VCoresSize.vCore2GB
                 cpuReserved 30
                 memoryReserved 800
+                replicasAcrossNodes false
+                clustered false
+                updateStrategy UpdateStrategy.recreate
+
+                publicUrl 'https://api.mycompany.com/my-api'
+                generateDefaultPublicUrl false
+                pathRewrite 'newpath'
+                lastMileSecurity true
+                forwardSslSession true
+
+                objectStoreV2 false
+                disableAmLogForwarding true
+                tracingEnabled true
             }
         }
         closure.delegate = context
@@ -160,7 +164,7 @@ class RuntimeFabricContextTest implements MavenInvoke {
             assertThat environment,
                     is(equalTo('DEV'))
             assertThat applicationName.normalizedAppName,
-                    is(equalTo('the-app'))
+                    is(equalTo('prefix-the-app-suffix'))
             assertThat appVersion,
                     is(equalTo('2.2.9'))
             assertThat cryptoKey,
@@ -173,23 +177,23 @@ class RuntimeFabricContextTest implements MavenInvoke {
                 assertThat target,
                         is(equalTo('target_name'))
                 assertThat muleVersion,
-                        is(equalTo('4.3.0'))
+                        is(equalTo('4.6.9'))
                 assertThat lastMileSecurity,
                         is(equalTo(true))
-                assertThat persistentObjectStore,
-                        is(equalTo(true))
+                assertThat objectStoreV2,
+                        is(equalTo(false))
                 assertThat clustered,
-                        is(equalTo(true))
+                        is(equalTo(false))
                 assertThat updateStrategy,
                         is(equalTo(UpdateStrategy.recreate))
                 assertThat replicasAcrossNodes,
-                        is(equalTo(true))
-                assertThat publicURL,
-                        is(equalTo(true))
+                        is(equalTo(false))
+                assertThat publicUrl,
+                        is(equalTo('https://api.mycompany.com/my-api'))
                 assertThat replicaSize,
-                        is(equalTo(VCoresSize.vCore15GB))
+                        is(equalTo(VCoresSize.vCore2GB))
                 assertThat workerCount,
-                        is(equalTo(13))
+                        is(equalTo(2))
                 assertThat cpuReserved,
                         is(equalTo("30m"))
                 assertThat memoryReserved,

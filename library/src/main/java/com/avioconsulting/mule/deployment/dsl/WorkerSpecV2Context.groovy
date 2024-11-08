@@ -5,29 +5,34 @@ import com.avioconsulting.mule.deployment.api.models.UpdateStrategy
 import com.avioconsulting.mule.deployment.api.models.VCoresSize
 
 class WorkerSpecV2Context extends BaseContext {
-    String muleVersion, target
-    boolean lastMileSecurity = false
-    boolean persistentObjectStore = false
-    boolean clustered = false
-    UpdateStrategy updateStrategy = UpdateStrategy.rolling
-    boolean replicasAcrossNodes = false
-    boolean generateDefaultPublicUrl = true
-    boolean forwardSslSession = false
-    boolean disableAmLogForwarding = true
-    VCoresSize replicaSize = VCoresSize.vCore1GB
-    int workerCount = 1
-    int cpuReserved, memoryReserved
-    String publicUrl
+    String muleVersion
     String releaseChannel
     String javaVersion
-    boolean pathRewrite
-    boolean tracingEnabled
+
+    String target
+    Integer workerCount
+    VCoresSize replicaSize
+    Integer cpuReserved
+    Integer memoryReserved
+    Boolean replicasAcrossNodes
+    Boolean clustered
+    UpdateStrategy updateStrategy
+
+    String publicUrl
+    Boolean generateDefaultPublicUrl
+    String pathRewrite
+    Boolean lastMileSecurity
+    Boolean forwardSslSession
+
+    Boolean objectStoreV2
+    Boolean disableAmLogForwarding
+    Boolean tracingEnabled
 
     WorkerSpecRequest createRequest() {
         new WorkerSpecRequest(this.target,
                               this.muleVersion,
                               this.lastMileSecurity,
-                              this.persistentObjectStore,
+                              this.objectStoreV2,
                               this.clustered,
                               this.updateStrategy,
                               this.replicasAcrossNodes,
@@ -47,11 +52,38 @@ class WorkerSpecV2Context extends BaseContext {
 
     @Override
     List<String> findOptionalProperties() {
-        [
-            'lastMileSecurity', 'persistentObjectStore', 'clustered',
-            'updateStrategy', 'replicasAcrossNodes', 'publicURL', 'replicaSize',
-            'workerCount', 'cpuReserved', 'memoryReserved', 'publicUrl', 'pathRewrite',
+        [  'muleVersion',
+           'lastMileSecurity', 'objectStoreV2', 'clustered',
+            'updateStrategy', 'replicasAcrossNodes', 'generateDefaultPublicUrl', 'replicaSize',
+            'workerCount', 'forwardSslSession', 'disableAmLogForwarding',
+            'cpuReserved', 'memoryReserved', 'publicUrl', 'pathRewrite',
             'releaseChannel', 'javaVersion', 'tracingEnabled'
         ]
+    }
+
+
+    @Override
+    String toString() {
+        return "WorkerSpecV2Context{" +
+                "muleVersion='" + (muleVersion ?: "null") + '\'' +
+                ", releaseChannel='" + (releaseChannel ?: "null") + '\'' +
+                ", javaVersion='" + (javaVersion ?: "null") + '\'' +
+                ", target='" + (target ?: "null") + '\'' +
+                ", workerCount=" + (workerCount ?: "null") +
+                ", replicaSize=" + (replicaSize ?: "null") +
+                ", cpuReserved=" + (cpuReserved ?: "null") +
+                ", memoryReserved=" + (memoryReserved ?: "null") +
+                ", replicasAcrossNodes=" + (replicasAcrossNodes ?: "null") +
+                ", clustered=" + (clustered ?: "null") +
+                ", updateStrategy=" + (updateStrategy ?: "null") +
+                ", publicUrl='" + (publicUrl ?: "null") + '\'' +
+                ", generateDefaultPublicUrl=" + (generateDefaultPublicUrl ?: "null") +
+                ", pathRewrite='" + (pathRewrite ?: "null") + '\'' +
+                ", lastMileSecurity=" + (lastMileSecurity ?: "null") +
+                ", forwardSslSession=" + (forwardSslSession ?: "null") +
+                ", objectStoreV2=" + (objectStoreV2 ?: "null") +
+                ", disableAmLogForwarding=" + (disableAmLogForwarding ?: "null") +
+                ", tracingEnabled=" + (tracingEnabled ?: "null") +
+                '}';
     }
 }

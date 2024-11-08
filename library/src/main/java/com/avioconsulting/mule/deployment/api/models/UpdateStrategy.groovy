@@ -11,4 +11,6 @@ enum UpdateStrategy {
      * Re-deployment is quicker than rolling and doesn’t require additional resources.
      */
     recreate
+
+    String updateStrategy
 }

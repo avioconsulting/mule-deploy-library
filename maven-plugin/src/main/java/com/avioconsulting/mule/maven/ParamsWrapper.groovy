@@ -3,6 +3,11 @@ package com.avioconsulting.mule.maven
 class ParamsWrapper {
     private final Properties properties
 
+    ParamsWrapper(Map<Object,Object> params) {
+        this.properties = new Properties()
+        properties.putAll(params)
+    }
+
     ParamsWrapper(Properties properties) {
         this.properties = properties
     }

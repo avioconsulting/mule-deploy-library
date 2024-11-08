@@ -15,132 +15,135 @@ class WorkerSpecRequest {
      * Enable Last-Mile security to forward HTTPS connections to be decrypted by this application.
      * This requires an SSL certificate to be included in the Mule ap. Defaults to false.
      */
-    final boolean lastMileSecurity
+    boolean lastMileSecurity
+
+    /***
+     * Use ObjectStore v2. Defaults to false.
+     */
+    boolean objectStoreV2
 
     /***
      * Enables clustering across two or more replicas of the application. Defaults to false.
      */
-    final boolean persistentObjectStore
-
-    /***
-     * Use persistent ObjectStore. Defaults to false.
-     */
-    final boolean clustered
+    boolean clustered
 
     /***
      * rolling: Maintains availability by updating replicas incrementally.
      * recreate: Terminates replicas before re-deployment. Defaults to rolling.
      */
-    final UpdateStrategy updateStrategy
+    UpdateStrategy updateStrategy
 
     /***
      * Enforces the deployment of replicas across different nodes. Defaults to false.
      */
-    final boolean replicasAcrossNodes
+    boolean replicasAcrossNodes
 
     /***
      * Enables SSL forwarding during a session. Defaults to false.
      */
-    final boolean forwardSslSession
+    boolean forwardSslSession
 
     /***
      * Disables forwarding applications logs to Anypoint Monitoring.. Defaults to true.
      */
-    final boolean disableAmLogForwarding
+    boolean disableAmLogForwarding
 
     /***
      * When this parameter is set to true, CloudHub 2.0 generates a public URL for the deployed application. Default to false
      */
-    final boolean generateDefaultPublicUrl
+    boolean generateDefaultPublicUrl
 
     /**
      * Specifies the number of cores to allocate for each application replica. The default value is 0.5 vCores
      * Valid only for RTF deployment, not for CloudHub 2.0
      */
-    final String cpuReserved
+    String cpuReserved
 
     /**
      * Specifies the amount of memory to allocate for each application replica. The default value is 700 MB
      * Valid only for RTF deployment, not for CloudHub 2.0
      */
-    final String memoryReserved
+    String memoryReserved
 
     /***
      * How big of a worker to use
      */
-    final VCoresSize replicaSize
+    VCoresSize replicaSize
 
     /***
      * How many workers, defaults to 1
      */
-    final int workerCount
+    int workerCount
 
     /**
      * The CloudHub 2.0 target name to deploy the app to.
      * Specify either a shared space or a private space available in your Deployment Target values in CloudHub 2.0
      */
-    final String target
+    String target
     /***
      * The publicUrl, this is defined when the user wishes to deploy an API with a public ingress endpoint available
      */
-    final String publicUrl
+    String publicUrl
     /***
      * Overwriting the publicUrl, this is defined and publicUrl is null when a User wishes to overwrite their custom url for the API
      */
-    final boolean pathRewrite
+    String pathRewrite
     /***
      * The releaseChannel, this is either LTS or EDGE
      */
-    final String releaseChannel
+    String releaseChannel
     /***
      * The Java Version, this is either 8 or 17
      */
-    final String javaVersion
+    String javaVersion
     /***
      * Tracing Enabled flag, this defaults to false
      */
-    final Boolean tracingEnabled
+    Boolean tracingEnabled
     /***
      * Standard request, see properties for parameter info.
      */
     WorkerSpecRequest(String target,
-                      String muleVersion = null,
-                      boolean lastMileSecurity = false,
-                      boolean persistentObjectStore = false,
-                      boolean clustered = false,
-                      UpdateStrategy updateStrategy = UpdateStrategy.rolling,
-                      boolean replicasAcrossNodes = false,
-                      boolean generateDefaultPublicUrl = true,
-                      VCoresSize replicaSize = VCoresSize.vCore1GB,
-                      int workerCount = 1,
-                      boolean forwardSslSession = false,
-                      boolean disableAmLogForwarding = true,
-                      int cpuReserved = 20,
-                      int memoryReserved = 700,
-                      String publicUrl = null,
-                      boolean pathRewrite = null,
-                      String releaseChannel = "LTS",
-                      String javaVersion = "8",
-                      Boolean tracingEnabled = false) {
-        this.muleVersion = muleVersion
-        this.lastMileSecurity = lastMileSecurity
-        this.persistentObjectStore = persistentObjectStore
-        this.clustered = clustered
-        this.updateStrategy = updateStrategy
-        this.replicasAcrossNodes = replicasAcrossNodes
-        this.generateDefaultPublicUrl = generateDefaultPublicUrl
-        this.forwardSslSession = forwardSslSession
-        this.disableAmLogForwarding = disableAmLogForwarding
-        this.cpuReserved = "${cpuReserved}m"
-        this.memoryReserved = "${memoryReserved}Mi"
-        this.replicaSize = replicaSize
-        this.workerCount = workerCount
+                      String muleVersion,
+                      Boolean lastMileSecurity,
+                      Boolean objectStoreV2,
+                      Boolean clustered,
+                      UpdateStrategy updateStrategy,
+                      Boolean replicasAcrossNodes,
+                      Boolean generateDefaultPublicUrl,
+                      VCoresSize replicaSize,
+                      Integer workerCount,
+                      Boolean forwardSslSession,
+                      Boolean disableAmLogForwarding,
+                      Integer cpuReserved,
+                      Integer memoryReserved,
+                      String publicUrl,
+                      String pathRewrite,
+                      String releaseChannel,
+                      String javaVersion,
+                      Boolean tracingEnabled) {
+
+        println "target: $target, muleVersion: $muleVersion, lastMileSecurity: $lastMileSecurity, objectStoreV2: $objectStoreV2, clustered: $clustered, updateStrategy: $updateStrategy, replicasAcrossNodes: $replicasAcrossNodes, generateDefaultPublicUrl: $generateDefaultPublicUrl, replicaSize: $replicaSize, workerCount: $workerCount, forwardSslSession: $forwardSslSession, disableAmLogForwarding: $disableAmLogForwarding, cpuReserved: ${cpuReserved}m, memoryReserved: ${memoryReserved}Mi, publicUrl: $publicUrl, pathRewrite: $pathRewrite, releaseChannel: $releaseChannel, javaVersion: $javaVersion, tracingEnabled: $tracingEnabled"
+
         this.target = target
-        this.publicUrl = publicUrl
-        this.pathRewrite = pathRewrite
-        this.releaseChannel = releaseChannel
-        this.javaVersion = javaVersion
-        this.tracingEnabled = tracingEnabled
+        this.muleVersion = muleVersion ?: null
+        this.lastMileSecurity = lastMileSecurity != null ? lastMileSecurity : false
+        this.objectStoreV2 = objectStoreV2 != null ? objectStoreV2 : true
+        this.clustered = clustered != null ? clustered : true
+        this.updateStrategy = updateStrategy != null ? updateStrategy : UpdateStrategy.rolling
+        this.replicasAcrossNodes = replicasAcrossNodes != null ? replicasAcrossNodes : true
+        this.generateDefaultPublicUrl = generateDefaultPublicUrl != null ? generateDefaultPublicUrl : true
+        this.forwardSslSession = forwardSslSession != null ? forwardSslSession : false
+        this.disableAmLogForwarding = disableAmLogForwarding != null ? disableAmLogForwarding : false
+        this.cpuReserved = cpuReserved != null ? "${cpuReserved}m" : "20m"
+        this.memoryReserved = memoryReserved != null ? "${memoryReserved}Mi" : "700Mi"
+        this.replicaSize = replicaSize != null ? replicaSize : VCoresSize.vCore1GB
+        this.workerCount = workerCount != null ? workerCount : 1
+        this.publicUrl = publicUrl ?: null
+        this.pathRewrite = pathRewrite ?: null
+        this.releaseChannel = releaseChannel ?: 'LTS'
+        this.javaVersion = javaVersion ?: '8'
+        this.tracingEnabled = tracingEnabled != null ? tracingEnabled : false
     }
 
 }
