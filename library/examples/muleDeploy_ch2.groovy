@@ -1,3 +1,6 @@
+import com.avioconsulting.mule.deployment.api.models.VCoresSize
+import com.avioconsulting.mule.deployment.api.models.UpdateStrategy
+
 muleDeploy {
     // version of the tool
     version '1.0'
@@ -15,43 +18,57 @@ muleDeploy {
     }
 
     cloudHubV2Application {
+        businessGroupId params.groupId
         environment params.env
-        applicationName {
-            baseAppName 'hello-world-test'
-        }
-        appVersion '1.0.0-SNAPSHOT'
+        environmentProperty 'env'
         cryptoKey params.cryptoKey
+        cryptoKeyProperty 'crypto.key'
+        appVersion params.appVersion
+
+        applicationName {
+            baseAppName params.artifactId
+            prefix 'avio'
+            suffix params.env
+        }
+
+        workerSpecs {
+            target params.target
+
+            muleVersion '4.6'
+            releaseChannel 'LTS'
+            javaVersion '8'
+
+            workerCount 1
+            replicaSize VCoresSize.vCore1GB
+            replicasAcrossNodes true
+            clustered true
+            updateStrategy UpdateStrategy.rolling
+
+            if(params.env.toLowerCase() != 'prod') {
+                publicUrl "https://api-${params.env.toLowerCase()}.avio.dev/${params.artifactId}"
+            } else {
+                publicUrl "https://api.avio.dev/${params.artifactId}"
+            }
+            generateDefaultPublicUrl true
+            pathRewrite null
+            lastMileSecurity false
+            forwardSslSession false
+
+            objectStoreV2 true
+            disableAmLogForwarding false
+            tracingEnabled false
+        }
+
         autoDiscovery {
             clientId params.autoDiscClientId
             clientSecret params.autoDiscClientSecret
         }
 
-        // Cloudhub v2 specific params
-        applicationName '${project.name}'
+        appProperties {
 
-        workerSpecs {
-            muleVersion '4.4.0'
-            target 'Cloudhub-US-East-1'
-            replicas '1'
-            vCores '0.1'
-            provider 'MC'
-            lastMileSecurity 'false'
-            persistentObjectStore 'false'
-            clustered 'true'
-            updateStrategy 'recreate'
-            forwardSslSession 'true'
-            publicUrl 'myapp.anypoint.com'
-            pathRewrite '/test'
-            releaseChannel 'EDGE'
-            javaVersion '17'
-            tracingEnabled 'true'
-            generateDefaultPublicUrl 'false'
         }
+        appSecureProperties {
 
-        environment 'DEV'
-        businessGroup 'AVIO Sandbox'
-        // When the user is member of multiple organizations, businessGroupId must be provided
-        // in order to have correct ID when the plugin is retrieving info like target, environment, etc
-        businessGroupId 'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee'
+        }
     }
 }

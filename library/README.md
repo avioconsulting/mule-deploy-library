@@ -66,7 +66,7 @@ For CloudHub version 2 and RTF deployment, the application only sends the GAV in
 
 In all cases, the library is capable of either doing a new deployment or updating an existing deployed application. 
 
-#### ApplicationName
+#### Application Name
 Starting in version 2.0.0, the application name can be composed of a base app name, prefix, and suffix. The base app name is mandatory, but the prefix and suffix are optional.
 For those three fields, the allowed characters are any letter (lower and uppercase), any number, and dashes (except at the beginning and end), which means that no special characters are allowed in the names.
 
@@ -79,6 +79,60 @@ Below is an example of how to specify the application using the prefix and suffi
     }
 ```
 The applicationName section should be listed within the deployment type, such as cloudHubApplication, onPremApplication, etc.
+
+#### Cloudhub v2 Deployment Reference
+Below are all the fields available within the cloudHubV2Application context for configuring your deployment. 
+See a full example with all options configured in [muleDeploy_ch2.groovy](examples/muleDeploy_ch2.groovy)
+The command to run the example above would be:
+```
+mvn com.avioconsulting.mule:mule-deploy-maven-plugin:2.0.0:deploy \
+-Danypoint.org.name="AVIO IT" \
+-Danypoint.connected-app.id=DEPLOYMENT_CONNECTED_APP_ID \
+-Danypoint.connected-app.secret=DEPLOYMENT_CONNECTED_APP_SECERET \
+-Dmd.autoDiscClientId=ANYPOINT_ENV_CLIENT_ID \
+-Dmd.autoDiscClientSecret=ANYPOINT_ENV_CLIENT_SECRET \
+-Dmd.groupId=12f3c8f5-84c8-4d48-8e56-0712f9734e5b \
+-Dmd.artifactId=jira-sys-api \
+-Dmd.appVersion=1.0.6-59 \
+-Dmd.cryptoKey=YOUR_SECURE_PROPERTIES_CRYPTO_KEY \
+-Dmd.env=DEV \
+-Dmd.target=YOUR_PRIVATE_SPACE_NAME
+```
+
+| Field                                |        Default         | Description                                                                                              |
+|:-------------------------------------|:----------------------:|:---------------------------------------------------------------------------------------------------------|
+| businessGroupId                      |                        | The business group id where your application artifact is published in exchange                           |
+| environment                          |                        | The environment to deploy to.  This value will be placed in all lower case in the property defined below |
+| environmentProperty                  |          env           | The application property to set with the environment name above                                          |
+| cryptoKey                            |                        | The crypto key used in your secure properties configuration                                              |
+| cryptoKeyProperty                    |       crypto.key       | The application property that will be set with the crypto key above                                      |
+| appVersion                           |                        | The application artifact version to deploy from exchange                                                 |
+| applicationName.baseAppName          |                        | The application artifact name to deploy from exchange                                                    |
+| applicationName.prefix               |                        | An optional prefix to be prepended to the baseAppName (prefix-baseAppName)                               |
+| applicationName.suffix               |                        | An optional suffix to be appended to the baseAppName (baseAppName-suffix)                                |
+| workerSpecs.target                   |                        | The target shared space or private space to deploy to                                                    |
+| workerSpecs.muleVersion              |                        | The Mule runtime version.  This is optional and the release channel will have a default version          |
+| workerSpecs.releaseChannel           |          LTS           | The release channel to use to determine the Mule runtime version (LTS or EDGE)                           |
+| workerSpecs.javaVersion              |           8            | The Java version to use (8 or 17)                                                                        |
+| workerSpecs.workerCount              |           1            | The number of workers to deploy                                                                          |
+| workerSpecs.replicaSize              |  VCoresSize.vCore1GB   | The size of the workers to deploy (See VCoresSize Enum for options)                                      |
+| workerSpecs.replicasAcrossNodes      |          true          | Option to force workers to be spread across nodes when possible                                          |
+| workerSpecs.clustered                |          true          | Enable clustering                                                                                        |
+| workerSpecs.updateStrategy           | UpdateStrategy.rolling | See UpdateStrategy enum for options (recreate/rolling)                                                   |
+| workerSpecs.publicUrl                |                        | Custom public ingress URL's (Comma separated list)                                                       |
+| workerSpecs.generateDefaultPublicUrl |          true          | Enable creation of default ingress URL                                                                   |
+| workerSpecs.pathRewrite              |                        | Path to re-write requests to                                                                             |
+| workerSpecs.lastMileSecurity         |         false          | Enable last mile security (TLS/SSL from Ingress to worker)                                               |
+| workerSpecs.forwardSslSession        |         false          | Enable SSL session forwarding through ingress                                                            |
+| workerSpecs.objectStoreV2            |          true          | Enable Object Store v2                                                                                   |
+| workerSpecs.disableAmLogForwarding   |         false          | Disable log forwarding to Anypoint Monitoring                                                            |
+| workerSpecs.tracingEnabled           |         false          | Enable Anypoint Monitoring Tracing                                                                       |
+| autoDiscovery.clientId               |                        | The environment client id to use when registering auto discovery for API manager                         |
+| autoDiscovery.clientSecret           |                        | The environment client secret to use when registering auto discovery for API manager                     |
+| appProperties                        |                        | A map of additional application properties you would like to set                                         |
+| appSecureProperties                  |                        | A map of additional secure application properties you would like to set                                  |
+
+
 
 ### DesignCenterSync
 Using this flag, the library will extract all RAML files from the source directory (provided in `apiSpec`), find the project in the design center by the name to be able to retrieve the current content in the server,
