@@ -12,15 +12,21 @@ on:
       - 'main'
 
 jobs:
-  Test-Setup:
+  Build-Setup:
     runs-on: ubuntu-latest
     
     outputs:
       test-suite: ${{ steps.set-test-suite.outputs.GITHUB_TEST_SUITE }}
+      ANYPOINT_CLIENT_ID: ${{ secrets.ANYPOINT_CLIENT_ID }}
+      ANYPOINT_CLIENT_SECRET: ${{ secrets.ANYPOINT_CLIENT_SECRET }}
+      ANYPOINT_CONNECTED_APP_ID: ${{ secrets.ANYPOINT_CONNECTED_APP_ID }}
+      ANYPOINT_CONNECTED_APP_SECRET: ${{ secrets.ANYPOINT_CONNECTED_APP_SECRET }} 
+      ANYPOINT_USERNAME: ${{ secrets.ANYPOINT_USERNAME }} 
+      ANYPOINT_PASSWORD: ${{ secrets.ANYPOINT_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v4
-        with:
+        with: 
           fetch-depth: '0'
           submodules: 'recursive'
 
@@ -31,12 +37,12 @@ jobs:
 
 
   Build-Maven:
-    needs: Test-Setup
+    needs: Build-Setup
     uses: avioconsulting/shared-workflows/.github/workflows/maven-build.yml@main
     secrets: inherit
     with:
       include-mule-ee-repo: true
-      maven-args: -Dtest=${{ needs.Test-Setup.outputs.test-suite }} -Danypoint.client.id=${{secrets.ANYPOINT_CLIENT_ID}} -Danypoint.client.secret=${{secrets.ANYPOINT_CLIENT_SECRET}} -Danypoint.connected-app.id=${{secrets.ANYPOINT_CONNECTED_APP_ID}} -Danypoint.connected-app.secret=${{secrets.ANYPOINT_CONNECTED_APP_SECRET}} -Danypoint.username=${{secrets.ANYPOINT_USERNAME}} -Danypoint.password=${{secrets.ANYPOINT_PASSWORD}}
+      maven-args: -Dtest=${{ needs.Build-Setup.outputs.test-suite }} -Danypoint.client.id=${{ needs.Build-Setup.outputs.ANYPOINT_CLIENT_ID }} -Danypoint.client.secret=${{needs.Build-Setup.outputs.ANYPOINT_CLIENT_SECRET}} -Danypoint.connected-app.id=${{needs.Build-Setup.outputs.ANYPOINT_CONNECTED_APP_ID}} -Danypoint.connected-app.secret=${{needs.Build-Setup.outputs.ANYPOINT_CONNECTED_APP_SECRET}} -Danypoint.username=${{needs.Build-Setup.outputs.ANYPOINT_USERNAME}} -Danypoint.password=${{needs.Build-Setup.outputs.ANYPOINT_PASSWORD}}
 
   Release-Maven:
     needs: Build-Maven
