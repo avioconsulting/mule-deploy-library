@@ -14,15 +14,21 @@ on:
 jobs:
   Build-Setup:
     runs-on: ubuntu-latest
-    
-    outputs:
-      test-suite: ${{ steps.set-test-suite.outputs.GITHUB_TEST_SUITE }}
+    env:
       ANYPOINT_CLIENT_ID: ${{ secrets.ANYPOINT_CLIENT_ID }}
       ANYPOINT_CLIENT_SECRET: ${{ secrets.ANYPOINT_CLIENT_SECRET }}
       ANYPOINT_CONNECTED_APP_ID: ${{ secrets.ANYPOINT_CONNECTED_APP_ID }}
       ANYPOINT_CONNECTED_APP_SECRET: ${{ secrets.ANYPOINT_CONNECTED_APP_SECRET }} 
       ANYPOINT_USERNAME: ${{ secrets.ANYPOINT_USERNAME }} 
       ANYPOINT_PASSWORD: ${{ secrets.ANYPOINT_PASSWORD }}
+    outputs:
+      test-suite: ${{ steps.set-test-suite.outputs.GITHUB_TEST_SUITE }}
+      ANYPOINT_CLIENT_ID: ${{ env.ANYPOINT_CLIENT_ID }}
+      ANYPOINT_CLIENT_SECRET: ${{ env.ANYPOINT_CLIENT_SECRET }}
+      ANYPOINT_CONNECTED_APP_ID: ${{ env.ANYPOINT_CONNECTED_APP_ID }}
+      ANYPOINT_CONNECTED_APP_SECRET: ${{ env.ANYPOINT_CONNECTED_APP_SECRET }} 
+      ANYPOINT_USERNAME: ${{ env.ANYPOINT_USERNAME }} 
+      ANYPOINT_PASSWORD: ${{ env.ANYPOINT_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v4
