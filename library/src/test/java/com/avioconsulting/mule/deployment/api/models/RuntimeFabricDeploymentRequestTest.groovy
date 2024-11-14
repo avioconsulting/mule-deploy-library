@@ -2,6 +2,7 @@ package com.avioconsulting.mule.deployment.api.models
 
 import com.avioconsulting.mule.MavenInvoke
 import com.avioconsulting.mule.deployment.api.models.deployment.ApplicationName
+import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubV2DeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
 import org.hamcrest.MatcherAssert
 import org.junit.jupiter.api.BeforeAll
@@ -12,19 +13,18 @@ import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
-class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
+class RuntimeFabricDeploymentRequestTest {
 
-    @BeforeAll
-    static void setup() {
-        buildApp()
+    WorkerSpecRequest getWorkerSpecBase() {
+        return new WorkerSpecRequest('us-west-2',
+                '4.2.2', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     @Test
-    void explicit() {
+    void test_deploymentRequest_creation_ok() {
 
         def request = new RuntimeFabricDeploymentRequest('DEV', null,
-                new WorkerSpecRequest('us-west-2',
-                        '4.2.2', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null),
+                getWorkerSpecBase(),
                 'theKey', null,
                 'theClientId',
                 'theSecret',
@@ -50,8 +50,7 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
     void derived_app_version_and_name_normal() {
 
         def request = new RuntimeFabricDeploymentRequest('DEV', null,
-                new WorkerSpecRequest('us-west-2',
-                        '4.2.2', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null),
+                getWorkerSpecBase(),
                 'theKey', null,
                 'theClientId',
                 'theSecret',
@@ -80,12 +79,11 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
     }
 
     @Test
-    void spaces_in_name() {
+    void test_deploymentRequest_appName_should_not_have_spaces_in_name() {
 
         def exception = shouldFail {
             new RuntimeFabricDeploymentRequest('DEV', null,
-                    new WorkerSpecRequest('us-west-2',
-                            '4.2.2', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null),
+                    getWorkerSpecBase(),
                     'theKey', null,
                     'theClientId',
                     'theSecret',
@@ -95,12 +93,58 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
         }
         MatcherAssert.assertThat('fail', exception.message.contains("Name must be alphanumeric with dashes allowed within"))
     }
+    /**
+     * This case validates that the name of application to deploy is not larger that the maximum required of 42 characters.
+     * however, this validation happens after build the final appName (normalizedAppName) like this: ${cloudhubAppprefix}-${appName}-${env} length should not larger than 42 characters.
+     * example: ApplicationName{ baseName=myVeryVeryVeryLargeApplicationName, prefix=someprefix, suffix=prod -> someprefix-myVeryVeryLargeApplicationName-prod is larger than 42 characters, it's not a valid name
+     */
 
-//    @Test
+    @Test
+    void test_deploymentRequest_appName_should_not_larger_than_required() {
+
+        def appName = 'app-myVeryVeryVeryLargeApplicationName'
+        def prefix = 'client'
+        def environment = 'DEV'
+        def exception = shouldFail {
+            new RuntimeFabricDeploymentRequest(environment, null,
+                    getWorkerSpecBase(),
+                    'theKey', null,
+                    'theClientId',
+                    'theSecret',
+                    new ApplicationName(appName, prefix, environment),
+                    '4.2.2',
+                    'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
+        }
+
+        MatcherAssert.assertThat exception.message,
+                is(equalTo("Maximum size of application name is 42 and the provided name has 49 characters"))
+    }
+
+    @Test
+    void test_deploymentRequest_appName_empty() {
+
+        def appName = null
+        def environment = 'DEV'
+        def exception = shouldFail {
+            new RuntimeFabricDeploymentRequest(environment, null,
+                    getWorkerSpecBase(),
+                    'theKey', null,
+                    'theClientId',
+                    'theSecret',
+                    new ApplicationName(appName, null, null),
+                    '4.2.2',
+                    'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee')
+        }
+
+        MatcherAssert.assertThat exception.message,
+                is(equalTo("Property applicationName.baseAppName is required for CloudHub 2.0 and RTF applications"))
+    }
+
+    @Test
     void getCloudhubAppInfo_only_required() {
 
         def request = new RuntimeFabricDeploymentRequest('DEV', null,
-                new WorkerSpecRequest('us-west-2', '4.2.2', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null),
+                getWorkerSpecBase(),
                 'theKey', null,
                 'theClientId',
                 'theSecret',
@@ -125,7 +169,7 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                         "mule.agent.application.properties.service": [
                                                 applicationName : 'new-app',
                                                 properties      : ['anypoint.platform.client_id'       : 'theClientId', 'env': 'dev',
-                                                                   'anypoint.platform.visualizer.layer': 'null'],
+                                                                   'anypoint.platform.visualizer.layer': null],
                                                 secureProperties: ['anypoint.platform.client_secret': 'theSecret', 'crypto.key': 'theKey']
                                         ]
                                 ],
@@ -177,7 +221,7 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                 ]))
     }
 
-//    @Test
+    @Test
     void getCloudhubAppInfo_all_properties() {
 
         def request = new RuntimeFabricDeploymentRequest('DEV', null,
@@ -199,8 +243,8 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                         "testpath",
                         "EDGE",
                         "17",
-                        true), null,
-                'theKey',
+                        true), 'theKey',
+                null,
                 'theClientId',
                 'theSecret',
                 new ApplicationName('new-app', 'prefix', 'DEV'),
@@ -229,10 +273,15 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                                 applicationName : 'new-app',
                                                 properties      : [
                                                         apiId: '123',
+                                                        'anypoint.platform.client_id': 'theClientId',
+                                                        'env': 'dev',
+                                                        'anypoint.platform.visualizer.layer': null,
                                                         prop1: 'value1',
                                                         prop2: 'value2'
                                                 ],
                                                 secureProperties: [
+                                                        'anypoint.platform.client_secret': 'theSecret',
+                                                        'crypto.key': 'theKey',
                                                         secureProp1: 'secureValue1',
                                                         secureProp2: 'secureValue2'
                                                 ]
@@ -251,7 +300,6 @@ class RuntimeFabricDeploymentRequestTest implements MavenInvoke {
                                 targetId          : null,
                                 provider          : "MC",
                                 deploymentSettings: [
-                                        persistentObjectStore              : true,
                                         clustered                          : true,
                                         updateStrategy                     : UpdateStrategy.recreate,
                                         enforceDeployingReplicasAcrossNodes: true,
