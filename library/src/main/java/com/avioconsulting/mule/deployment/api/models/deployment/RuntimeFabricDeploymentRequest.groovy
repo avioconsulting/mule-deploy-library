@@ -124,7 +124,9 @@ class RuntimeFabricDeploymentRequest extends ExchangeAppDeploymentRequest {
         def secureProps = [:]
         secureProps[CloudhubAppProperties.ANYPOINT_PLATFORM_CLIENT_SECRET] = anypointClientSecret
         secureProps[cloudhubAppProperties.cryptoKeyProperty] = cryptoKey
-        this.appSecureProperties
+        if (appSecureProperties) {
+            secureProps += appSecureProperties
+        }
 
         def result = [
                 // CloudHub's v2 API calls the Mule application the 'domain'
