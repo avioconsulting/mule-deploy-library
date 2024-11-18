@@ -44,7 +44,7 @@ jobs:
 
   Build-Maven:
     needs: Build-Setup
-    uses: avioconsulting/shared-workflows/.github/workflows/maven-build.yml@main
+    uses: avioconsulting/shared-workflows/.github/workflows/maven-build.yml@fix/upload-artifacts-path
     secrets: inherit
     with:
       include-mule-ee-repo: true
