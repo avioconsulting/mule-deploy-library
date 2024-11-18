@@ -44,7 +44,7 @@ jobs:
 
   Build-Maven:
     needs: Build-Setup
-    uses: avioconsulting/shared-workflows/.github/workflows/maven-build.yml@fix/upload-artifacts-path
+    uses: avioconsulting/shared-workflows/.github/workflows/maven-build.yml@main
     secrets: inherit
     with:
       include-mule-ee-repo: true
@@ -52,7 +52,7 @@ jobs:
 
   Release-Maven:
     needs: Build-Maven
-    uses: avioconsulting/shared-workflows/.github/workflows/maven-release.yml@fix/upload-artifacts-path
+    uses: avioconsulting/shared-workflows/.github/workflows/maven-release.yml@main
     secrets: inherit
     with:
       app-version: ${{ needs.Build-Maven.outputs.app-version }}
@@ -60,7 +60,7 @@ jobs:
     #   java-distribution: adopt-hotspot
     #   java-version: 8
     #   maven-args: -X
-      main-branch: chore/tmp-main
+      # main-branch: chore/tmp-main
 
   Post-Release-Maven:
     needs: [Build-Maven, Release-Maven]
