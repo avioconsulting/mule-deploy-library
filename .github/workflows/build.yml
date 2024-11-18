@@ -38,7 +38,7 @@ jobs:
 
       - name: Set test suite
         id: set-test-suite
-        if: github.ref != 'refs/heads/master' && github.event_name != 'pull_request'
+        if: github.ref != 'refs/heads/main' && github.event_name != 'pull_request'
         run: echo "GITHUB_TEST_SUITE=UnitTestSuite" >> $GITHUB_ENV
 
 
@@ -52,7 +52,7 @@ jobs:
 
   Release-Maven:
     needs: Build-Maven
-    uses: avioconsulting/shared-workflows/.github/workflows/maven-release.yml@main
+    uses: avioconsulting/shared-workflows/.github/workflows/maven-release.yml@fix/upload-artifacts-path
     secrets: inherit
     with:
       app-version: ${{ needs.Build-Maven.outputs.app-version }}
@@ -60,7 +60,7 @@ jobs:
     #   java-distribution: adopt-hotspot
     #   java-version: 8
     #   maven-args: -X
-    #   main-branch: main
+      main-branch: chore/tmp-main
 
   Post-Release-Maven:
     needs: [Build-Maven, Release-Maven]
