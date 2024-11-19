@@ -25,8 +25,8 @@ abstract class FileBasedAppDeploymentRequest extends AppDeploymentRequest {
      */
     final File file
 
-    FileBasedAppDeploymentRequest(File file, ApplicationName applicationName, String appVersion, String environment) {
-        super(applicationName, appVersion, environment)
+    FileBasedAppDeploymentRequest(File file, ApplicationName applicationName, String appVersion, String environment, String environmentProperty) {
+        super(applicationName, appVersion, environment, environmentProperty)
 
         this.file = file
 

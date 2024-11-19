@@ -37,6 +37,9 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
     protected final String APP_ID = '987-654-321'
     protected final String APP_VERSION = '1.2.3'
     protected final String GROUP_ID = 'the-org-id'
+    protected final String CRYPTO_KEY = 'crypto-key'
+    protected final String CLIENT_ID = 'client-id'
+    protected final String CLIENT_SECRET = 'client-secret'
 
     @BeforeEach
     void clean() {
@@ -53,6 +56,38 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                 maxTries,
                 new TestConsoleLogger(),
                 dryRunMode)
+    }
+
+    RuntimeFabricDeploymentRequest getStandardDeploymentRequest() {
+       def request = new RuntimeFabricDeploymentRequest(ENV, null,
+                new WorkerSpecRequest(TARGET_NAME,
+                        VERSION,
+                        false,
+                        true,
+                        true,
+                        UpdateStrategy.recreate,
+                        true,
+                        true,
+                        VCoresSize.vCore15GB,
+                        2,
+                        false,
+                        false,
+                        30,
+                        800,
+                        null,
+                        null,
+                        'LTS',
+                        '17',
+                        false),
+                CRYPTO_KEY, null,
+                CLIENT_ID,
+                CLIENT_SECRET,
+                new ApplicationName(APP_NAME, null, 'dev'),
+                APP_VERSION,
+                GROUP_ID)
+
+        request.setAutoDiscoveryId('the.auto.disc.prop', '1234')
+        return request
     }
 
     @Test
@@ -91,29 +126,9 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
             }
         }
 
-        def request = new RuntimeFabricDeploymentRequest(ENV,
-                new WorkerSpecRequest(TARGET_NAME,
-                        VERSION,
-                        true,
-                        true,
-                        true,
-                        UpdateStrategy.recreate,
-                        true,
-                        true,
-                        VCoresSize.vCore15GB,
-                        13,
-                        true,
-                        false),
-                'theKey',
-                'theClientId',
-                'theSecret',
-                new ApplicationName(APP_NAME, null, 'dev'),
-                APP_VERSION,
-                GROUP_ID)
-
-        request.setAutoDiscoveryId('the.auto.disc.prop',
-                '1234')
-
+        def request = getStandardDeploymentRequest()
+        request.target = 'us-west-2'
+        request.appName = new ApplicationName(APP_NAME, null, 'dev')
         // act
         deployer.deploy(request)
 
@@ -159,29 +174,8 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
             }
         }
 
-        def request = new RuntimeFabricDeploymentRequest(ENV,
-                new WorkerSpecRequest(TARGET_NAME,
-                        VERSION,
-                        true,
-                        true,
-                        true,
-                        UpdateStrategy.recreate,
-                        true,
-                        true,
-                        VCoresSize.vCore15GB,
-                        13,
-                        true,
-                        false),
-                'theKey',
-                'theClientId',
-                'theSecret',
-                new ApplicationName(APP_NAME, null, null),
+        def request = getStandardDeploymentRequest()
 
-                APP_VERSION,
-                GROUP_ID)
-
-        request.setAutoDiscoveryId('the.auto.disc.prop',
-                '1234')
 
         def exception = shouldFail {
             deployer.deploy(request)
@@ -228,28 +222,27 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
             }
         }
 
-        def request = new RuntimeFabricDeploymentRequest(ENV,
-                new WorkerSpecRequest(TARGET_NAME,
-                        VERSION,
-                        true,
-                        true,
-                        true,
-                        UpdateStrategy.recreate,
-                        true,
-                        true,
-                        VCoresSize.vCore15GB,
-                        13,
-                        true,
-                        false),
-                'theKey',
-                'theClientId',
-                'theSecret',
-                new ApplicationName(APP_NAME, null, 'dev'),
-                APP_VERSION,
-                GROUP_ID)
+//        def request = new RuntimeFabricDeploymentRequest(ENV,
+//                new WorkerSpecRequest(TARGET_NAME,
+//                        VERSION,
+//                        true,
+//                        true,
+//                        true,
+//                        UpdateStrategy.recreate,
+//                        true,
+//                        true,
+//                        VCoresSize.vCore15GB,
+//                        13,
+//                        true,
+//                        false),
+//                'theKey',
+//                'theClientId',
+//                'theSecret',
+//                new ApplicationName(APP_NAME, null, 'dev'),
+//                APP_VERSION,
+//                GROUP_ID)
 
-        request.setAutoDiscoveryId('the.auto.disc.prop',
-                '1234')
+        def request = getStandardDeploymentRequest()
 
         // act
         deployer.deploy(request)
@@ -297,28 +290,27 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
             }
         }
 
-        def request = new RuntimeFabricDeploymentRequest(ENV,
-                new WorkerSpecRequest(TARGET_NAME,
-                        VERSION,
-                        true,
-                        true,
-                        true,
-                        UpdateStrategy.recreate,
-                        true,
-                        true,
-                        VCoresSize.vCore15GB,
-                        13,
-                        true,
-                        false),
-                'theKey',
-                'theClientId',
-                'theSecret',
-                new ApplicationName(APP_NAME, null, 'dev'),
-                APP_VERSION,
-                GROUP_ID)
+//        def request = new RuntimeFabricDeploymentRequest(ENV,
+//                new WorkerSpecRequest(TARGET_NAME,
+//                        VERSION,
+//                        true,
+//                        true,
+//                        true,
+//                        UpdateStrategy.recreate,
+//                        true,
+//                        true,
+//                        VCoresSize.vCore15GB,
+//                        13,
+//                        true,
+//                        false),
+//                'theKey',
+//                'theClientId',
+//                'theSecret',
+//                new ApplicationName(APP_NAME, null, 'dev'),
+//                APP_VERSION,
+//                GROUP_ID)
 
-        request.setAutoDiscoveryId('the.auto.disc.prop',
-                '1234')
+        def request = getStandardDeploymentRequest()
 
         def exception = shouldFail {
             deployer.deploy(request)
@@ -340,28 +332,8 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
             }
         }
 
-        def request = new RuntimeFabricDeploymentRequest('INVALID_ENV',
-                new WorkerSpecRequest(TARGET_NAME,
-                        VERSION,
-                        true,
-                        true,
-                        true,
-                        UpdateStrategy.recreate,
-                        true,
-                        true,
-                        VCoresSize.vCore15GB,
-                        13,
-                        true,
-                        false),
-                'theKey',
-                'theClientId',
-                'theSecret',
-                new ApplicationName(APP_NAME, null, null),
-                APP_VERSION,
-                GROUP_ID)
-
-        request.setAutoDiscoveryId('the.auto.disc.prop',
-                '1234')
+        def request = getStandardDeploymentRequest()
+        request.environment = 'INVALID_ENV'
 
         def exception = shouldFail {
             deployer.deploy(request)
@@ -386,28 +358,8 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
             }
         }
 
-        def request = new RuntimeFabricDeploymentRequest(ENV,
-                new WorkerSpecRequest('INVALID_TARGET_NAME',
-                        VERSION,
-                        true,
-                        true,
-                        true,
-                        UpdateStrategy.recreate,
-                        true,
-                        true,
-                        VCoresSize.vCore15GB,
-                        13,
-                        true,
-                        false),
-                'theKey',
-                'theClientId',
-                'theSecret',
-                new ApplicationName(APP_NAME, 'client', null),
-                APP_VERSION,
-                GROUP_ID)
-
-        request.setAutoDiscoveryId('the.auto.disc.prop',
-                '1234')
+        def request = getStandardDeploymentRequest()
+        request.target = 'INVALID_TARGET_NAME'
 
         def exception = shouldFail {
             deployer.deploy(request)
@@ -432,28 +384,8 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
             }
         }
 
-        def request = new RuntimeFabricDeploymentRequest(ENV,
-                new WorkerSpecRequest('INVALID_TARGET_NAME',
-                        VERSION,
-                        true,
-                        true,
-                        true,
-                        UpdateStrategy.recreate,
-                        true,
-                        true,
-                        VCoresSize.vCore15GB,
-                        13,
-                        true,
-                        false),
-                'theKey',
-                'theClientId',
-                'theSecret',
-                new ApplicationName(APP_NAME, 'client', null),
-                APP_VERSION,
-                GROUP_ID)
-
-        request.setAutoDiscoveryId('the.auto.disc.prop',
-                '1234')
+        def request = getStandardDeploymentRequest()
+        request.target = 'INVALID_TARGET_NAME'
 
         def exception = shouldFail {
             deployer.deploy(request)
@@ -531,7 +463,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                                 ],
                                 target: [
                                     provider: 'MC',
-                                    targetId: 'us-east-2'
+                                    targetId: 'us-west-2'
                                 ]
                             ]
                         ]
@@ -554,7 +486,7 @@ class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
                                 ],
                                 target: [
                                     provider: 'MC',
-                                    targetId: 'us-east-2'
+                                    targetId: 'us-west-2'
                                 ]
                             ]
                         ]

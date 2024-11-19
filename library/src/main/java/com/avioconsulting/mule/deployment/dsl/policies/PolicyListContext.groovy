@@ -8,7 +8,7 @@ class PolicyListContext {
     List<Policy> createPolicyList() {
         policies
     }
-
+    
     def policy(Closure closure) {
         def policyContext = new PolicyContext(null)
         closure.delegate = policyContext

@@ -3,6 +3,7 @@ package com.avioconsulting.mule
 import org.apache.maven.shared.invoker.DefaultInvocationRequest
 import org.apache.maven.shared.invoker.DefaultInvoker
 
+// TODO:  This currently only builds on Maven up to 3.8.8, we need to consider if the sample needs to move to mule maven plugin 4.x
 trait MavenInvoke {
     static File projectDirectory
     static File builtFile

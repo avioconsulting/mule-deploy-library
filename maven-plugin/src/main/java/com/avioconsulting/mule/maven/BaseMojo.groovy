@@ -36,18 +36,29 @@ abstract class BaseMojo extends AbstractMojo {
             }
         }
 
-        def props = System.getProperties().findAll { String k, v ->
-            (k as String).startsWith('muleDeploy.')
+        def props = [:]
+
+        if (artifact) {
+            logger.println "Adding ${artifact.file} path as appArtifact in your DSL and setting groupId, artifactId and artifactVersion"
+            props['appArtifact'] = artifact.file.absolutePath
+            props['groupId'] = artifact.groupId
+            props['artifactId'] = artifact.id
+            props['artifactVersion'] = artifact.version
+        }
+
+        def sysProps = System.getProperties().findAll { String k, v ->
+            (k as String).startsWith('muleDeploy.') || (k as String).startsWith('md.')
         }.collectEntries { k, v ->
             def withoutPrefix = (k as String).replaceFirst('muleDeploy\\.',
                     '')
+            withoutPrefix = withoutPrefix.replaceFirst('md\\.',
+                    '')
             [withoutPrefix, v]
         }
-        if (artifact) {
-            logger.println "Adding ${artifact.file} path as appArtifact in your DSL"
-            props['appArtifact'] = artifact.file.absolutePath
-        }
-        new ParamsWrapper(props + additionalProperties)
+
+
+
+        new ParamsWrapper(props + sysProps + additionalProperties)
     }
 
     protected DeploymentPackage processDsl() {

@@ -67,7 +67,8 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                               Map<String, String> appProperties = [:],
                               Map<String, String> otherCloudHubProperties = [:],
                               boolean analyticsAgentEnabled = true) {
-        super(file, applicationName, appVersion, environment)
+        // TODO: Do we need to support environment property here?
+        super(file, applicationName, appVersion, environment, null)
         if (!workerSpecRequest.muleVersion) {
             def propertyToUse = mule4Request ? 'app.runtime' : 'mule.version'
             def rawVersion = parsedPomProperties.props[propertyToUse]
@@ -85,17 +86,19 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
         this.otherCloudHubProperties = otherCloudHubProperties
 
         //normalize name
-        if(!applicationName.baseAppName){
+        if (!applicationName.baseAppName) {
             applicationName.baseAppName = parsedPomProperties.artifactId
         }
         //
         this.cloudhubAppProperties = new CloudhubAppProperties(applicationName.baseAppName,
-                                                               environment.toLowerCase(),
-                                                               cryptoKey,
-                                                               anypointClientId,
-                                                               anypointClientSecret,
-                                                               // only include prop if it's true
-                                                               analyticsAgentEnabled ? true : null)
+                environment.toLowerCase(),
+                null,
+                cryptoKey,
+                null,
+                anypointClientId,
+                anypointClientSecret,
+                // only include prop if it's true
+                analyticsAgentEnabled ? true : null)
         this.analyticsAgentEnabled = analyticsAgentEnabled
     }
 
@@ -104,19 +107,19 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
                 .setMode(HttpMultipartMode.BROWSER_COMPATIBLE)
         // without autoStart, the app won't actually start after we push this request out
                 .addTextBody('autoStart',
-                             'true')
+                        'true')
                 .addTextBody('appInfoJson',
-                             cloudhubAppInfoAsJson)
+                        cloudhubAppInfoAsJson)
                 .addBinaryBody('file',
-                               this.file,
-                               ContentType.APPLICATION_OCTET_STREAM,
-                               this.file.name)
+                        this.file,
+                        ContentType.APPLICATION_OCTET_STREAM,
+                        this.file.name)
                 .build()
     }
 
     Map<String, String> getCloudhubAppInfo() {
         def props = new ObjectMapper().convertValue(this.cloudhubAppProperties,
-                                                    Map)
+                Map)
         props += this.autoDiscoveries
         def result = [
                 // CloudHub's API calls the Mule application the 'domain'
@@ -153,8 +156,8 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
         JsonOutput.toJson(cloudhubAppInfo)
     }
 
-    Map<String,String> getCloudAppInfoAsObfuscatedJson() {
-        PropertiesObfuscator.obfuscateMap(cloudhubAppInfo,"properties")
+    Map<String, String> getCloudAppInfoAsObfuscatedJson() {
+        PropertiesObfuscator.obfuscateMap(cloudhubAppInfo, "properties")
     }
 
     @Lazy
