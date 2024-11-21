@@ -34,7 +34,6 @@ class RuntimeFabricContextTest{
             appVersion '2.2.9'
             applicationName {
                 baseAppName 'new-app'
-                suffix 'DEV'
             }
             workerSpecs {
                 target 'us-west-2'
@@ -52,7 +51,7 @@ class RuntimeFabricContextTest{
             assertThat environment,
                     is(equalTo('DEV'))
             assertThat applicationName.normalizedAppName,
-                    is(equalTo('new-app-dev'))
+                    is(equalTo('new-app'))
             assertThat appVersion,
                     is(equalTo('2.2.9'))
             assertThat cryptoKey,
@@ -84,71 +83,101 @@ class RuntimeFabricContextTest{
         }
         def appInfo = request.getCloudhubAppInfo()
 
-        assertThat appInfo,
-                is(equalTo([
-                        name       : 'new-app-dev',
-                        application: [
-                                ref          : [
-                                        groupId   : '123-456-789',
-                                        artifactId: 'new-app',
-                                        version   : '2.2.9',
-                                        packaging : "jar"
-                                ],
-                                desiredState : "STARTED",
-                                configuration: [
-                                        "mule.agent.application.properties.service": [
-                                                applicationName : 'new-app',
-                                                properties      : ['anypoint.platform.client_id'       : 'the_client_id', 'env': 'dev',
-                                                                   'anypoint.platform.visualizer.layer': null],
-                                                secureProperties: ['anypoint.platform.client_secret': 'the_client_secret', 'crypto.key': 'theKey']
-                                        ]
-                                ],
-                                integrations : [
-                                        services: [
-                                                objectStoreV2: [
-                                                        enabled: true
-                                                ]
-                                        ]
-                                ],
-                                "vCores"     : VCoresSize.vCore1GB
-                        ],
-                        target     : [
-                                targetId          : null,
-                                provider          : "MC",
-                                deploymentSettings: [
-                                        clustered                          : true,
-                                        updateStrategy                     : UpdateStrategy.rolling,
-                                        enforceDeployingReplicasAcrossNodes: true,
-                                        disableAmLogForwarding             : false,
-                                        generateDefaultPublicUrl           : true,
-                                        http                               : [
-                                                inbound: [
-                                                        publicUrl        : null,
-                                                        pathRewrite      : null,
-                                                        lastMileSecurity : false,
-                                                        forwardSslSession: false,
-                                                ]
-                                        ],
-                                        jvm                                : [:],
-                                        outbound                           : [:],
-                                        runtime                            : [
-                                                version       : '4.2.2',
-                                                releaseChannel: 'LTS',
-                                                java          : '8'
-                                        ],
-                                        tracingEnabled                     : false,
-                                        resources                          : [
-                                                cpu   : [
-                                                        reserved: "20m"
-                                                ],
-                                                memory: [
-                                                        reserved: "700Mi"
-                                                ]
-                                        ]
-                                ],
-                                replicas          : 1
-                        ]
-                ]))
+        appInfo.with {
+            assertThat name,
+                    is(equalTo('new-app'))
+            application.with {
+                ref.with {
+                    assertThat groupId,
+                            is(equalTo('123-456-789'))
+                    assertThat artifactId,
+                            is(equalTo('new-app'))
+                    assertThat version,
+                            is(equalTo('2.2.9'))
+                    assertThat packaging,
+                            is(equalTo('jar'))
+                }
+                assertThat desiredState,
+                        is(equalTo('STARTED'))
+                configuration.with {
+                    it.with {
+                        assertThat it."mule.agent.application.properties.service".applicationName,
+                                is(equalTo('new-app'))
+                        assertThat it."mule.agent.application.properties.service".properties,
+                                is(equalTo(['anypoint.platform.client_id'       : 'the_client_id', 'env': 'dev',
+                                            'anypoint.platform.visualizer.layer': null]))
+                        assertThat it."mule.agent.application.properties.service".secureProperties,
+                                is(equalTo(['anypoint.platform.client_secret': 'the_client_secret', 'crypto.key': 'theKey']))
+                    }
+                }
+                integrations.with {
+                    services.with {
+                        objectStoreV2.with {
+                            assertThat enabled,
+                                    is(equalTo(true))
+                        }
+                    }
+                }
+                assertThat vCores,
+                        is(equalTo(VCoresSize.vCore1GB))
+            }
+            target.with {
+                assertThat targetId,
+                        is(equalTo(null))
+                assertThat provider,
+                        is(equalTo('MC'))
+                deploymentSettings.with {
+                    assertThat clustered,
+                            is(equalTo(true))
+                    assertThat updateStrategy,
+                            is(equalTo(UpdateStrategy.rolling))
+                    assertThat enforceDeployingReplicasAcrossNodes,
+                            is(equalTo(true))
+                    assertThat disableAmLogForwarding,
+                            is(equalTo(false))
+                    assertThat generateDefaultPublicUrl,
+                            is(equalTo(true))
+                    http.with {
+                        inbound.with {
+                            assertThat publicUrl,
+                                    is(equalTo(null))
+                            assertThat pathRewrite,
+                                    is(equalTo(null))
+                            assertThat lastMileSecurity,
+                                    is(equalTo(false))
+                            assertThat forwardSslSession,
+                                    is(equalTo(false))
+                        }
+                    }
+                    assertThat jvm,
+                            is(equalTo([:]))
+                    assertThat outbound,
+                            is(equalTo([:]))
+                    runtime.with {
+                        assertThat version,
+                                is(equalTo('4.2.2'))
+                        assertThat releaseChannel,
+                                is(equalTo('LTS'))
+                        assertThat java,
+                                is(equalTo('8'))
+                    }
+                    assertThat tracingEnabled,
+                            is(equalTo(false))
+                    resources.with {
+                        cpu.with {
+                            assertThat reserved,
+                                    is(equalTo('20m'))
+                        }
+                        memory.with {
+                            assertThat reserved,
+                                    is(equalTo('700Mi'))
+                        }
+                    }
+                }
+                assertThat replicas,
+                    is(equalTo(1))
+            }
+        }
     }
 
     @Test
@@ -252,82 +281,102 @@ class RuntimeFabricContextTest{
 
         def appInfo = request.getCloudhubAppInfo()
 
-        assertThat appInfo,
-                is(equalTo([
-                        name       : 'prefix-new-app-suffix',
-                        application: [
-                                ref          : [
-                                        groupId   : '123-456-789',
-                                        artifactId: 'new-app',
-                                        version   : '2.2.9',
-                                        packaging : "jar"
-                                ],
-                                desiredState : "STARTED",
-                                configuration: [
-                                        "mule.agent.application.properties.service": [
-                                                applicationName : 'new-app',
-                                                properties      : [
-                                                        apiId: '123',
-                                                        'anypoint.platform.client_id': 'the_client_id',
-                                                        'env': 'dev',
-                                                        'anypoint.platform.visualizer.layer': null,
-                                                        prop1: 'value1',
-                                                        prop2: 'value2'
-                                                ],
-                                                secureProperties: [
-                                                        'anypoint.platform.client_secret': 'the_client_secret',
-                                                        'crypto.key': 'theKey',
-                                                        secureProp1: 'secureValue1',
-                                                        secureProp2: 'secureValue2'
-                                                ]
-                                        ]
-                                ],
-                                integrations : [
-                                        services: [
-                                                objectStoreV2: [
-                                                        enabled: false
-                                                ]
-                                        ]
-                                ],
-                                "vCores"     : VCoresSize.vCore2GB
-                        ],
-                        target     : [
-                                targetId          : null,
-                                provider          : "MC",
-                                deploymentSettings: [
-                                        clustered                          : false,
-                                        updateStrategy                     : UpdateStrategy.recreate,
-                                        enforceDeployingReplicasAcrossNodes: true,
-                                        disableAmLogForwarding             : true,
-                                        generateDefaultPublicUrl           : false,
-                                        http                               : [
-                                                inbound: [
-                                                        publicUrl        : 'https://api.mycompany.com/my-api',
-                                                        pathRewrite      : 'newpath',
-                                                        lastMileSecurity : true,
-                                                        forwardSslSession: true
-                                                ]
-                                        ],
-                                        jvm                                : [:],
-                                        outbound                           : [:],
-                                        runtime                            : [
-                                                version       : '4.6.9',
-                                                releaseChannel: 'LTS',
-                                                java          : '17'
-                                        ],
-                                        tracingEnabled                     : true,
-                                        resources                          : [
-                                                cpu   : [
-                                                        reserved: "30m"
-                                                ],
-                                                memory: [
-                                                        reserved: "800Mi"
-                                                ]
-                                        ]
-                                ],
-                                replicas          : 2
-                        ]
-                ]))
+        appInfo.with {
+            assertThat name,
+                    is(equalTo('prefix-new-app-suffix'))
+            application.with {
+                ref.with {
+                    assertThat groupId,
+                            is(equalTo('123-456-789'))
+                    assertThat artifactId,
+                            is(equalTo('new-app'))
+                    assertThat version,
+                            is(equalTo('2.2.9'))
+                    assertThat packaging,
+                            is(equalTo('jar'))
+                }
+                assertThat desiredState,
+                        is(equalTo('STARTED'))
+                configuration.with {
+                    it.with {
+                        assertThat it."mule.agent.application.properties.service".applicationName,
+                                is(equalTo('new-app'))
+                        assertThat it."mule.agent.application.properties.service".properties,
+                                is(equalTo(['apiId': '123', 'anypoint.platform.client_id'       : 'the_client_id', 'env': 'dev',
+                                            'anypoint.platform.visualizer.layer': null, 'prop1': 'value1', 'prop2': 'value2']))
+                        assertThat it."mule.agent.application.properties.service".secureProperties,
+                                is(equalTo(['anypoint.platform.client_secret': 'the_client_secret', 'crypto.key': 'theKey',
+                                            'secureProp1': 'secureValue1', 'secureProp2': 'secureValue2']))
+                    }
+                }
+                integrations.with {
+                    services.with {
+                        objectStoreV2.with {
+                            assertThat enabled,
+                                    is(equalTo(false))
+                        }
+                    }
+                }
+                assertThat vCores,
+                        is(equalTo(VCoresSize.vCore2GB))
+            }
+            target.with {
+                assertThat targetId,
+                        is(equalTo(null))
+                assertThat provider,
+                        is(equalTo('MC'))
+                deploymentSettings.with {
+                    assertThat clustered,
+                            is(equalTo(false))
+                    assertThat updateStrategy,
+                            is(equalTo(UpdateStrategy.recreate))
+                    assertThat enforceDeployingReplicasAcrossNodes,
+                            is(equalTo(true))
+                    assertThat disableAmLogForwarding,
+                            is(equalTo(true))
+                    assertThat generateDefaultPublicUrl,
+                            is(equalTo(false))
+                    http.with {
+                        inbound.with {
+                            assertThat publicUrl,
+                                    is(equalTo('https://api.mycompany.com/my-api'))
+                            assertThat pathRewrite,
+                                    is(equalTo('newpath'))
+                            assertThat lastMileSecurity,
+                                    is(equalTo(true))
+                            assertThat forwardSslSession,
+                                    is(equalTo(true))
+                        }
+                    }
+                    assertThat jvm,
+                            is(equalTo([:]))
+                    assertThat outbound,
+                            is(equalTo([:]))
+                    runtime.with {
+                        assertThat version,
+                                is(equalTo('4.6.9'))
+                        assertThat releaseChannel,
+                                is(equalTo('LTS'))
+                        assertThat java,
+                                is(equalTo('17'))
+                    }
+                    assertThat tracingEnabled,
+                            is(equalTo(true))
+                    resources.with {
+                        cpu.with {
+                            assertThat reserved,
+                                    is(equalTo('30m'))
+                        }
+                        memory.with {
+                            assertThat reserved,
+                                    is(equalTo('800Mi'))
+                        }
+                    }
+                }
+                assertThat replicas,
+                        is(equalTo(2))
+            }
+        }
     }
 
     // Failure Test Cases
