@@ -11,7 +11,7 @@ import groovy.json.JsonOutput
 import org.apache.http.client.methods.*
 import org.apache.http.entity.StringEntity
 
-class CloudHubV2Deployer extends RuntimeFabricDeployer implements ICloudHubV2Deployer {
+class CloudHubV2Deployer extends ContainerBaseDeployer<CloudHubV2Deployer> implements ICloudHubV2Deployer {
 
     CloudHubV2Deployer(HttpClientWrapper clientWrapper,
                        EnvironmentLocator environmentLocator,

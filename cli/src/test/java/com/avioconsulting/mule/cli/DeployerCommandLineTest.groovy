@@ -357,10 +357,10 @@ muleDeploy {
     void deployment_failure() {
         // arrange
         def mockDeployer = [
-                deployApplication: { FileBasedAppDeploymentRequest appDeploymentRequest,
-                                     ApiSpecification apiSpecification,
-                                     List<Policy> desiredPolicies,
-                                     List<Features> enabledFeatures ->
+                deployApplication: { appDeploymentRequest,
+                                     apiSpecification = null,
+                                     desiredPolicies = null,
+                                     enabledFeatures = null ->
                     throw new Exception('some deployment problem')
                 }
         ] as IDeployer

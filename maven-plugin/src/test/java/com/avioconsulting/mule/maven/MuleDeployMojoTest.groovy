@@ -21,7 +21,7 @@ import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-@SuppressWarnings(value = ['GroovyVariableNotAssigned', 'GroovyAccessibility'])
+@SuppressWarnings(value = ['GroovyVariableNotAssigned', 'groovy:access'])
 class MuleDeployMojoTest implements MavenInvoke {
     def logger = new TestLogger()
 
