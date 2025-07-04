@@ -15,8 +15,8 @@ jobs:
   Build-Setup:
     runs-on: ubuntu-latest
     env:
-      JAVA_DISTRIBUTION: temurin
-      JAVA_VERSION: 17
+      JAVA_DISTRIBUTION: 'temurin'
+      JAVA_VERSION: '17'
       ANYPOINT_CLIENT_ID: ${{ secrets.ANYPOINT_CLIENT_ID }}
       ANYPOINT_CLIENT_SECRET: ${{ secrets.ANYPOINT_CLIENT_SECRET }}
       ANYPOINT_CONNECTED_APP_ID: ${{ secrets.ANYPOINT_CONNECTED_APP_ID }}
@@ -25,6 +25,8 @@ jobs:
       ANYPOINT_PASSWORD: ${{ secrets.ANYPOINT_PASSWORD }}
     outputs:
       test-suite: ${{ steps.set-test-suite.outputs.GITHUB_TEST_SUITE }}
+      JAVA_DISTRIBUTION: ${{ env.JAVA_DISTRIBUTION }}
+      JAVA_VERSION: ${{ env.JAVA_VERSION }}
       ANYPOINT_CLIENT_ID: ${{ env.ANYPOINT_CLIENT_ID }}
       ANYPOINT_CLIENT_SECRET: ${{ env.ANYPOINT_CLIENT_SECRET }}
       ANYPOINT_CONNECTED_APP_ID: ${{ env.ANYPOINT_CONNECTED_APP_ID }}
@@ -50,8 +52,8 @@ jobs:
     secrets: inherit
     with:
       include-mule-ee-repo: true
-      java-distribution: ${{ env.JAVA_DISTRIBUTION }}
-      java-version: ${{ env.JAVA_VERSION }}
+      java-distribution: ${{ needs.Build-Setup.outputs.JAVA_DISTRIBUTION }}
+      java-version: ${{ needs.Build-Setup.outputs.JAVA_VERSION }}
       maven-args: -Dtest=${{ needs.Build-Setup.outputs.test-suite }} -Danypoint.client.id=${{ needs.Build-Setup.outputs.ANYPOINT_CLIENT_ID }} -Danypoint.client.secret=${{needs.Build-Setup.outputs.ANYPOINT_CLIENT_SECRET}} -Danypoint.connected-app.id=${{needs.Build-Setup.outputs.ANYPOINT_CONNECTED_APP_ID}} -Danypoint.connected-app.secret=${{needs.Build-Setup.outputs.ANYPOINT_CONNECTED_APP_SECRET}} -Danypoint.username=${{needs.Build-Setup.outputs.ANYPOINT_USERNAME}} -Danypoint.password=${{needs.Build-Setup.outputs.ANYPOINT_PASSWORD}}
 
   Release-Maven:
@@ -61,8 +63,8 @@ jobs:
     with:
       app-version: ${{ needs.Build-Maven.outputs.app-version }}
       publish-maven-central: true
-      java-distribution: ${{ env.JAVA_DISTRIBUTION }}
-      java-version: ${{ env.JAVA_VERSION }}
+      java-distribution: ${{ needs.Build-Setup.outputs.JAVA_DISTRIBUTION }}
+      java-version: ${{ needs.Build-Setup.outputs.JAVA_VERSION }}
     #   maven-args: -X
     #   main-branch: main
 
@@ -72,8 +74,8 @@ jobs:
     secrets: inherit
     with:
       app-version: ${{ needs.Build-Maven.outputs.app-version }}
-      java-distribution: ${{ env.JAVA_DISTRIBUTION }}
-      java-version: ${{ env.JAVA_VERSION }}
+      java-distribution: ${{ needs.Build-Setup.outputs.JAVA_DISTRIBUTION }}
+      java-version: ${{ needs.Build-Setup.outputs.JAVA_VERSION }}
     #   maven-args: -X
     #   main-branch: main
     #   pr-reviewers: adesjardin, manikmagar, kkingavio
