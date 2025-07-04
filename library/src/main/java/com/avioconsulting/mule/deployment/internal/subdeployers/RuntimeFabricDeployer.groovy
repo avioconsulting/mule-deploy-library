@@ -15,7 +15,7 @@ import org.apache.http.client.methods.HttpPatch
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 
-class RuntimeFabricDeployer extends ContainerBaseDeployer<RuntimeFabricDeploymentRequest> implements IRuntimeFabricDeployer {
+class RuntimeFabricDeployer extends ExchangeBasedDeployer<RuntimeFabricDeploymentRequest> implements IRuntimeFabricDeployer {
 
     RuntimeFabricDeployer(HttpClientWrapper clientWrapper,
                           EnvironmentLocator environmentLocator,

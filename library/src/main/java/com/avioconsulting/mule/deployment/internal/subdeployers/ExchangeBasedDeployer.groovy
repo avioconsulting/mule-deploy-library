@@ -2,7 +2,7 @@ package com.avioconsulting.mule.deployment.internal.subdeployers
 
 import com.avioconsulting.mule.deployment.api.DryRunMode
 import com.avioconsulting.mule.deployment.api.ILogger
-import com.avioconsulting.mule.deployment.api.models.deployment.RuntimeFabricDeploymentRequest
+import com.avioconsulting.mule.deployment.api.models.deployment.ExchangeAppDeploymentRequest
 import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.AppStatus
@@ -10,14 +10,15 @@ import com.avioconsulting.mule.deployment.internal.models.AppStatusPackage
 import com.avioconsulting.mule.deployment.internal.models.DeploymentItem
 import com.avioconsulting.mule.deployment.internal.models.DeploymentUpdateStatus
 import groovy.json.JsonOutput
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPatch
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.StringEntity
 
-class ContainerBaseDeployer<T> extends BaseDeployer {
+abstract class ExchangeBasedDeployer<T extends ExchangeAppDeploymentRequest> extends BaseDeployer {
 
-    ContainerBaseDeployer(HttpClientWrapper clientWrapper,
+    ExchangeBasedDeployer(HttpClientWrapper clientWrapper,
                           EnvironmentLocator environmentLocator,
                           ILogger logger,
                           DryRunMode dryRunMode) {
@@ -30,7 +31,7 @@ class ContainerBaseDeployer<T> extends BaseDeployer {
              dryRunMode)
     }
 
-  ContainerBaseDeployer(HttpClientWrapper clientWrapper,
+    ExchangeBasedDeployer(HttpClientWrapper clientWrapper,
                         EnvironmentLocator environmentLocator,
                         int retryIntervalInMs,
                         int maxTries,
@@ -44,7 +45,7 @@ class ContainerBaseDeployer<T> extends BaseDeployer {
               dryRunMode)
     }
 
-  ContainerBaseDeployer(int retryIntervalInMs,
+    ExchangeBasedDeployer(int retryIntervalInMs,
                         int maxTries,
                         ILogger logger,
                         HttpClientWrapper clientWrapper,
@@ -100,22 +101,7 @@ class ContainerBaseDeployer<T> extends BaseDeployer {
                                   String envId,
                                   String groupId) {
         def request = new HttpPost("${clientWrapper.baseUrl}/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments")
-        def prettyJson = JsonOutput.prettyPrint(deploymentRequest.cloudhubAppInfoAsJson)
-        if (dryRunMode != DryRunMode.Run) {
-            logger.println "WOULD deploy using settings but in dry-run mode: ${prettyJson}"
-            return
-        }
-        logger.println "Deploying using settings: ${prettyJson}"
-        request = request.with {
-            setHeader('Content-Type', 'application/json')
-            addStandardStuff(it, deploymentRequest.environment)
-            setEntity(new StringEntity(prettyJson))
-            it
-        }
-        def response = clientWrapper.execute(request)
-        def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,'deploy application')
-        logger.println("Application '${deploymentRequest.normalizedAppName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
-        response.close()
+        createOrUpdateApp(deploymentRequest, request)
     }
 
     private def updateApp(T deploymentRequest,
@@ -123,6 +109,10 @@ class ContainerBaseDeployer<T> extends BaseDeployer {
                           String envId,
                           String groupId) {
         def request = new HttpPatch("${clientWrapper.baseUrl}/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments/${appInfo.getId()}")
+        createOrUpdateApp(deploymentRequest, request)
+    }
+
+    private void createOrUpdateApp(T deploymentRequest, HttpEntityEnclosingRequestBase request) {
         def prettyJson = JsonOutput.prettyPrint(deploymentRequest.cloudhubAppInfoAsJson)
         if (dryRunMode != DryRunMode.Run) {
             logger.println "WOULD deploy using settings but in dry-run mode: ${prettyJson}"

@@ -7,11 +7,9 @@ import com.avioconsulting.mule.deployment.internal.http.EnvironmentLocator
 import com.avioconsulting.mule.deployment.internal.http.HttpClientWrapper
 import com.avioconsulting.mule.deployment.internal.models.AppStatusPackage
 import com.avioconsulting.mule.deployment.internal.models.DeploymentItem
-import groovy.json.JsonOutput
-import org.apache.http.client.methods.*
-import org.apache.http.entity.StringEntity
+import org.apache.http.client.methods.HttpDelete
 
-class CloudHubV2Deployer extends ContainerBaseDeployer<CloudHubV2Deployer> implements ICloudHubV2Deployer {
+class CloudHubV2Deployer extends ExchangeBasedDeployer<CloudhubV2DeploymentRequest> implements ICloudHubV2Deployer {
 
     CloudHubV2Deployer(HttpClientWrapper clientWrapper,
                        EnvironmentLocator environmentLocator,
@@ -68,63 +66,6 @@ class CloudHubV2Deployer extends ContainerBaseDeployer<CloudHubV2Deployer> imple
             throw new Exception("Unable to find valid cloudhub v2 target '${targetName}'. Valid targets are ${valids}")
         }
         return target
-    }
-
-    private def doDeployment(CloudhubV2DeploymentRequest deploymentRequest, String envId, DeploymentItem appInfo) {
-        def groupId = deploymentRequest.groupId
-
-        if (appInfo == null) {
-            logger.println "Starting new deployment for application '${deploymentRequest.appName}'."
-            createApp(deploymentRequest, envId, groupId)
-        } else {
-            logger.println "The name of the application '${deploymentRequest.appName}' is already used. Updating the application."
-            updateApp(deploymentRequest, appInfo, envId, groupId)
-        }
-    }
-
-    private def createApp(CloudhubV2DeploymentRequest deploymentRequest,
-                                  String envId,
-                                  String groupId) {
-        def request = new HttpPost("${clientWrapper.baseUrl}/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments")
-        def prettyJson = JsonOutput.prettyPrint(deploymentRequest.cloudhubAppInfoAsJson)
-        if (dryRunMode != DryRunMode.Run) {
-            logger.println "WOULD deploy using settings but in dry-run mode: ${prettyJson}"
-            return
-        }
-        logger.println "Deploying using settings: ${prettyJson}"
-        request = request.with {
-            setHeader('Content-Type', 'application/json')
-            addStandardStuff(it, deploymentRequest.environment)
-            setEntity(new StringEntity(prettyJson))
-            it
-        }
-        def response = clientWrapper.execute(request)
-        def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,'deploy application')
-        logger.println("Application '${deploymentRequest.normalizedAppName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
-        response.close()
-    }
-
-    private def updateApp(CloudhubV2DeploymentRequest deploymentRequest,
-                          DeploymentItem appInfo,
-                          String envId,
-                          String groupId) {
-        def request = new HttpPatch("${clientWrapper.baseUrl}/amc/application-manager/api/v2/organizations/${groupId}/environments/${envId}/deployments/${appInfo.getId()}")
-        def prettyJson = JsonOutput.prettyPrint(deploymentRequest.cloudhubAppInfoAsJson)
-        if (dryRunMode != DryRunMode.Run) {
-            logger.println "WOULD deploy using settings but in dry-run mode: ${prettyJson}"
-            return
-        }
-        logger.println "Deploying using settings: ${prettyJson}"
-        request = request.with {
-            setHeader('Content-Type', 'application/json')
-            addStandardStuff(it, deploymentRequest.environment)
-            setEntity(new StringEntity(prettyJson))
-            it
-        }
-        def response = clientWrapper.execute(request)
-        def result = clientWrapper.assertSuccessfulResponseAndReturnJson(response,'deploy application')
-        logger.println("Application '${deploymentRequest.normalizedAppName}' has been accepted by Runtime Manager for deployment, details returned: ${JsonOutput.prettyPrint(JsonOutput.toJson(result))}")
-        response.close()
     }
 
     @Override
