@@ -10,6 +10,7 @@ import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubDeployme
 import com.avioconsulting.mule.deployment.api.models.deployment.FileBasedAppDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.deployment.OnPremDeploymentRequest
 import com.avioconsulting.mule.deployment.api.models.policies.Policy
+import org.apache.maven.artifact.Artifact
 import org.apache.maven.artifact.DefaultArtifact
 import org.apache.maven.artifact.handler.ArtifactHandler
 import org.apache.maven.project.MavenProject
@@ -253,7 +254,7 @@ muleDeploy {
     onPremApplication {
         environment 'DEV'
         applicationName {
-            baseAppName 'the-app'
+            baseAppName params.artifactId
             prefix ''
             suffix ''
         }
@@ -263,10 +264,20 @@ muleDeploy {
     }
 }
 """
+        //Set Maven Project so we can validate the application name parsing as well.
+        MavenProject mavenProject = new MavenProject();
+        mavenProject.setGroupId("testGroupId")
+        mavenProject.setArtifactId("test-artifact-id")
+        mavenProject.setVersion("1.0.0")
+        Artifact artifact = new DefaultArtifact('testGroupId','test-artifact-id','1.0.0',
+          'compile', '','mule-application', null)
+        artifact.setFile(new File("/tmp/app.jar"))
+        mavenProject.setArtifact(artifact)
+
         def mojo = getMojo(mock,
                            dslText,
         'the user',
-        'the pass')
+        'the pass',null,null,DryRunMode.Run, null, ['DEV'], mavenProject)
 
         // act
         mojo.execute()
@@ -280,7 +291,7 @@ muleDeploy {
         assert actualApp instanceof OnPremDeploymentRequest
         actualApp.with {
             assertThat it.appName.normalizedAppName,
-                       is(equalTo('the-app'))
+                       is(equalTo('test-artifact-id'))
             assertThat it.environment,
                        is(equalTo('DEV'))
         }
