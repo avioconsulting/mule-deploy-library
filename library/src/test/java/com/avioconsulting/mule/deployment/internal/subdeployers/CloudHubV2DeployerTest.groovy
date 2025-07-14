@@ -21,7 +21,7 @@ import static org.hamcrest.Matchers.containsString
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
-@SuppressWarnings("GroovyAccessibility")
+@SuppressWarnings("groovy:access")
 class CloudHubV2DeployerTest extends RuntimeFabricDeployerTest implements MavenInvoke {
     private CloudHubV2Deployer deployer
 

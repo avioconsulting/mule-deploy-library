@@ -23,7 +23,7 @@ import static groovy.test.GroovyAssert.shouldFail
 import static org.hamcrest.MatcherAssert.assertThat
 import static org.hamcrest.Matchers.*
 
-@SuppressWarnings("GroovyAccessibility")
+@SuppressWarnings("groovy:access")
 class CloudHubDeployerTest extends BaseTest {
     private CloudHubDeployer deployer
     private int statusCheckCount

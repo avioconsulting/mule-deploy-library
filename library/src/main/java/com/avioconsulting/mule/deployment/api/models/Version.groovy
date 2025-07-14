@@ -11,7 +11,8 @@ class Version extends com.fasterxml.jackson.core.Version {
     }
 
     int compareTo(Version other) {
-        int result = super.compareTo(other)
+        //Explicit type cast to avoid recursive self calling based on type
+        int result = super.compareTo((com.fasterxml.jackson.core.Version)other)
 
         // If no qualifiers are set, just use the super result
         if(this.getQualifier() == null && other.getQualifier() == null) {

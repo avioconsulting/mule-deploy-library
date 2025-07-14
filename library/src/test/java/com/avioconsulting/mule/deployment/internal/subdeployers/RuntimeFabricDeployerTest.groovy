@@ -22,7 +22,7 @@ import static org.hamcrest.Matchers.containsString
 import static org.hamcrest.Matchers.equalTo
 import static org.hamcrest.Matchers.is
 
-@SuppressWarnings("GroovyAccessibility")
+@SuppressWarnings("groovy:access")
 class RuntimeFabricDeployerTest extends BaseTest implements MavenInvoke {
     private RuntimeFabricDeployer deployer
     protected int statusCheckCount

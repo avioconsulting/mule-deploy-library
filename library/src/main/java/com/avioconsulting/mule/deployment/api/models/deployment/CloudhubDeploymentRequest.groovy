@@ -163,8 +163,7 @@ class CloudhubDeploymentRequest extends FileBasedAppDeploymentRequest {
     @Lazy
     protected PomInfo parsedPomProperties = {
         def zipOrJarPath = getFile().toPath()
-        FileSystems.newFileSystem(zipOrJarPath,
-                null).withCloseable { fs ->
+        FileSystems.newFileSystem(zipOrJarPath).withCloseable { fs ->
             def pomXmlPath = Files.walk(fs.getPath('/META-INF/maven')).find { p ->
                 p.endsWith('pom.xml')
             } as Path
