@@ -42,7 +42,7 @@ abstract class BaseMojo extends AbstractMojo {
             logger.println "Adding ${artifact.file} path as appArtifact in your DSL and setting groupId, artifactId and artifactVersion"
             props['appArtifact'] = artifact.file.absolutePath
             props['groupId'] = artifact.groupId
-            props['artifactId'] = artifact.id
+            props['artifactId'] = artifact.artifactId
             props['artifactVersion'] = artifact.version
         }
 
