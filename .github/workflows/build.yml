@@ -57,7 +57,9 @@ jobs:
       maven-args: -Dtest=${{ needs.Build-Setup.outputs.test-suite }} -Danypoint.client.id=${{ needs.Build-Setup.outputs.ANYPOINT_CLIENT_ID }} -Danypoint.client.secret=${{needs.Build-Setup.outputs.ANYPOINT_CLIENT_SECRET}} -Danypoint.connected-app.id=${{needs.Build-Setup.outputs.ANYPOINT_CONNECTED_APP_ID}} -Danypoint.connected-app.secret=${{needs.Build-Setup.outputs.ANYPOINT_CONNECTED_APP_SECRET}} -Danypoint.username=${{needs.Build-Setup.outputs.ANYPOINT_USERNAME}} -Danypoint.password=${{needs.Build-Setup.outputs.ANYPOINT_PASSWORD}}
 
   Release-Maven:
-    needs: Build-Maven
+    needs:
+      - Build-Setup
+      - Build-Maven
     uses: avioconsulting/shared-workflows/.github/workflows/maven-release.yml@main
     secrets: inherit
     with:
@@ -69,7 +71,10 @@ jobs:
     #   main-branch: main
 
   Post-Release-Maven:
-    needs: [Build-Maven, Release-Maven]
+    needs:
+      - Build-Setup
+      - Build-Maven
+      - Release-Maven
     uses: avioconsulting/shared-workflows/.github/workflows/maven-post-release.yml@main
     secrets: inherit
     with:
