@@ -22,7 +22,7 @@
         <repository.url>git@github.com:${project.github.repository}.git</repository.url>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <nexus.url>https://oss.sonatype.org</nexus.url>
+        <central.base.url>https://central.sonatype.com</central.base.url>
 
         <!-- Use Java 8 as the baseline for compatibility -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -108,9 +108,9 @@
                     <version>1.6</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>1.6.8</version>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>0.8.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -261,17 +261,6 @@
                 </property>
             </activation>
 
-            <distributionManagement>
-                <repository>
-                    <id>ossrh</id>
-                    <url>${nexus.url}/service/local/staging/deploy/maven2/</url>
-                </repository>
-                <snapshotRepository>
-                    <id>ossrh</id>
-                    <url>${nexus.url}/content/repositories/snapshots</url>
-                </snapshotRepository>
-            </distributionManagement>
-
             <build>
                 <plugins>
                     <plugin>
@@ -308,13 +297,13 @@
                         </configuration>
                     </plugin>
                     <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <groupId>org.sonatype.central</groupId>
+                        <artifactId>central-publishing-maven-plugin</artifactId>
                         <extensions>true</extensions>
                         <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>${nexus.url}</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                            <publishingServerId>maven-publish</publishingServerId>
+                            <autoPublish>true</autoPublish>
+                            <centralBaseUrl>${central.base.url}</centralBaseUrl>
                         </configuration>
                     </plugin>
                 </plugins>
