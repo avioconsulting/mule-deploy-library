@@ -291,7 +291,9 @@
                         <version>3.0.2</version>
                         <executions>
                             <execution>
+                                <phase>package</phase>
                                 <goals>
+                                    <goal>compile</goal>
                                     <goal>groovydoc</goal>
                                 </goals>
                             </execution>
@@ -337,7 +339,7 @@
             <activation>
                 <property>
                     <name>release</name>
-                    <value>f</value>
+                    <value>true</value>
                 </property>
             </activation>
             <properties>
