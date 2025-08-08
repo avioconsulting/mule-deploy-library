@@ -203,6 +203,13 @@
             <version>${groovy.version}</version>
         </dependency>
         <dependency>
+            <!--Required for groovy doc generation-->
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-groovydoc</artifactId>
+            <version>${groovy.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-1.2-api</artifactId>
             <version>${log4j2.version}</version>
@@ -279,6 +286,21 @@
                         </executions>
                     </plugin>
                     <plugin>
+                        <groupId>org.codehaus.gmavenplus</groupId>
+                        <artifactId>gmavenplus-plugin</artifactId>
+                        <version>3.0.2</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>groovydoc</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <groovyDocOutputDirectory>${project.build.directory}/apidocs</groovyDocOutputDirectory>
+                        </configuration>
+                    </plugin>
+                    <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <executions>
@@ -289,12 +311,13 @@
                                 </goals>
                                 <configuration>
                                     <attach>true</attach>
+                                    <jarOutputDirectory>${project.build.directory}</jarOutputDirectory>
+                                    <outputDirectory>${project.build.directory}/apidocs</outputDirectory>
+                                    <detectOfflineLinks>false</detectOfflineLinks>
+                                    <skip>false</skip>
                                 </configuration>
                             </execution>
                         </executions>
-                        <configuration>
-                            <destDir>${project.build.directory}/docs/apidocs</destDir>
-                        </configuration>
                     </plugin>
                     <plugin>
                         <groupId>org.sonatype.central</groupId>
@@ -314,7 +337,7 @@
             <activation>
                 <property>
                     <name>release</name>
-                    <value>true</value>
+                    <value>f</value>
                 </property>
             </activation>
             <properties>

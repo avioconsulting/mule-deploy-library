@@ -8,3 +8,4 @@ evaluate.gdsl
 maven-plugin/stuff.groovy
 cli/stuff.groovy
 .DS_Store
+.flattened-pom.xml
