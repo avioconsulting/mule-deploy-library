@@ -7,6 +7,7 @@ import groovy.transform.ToString
 @ToString
 class CloudhubV2DeploymentRequest extends RuntimeFabricDeploymentRequest {
 
+    final Boolean enableLinkedUpgrade
     /**
      * Construct a "standard" request. See properties for parameter info.
      */
@@ -22,8 +23,10 @@ class CloudhubV2DeploymentRequest extends RuntimeFabricDeploymentRequest {
                                 String groupId,
                                 Map<String, String> appProperties = [:],
                                 Map<String, String> appSecureProperties = [:],
-                                Map<String, String> otherCloudHubProperties = [:]) {
+                                Map<String, String> otherCloudHubProperties = [:],
+                                Boolean enableLinkedUpgrade = false) {
         super(environment, environmentProperty, workerSpecRequest, cryptoKey, cryptoKeyProperty, anypointClientId, anypointClientSecret, applicationName, appVersion, groupId, appProperties, appSecureProperties, otherCloudHubProperties)
+        this.enableLinkedUpgrade = enableLinkedUpgrade
     }
 
     Map<String, String> getCloudhubAppInfo() {
@@ -32,6 +35,16 @@ class CloudhubV2DeploymentRequest extends RuntimeFabricDeploymentRequest {
         result.target.deploymentSettings.persistentObjectStore = false
         def vCores = ["vCores": workerSpecRequest.replicaSize.vCoresSize]
         result.application << vCores
+                
+        // Add upgradeData when enableLinkedUpgrade is true for CloudHub v1 to v2 migration
+        if (enableLinkedUpgrade) {
+            result.upgradeData = [
+                linkedCloudhubDeployment: [
+                    applicationName: normalizedAppName
+                ]
+            ]
+        }
+        
         result
     }
 

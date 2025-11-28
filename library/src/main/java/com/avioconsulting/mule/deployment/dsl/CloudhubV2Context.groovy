@@ -4,6 +4,8 @@ import com.avioconsulting.mule.deployment.api.models.deployment.CloudhubV2Deploy
 
 class CloudhubV2Context extends RuntimeFabricContext {
 
+    Boolean enableLinkedUpgrade = false
+
     CloudhubV2DeploymentRequest createDeploymentRequest() {
         validateContext()
         new CloudhubV2DeploymentRequest(this.environment,
@@ -18,7 +20,8 @@ class CloudhubV2Context extends RuntimeFabricContext {
                 businessGroupId,
                 appProperties,
                 appSecureProperties,
-                otherCloudHubProperties)
+                otherCloudHubProperties,
+                enableLinkedUpgrade)
     }
 
 }
