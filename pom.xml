@@ -34,7 +34,7 @@
         <groovy-eclipse-compiler.version>3.9.0</groovy-eclipse-compiler.version>
         <groovy-eclipse-batch.version>3.0.19-02</groovy-eclipse-batch.version>
 
-        <log4j2.version>2.24.1</log4j2.version>
+        <log4j2.version>2.25.3</log4j2.version>
         <junit.version>5.11.3</junit.version>
         <junit.platform.version>1.11.3</junit.platform.version>
         <maven.surefire.plugin.version>3.5.2</maven.surefire.plugin.version>
