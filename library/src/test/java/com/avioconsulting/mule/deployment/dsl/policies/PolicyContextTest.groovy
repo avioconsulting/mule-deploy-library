@@ -516,6 +516,46 @@ class PolicyContextTest {
     }
 
     @Test
+    void client_enforcement_policy_custom_minimum() {
+        // arrange
+        def context = new ClientEnforcementPolicyCustomContext()
+        def closure = {
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createPolicyModel()
+
+        // assert
+        assertThat request,
+                is(equalTo(new ClientEnforcementPolicyCustomAuth()))
+    }
+
+    @Test
+    void client_enforcement_policy_custom_full(){
+        def context = new ClientEnforcementPolicyCustomContext()
+        def closure = {
+            version '1.4.1'
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def request = context.createPolicyModel()
+
+        // assert
+        assertThat request.version,
+            is(equalTo("1.4.1"))
+        assertThat request.policyConfiguration,
+                is(equalTo([
+                    credentialsOriginHasHttpBasicAuthenticationHeader : "customExpression",
+                    clientIdExpression : "#[attributes.headers['client_id']]",
+                    clientSecretExpression : "#[attributes.headers['client_secret']]"
+                ]))
+    }
+
+    @Test
     void client_enforcement_policy_full() {
         // arrange
         def context = new ClientEnforcementPolicyBasicContext()

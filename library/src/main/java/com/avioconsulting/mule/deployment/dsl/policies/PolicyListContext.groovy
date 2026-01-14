@@ -25,6 +25,14 @@ class PolicyListContext {
         policies << policyContext.createPolicyModel()
     }
 
+    def clientEnforcementPolicyCustom(Closure closure = {}) {
+        def policyContext = new ClientEnforcementPolicyCustomContext()
+        closure.delegate = policyContext
+        closure.resolveStrategy = Closure.DELEGATE_FIRST
+        closure.call()
+        policies << policyContext.createPolicyModel()
+    }
+
     def mulesoftPolicy(Closure closure) {
         def policyContext = new PolicyContext(Policy.getMulesoftGroupId())
         closure.delegate = policyContext
