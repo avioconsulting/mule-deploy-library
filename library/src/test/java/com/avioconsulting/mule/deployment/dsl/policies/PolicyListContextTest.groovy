@@ -89,6 +89,35 @@ class PolicyListContextTest {
     }
 
     @Test
+    void clientEnforcementPolicyCustom_with_details() {
+        // arrange
+        def context = new PolicyListContext()
+        def closure = {
+            policy {
+                assetId 'the-asset-id'
+                version '1.2.1'
+                config hello: 'there'
+            }
+            clientEnforcementPolicyCustom {
+                clientSecretExpression "#[attributes.headers['client_secret']]"
+            }
+        }
+        closure.delegate = context
+        closure.call()
+
+        // act
+        def result = context.createPolicyList()
+
+        // assert
+        assertThat result.size(),
+                is(equalTo(2))
+        assertThat result[0],
+                is(instanceOf(Policy))
+        assertThat result[1],
+                is(instanceOf(ClientEnforcementPolicyCustom))
+    }
+
+    @Test
     void no_policies_on_purpose() {
         // arrange
         def context = new PolicyListContext()
