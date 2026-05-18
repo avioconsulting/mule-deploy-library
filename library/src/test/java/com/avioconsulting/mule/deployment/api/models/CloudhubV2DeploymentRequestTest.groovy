@@ -56,4 +56,56 @@ class CloudhubV2DeploymentRequestTest {
         assertThat  appInfo.target.deploymentSettings.persistentObjectStore, is(equalTo(false))
         assertThat  appInfo.application.vCores, is(equalTo(vCoreSizeExpected))
     }
+
+        /**
+     * This test case validates that when enableLinkedUpgrade is set to false,
+     * the upgradeData is not included in the deployment request
+     */
+    @Test
+    void test_deploymentRequest_without_linkedUpgrade() {
+        def request = new CloudhubV2DeploymentRequest('DEV', null,
+                getWorkerSpecBase(),
+                'theKey', null,
+                'theClientId',
+                'theSecret',
+                new ApplicationName('my-app', null, null),
+                '1.0.0',
+                'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee',
+                [:], [:], [:],
+                false)
+
+        def appInfo = request.getCloudhubAppInfo()
+
+        assertThat appInfo.upgradeData,
+                is(equalTo(null))
+    }
+
+    /**
+     * This test case validates that when enableLinkedUpgrade is set to true,
+     * the upgradeData is included in the deployment request with the correct structure
+     */
+    @Test
+    void test_deploymentRequest_with_linkedUpgrade() {
+        def request = new CloudhubV2DeploymentRequest('DEV', null,
+                getWorkerSpecBase(),
+                'theKey', null,
+                'theClientId',
+                'theSecret',
+                new ApplicationName('my-app', 'client', 'dev'),
+                '1.0.0',
+                'f2ea2cb4-c600-4bb5-88e8-e952ff5591ee',
+                [:], [:], [:],
+                true)
+
+        def appInfo = request.getCloudhubAppInfo()
+
+        assertThat request.normalizedAppName,
+                is(equalTo('client-my-app-dev'))
+        assertThat appInfo.upgradeData,
+                is(equalTo([
+                    linkedCloudhubDeployment: [
+                        applicationName: 'client-my-app-dev'
+                    ]
+                ]))
+    }
 }
