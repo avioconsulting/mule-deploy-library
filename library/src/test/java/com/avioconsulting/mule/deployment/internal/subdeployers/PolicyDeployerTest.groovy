@@ -112,7 +112,7 @@ class PolicyDeployerTest extends BaseTest {
 
         // assert
         assertThat url,
-                   is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'))
+                    is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies?fullInfo=false'))
         assertThat results,
                    is(equalTo([
                            new ExistingPolicy('openidconnect-access-token-enforcement',
@@ -123,7 +123,7 @@ class PolicyDeployerTest extends BaseTest {
                                                       new PolicyPathApplication([HttpMethod.POST],
                                                                                 '.*foo')
                                               ],
-                                              '654160'),
+                                               '654160', false, 1),
                            new ExistingPolicy('openidconnect-access-token-enforcement',
                                               '1.2.0',
                                               [exposeHeaders: false],
@@ -134,8 +134,40 @@ class PolicyDeployerTest extends BaseTest {
                                                       new PolicyPathApplication([HttpMethod.GET],
                                                                                 '.*bar')
                                               ],
-                                              '654159')
+                                               '654159', false, 2)
                    ]))
+    }
+
+    @Test
+    void getExistingPolicies_flat_response_shapes_include_disabled_state() {
+        def rows = [[id: 7174311, groupId: Policy.mulesoftGroupId, assetId: 'client-id-enforcement',
+                     assetVersion: '1.3.2', configurationData: [:], pointcutData: null, order: 1, disabled: true]]
+        def response = rows
+        def requests = []
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request) || mockEnvironments(request)) return
+            requests << "${request.method().name()} ${request.uri()}".toString()
+            request.response().setStatusCode(200).putHeader('Content-Type', 'application/json').end(JsonOutput.toJson(response))
+        }
+        def spec = new ExistingApiSpec('1234', 'asset', '1.0.0', 'https://foo', 'DEV', 'v1', true)
+        [rows, [value: rows], [policies: rows]].each { shape ->
+            response = shape
+            def policies = policyDeployer.getExistingPolicies(spec)
+            assert policies.size() == 1
+            assert policies[0].id == '7174311'
+            assert policies[0].disabled
+            assert policies[0].order == 1
+            assert policies[0].policyConfiguration == [:]
+        }
+        response = [unexpected: []]
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException) {
+            policyDeployer.synchronizePolicies(spec, [])
+        }
+        response = [policies: [[assetId: 'missing-identity']]]
+        org.junit.jupiter.api.Assertions.assertThrows(IllegalStateException) {
+            policyDeployer.synchronizePolicies(spec, [])
+        }
+        assert requests.every { it == 'GET /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies?fullInfo=false' }
     }
 
     @Test
@@ -188,7 +220,7 @@ class PolicyDeployerTest extends BaseTest {
 
         // assert
         assertThat url,
-                   is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'))
+                    is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies?fullInfo=false'))
         assertThat results,
                    is(equalTo([
                            new ExistingPolicy('openidconnect-access-token-enforcement',
@@ -196,7 +228,7 @@ class PolicyDeployerTest extends BaseTest {
                                               [exposeHeaders: false],
                                               Policy.mulesoftGroupId,
                                               null,
-                                              '654159')
+                                               '654159', false, 2)
                    ]))
     }
 
@@ -255,7 +287,7 @@ class PolicyDeployerTest extends BaseTest {
 
         // assert
         assertThat url,
-                   is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'))
+                    is(equalTo('/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies?fullInfo=false'))
         assertThat results,
                    is(equalTo([
                            new ExistingPolicy('openidconnect-access-token-enforcement',
@@ -269,7 +301,7 @@ class PolicyDeployerTest extends BaseTest {
                                                                                 ],
                                                                                 '.*foo')
                                               ],
-                                              '654159')
+                                               '654159', false, 2)
                    ]))
     }
 
@@ -447,7 +479,7 @@ class PolicyDeployerTest extends BaseTest {
 
     static def mockPolicyGet(HttpServerRequest request,
                              List<ExistingPolicy> policies) {
-        if (request.uri() != '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies' || request.method() != io.vertx.core.http.HttpMethod.GET) {
+        if (request.uri() != '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies?fullInfo=false' || request.method() != io.vertx.core.http.HttpMethod.GET) {
             return false
         }
         request.response().with {
@@ -458,7 +490,7 @@ class PolicyDeployerTest extends BaseTest {
                     policies: policies.withIndex().collect { ExistingPolicy policy, index ->
                         [
                                 policyTemplateId: '269608',
-                                order           : index,
+                                order           : policy.order != null ? policy.order : index + 1,
                                 pointcutData    : policy.policyPathApplications.collect { ppa ->
                                     [
                                             methodRegex     : ppa.httpMethods.collect { r -> r.toString() }.join('|'),
@@ -467,13 +499,12 @@ class PolicyDeployerTest extends BaseTest {
                                 }.with {
                                     it.any() ? it : null
                                 },
-                                policyId        : policy.id,
-                                configuration   : policy.policyConfiguration,
-                                template        : [
-                                        groupId     : policy.groupId,
-                                        assetId     : policy.assetId,
-                                        assetVersion: policy.version
-                                ]
+                                id              : policy.id,
+                                disabled        : policy.disabled,
+                                configurationData: policy.policyConfiguration,
+                                groupId         : policy.groupId,
+                                assetId         : policy.assetId,
+                                assetVersion    : policy.version
                         ]
                     }
             ]
@@ -527,9 +558,89 @@ class PolicyDeployerTest extends BaseTest {
         // assert
         assertThat requests,
                    is(equalTo([
-                           'GET /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies',
+                            'GET /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies?fullInfo=false',
                            'POST /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'
                    ]))
+    }
+
+    private void verifyInPlaceSynchronization(boolean disabled, boolean changed, DryRunMode mode) {
+        setupDeployer(mode)
+        def mutations = []
+        def paths = [new PolicyPathApplication([HttpMethod.POST], '/desired/.*')]
+        def desired = new Policy('client-id-enforcement', '1.3.2', [setting: 'desired'], Policy.mulesoftGroupId, paths)
+        def state = [new ExistingPolicy(desired.assetId, desired.version,
+                changed ? [setting: 'old'] : desired.policyConfiguration, desired.groupId,
+                changed ? null : paths, '7174311', disabled, changed ? 4 : 1)]
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request) || mockEnvironments(request) || mockPolicyGet(request, state)) return
+            request.bodyHandler { body ->
+                def payload = new JsonSlurper().parseText(body.toString())
+                mutations << [method: request.method().name(), uri: request.uri(), payload: payload]
+                state[0] = new ExistingPolicy(desired.assetId, desired.version, payload.configurationData as Map,
+                        desired.groupId, paths, '7174311', payload.disabled as boolean, payload.order as Integer)
+                request.response().setStatusCode(200).putHeader('Content-Type', 'application/json').end('{}')
+            }
+        }
+        def apiSpec = new ExistingApiSpec('1234', 'the-asset-id', '1.2.3', 'https://foo', 'DEV', 'v1', true)
+        policyDeployer.synchronizePolicies(apiSpec, [desired])
+        // A repeated run must not enable again, recreate, or update an already synchronized policy.
+        policyDeployer.synchronizePolicies(apiSpec, [desired])
+        if (mode != DryRunMode.Run) {
+            assert mutations.empty
+        } else {
+            assert mutations == [[method: 'PATCH',
+                    uri: '/apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies/7174311',
+                    payload: [configurationData: [setting: 'desired'],
+                              pointcutData: [[methodRegex: 'POST', uriTemplateRegex: '/desired/.*']],
+                              order: 1, disabled: false]]]
+        }
+    }
+
+    @Test
+    void synchronizePolicies_enables_disabled_matching_policy_in_place() {
+        verifyInPlaceSynchronization(true, false, DryRunMode.Run)
+    }
+
+    @Test
+    void synchronizePolicies_enables_and_syncs_disabled_policy_settings_paths_and_order() {
+        verifyInPlaceSynchronization(true, true, DryRunMode.Run)
+    }
+
+    @Test
+    void synchronizePolicies_updates_enabled_policy_in_place() {
+        verifyInPlaceSynchronization(false, true, DryRunMode.Run)
+    }
+
+    @Test
+    void synchronizePolicies_disabled_policy_dry_run_does_not_mutate() {
+        verifyInPlaceSynchronization(true, true, DryRunMode.OnlineValidate)
+    }
+
+    @Test
+    void synchronizePolicies_duplicate_gav_reserves_exact_matches_and_updates_order() {
+        def a = new Policy('policy', '1.0.0', [setting: 'a'], Policy.mulesoftGroupId)
+        def b = new Policy('policy', '1.0.0', [setting: 'b'], Policy.mulesoftGroupId)
+        def existing = [
+                new ExistingPolicy(a.assetId, a.version, a.policyConfiguration, a.groupId, null, 'a', false, 1),
+                new ExistingPolicy(b.assetId, b.version, b.policyConfiguration, b.groupId, null, 'b', true, 2)]
+        def mutations = []
+        withHttpServer { HttpServerRequest request ->
+            if (mockAuthenticationOk(request) || mockEnvironments(request) || mockPolicyGet(request, existing)) return
+            request.bodyHandler { body ->
+                mutations << [method: request.method().name(), id: request.path().tokenize('/').last(),
+                              payload: new JsonSlurper().parseText(body.toString())]
+                request.response().setStatusCode(200).putHeader('Content-Type', 'application/json').end('{}')
+            }
+        }
+        def spec = new ExistingApiSpec('1234', 'asset', '1.0.0', 'https://foo', 'DEV', 'v1', true)
+        // Reserve the exact instance for the second desired policy before matching the changed one.
+        def changed = new Policy(a.assetId, a.version, [setting: 'changed'], a.groupId)
+        policyDeployer.synchronizePolicies(spec, [changed, a])
+        assert mutations*.method == ['PATCH', 'PATCH']
+        assert mutations*.id == ['b', 'a']
+        assert mutations*.payload == [
+                [configurationData: [setting: 'changed'], pointcutData: null, order: 1, disabled: false],
+                [configurationData: [setting: 'a'], pointcutData: null, order: 2, disabled: false]]
     }
 
     @Test
@@ -584,7 +695,7 @@ class PolicyDeployerTest extends BaseTest {
         // assert
         assertThat requests,
                    is(equalTo([
-                           'GET /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies',
+                            'GET /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies?fullInfo=false',
                    ]))
     }
 
@@ -644,10 +755,8 @@ class PolicyDeployerTest extends BaseTest {
         // assert
         assertThat requests,
                    is(equalTo([
-                           'GET /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies',
-                           'DELETE /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies/987',
-                           'POST /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies',
-                           'POST /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'
+                            'GET /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies?fullInfo=false',
+                            'POST /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'
                    ]))
     }
 
@@ -703,7 +812,7 @@ class PolicyDeployerTest extends BaseTest {
         // assert
         assertThat requests,
                    is(equalTo([
-                           'GET /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies',
+                            'GET /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies?fullInfo=false',
                            'DELETE /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies/987',
                            'POST /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'
                    ]))
@@ -766,7 +875,7 @@ class PolicyDeployerTest extends BaseTest {
         // assert
         assertThat requests,
                    is(equalTo([
-                           'GET /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies'
+                            'GET /apimanager/api/v1/organizations/the-org-id/environments/def456/apis/1234/policies?fullInfo=false'
                    ]))
     }
 

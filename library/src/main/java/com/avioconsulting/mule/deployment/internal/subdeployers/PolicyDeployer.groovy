@@ -13,6 +13,7 @@ import groovy.json.JsonOutput
 import org.apache.http.client.methods.HttpDelete
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
+import org.apache.http.client.methods.HttpPatch
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.StringEntity
 
@@ -41,24 +42,52 @@ class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
             logger.println('In dry-run mode with new API definition so cannot fetch existing policies')
         }
         def existing = cannotFetch ? [] : getExistingPolicies(apiSpec)
-        def existingForComparison = existing.collect { policy -> policy.withoutId }
-        if (existingForComparison == desiredPolicies) {
-            logger.println('Existing policies are correct, no updates required')
+        def unmatched = new ArrayList<ExistingPolicy>(existing)
+        // Reserve exact matches first so duplicate GAVs do not steal each other's instances.
+        def matches = desiredPolicies.collect { Policy desired ->
+            def match = unmatched.find { it.withoutId == desired }
+            if (match != null) unmatched.remove(match)
+            match
+        }
+        desiredPolicies.eachWithIndex { Policy desired, int index ->
+            if (matches[index] == null) {
+                def match = unmatched.find {
+                    it.groupId == desired.groupId && it.assetId == desired.assetId && it.version == desired.version
+                }
+                if (match != null) unmatched.remove(match)
+                matches[index] = match
+            }
+        }
+        // Remove only obsolete instances (including old versions) before creating replacements.
+        unmatched.each { deletePolicy(apiSpec, it) }
+        desiredPolicies.eachWithIndex { Policy desired, int index ->
+            ExistingPolicy match = matches[index]
+            if (match == null) {
+                createPolicy(apiSpec, desired, index + 1)
+            } else if (match.disabled || match.withoutId != desired || match.order != index + 1) {
+                updatePolicy(apiSpec, match, desired, index + 1)
+            }
+        }
+    }
+
+    private def updatePolicy(ExistingApiSpec apiSpec, ExistingPolicy existing, Policy desired, int order) {
+        def payload = JsonOutput.toJson([
+                configurationData: desired.policyConfiguration,
+                pointcutData: desired.policyPathApplications ? desired.policyPathApplications.collect {
+                    [methodRegex: it.httpMethods.collect { method -> method.toString() }.join('|'),
+                     uriTemplateRegex: it.regex]
+                } : null,
+                order: order,
+                disabled: false
+        ])
+        if (dryRunMode != DryRunMode.Run) {
+            logger.println("For API ${apiSpec.id}, WOULD enable and update policy ${existing.id} but in dry-run mode")
             return
         }
-        // much simpler to just clean out everything to ensure we get the right order
-        logger.println("Removing ${existing.size()} existing policies")
-        existing.each { policy ->
-            deletePolicy(apiSpec,
-                         policy)
-        }
-        logger.println("Creating ${desiredPolicies.size()} policies")
-        desiredPolicies.withIndex().each { Policy policy, int index ->
-            createPolicy(apiSpec,
-                         policy,
-                         // 1 based index
-                         index + 1)
-        }
+        logger.println("For API ${apiSpec.id}, enabling and updating policy ${existing.id}")
+        def request = new HttpPatch(getApiManagerUrl("/${apiSpec.id}/policies/${existing.id}", apiSpec.environment))
+        request.setEntity(new StringEntity(payload, ContentType.APPLICATION_JSON))
+        clientWrapper.executeWithSuccessfulCloseableResponse(request, 'updating policy')
     }
 
     private List<Policy> normalizePolicies(List<Policy> desiredPolicies) {
@@ -118,15 +147,22 @@ class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
     }
 
     private List<ExistingPolicy> getExistingPolicies(ExistingApiSpec apiSpec) {
-        def request = new HttpGet(getApiManagerUrl("/${apiSpec.id}/policies",
+        def request = new HttpGet(getApiManagerUrl("/${apiSpec.id}/policies?fullInfo=false",
                                                    apiSpec.environment))
         logger.println("For API ${apiSpec.id}, getting existing policies")
         clientWrapper.executeWithSuccessfulCloseableResponse(request,
                                                              'fetch policies') { response ->
-            response.policies.sort { Map policyMap ->
+            def policies = response instanceof List ? response : (response.policies != null ? response.policies : response.value)
+            if (!(policies instanceof List)) {
+                throw new IllegalStateException('Unexpected API Manager policy response; refusing to reconcile policies')
+            }
+            policies.sort { Map policyMap ->
                 policyMap.order
             }.collect { Map policyMap ->
-                def template = policyMap.template as Map
+                def template = (policyMap.template ?: policyMap) as Map
+                if (!(policyMap.id ?: policyMap.policyId) || !template.groupId || !template.assetId || !template.assetVersion) {
+                    throw new IllegalStateException('API Manager returned a policy without its identity; refusing to reconcile policies')
+                }
                 def paths = policyMap.pointcutData.collect { Map pointCutMap ->
                     def methods = (pointCutMap.methodRegex as String).split('\\|').collect { method ->
                         HttpMethod.valueOf(method)
@@ -136,10 +172,12 @@ class PolicyDeployer implements ApiManagerFunctionality, IPolicyDeployer {
                 }
                 new ExistingPolicy(template.assetId as String,
                                    template.assetVersion as String,
-                                   policyMap.configuration as Map<String, Object>,
+                                    (policyMap.containsKey('configurationData') ? policyMap.configurationData : policyMap.configuration) as Map<String, Object>,
                                    template.groupId as String,
                                    paths.any() ? paths : null,
-                                   policyMap.policyId as String)
+                                    (policyMap.id ?: policyMap.policyId) as String,
+                                    policyMap.disabled == true,
+                                    policyMap.order as Integer)
             }
         } as List<ExistingPolicy>
     }
