@@ -9,19 +9,25 @@ import groovy.transform.ToString
 @ToString(includeSuper = true)
 class ExistingPolicy extends Policy {
     final String id
+    final boolean disabled
+    final Integer order
 
     ExistingPolicy(String assetId,
                    String version,
                    Map<String, Object> policyConfiguration,
                    String groupId,
                    List<PolicyPathApplication> policyPathApplications,
-                   String id) {
+                   String id,
+                   boolean disabled = false,
+                   Integer order = null) {
         super(assetId,
               version,
               policyConfiguration,
               groupId,
               policyPathApplications)
         this.id = id
+        this.disabled = disabled
+        this.order = order
     }
 
     Policy getWithoutId() {
